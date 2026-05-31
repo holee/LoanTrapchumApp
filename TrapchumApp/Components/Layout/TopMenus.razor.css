@@ -1,0 +1,237 @@
+/* ═══════════════════════════════════════════════════════════
+   TopMenus — matches Profiles.razor fb-* style system
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Wrapper ─────────────────────────────────────────────── */
+.tm-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* ── Trigger button ───────────────────────────────────────── */
+.tm-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.55rem 0.25rem 0.4rem;
+    border-radius: 2rem;
+    background: rgba(255,255,255,0.13);
+    border: 1px solid rgba(255,255,255,0.22);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+}
+
+    .tm-trigger:hover {
+        background: rgba(255,255,255,0.22);
+    }
+
+.tm-trigger__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+    .tm-trigger__icon :deep(i.rzi),
+    .tm-trigger__icon :deep(.rzi) {
+        font-size: 1.1rem;
+        line-height: 1;
+    }
+
+.tm-trigger__label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+
+.tm-trigger__chevron {
+    display: flex;
+    align-items: center;
+    color: rgba(255,255,255,0.8);
+    transition: transform 0.2s;
+}
+
+    .tm-trigger__chevron--up {
+        transform: rotate(180deg);
+    }
+
+/* ── Backdrop ─────────────────────────────────────────────── */
+.tm-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+}
+
+/* ── Dropdown panel ───────────────────────────────────────── */
+.tm-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    width: 28rem;
+    max-width: 95vw;
+    background: var(--rz-base-background-color, #fff);
+    border-radius: 0.85rem;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.20), 0 2px 8px rgba(0,0,0,0.10);
+    z-index: 1050;
+    overflow: hidden;
+    animation: tm-dropdown-in 0.15s ease;
+}
+
+@keyframes tm-dropdown-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ── Section label ────────────────────────────────────────── */
+.tm-section-label {
+    padding: 0.45rem 1rem 0.15rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--rz-text-secondary-color, #65676b);
+}
+
+/* ── Menu item ────────────────────────────────────────────── */
+.tm-menu-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin: 0.25rem 0.5rem;
+    border-radius: 0.65rem;
+    text-decoration: none;
+    cursor: default;
+    color: var(--rz-text-color, #050505);
+    background: var(--rz-base-200, #f7f8fa);
+    border: 1px solid var(--rz-border-color, #e4e6eb);
+}
+
+.tm-menu-item__icon {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+    .tm-menu-item__icon :deep(i.rzi),
+    .tm-menu-item__icon :deep(.rzi) {
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+
+    .tm-menu-item__icon--green {
+        background: #e6f4ea;
+        color: #2e7d32;
+    }
+
+    .tm-menu-item__icon--blue {
+        background: #e7f3ff;
+        color: #1877f2;
+    }
+
+    .tm-menu-item__icon--orange {
+        background: #fff3e0;
+        color: #e65100;
+    }
+
+.tm-menu-item__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: visible;
+    min-width: 0;
+    width: 100%;
+}
+
+.tm-menu-item__title {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--rz-text-color, #050505);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tm-menu-item__sub {
+    font-size: 0.72rem;
+    color: var(--rz-text-secondary-color, #65676b);
+    margin-top: 0.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+.tm-dropdown__footer {
+    padding: 0.5rem 1rem 0.65rem;
+    font-size: 0.68rem;
+    color: var(--rz-text-secondary-color, #65676b);
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    margin-top: 0.2rem;
+    border-top: 1px solid var(--rz-border-color, #e4e6eb);
+}
+
+/* ── Dropdown header ──────────────────────────────────────── */
+.tm-dropdown__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem 0.55rem;
+    border-bottom: 1px solid var(--rz-border-color, #e4e6eb);
+    background: var(--rz-base-200, #f7f8fa);
+}
+
+.tm-dropdown__header-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--rz-text-color, #050505);
+    display: flex;
+    align-items: center;
+}
+
+/* ── Branch active badge ──────────────────────────────────── */
+.tm-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.18rem 0.65rem;
+    border-radius: 2rem;
+    background: #e6f4ea;
+    color: #2e7d32;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.tm-status-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: #2e7d32;
+    flex-shrink: 0;
+    animation: tm-pulse 1.8s infinite;
+}
+
+@keyframes tm-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.35; }
+}

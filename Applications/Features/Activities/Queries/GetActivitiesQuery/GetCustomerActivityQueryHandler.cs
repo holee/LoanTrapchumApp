@@ -15,7 +15,6 @@ public sealed class GetCustomerActivityQueryHandler : IRequestHandler<GetCustome
 
     public async Task<IEnumerable<VCustomerActivities>> Handle(GetCustomerActivityQuery request, CancellationToken cancellationToken = default)
     {
-        var rsp = await _customerActivity.GetCustomerActivies(request.CustomerId, cancellationToken);
-        return rsp.IsSuccess && rsp.Data is not null ? rsp.Data : [];
+        return await _customerActivity.GetCustomerActivies(request.CustomerId, cancellationToken);
     }
 }

@@ -122,11 +122,11 @@ public partial class UserIndexPages
 
         var resp = await _authService.GetUsersAsync(selectedBranchId, userId, param);
 
-        if (resp.IsSuccess)
+        if (!resp.IsError)
         {
-            counts = resp.Data.Count;
+            counts = resp.Value.Count;
 
-            AllUsers = resp.Data.Items;
+            AllUsers = resp.Value.Items;
         }
         else
         {

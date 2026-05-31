@@ -1,14 +1,17 @@
 ﻿@page "/App/Account/Profile/{UserId}/User"
 @page "/profile"
 @using Applications.Features.Identity.Users
+@using Applications.Interfaces.Identity
 @inject NavigationManager Navigation
 @inject IWebHostEnvironment Env
+@inject IProfilePhotoService ProfilePhotoService
+@inject IUserService UserService
 
 <PageTitle>User Profile</PageTitle>
 
 <style>
     .up-wrap {
-        max-width: 820px;
+        width: 100%;
         margin: 1.5rem auto;
     }
 
@@ -161,11 +164,6 @@
         justify-content: flex-end;
     }
 
-    @@media (max-width: 600px) {
-        .up-card { flex-direction: column; }
-        .up-left { width: 100%; padding: 2rem 1rem 1.5rem; }
-        .up-right { padding: 1.5rem 1rem; }
-    }
 </style>
 
 <div class="up-wrap">
@@ -176,14 +174,10 @@
             <div class="up-avatar-ring">
                 <img src="@(string.IsNullOrWhiteSpace(user.FileUrl) ? "assets/logo/tch_Logo.png" : user.FileUrl)"
                      alt="Avatar" class="up-avatar" />
-                <EditForm Model="@UploadModel" OnValidSubmit="@ChangeProfile">
-                    <FluentValidationValidator />
-                    <div class="up-cam-btn" title="Change photo">
-                        <i class="notranslate rzi">photo_camera</i>
-                        <InputFile OnChange="HandleFileSelected" accept="image/*" />
-                    </div>
-                    <button type="submit" id="_submitPhotoBtn" hidden></button>
-                </EditForm>
+                <div class="up-cam-btn" title="Change photo">
+                    <i class="notranslate rzi">photo_camera</i>
+                    <InputFile OnChange="HandleFileSelected" accept="image/*" />
+                </div>
             </div>
 
             <div class="up-name">@user.FullName</div>
@@ -203,7 +197,7 @@
                           Size="ButtonSize.Small"
                           Style="width:100%;background:#94d1b8;border-color:#94d1b8;color:#25476a;font-weight:700;"
                           Click="@ChangeProfile"
-                          Disabled="@(UploadModel.FileContent is null)" />
+                          Disabled="@(_selectedFile is null)" />
         </div>
 
         <!-- ── Right: Info + actions ── -->
@@ -240,24 +234,17 @@
 </div>
 
 @code {
-    private readonly IUserServiceImpl userService;
-
-    public ManageUserProfile(IUserServiceImpl userService)
-    {
-        this.userService = userService;
-    }
-
     [Parameter]
     public string UserId { get; set; } = string.Empty;
 
     UserProfileResponse user = new();
-    ProfileDtoCreate UploadModel = new();
+    IBrowserFile? _selectedFile;
 
     protected override async Task OnInitializedAsync()
     {
         var rsp = await _userService.GetUserProfile(UserId);
-        if (rsp.IsSuccess)
-            user = rsp.Data!;
+        if (!rsp.IsError)
+            user = rsp.Value!;
 
         await base.OnInitializedAsync();
     }
@@ -274,29 +261,65 @@
     {
         if (e.FileCount == 0) return;
 
-        using var stream = new MemoryStream();
+        _selectedFile = e.File;
+
+        using var previewStream = new MemoryStream();
+
         using var fileStream = e.File.OpenReadStream(maxFileSize);
-        await fileStream.CopyToAsync(stream);
 
-        UploadModel.FileName = e.File.Name;
-        UploadModel.FileSize = e.File.Size;
-        UploadModel.FileContent = stream.ToArray();
+        await fileStream.CopyToAsync(previewStream);
 
-        var base64 = Convert.ToBase64String(UploadModel.FileContent);
+        var base64 = Convert.ToBase64String(previewStream.ToArray());
+
         user.FileUrl = $"data:{e.File.ContentType};base64,{base64}";
     }
 
     async Task ChangeProfile()
     {
-        if (UploadModel?.FileContent is null) return;
+        if (_selectedFile is null) return;
 
         Tracker.Show();
-        var rsp = await userService.ChangeProfile(UserId, UploadModel);
-        if (rsp.IsSuccess)
+        try
         {
-            UploadModel = new();
-            StateHasChanged();
+            var extension = Path.GetExtension(_selectedFile.Name).ToLowerInvariant();
+            var newFileName = $"{Guid.NewGuid()}{extension}";
+            var destinationPath = Path.Combine(Env.WebRootPath, "assets/profiles");
+
+            if (!Directory.Exists(destinationPath))
+                Directory.CreateDirectory(destinationPath);
+
+            using var ms = new MemoryStream();
+            using var stream = _selectedFile.OpenReadStream(maxFileSize);
+            await stream.CopyToAsync(ms);
+            var bytes = ms.ToArray();
+
+            var fullPath = Path.Combine(destinationPath, newFileName);
+            await File.WriteAllBytesAsync(fullPath, bytes);
+
+            var fileUrl = $"/assets/profiles/{newFileName}";
+            var fileModel = new Domains.Models.Files.FileModel(_selectedFile.Name, newFileName, _selectedFile.Size, bytes)
+            {
+                FileUrl = fileUrl
+            };
+
+            var result = await UserService.ChangeProfile(UserId, fileModel);
+
+            if (!result.IsError)
+            {
+                user.FileUrl = fileUrl;
+
+                ProfilePhotoService.NotifyPhotoChanged(UserId, fileUrl);
+
+                _selectedFile = null;
+
+                StateHasChanged();
+            }
         }
-        Tracker.Hide();
+        finally
+        {
+            Tracker.Hide();
+        }
     }
+
+    private sealed record UploadResult(string FileUrl);
 }

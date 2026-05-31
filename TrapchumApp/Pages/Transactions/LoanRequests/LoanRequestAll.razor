@@ -1,10 +1,82 @@
-﻿@using Applications.Responses.ViewModels.Loans.Requests
+@using Applications.Features.Branches.Dtos
+@using Applications.Responses.ViewModels.Loans.Requests
+@inject UserServices userServices
 @attribute [StreamRendering]
-<RadzenCard Variant="Variant.Outlined">
-    <GridToolbar SearchChanged="@FilterTextChanged"
-                 @bind-Value="@filtertext"
-                 Placeholder="Type something to search........">
-    </GridToolbar>
+
+<RadzenCard class="rz-shadow-3 rz-border-radius-2" Style="padding:0;overflow:hidden;">
+
+    @* Page Header *@
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.SpaceBetween"
+                 class="rz-px-4 rz-py-3"
+                 Style="border-bottom:1px solid var(--rz-border-disabled-color);background:var(--rz-base-200);">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenIcon Icon="@IconNames.SendMoney" Style="font-size:1.4rem;color:var(--rz-primary);" />
+            <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H2" class="rz-m-0">
+                Loan Requests
+            </RadzenText>
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <AuthorizeView>
+                <Authorized>
+                    @if (branchService.IsHeadOffice == true)
+                    {
+                        <RadzenDropDown TValue="int"
+                                        TextProperty="@nameof(VBranch.BranchName)"
+                                        ValueProperty="@nameof(VBranch.BranchId)"
+                                        @bind-Value="@_selectedBranchId"
+                                        SelectedItemChanged="SelectedBranchChanged"
+                                        Data="@_branches">
+                        </RadzenDropDown>
+                    }
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView>
+                <Authorized>
+                    <RadzenButton Size="ButtonSize.Small"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Icon="@IconNames.Add"
+                                  Text="New Request"
+                                  NavigatePath="@createRequestUrl"
+                                  class="rz-border-radius-2" />
+                </Authorized>
+            </AuthorizeView>
+        </RadzenStack>
+
+    </RadzenStack>
+
+    @* Toolbar: Search + Status Filter *@
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.SpaceBetween"
+                 Wrap="FlexWrap.Wrap"
+                 Gap="0.75rem"
+                 class="rz-px-4 rz-py-2"
+                 Style="background:var(--rz-base-200);border-bottom:1px solid var(--rz-border-disabled-color);">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenIcon Icon="filter_list" Style="color:var(--rz-text-secondary-color);" />
+            <RadzenText TextStyle="TextStyle.Caption" class="rz-m-0" Style="white-space:nowrap;">Status:</RadzenText>
+            <RadzenDropDown Data="@_dropDownItrem"
+                            TValue="string"
+                            @bind-Value="SelectedStatus"
+                            TextProperty="@nameof(BaseEnum.Name)"
+                            SelectedItemChanged="@SelectedItemChanged"
+                            ValueProperty="@nameof(BaseEnum.Name)"
+                            Style="min-width:8rem;" />
+        </RadzenStack>
+        <RadzenFormField AllowFloatingLabel="false" Style="margin-bottom:0;">
+            <Start><RadzenIcon Icon="search" /></Start>
+            <ChildContent>
+                <RadzenTextBox @bind-Value="filtertext"
+                               @oninput="@(e => FilterTextChanged(e.Value?.ToString()))"
+                               Placeholder="Search requests..."
+                               Style="min-width:14rem;" />
+            </ChildContent>
+        </RadzenFormField>
+    </RadzenStack>
+
+    @* Data Grid *@
     <RadzenDataGrid Data="LoanRequests"
                     TItem="VLoanRequests"
                     Responsive="true"
@@ -16,114 +88,156 @@
                     Count="@counts"
                     PageSize="@pageSize"
                     Density="Density.Compact"
-                    GridLines="DataGridGridLines.Both"
+                    GridLines="DataGridGridLines.Horizontal"
                     AllowPaging="true"
                     PageSizeOptions="StorageConstant.PageSizeOptions"
                     PageSizeChanged="@PageChanged"
                     RowRender="@OnRowRender"
                     AllowColumnPicking="true"
                     CellContextMenu="@OnCellContextMenu"
-                    Style="height:30rem;max-height:50rem;overflow:auto;margin:0;padding:0;"
+                    Style="height:32rem;max-height:52rem;"
                     ShowPagingSummary="true">
-        <HeaderTemplate>
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
-                <RadzenLabel Text="Filter by Status:" />
-                <RadzenDropDown Data="@_dropDownItrem"
-                                TValue="string"
-                                @bind-Value="SelectedStatus"
-                                TextProperty="@nameof(BaseEnum.Name)"
-                                SelectedItemChanged="@SelectedItemChanged"
-                                ValueProperty="@nameof(BaseEnum.Name)">
-                </RadzenDropDown>
-            </RadzenStack>
-        </HeaderTemplate>
         <Columns>
             <RadzenDataGridColumn Property="@(nameof(VLoanRequests.RowIndex))"
                                   Context="r"
-                                  Width="4rem"
+                                  Width="3.5rem"
+                                  Sortable="false"
                                   Title="#">
+                <HeaderTemplate>
+                    <RadzenText TextStyle="TextStyle.Caption" Style="color:var(--rz-text-secondary-color);">#</RadzenText>
+                </HeaderTemplate>
                 <Template>
-                    @r.RowIndex
+                    <RadzenText TextStyle="TextStyle.Caption">@r.RowIndex</RadzenText>
                 </Template>
             </RadzenDataGridColumn>
+
             <RadzenDataGridColumn Property="@(nameof(VLoanRequests.RequestDate))"
                                   Context="r"
-                                  Width="8rem"
+                                  Width="7.5rem"
                                   Title="Date">
                 <Template>
-                    @r.RequestDate.DayFirst()
+                    <RadzenText TextStyle="TextStyle.Caption">@r.RequestDate.DayFirst()</RadzenText>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AltName))" Title="Name" Context="c">
+
+            <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AltName))" Title="Applicant" Context="c">
                 <Template>
                     <TrapchumApp.Pages.Lists.KhmerName AltName="@c.AltName" />
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn Property="@(nameof(VLoanRequests.BranchName))" Title="Branch Name" />
-            <RadzenDataGridColumn Width="8rem"
-                                  Property="@(nameof(VLoanRequests.CurrencyName))" Title="Currency" />
+
+            <RadzenDataGridColumn Property="@(nameof(VLoanRequests.BranchName))" Title="Branch" />
+
+            <RadzenDataGridColumn Property="@(nameof(VLoanRequests.CurrencyName))"
+                                  Title="Currency"
+                                  Context="r">
+                <Template>
+                    <RadzenBadge BadgeStyle="@(r.CurrencyId == 1 ? BadgeStyle.Primary : r.CurrencyId == 2 ? BadgeStyle.Success : r.CurrencyId == 3 ? BadgeStyle.Warning : r.CurrencyId == 4 ? BadgeStyle.Info : BadgeStyle.Secondary)"
+                                 Shade="Shade.Default"
+                                 Text="@r.CurrencyName"
+                                 Style="text-transform:uppercase; font-weight:600;" />
+                </Template>
+            </RadzenDataGridColumn>
+
             <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AprovedAmount))"
                                   Context="r"
                                   TextAlign="TextAlign.Right"
                                   Width="9rem"
                                   Title="Amount">
                 <Template>
-                    @r.AprovedAmount.Format(r.CurrencyId)
+                    <RadzenText TextStyle="TextStyle.Body2" Style="font-weight:600;">
+                        @r.AprovedAmount.Format(r.CurrencyId)
+                    </RadzenText>
                 </Template>
             </RadzenDataGridColumn>
+
             <RadzenDataGridColumn Visible="false"
-                                  Property="@(nameof(VLoanRequests.Summiter))" Title="Summiter" />
-            <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AprovedBy))"
-                                  Width="10rem"
-                                  Title="Approved User" />
-            <RadzenDataGridColumn TextAlign="TextAlign.Right" Width="5rem"
-                                  Property="@(nameof(VLoanRequests.InterestRate))" Title="Rate" />
-            <RadzenDataGridColumn TextAlign="TextAlign.Right" Width="6rem"
+                                  Property="@(nameof(VLoanRequests.Summiter))" Title="Submitter" />
+
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Property="@(nameof(VLoanRequests.InterestRate))"
+                                  Title="Rate (%)">
+                <Template Context="r">
+                    @r.InterestRate.AsPercent()
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Property="@(nameof(VLoanRequests.CollectionFeeRate))"
+                                  Title="Eff. Rate(%)">
+                <Template Context="r">
+                    @r.CollectionFeeRate.AsPercent()
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Property="@(nameof(VLoanRequests.AdminFeeRate))"
+                                  Title="Fee. Rate (%)">
+                <Template Context="r">
+                    @r.AdminFeeRate.AsPercent()
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Width="7rem"
                                   Property="@(nameof(VLoanRequests.Status))"
                                   Context="x"
                                   Sortable="false"
-                                  Title="State">
+                                  Title="Status">
                 <Template>
-                    <RadzenBadge Variant="Variant.Filled" BadgeStyle="@ChangeBadgeStyle(x.StatusId)">
+                    <RadzenBadge Variant="Variant.Filled"
+                                 BadgeStyle="@ChangeBadgeStyle(x.StatusId)"
+                                 class="rz-border-radius-6"
+                                 Style="font-size:0.7rem;padding:0.2rem 0.6rem;">
                         @x.Status
                     </RadzenBadge>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn Title="Action" Context="r"
+            <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AprovedBy))"
+                                  Title="Approved By" />
+            <RadzenDataGridColumn Title="Actions"
+                                  Context="r"
                                   Width="5rem"
                                   Sortable="false"
-                                  TextAlign="TextAlign.Center">
+                                  TextAlign="TextAlign.Center"
+                                  Frozen="true"
+                                  FrozenPosition="FrozenColumnPosition.Right">
                 <Template>
                     <AuthorizeView>
                         <Authorized>
                             <RadzenButton Size="ButtonSize.Small"
                                           Variant="Variant.Text"
-                                          Click="@((arg)=>ShowLoanRequestMenu(arg,r))"
-                                          Icon="@IconNames.MoreVert">
-                            </RadzenButton>
+                                          ButtonStyle="ButtonStyle.Base"
+                                          Click="@((arg) => ShowLoanRequestMenu(arg, r))"
+                                          Icon="@IconNames.MoreVert"
+                                          Style="border-radius:50%;" />
                         </Authorized>
                     </AuthorizeView>
                 </Template>
             </RadzenDataGridColumn>
         </Columns>
-        <LoadingTemplate>
-            <RadzenProgressBarCircular Visible="@Tracker.IsLoading"
-                                       ShowValue="false"
-                                       Mode="ProgressBarMode.Indeterminate"
-                                       Value="100"
-                                       ProgressBarStyle="ProgressBarStyle.Danger"></RadzenProgressBarCircular>
-        </LoadingTemplate>
+
+        <EmptyTemplate>
+            <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center"
+                         Style="height:8rem;opacity:0.6;">
+                <RadzenIcon Icon="inbox" Style="font-size:2.5rem;" />
+                <RadzenText TextStyle="TextStyle.Body2">No loan requests found.</RadzenText>
+            </RadzenStack>
+        </EmptyTemplate>
     </RadzenDataGrid>
+
 </RadzenCard>
 
 @code {
-    
+
     void ShowLoanRequestMenu(MouseEventArgs args, VLoanRequests? Request)
     {
 
         if (Request is null) return;
 
         if (string.IsNullOrEmpty(Request.LoanRequestId)) return;
+
+        var resource = (request: Request, loanSizes: userServices.UserLoanSize);
+
+        _ = bState.WhoCanApproved(resource);
+        _ = bState.WhoCanRequest(Request);
+        _ = bState.WhoCanDisbursemnt(Request);
 
         var requestNowUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
         var checkloanRequestUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
@@ -136,38 +250,40 @@
            
             <RadzenMenuItem Path="@requestNowUrl"
                             Icon="@IconNames.SendMoney"
-                            Disabled="@(!bState.CanRequest || Request.StatusId != (int)RequestStatus.New)"
+                            Disabled="!bState.CanRequest"
                             Text="Request Now" Value="@Request.CustomerId" />
 
             <RadzenMenuItem Path="@requestLoanRequestUrl"
                             Icon="@IconNames.Edit"
-                            Disabled="@(!bState.CanRequest || Request.StatusId != (int)RequestStatus.New)"
+                            Disabled="!bState.CanRequest"
                             Text="Edit Request" Value="@Request.CustomerId" />
-                                
+
             <RadzenMenuItem Path="@requestLoanRequestUrl"
                             Icon="@IconNames.Edit"
-                            Disabled="@(!bState.CanRequest || Request.StatusId != (int)RequestStatus.Rechecked)"
-                            Text="Review Request" Value="@Request.CustomerId" />
+                            Disabled="!bState.CanRequest"
+                            Text="Review Request"
+                            Value="@Request.CustomerId" />
 
             
             <RadzenMenuItem Path="@checkloanRequestUrl"
                             Icon="@IconNames.Info"
-                            Disabled="@(!bState.CanApproved || Request.StatusId != (int)RequestStatus.Requested)"
-                            Text="Approved Now" Value="@Request.CustomerId" />
+                            Disabled="!bState.CanApproved"
+                            Text="Approved Now"
+                            Value="@Request.CustomerId" />
 
          
-            <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Approved"
+            <RadzenMenuItem Visible="@bState.CanDisbursed"
                             Path="@disburseRequestLoanUrl"
                             Icon="@IconNames.Info"
                             Text="Disburse Now"
-                            Disabled="@(Request.StatusId != (int)RequestStatus.Approved || !bState.CanDisbursed)"
+                            Disabled="!bState.CanDisbursed"
                             Value="@Request.CustomerId" />
 
             <RadzenMenuItem Icon="@IconNames.Details"
                             Path="@loanRequestDetailsUrl"
                             Text="Request Details"
                             Value="@Request.CustomerId" />
-          
+
         </RadzenMenu>
     );
     }
@@ -177,7 +293,9 @@
 
     void OnRowRender(RowRenderEventArgs<VLoanRequests> args)
     {
-        args.Data!.RowIndex = args.Index + 1;
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
     }
 
     void OnCellContextMenu(DataGridCellMouseEventArgs<VLoanRequests> args)
@@ -195,7 +313,7 @@
             Value = 1,
             Disabled = (selectedRequest?.StatusId != (int)RequestStatus.New || !bState.CanRequest)
         });
-            
+
         items.Add(new ContextMenuItem()
         {
             Text = "Edit Request",
@@ -210,7 +328,7 @@
             Value = 3,
             Disabled = (selectedRequest?.StatusId != (int)RequestStatus.Rechecked || !bState.CanRequest)
         });
-       
+
         items.Add(new ContextMenuItem()
         {
             Text = "Approved Now",
@@ -290,3 +408,4 @@
 
 
 }
+

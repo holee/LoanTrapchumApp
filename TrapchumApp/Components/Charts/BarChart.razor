@@ -1,0 +1,50 @@
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div class="bar-chart-wrapper">
+    <canvas id="@_canvasId" class="bar-chart-canvas"></canvas>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public double[] Series1Values { get; set; } = [];
+    [Parameter, EditorRequired] public double[] Series2Values { get; set; } = [];
+    [Parameter] public string[] Labels { get; set; } = [];
+    [Parameter] public string Series1Label { get; set; } = "Series 1";
+    [Parameter] public string Series2Label { get; set; } = "Series 2";
+
+    private readonly string _canvasId = $"chart-{Guid.NewGuid():N}";
+    private bool _initialRenderDone;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _initialRenderDone = true;
+            await RenderChart();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_initialRenderDone)
+            await RenderChart();
+    }
+
+    private async Task RenderChart()
+    {
+        await JS.InvokeVoidAsync(
+            "BarChart.update",
+            _canvasId,
+            Labels,
+            Series1Values,
+            Series1Label,
+            Series2Values,
+            Series2Label);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try { await JS.InvokeVoidAsync("BarChart.destroy", _canvasId); }
+        catch { /* JS runtime already disposed */ }
+    }
+}

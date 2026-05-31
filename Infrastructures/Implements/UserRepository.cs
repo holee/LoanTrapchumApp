@@ -107,8 +107,7 @@ public sealed class UserRepository : IUserService
             return Error.NotFound(description: "No user found with the provided userId.");
 
         if (await IsUserHasLoanRequest(userId, cancellation) ||
-           await IsUserHasLoanDisbursment(userId, cancellation) ||
-           await IsUserHasProfile(userId, cancellation))
+           await IsUserHasLoanDisbursment(userId, cancellation))
         {
             return DeleteResult.InUse("User cannot be deleted because it is associated with existing loan requests, disbursements, or profiles.");
         }
@@ -670,7 +669,7 @@ public sealed class UserRepository : IUserService
 
     private async Task<bool> IsUserHasProfile(string userId, CancellationToken cancellation = default)
     {
-        await using var context = await _cxtFactory.CreateDbContextAsync(cancellation);
+        await using var context = await _userContextFactory.CreateDbContextAsync(cancellation);
 
         return await context.UserProfiles
                             .Where(up => up.UserRefId == userId)

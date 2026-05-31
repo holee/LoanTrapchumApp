@@ -151,27 +151,29 @@ else if (data is not null)
 
         <AuthorizeView Policy="@Policies.ApproveLoanRequest">
             <Authorized>
-                <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                              Icon="@IconNames.Save"
-                              Size="@Styles.DefaultSize"
-                              Click="SaveLoanRequestManager"
-                              Text="រក្សាទុក" />
-                <RadzenButton ButtonStyle="ButtonStyle.Success"
-                              Icon="@IconNames.RequestQuote"
-                              Size="@Styles.DefaultSize"
-                              Click="ApproveLoanRequest"
-                              Text="អនុម័ត" />
-                <RadzenButton ButtonStyle="ButtonStyle.Secondary"
-                              Icon="@IconNames.Block"
-                              Size="@Styles.DefaultSize"
-                              Click="DeniedLoanRequest"
-                              Text="បដិសេធ" />
-                <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                              Icon="@IconNames.Undo"
-                              Size="@Styles.DefaultSize"
-                              Click="RecheckedLoanRequest"
-                              Text="ពិនិត្យឡើងវិញ" />
-
+                @if (!data.IsApproved && data.IsSubmitted == true)
+                {
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                  Icon="@IconNames.Save"
+                                  Size="@Styles.DefaultSize"
+                                  Click="SaveLoanRequestManager"
+                                  Text="រក្សាទុក" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                  Icon="@IconNames.RequestQuote"
+                                  Size="@Styles.DefaultSize"
+                                  Click="ApproveLoanRequest"
+                                  Text="អនុម័ត" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Secondary"
+                                  Icon="@IconNames.Block"
+                                  Size="@Styles.DefaultSize"
+                                  Click="DeniedLoanRequest"
+                                  Text="បដិសេធ" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                  Icon="@IconNames.Undo"
+                                  Size="@Styles.DefaultSize"
+                                  Click="RecheckedLoanRequest"
+                                  Text="ពិនិត្យឡើងវិញ" />
+                }
             </Authorized>
         </AuthorizeView>
         <BackButton Href="@_navService.PreviousUrl" />

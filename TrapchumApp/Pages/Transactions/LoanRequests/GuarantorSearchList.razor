@@ -8,7 +8,7 @@
         position: absolute;
         overflow: hidden;
         height: 340px;
-        width: 560px;
+        width: 60%;
         border: var(--rz-panel-border);
         background-color: var(--rz-panel-background-color);
         box-shadow: var(--rz-panel-shadow);
@@ -24,8 +24,8 @@
                    @oninput="@OnGuarantorSearchText"
                    @onkeydown="@OnKeyDown"
                    @onclick="@OpenPopup"
-                   Placeholder="Search guarantor by name or phone..."
-                   Style="width:300px;" />
+                   Style="width:30rem;"
+                   Placeholder="Search guarantor by name or phone..."/>
   
 </RadzenStack>
 <Popup @ref="@_guarantorPopup"

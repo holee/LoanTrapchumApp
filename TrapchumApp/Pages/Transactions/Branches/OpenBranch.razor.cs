@@ -1,3 +1,4 @@
+using Applications.Exceptions;
 using Applications.Features.Branches.Command.CloseBranch;
 using Applications.Features.Branches.Command.OpenBranch;
 using Applications.Features.Branches.Queries.GetBranchState;
@@ -35,15 +36,23 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
                 await bState.GetAuthenticatedUser(auth.User);
             }
-            await GetCashVault();
+            try
+            {
+                await GetCashVault();
 
-            await GetBranchState();
+                await GetBranchState();
+            }
+            catch (MediatorException ex)
+            {
+                _toastService.ShowError(ex.ErrorMessages.First());
+            }
 
             await base.OnInitializedAsync();
         }
 
         private async Task GetCashVault()
         {
+
             var command1 = new GetCashVaultBalanceQuery(BranchId);
 
             var rsp = await mediator.Send(command1);
@@ -63,6 +72,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         private async Task GetBranchState()
         {
+
             var command = new GetBranchStateQuery(UserId);
 
             var rsp1 = await mediator.Send(command);
@@ -75,6 +85,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
             {
                 bState.State = false;
             }
+
         }
 
         async Task GetCurrencies(int id = 0)
@@ -95,15 +106,9 @@ namespace TrapchumApp.Pages.Transactions.Branches
         async Task SubmitCloseBranch()
         {
 
-            var confirm = await DialogService.Confirm("Are you sure you want to close branch?", "Confirm", new ConfirmOptions
-            {
-                OkButtonText = "Yes",
+            var confirm = await MsgBox.ConfirmAsync("Are you sure you want to close branch?", "Confirm");
 
-                CancelButtonText = "No",
-
-                CloseDialogOnEsc = false,
-            });
-            if (confirm == false)
+            if (confirm == MsgBoxResult.No)
             {
                 return;
             }
@@ -134,12 +139,12 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
                 bState.State = false;
 
-                NotificationService.Notify(NotificationSeverity.Success, "Close Branch successful");
+                _toastService.ShowSuccess("Close Branch successful");
 
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, result.GetMessage());
+                _toastService.ShowError(result.GetMessage());
             }
         }
 
@@ -150,13 +155,9 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         async Task SubmitOpenBranch()
         {
-            var confirm = await DialogService.Confirm("Are you sure you want to open branch?", "Confirm", new ConfirmOptions
-            {
-                OkButtonText = "Yes",
-                CancelButtonText = "No",
-                CloseDialogOnEsc = false,
-            });
-            if (confirm == false)
+            var confirm = await MsgBox.ConfirmAsync("Are you sure you want to open branch?", "Confirm");
+
+            if (confirm == MsgBoxResult.No)
             {
                 return;
             }
@@ -184,13 +185,16 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             if (!result.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Error, result.GetMessage());
+                _toastService.ShowError(result.GetMessage());
             }
             else
             {
                 bState.State = true;
 
-                NotificationService.Notify(NotificationSeverity.Success, "Open Branch successful");
+                _toastService.ShowSuccess("Open Branch successful");
+
+                await Swal.SuccessAsync("Open Branch successful", "Branch has been opened successfully.");
+
             }
 
         }
@@ -216,7 +220,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
             if (BranchId is null && BranchId <= 0)
                 return;
 
-            var param = new Dictionary<string, object> { { "BranchId", BranchId! } };
+            var param = new Dictionary<string, object?> { { "BranchId", BranchId! } };
 
             var options = new DialogOptions
             {

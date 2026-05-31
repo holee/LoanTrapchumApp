@@ -118,11 +118,10 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
     {
         using var db = await dapperFactory.CreateConnectionAsync(cancellation);
 
-        var sql = """
-        SELECT * FROM VCustomerCollateralLines
-        WHERE CollateralId = @customerId
+        var sql = @"SELECT * FROM VCustomerCollateralLines
+            WHERE CollateralId = @customerId
           AND (@includeInUsed = 1 OR IsUsed = 0)
-        """;
+        ";
 
         var command = new CommandDefinition(
             sql,

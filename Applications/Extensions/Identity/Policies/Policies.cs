@@ -40,7 +40,7 @@ public partial class Policies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Bm, AppRoles.Rbm)
+                    .RequireRole(AppRoles.Bm, AppRoles.Rbm, AppRoles.ChiefBm)
                     .Build();
     }
 
@@ -56,7 +56,7 @@ public partial class Policies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Manager,AppRoles.Ceo)
+                    .RequireRole(AppRoles.Manager, AppRoles.Ceo)
                     .Build();
     }
 
@@ -87,7 +87,7 @@ public partial class Policies
     private static string delete = AppPermission.RuleFor(Modules.Repayments, Actions.Delete);
     private static string multiple = AppPermission.RuleFor(Modules.Repayments, Actions.MultiplePayment);
     private static string payoff = AppPermission.RuleFor(Modules.Repayments, Actions.PayOff);
-    private static string recievePayment = AppPermission.RuleFor(Modules.Repayments, Actions.RecievePayment);
+    private static string recievePayment = AppPermission.RuleFor(Modules.Repayments, Actions.ReceivePayment);
     private static string writeOff = AppPermission.RuleFor(Modules.Repayments, Actions.WriteOff);
     public static AuthorizationPolicy CanCreate()
     {

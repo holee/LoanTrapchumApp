@@ -14,7 +14,7 @@ public static class VCollateralLinesExtensions
             CategoryRefId = lines.CategoryRefId,
             TypeName = lines.TypeName,
             SubCategoryRefId = lines.SubCategoryRefId,
-            CollateralSubTypeName = lines.CollateralSubTypeName,
+            SubTypeName = lines.SubTypeName,
             ReferenceNo = lines.ReferenceNo,
             CollateralNo = lines.CollateralNo,
             IsAvailable = lines.IsAvailable,
@@ -43,7 +43,7 @@ public static class VCollateralLinesExtensions
             CategoryRefId = null, // No direct mapping
             TypeName = loanCollateral.TypeName,
             SubCategoryRefId = null, // No direct mapping
-            CollateralSubTypeName = loanCollateral.SubTypeName,
+            SubTypeName = loanCollateral.SubTypeName,
             ReferenceNo = loanCollateral.ReferenceNo,
             CollateralNo = loanCollateral.CollateralNo,
             IsAvailable = !(loanCollateral.InUsed ?? true), // Inverse of InUsed, default to false if null
@@ -92,7 +92,7 @@ public static class VCollateralLinesExtensions
             HotPrice = collateral.HotPrice,
             PawnPrice = collateral.PawnPrice,
             TypeName = collateral.TypeName,
-            SubTypeName = collateral.CollateralSubTypeName,
+            SubTypeName = collateral.SubTypeName,
             InUsed = collateral.IsUsed // Map IsUsed to InUsed
         };
     }

@@ -18,9 +18,9 @@ namespace TrapchumApp.Pages.Identity.Users
         {
             var response = await _userService.ChangePassword(model);
 
-            if (!response.IsSuccess)
+            if (response.IsError)
             {
-                NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, response.FirstError.Description);
 
                 return;
             }

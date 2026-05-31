@@ -79,7 +79,10 @@
                               TextAlign="TextAlign.Right"
                               Sortable="true">
             <Template>
-                @p.Principle.Format(p.CurrencyId)
+                <RadzenText TextStyle="TextStyle.Body2"
+                            Style="font-weight:700; color:var(--rz-primary);">
+                    @p.Principle.Format(p.CurrencyId)
+                </RadzenText>
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
@@ -88,7 +91,10 @@
                               TextAlign="TextAlign.Right"
                               Sortable="true">
             <Template>
-                @p.InterestRate (%) / @p.PeriodName
+                <RadzenText TextStyle="TextStyle.Body2"
+                            Style="font-weight:700; color:var(--rz-warning-darker);">
+                    @p.InterestRate (%) / @p.PeriodName
+                </RadzenText>
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
@@ -97,7 +103,10 @@
                               TextAlign="TextAlign.Right"
                               Sortable="true">
             <Template>
-                @p.PaidPrinciple.Format(p.CurrencyId)
+                <RadzenText TextStyle="TextStyle.Body2"
+                            Style="font-weight:700; color:var(--rz-success-darker);">
+                    @p.PaidPrinciple.Format(p.CurrencyId)
+                </RadzenText>
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
@@ -106,7 +115,10 @@
                               TextAlign="TextAlign.Right"
                               Sortable="true">
             <Template>
-                @p.OutStanding.Format(p.CurrencyId)
+                <RadzenText TextStyle="TextStyle.Body2"
+                            Style="font-weight:700; color:var(--rz-danger);">
+                    @p.OutStanding.Format(p.CurrencyId)
+                </RadzenText>
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"

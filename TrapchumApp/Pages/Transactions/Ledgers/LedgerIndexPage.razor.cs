@@ -1,18 +1,15 @@
-﻿using Applications.Interfaces.Transactions;
+﻿using Applications.Features.Ledgers.Commands.ChangeLedgerStatus;
+using Applications.Features.Ledgers.Commands.DeleteLedger;
+using Applications.Features.Ledgers.Dto;
+using Applications.Features.Ledgers.Queries.GetLedgers;
+using Applications.Interfaces.Transactions;
 using Applications.Responses.ViewModels.Ledgers;
 
 namespace TrapchumApp.Pages.Transactions.Ledgers;
 
-public partial class LedgerIndex
+public partial class LedgerIndexPage
 {
     [Parameter] public int? BranchId { get; set; } = 0;
-
-    private readonly ILedgerService _ledgerService;
-
-    public LedgerIndex(ILedgerService ledgerService)
-    {
-        _ledgerService = ledgerService;
-    }
 
     protected string searchField { get; set; } = string.Empty;
 
@@ -41,7 +38,7 @@ public partial class LedgerIndex
     {
         pageIndex = e.Skip ?? 0;
 
-        searchField = e.Filter;
+        searchField = e.Filter ?? string.Empty;
 
         (sortColumn, sortDescending) = e.PageInfo();
 
@@ -49,28 +46,19 @@ public partial class LedgerIndex
     }
     protected async override Task OnInitializedAsync()
     {
-        try
-        {
-            await LoadLedgerPageList();
+        await LoadLedgerPageList();
 
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-        }
         await base.OnInitializedAsync();
     }
     async Task LoadLedgerPageList(string? filter = null)
     {
         try
         {
+            isLoading = true;
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, includeInactive, sortDescending, filter);
 
-
-            isLoading = true;
-
-            var res = await _ledgerService.GetLedgersAsync(currencyId, param);
+            var res = await mediator.Send(new GetLedgersPaginatedQuery(currencyId, param));   //_ledgerService.GetLedgersAsync(currencyId, param);
 
             Ledgers = res.Items;
 
@@ -82,7 +70,7 @@ public partial class LedgerIndex
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+            _toastService.ShowError($"{ex.Message}");
         }
     }
 
@@ -98,7 +86,7 @@ public partial class LedgerIndex
             Draggable = true,
             Resizable = false
         };
-        var parameters = new Dictionary<string, object>
+        var parameters = new Dictionary<string, object?>
         {
             {"Id",id }
         };
@@ -121,11 +109,22 @@ public partial class LedgerIndex
     }
     protected async Task OnCheckChanged(bool? arg, int ledgerId)
     {
-        var result = await _ledgerService!.ChangeLedgerStatus(new(ledgerId, arg!.Value));
+
+        var state = arg ?? false;
+
+        var command = new ChangeLedgerStatusCommand(new LedgerChangeStatus
+        {
+            LedgerId = ledgerId,
+
+            Status = state
+        });
+
+        var result = await mediator.Send(command);    //_ledgerService!.ChangeLedgerStatus(new(ledgerId, arg!.Value));
 
         if (!result.IsError)
         {
-            NotificationService.Notify(NotificationSeverity.Success, result.Value);
+            _toastService.ShowSuccess(result.Value);
+
             if (!includeInactive)
             {
                 await LoadLedgerPageList();
@@ -133,7 +132,7 @@ public partial class LedgerIndex
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, result.FirstError.Description);
+            _toastService.ShowError(result.GetMessage());
         }
     }
     protected async Task OnIncludeInActive()
@@ -177,11 +176,16 @@ public partial class LedgerIndex
         });
 
         if (cmf == false) return;
-        var isDe = await _ledgerService!.DeleteLedger(ledgerId);
+
+        var isDe = await mediator.Send(new DeleteLedgerCommand(ledgerId)); //_ledgerService!.DeleteLedger(ledgerId);
+
         if (!isDe.IsError)
         {
-            NotificationService.Notify(NotificationSeverity.Success, isDe.Value);
+
+            _toastService.ShowSuccess(isDe.Value);
+
             await LoadLedgerPageList(searchField);
+
             return;
         }
         var messageErr = isDe.FirstError.Description;
@@ -190,23 +194,31 @@ public partial class LedgerIndex
 
         if (!used)
         {
-            NotificationService.Notify(NotificationSeverity.Error, messageErr);
+            _toastService.ShowInfo(messageErr);
+
             return;
         }
-        var confirm = await DialogService!.Confirm($"You cannot delete ledger #<b>{ledgerId}</b>.<br/>Do you want to deactivate ledger<b>#{ledgerId}</b>?", "Ledger", new ConfirmOptions
+
+        var confirm = await MsgBox.ConfirmAsync($"You cannot delete ledger #<b>{ledgerId}</b>.<br/>Do you want to deactivate ledger<b>#{ledgerId}</b>?");
+
+        if (confirm == MsgBoxResult.No) return;
+
+        //_ledgerService.ChangeLedgerStatus(new(ledgerId, false));
+
+        var resp = await mediator.Send(new ChangeLedgerStatusCommand(new LedgerChangeStatus
         {
-            OkButtonText = "OK",
-            CancelButtonText = "Cancel"
-        });
-        if (confirm == false) return;
-        var resp = await _ledgerService.ChangeLedgerStatus(new(ledgerId, false));
+            LedgerId = ledgerId,
+
+            Status = false
+        })); 
+ 
         if (!resp.IsError)
         {
             await LoadLedgerPageList(searchField);
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, resp.FirstError.Description);
+            _toastService.ShowError(resp.GetMessage());
         }
 
     }

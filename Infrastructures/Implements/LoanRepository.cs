@@ -65,7 +65,7 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
                          && r.CustomerRefId == req.CustomerRefId
                          && r.BranchRefId == req.BranchRefId)
                 .ExecuteUpdateAsync(s => s
-                    .SetProperty(r => r.LoanRequestStatusRefId, (int)RequestStatus.Completed)
+                    .SetProperty(r => r.LoanRequestStatusRefId, (int)RequestStatus.Disbursed)
                     .SetProperty(r => r.ModifiedDt, DateTimeOffset.UtcNow), cancellation);
 
             await context.CollateralsLinks

@@ -214,7 +214,7 @@ namespace Infrastructures.DataAccess
         public DbSet<MarritalStatus> MarritalStatuses => Set<MarritalStatus>();
         public DbSet<LoanDisbursment> LoanDisbursementRequests => Set<LoanDisbursment>();
         public DbSet<LoanRequest> LoanRequests => Set<LoanRequest>();
-        public DbSet<Domains.Models.Loans.CoPawnCustomer> CoLoanRequests => Set<Domains.Models.Loans.CoPawnCustomer>();
+        public DbSet<CoPawnCustomer> CoLoanRequests => Set<CoPawnCustomer>();
         public DbSet<LtLocation> Locations => Set<LtLocation>();
         public DbSet<LoanDocuments> LoanDocuments => Set<LoanDocuments>();
         public DbSet<LoanDescriptions> LoanDescriptions => Set<LoanDescriptions>();
@@ -255,6 +255,5 @@ namespace Infrastructures.DataAccess
         public DbSet<VVillages> VVillages => Set<VVillages>();
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<LtDocument> LtDocuments => Set<LtDocument>();
-        public DbSet<UserProfiles> UserProfiles { get;  set; }
     }
 }

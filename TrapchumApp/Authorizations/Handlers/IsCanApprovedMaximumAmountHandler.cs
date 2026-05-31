@@ -7,10 +7,6 @@ using TrapchumApp.Authorizations.Rquirements;
 
 namespace TrapchumApp.Authorizations.Handlers;
 
-/// <summary>
-/// Manager or CEO can approve loan requests with amounts exceeding normal limits:
-/// USD > 250 or KHR > 1,000,000.
-/// </summary>
 public sealed class IsCanApprovedMaximumAmountHandler
     : AuthorizationHandler<IsCanApprovedMaximumAmountRequirement, VLoanRequests>
 {

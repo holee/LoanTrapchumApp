@@ -4,7 +4,12 @@ using Applications.Features.Collaterals.Queries.GetCollateralSubTypesById;
 using Applications.Features.Collaterals.Queries.GetCollateralTypes;
 using Applications.Features.Employees.Commands.DeleteEmployee;
 using Applications.Features.Holidays.Dtos;
+using Applications.Features.Identity.Command.ChangePassword;
 using Applications.Features.Identity.Command.DeleteUser;
+using Applications.Features.Identity.Command.ToggleUserActive;
+using Applications.Features.Identity.Command.UpdateUserRole;
+using Applications.Features.Identity.Queries.GetUserById;
+using Applications.Features.Identity.Queries.GetUserPermissions;
 using Applications.Features.Identity.Roles.Commands.AddRolePermissions;
 using Applications.Features.Identity.Roles.Commands.CreateRole;
 using Applications.Features.Identity.Roles.Commands.DeleteRole;
@@ -16,6 +21,7 @@ using Applications.Features.Identity.Roles.Queries.GetRoles;
 using Applications.Features.Identity.Roles.Queries.GetRolesAsPaging;
 using Applications.Features.Identity.Roles.Requests;
 using Applications.Features.Identity.Roles.Responses;
+using Applications.Features.Identity.Users;
 using Applications.Features.LoanRequests.Command.AddCoPawnCustomer;
 using Applications.Features.LoanRequests.Command.AddCoPawnCustomers;
 using Applications.Features.LoanRequests.Command.DeleteCoPawnCustomer;
@@ -33,6 +39,7 @@ using Applications.Features.Locations.Queries.GetLocationsAsPaging;
 using Applications.Features.OtherNames.Dto;
 using Applications.Features.Settings.Queries.GetApprovedUsers;
 using Applications.Features.Settings.Queries.GetLoanCategories;
+using Applications.Features.Settings.Queries.UserLoanSizes.GetLoanSizeByUser;
 using Applications.Features.Vendors.Commands.ChangeVendorStatus;
 using Applications.Features.Vendors.Commands.CreateVendor;
 using Applications.Features.Vendors.Commands.DeleteVendor;
@@ -41,6 +48,7 @@ using Applications.Features.Vendors.Dto.Responses;
 using Applications.Features.Vendors.Queries.GetUpdateVendorById;
 using Applications.Features.Vendors.Queries.GetVendorById;
 using Applications.Features.Vendors.Queries.GetVendorsAsPaging;
+using Applications.Features.Schedules.Dto;
 using Applications.Responses.Auths;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.ViewModels.Auths;
@@ -190,7 +198,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetApprovedLoanRequestQuery, ErrorOr<VLoanRequests>>, GetApprovedLoanRequestQueryHandler>();
         services.AddScoped<IRequestHandler<CreateLoanCommand, ErrorOr<DisburseResult>>, CreateLoanCommandHandler>();
         services.AddScoped<IRequestHandler<GetLoanWithScedulesQuery, ErrorOr<IEnumerable<LoanResponse>>>, GetLoanWithScedulesQueryHandler>();
-        
+
         ///Employee
         services.AddScoped<IRequestHandler<GetEmployeeAsPagingQuery, Pager<VEmployeeList>>, GetEmployeeAsPagingQueryHandler>();
         services.AddScoped<IRequestHandler<ChangeEmployeeStateCommand, ErrorOr<VEmployeeList>>, ChangeEmployeeStateCommandHandler>();
@@ -374,6 +382,7 @@ public static class ApplicationServiceInjection
 
         services.AddScoped<IRequestHandler<RecievePaymentCommand, ErrorOr<string>>, RecievePaymentCommandHandler>();
         services.AddScoped<IRequestHandler<GetLoanSchedulesByLoanIdQuery, ErrorOr<IEnumerable<VSchedule>>>, GetLoanSchedulesByLoanIdQueryHandler>();
+        services.AddScoped<IRequestHandler<Applications.Features.LoanPayments.Queries.GetScheduleById.GetScheduleByIdQuery, ErrorOr<ScheduleDetailsDto>>, Applications.Features.LoanPayments.Queries.GetScheduleById.GetScheduleByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanByIdQuery, ErrorOr<VLoanDisbursments>>, GetLoanByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanByBranchIdQuery, Pager<VLoanDisbursments>>, GetLoanByBranchIdQueryHandler>();
 
@@ -403,6 +412,13 @@ public static class ApplicationServiceInjection
         //User and Identity
         services.AddScoped<IRequestHandler<CreateNewUserCommand, ErrorOr<string>>, CreateNewUserCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteUserCommand, ErrorOr<DeleteResult>>, DeleteUserCommandHandler>();
+        services.AddScoped<IRequestHandler<GetUserByIdQuery, ErrorOr<UserDto>>, GetUserByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetUserPermissionsQuery, ErrorOr<UserPermissions>>, GetUserPermssionsQueryHandler>();
+        services.AddScoped<IRequestHandler<ChangePasswordCommand, ErrorOr<string>>, ChangePasswordCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateUserRoleCommand, ErrorOr<Updated>>, UpdateUserRoleCommandHandler>();
+        services.AddScoped<IRequestHandler<ToggleUserActiveCommand, ErrorOr<Updated>>, ToggleUserActiveCommandHandler>();
+
+
 
         // Settings — AppSettings
         services.AddScoped<IRequestHandler<GetAppSettingsQuery, ErrorOr<IEnumerable<AppSettingDto>>>, GetAppSettingsQueryHandler>();
@@ -410,9 +426,8 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<CreateAppSettingCommand, ErrorOr<AppSettingDto>>, CreateAppSettingCommandHandler>();
         services.AddScoped<IRequestHandler<UpdateAppSettingCommand, ErrorOr<AppSettingDto>>, UpdateAppSettingCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteAppSettingCommand, ErrorOr<bool>>, DeleteAppSettingCommandHandler>();
-
-        services.AddScoped<IRequestHandler<GetLoanCategoriesQuery, Pager<LoanCategoryDto>>, GetLoanCategoriesQueryHandler>();
-
+        services.AddScoped<IRequestHandler<GetLoanSizeByUserQuery, ErrorOr<VUserLoanSizes>>, GetLoanSizeByUserQueryHandler>();
+        
 
 
         // Settings — UserLoanSizes
@@ -423,6 +438,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<DeleteUserLoanSizeCommand, ErrorOr<bool>>, DeleteUserLoanSizeCommandHandler>();
         services.AddScoped<IRequestHandler<ToggleUserLoanSizeCommand, ErrorOr<bool>>, ToggleUserLoanSizeCommandHandler>();
         services.AddScoped<IRequestHandler<GetApprovedUserQuery, ErrorOr<IEnumerable<VUserLoanSizes>>>, GetApprovedUserQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLoanCategoriesQuery, Pager<LoanCategoryDto>>, GetLoanCategoriesQueryHandler>();
 
         // Settings — CollateralSubTypes
         services.AddScoped<IRequestHandler<GetCollateralSubTypesQuery, Pager<CollateralSubTypeDto>>, GetCollateralSubTypesQueryHandler>();

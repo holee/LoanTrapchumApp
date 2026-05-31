@@ -4,6 +4,7 @@
 @using TrapchumApp.Helpers.Extensions
 @using TrapchumApp.Pages
 <PageTitle>All Collaterals</PageTitle>
+@attribute [StreamRendering]
 <RadzenTabs RenderMode="TabRenderMode.Client"
             @ref="@tabs"
             SelectedIndex="@selectedIndex"
@@ -66,6 +67,7 @@
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Property="@nameof(VCollateralLines.CollateralNo)" Title="CollateralNo" />
                     <RadzenDataGridColumn Property="@nameof(VCollateralLines.OwnerName)" Title="Owner Name" />
+                    <RadzenDataGridColumn Property="@nameof(VCollateralLines.SubTypeName)" Title="Sub TypeName" />
                     <RadzenDataGridColumn Property="@nameof(VCollateralLines.TypeName)" Title="Type Name" />
                     <RadzenDataGridColumn Visible="false"
                                           Property="@nameof(VCollateralLines.RegisterDate)" Title="Register Date" Context="c">
@@ -115,11 +117,6 @@
                         </Template>
                     </RadzenDataGridColumn>
                 </Columns>
-                <LoadingTemplate>
-                    <div class="p-4 text-center">
-                        <RadzenProgressBar Visible="true" Mode="ProgressBarMode.Indeterminate" Style="height: 4px;" />
-                    </div>
-                </LoadingTemplate>
             </RadzenDataGrid>
         </RadzenTabsItem>
         @foreach (var tab in _tabs)
@@ -269,22 +266,21 @@
 
     private async Task DeleteCollateralLine(VCollateralLines item)
     {
-        var confirm = await DialogService.Confirm(
-        "Are you sure you want to delete this collateral line?", "Confirm Delete",
-        new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
 
-        if (confirm != true) return;
+        var confirm2 = await MsgBox.ConfirmAsync("Are you sure you want to delete this collateral line?", "Confirm Delete");
+
+        if (confirm2 == MsgBoxResult.No) return;
 
         var command = new Applications.Features.Collaterals.Commands.DeleteCollateralLines.DeleteCollateralLineCommand(item.Id, item.CollateralId!);
+        
         var result = await mediator.Send(command);
 
         if (result.IsError)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Error", result.FirstError.Description);
+            _toastService.ShowError("Error", result.GetMessage());
+
             return;
         }
-
-        //NotificationService.Notify(NotificationSeverity.Success, "Deleted successfully");
 
         _toastService.ShowSuccess("Confirm", "Deleted successfully");
 
@@ -294,7 +290,7 @@
 
     void OnRowSelection(VCollateralLines line)
     {
-       
+
     }
 }
 

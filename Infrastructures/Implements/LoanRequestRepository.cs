@@ -22,9 +22,11 @@ using Domains.Models.Lists.Customers;
 using Domains.Models.Loans;
 using ErrorOr;
 using Infrastructures.DataAccess;
+using Infrastructures.Implements.Extensions;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
 namespace Infrastructures.Implements;
 
@@ -196,6 +198,8 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
 
             existingLoanRequest.AdminFeeAmount = req.AdminFeeAmount;
 
+            existingLoanRequest.ApprovedBy = currentUserService.UserId;
+
             await cxt.SaveChangesAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
@@ -212,7 +216,6 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.Unexpected($"{ex.Message}");
         }
     }
-
     public async Task<ErrorOr<RequestResult>> SaveLoanRequestByManagerAsync(SaveLoanRequestDtoCreate req, CancellationToken cancellationToken = default)
     {
 
@@ -268,9 +271,9 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         try
         {
             existingLoanRequest.LoanRequestStatusRefId = (int)req.RequestStatus;
-
+            existingLoanRequest.IsSubmitted = false;
+            existingLoanRequest.ModifiedDt = DateTime.UtcNow;
             existingLoanRequest.Remark = req.Remark;
-
             existingLoanRequest.LoanDescriptions.Add(new LoanDescriptions
             {
                 Memo = req.Memo,
@@ -308,6 +311,8 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             }
 
             existingRequest.LoanRequestStatusRefId = (int)RequestStatus.Denied;
+
+            existingRequest.IsSubmitted = false;
 
             existingRequest.ModifiedDt = DateTime.UtcNow;
 
@@ -437,10 +442,8 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             ? new RequestResult(true, "Loan Request was Approved")
             : Error.Unexpected("cannot be approved the loan Request.");
     }
-
     public async Task<ErrorOr<RequestResult>> PassLoanRequestAsync(PassRequestDtoCreate req, CancellationToken cancellationToken = default)
     {
-
 
         logger.LogInformation("Approving loan request for LoanRequestId: {LoanRequestId}, BranchRefId: {BranchRefId}, CustomerRefId: {CustomerId}",
             req.LoanRequestId, req.BranchId, req.CustomerId);
@@ -494,8 +497,6 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.Unexpected($"{ex.Message}");
         }
     }
-
-
     public async Task<ErrorOr<bool>> IsCustomerBusy(string? customerId, CancellationToken cancellation = default)
     {
         if (string.IsNullOrEmpty(customerId)) return false;
@@ -560,7 +561,6 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.Unexpected($"{ex.Message}");
         }
     }
-
 
     public async Task<CoPawnCustomerDto?> AddCoPawnCustomerAsync(CoPawnCustomer req, CancellationToken cancellation = default)
     {
@@ -899,7 +899,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                 .FirstOrDefaultAsync(x => x.LoanRequestId == loanRequestId && x.BranchRefId == branchId);
 
             if (existingRequest is not null &&
-                existingRequest.LoanRequestStatusRefId == (int)RequestStatus.Completed)
+                existingRequest.LoanRequestStatusRefId == (int)RequestStatus.Disbursed)
             {
                 return Error.NotFound("cannot remove this request due to it is in used.");
             }
@@ -1026,7 +1026,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                 .Where(x => x.LoanRequestId == loanRequestId && x.BranchRefId == branchId)
                 .FirstOrDefaultAsync();
 
-            if (existingRequest is not null && existingRequest.LoanRequestStatusRefId == (int)RequestStatus.Completed)
+            if (existingRequest is not null && existingRequest.LoanRequestStatusRefId == (int)RequestStatus.Disbursed)
             {
                 return Error.Conflict(LoanRequestMessage.REQUEST_IN_USED);
             }
@@ -1204,7 +1204,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                 .Where(x => x.LoanRequestId == loanRequestId && x.BranchRefId == branchId)
                 .FirstOrDefaultAsync();
 
-            if (existingRequest is not null && existingRequest.LoanRequestStatusRefId == (int)RequestStatus.Completed)
+            if (existingRequest is not null && existingRequest.LoanRequestStatusRefId == (int)RequestStatus.Disbursed)
             {
                 return Error.Conflict("cannot remove this request due to it is in used.");
             }
@@ -1557,6 +1557,13 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         return new Pager<VLoanRequests>(items, totalCount);
     }
 
+    private static readonly string[] _loanRequestSearchColumns =
+    [
+        nameof(VLoanRequests.BranchName),
+        nameof(VLoanRequests.AltName),
+        nameof(VLoanRequests.FullName)
+    ];
+
     public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, int? branchId,
            RequestStatus requestStatus,
            QueryParam param,
@@ -1564,62 +1571,104 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
-        IQueryable<VLoanRequests> query = context.VLoanRequests
-            .WhereIf(branchId is not null && branchId > 0, x => x.BranchId == branchId)
-            .WhereIf(!string.IsNullOrEmpty(param.Filter),
-                x => EF.Functions.Like(x.BranchName!, $"{param.Filter}%") ||
-                     EF.Functions.Like(x.AltName!, $"{param.Filter}%") ||
-                     EF.Functions.Like(x.FullName!, $"{param.Filter}%"));
+        var queries = context.VLoanRequests.WhereIf(branchId is not null && branchId > 0, x => x.BranchId == branchId);
+
+        if (!string.IsNullOrWhiteSpace(param.Filter))
+        {
+            queries = queries.StartWiths(param.Filter.Trim(), _loanRequestSearchColumns);
+        }
+
         if (!string.IsNullOrEmpty(userId))
         {
-            query = requestStatus switch
+            queries = requestStatus switch
             {
                 RequestStatus.All
-                    => query.Where(x => x.AprovedUserId == userId || x.UserRequestId == userId), // no filter
+                    => queries.Where(x => x.AprovedUserId == userId || x.UserRequestId == userId),
                 RequestStatus.New or RequestStatus.Rechecked or RequestStatus.Denied
-                    => query.Where(x =>
+                    => queries.Where(x =>
                         (x.StatusId == (int)RequestStatus.New ||
                          x.StatusId == (int)RequestStatus.Rechecked ||
                          x.StatusId == (int)RequestStatus.Denied) &&
                         x.UserRequestId == userId),
-
                 RequestStatus.Requested or RequestStatus.Checking
-                    => query.Where(x =>
+                    => queries.Where(x =>
                         (x.StatusId == (int)RequestStatus.Requested ||
                          x.StatusId == (int)RequestStatus.Checking) &&
                         x.AprovedUserId == userId),
-
-                RequestStatus.Completed
-                    => query.Where(x => x.StatusId == (int)RequestStatus.Completed &&
+                RequestStatus.Disbursed
+                    => queries.Where(x => x.StatusId == (int)RequestStatus.Disbursed &&
                         (x.AprovedUserId == userId || x.UserRequestId == userId)),
-
-                _ => query.Where(x => x.StatusId == (int)requestStatus)
+                _ => queries.Where(x => x.StatusId == (int)requestStatus)
             };
         }
         else
         {
-            query = requestStatus switch
+            queries = requestStatus switch
             {
-                RequestStatus.All => query,
-                _ => query.Where(x => x.StatusId == (int)requestStatus)
+                RequestStatus.All => queries,
+                _ => queries.Where(x => x.StatusId == (int)requestStatus)
             };
         }
+
         // --- Sorting
-        if (param.SortDescending && !string.IsNullOrEmpty(param.SortColumn))
-            query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
-        else if (!string.IsNullOrEmpty(param.SortColumn))
-            query = query.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+        if (!string.IsNullOrEmpty(param.FilterColumn))
+        {
+            queries = param.SortDescending
+                ? queries.OrderByDescending(x => EF.Property<object>(x, param.FilterColumn))
+                          .ThenByDescending(x => x.ModifiedDT)
+                          .ThenByDescending(x => x.StatusId)
+                          .ThenByDescending(x => x.RequestDate)
+                : queries.OrderBy(x => EF.Property<object>(x, param.FilterColumn))
+                            .ThenBy(x => x.ModifiedDT)
+                            .ThenBy(x => x.StatusId)
+                            .ThenBy(x => x.RequestDate);
+        }
+        else
+        {
+            queries = param.SortDescending
+                ? queries.OrderByDescending(x => x.ModifiedDT)
+                                    .ThenByDescending(x => x.Status)
+                                    .ThenByDescending(x => x.RequestDate)
+                : queries.OrderBy(x => x.ModifiedDT)
+                                    .ThenBy(x => x.Status)
+                                    .ThenBy(x => x.RequestDate);
+        }
 
-        // --- Paging
-        var totalCount = await query.CountAsync();
+        // --- Paging: run count and data fetch concurrently
 
-        var items = await query.Skip(param.Page)
-                    .Take(param.Take)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken);
+        var skip = param.Page == 0 ? param.Page : (param.Page - 1) * param.Take;
 
-        return new Pager<VLoanRequests>(items, totalCount);
+        var countTask = await queries.CountAsync(cancellationToken);
+
+        var itemsTask = await queries.Skip(skip)
+                               .Take(param.Take)
+                               .AsNoTracking()
+                               .Select(x => new VLoanRequests
+                               {
+                                   LoanRequestId = x.LoanRequestId,
+                                   BranchId = x.BranchId,
+                                   CurrencyId = x.CurrencyId,
+                                   CustomerId = x.CustomerId,
+                                   BranchName = x.BranchName,
+                                   AltName = x.AltName,
+                                   RequestDate = x.RequestDate,
+                                   StatusId = x.StatusId,
+                                   Status = x.Status,
+                                   CurrencyName = x.CurrencyName,
+                                   AprovedAmount = x.AprovedAmount,
+                                   InterestRate = x.InterestRate,
+                                   CollectionFeeRate = x.CollectionFeeRate,
+                                   AdminFeeRate = x.AdminFeeRate,
+                                   Summiter = x.Summiter,
+                                   AprovedBy = x.AprovedBy,
+                                   ModifiedDT = x.ModifiedDT
+                               })
+                               .ToListAsync(cancellationToken);
+        return new Pager<VLoanRequests>(itemsTask, countTask);
     }
+
+
+
 
     public async Task<ErrorOr<string>> AddDescription(LoanDescriptions descriptions, CancellationToken cancellation = default)
     {

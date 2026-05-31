@@ -1,7 +1,9 @@
 ﻿using Applications.Features.Documents.Command.AddDocument;
 using Applications.Features.Documents.Command.AddDocuments;
 using Applications.Features.Documents.Dto;
+using Applications.Interfaces.Identity;
 using Applications.Utils;
+using Domains.Models.Files;
 
 namespace TrapchumApp;
 
@@ -212,6 +214,67 @@ internal static class MapAdditinalEndpoints
             {
                 logger.LogError(ex, "Error uploading file: {ErrorMessage}", ex.Message);
 
+                return Results.Problem(detail: $"Error uploading file: {ex.Message}", statusCode: 500);
+            }
+        }).DisableAntiforgery();
+
+
+        uploadGroup.MapPost("/Users/Profiles/{userId}", async (
+            string userId,
+            IFormFile file,
+            IUserService userService,
+            IWebHostEnvironment env,
+            ILogger<Program> logger) =>
+        {
+            if (file is null || file.Length == 0)
+            {
+                logger.LogWarning("No file uploaded for user {UserId}.", userId);
+                return Results.BadRequest("No file uploaded.");
+            }
+
+            const long maxFileSize = 10L * 1024 * 1024; // 10 MB
+
+            if (file.Length > maxFileSize)
+                return Results.BadRequest("File size exceeds 10 MB.");
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+
+            if (!permittedExtensions.Contains(extension))
+                return Results.BadRequest("Invalid file type. Only JPG, PNG and WEBP are allowed.");
+
+            try
+            {
+                var newFileName = $"{Guid.NewGuid()}{extension}";
+                var destinationPath = Path.Combine(env.WebRootPath, "assets/profiles");
+
+                if (!Directory.Exists(destinationPath))
+                    Directory.CreateDirectory(destinationPath);
+
+                var fullPath = Path.Combine(destinationPath, newFileName);
+                using var fileStream = new FileStream(fullPath, FileMode.Create);
+                await file.CopyToAsync(fileStream);
+
+                var fileUrl = $"/assets/profiles/{newFileName}";
+
+                using var stream = new MemoryStream();
+                file.OpenReadStream().CopyTo(stream);
+
+                var fileModel = new FileModel(file.FileName, newFileName, file.Length, stream.ToArray())
+                {
+                    FileUrl = fileUrl
+                };
+
+                var result = await userService.ChangeProfile(userId, fileModel);
+
+                if (result.IsError)
+                    return Results.Problem(detail: result.FirstError.Description, statusCode: 400);
+
+                return Results.Ok(new { fileUrl });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error uploading profile photo for user {UserId}.", userId);
                 return Results.Problem(detail: $"Error uploading file: {ex.Message}", statusCode: 500);
             }
         }).DisableAntiforgery();

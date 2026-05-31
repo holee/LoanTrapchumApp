@@ -2,7 +2,7 @@
 
 namespace Applications.Extensions.Maths
 {
-    public static class NumerFormatExtensions
+    public static class NumberFormatExtensions
     {
 
         public static string FormatN(this decimal? d, string formatter)

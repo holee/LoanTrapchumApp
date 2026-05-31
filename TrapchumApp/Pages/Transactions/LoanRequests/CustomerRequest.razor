@@ -1,76 +1,106 @@
 ﻿@using TrapchumApp.Pages.Lists.Collaterals
 @using TrapchumApp.Pages.Lists.Customers
 
-<div class="customer-info">
+<div class="customer-card">
+
+    <!-- Header: Avatar + Name -->
+    <div class="customer-header">
+        <div class="customer-avatar">
+            @if (!string.IsNullOrWhiteSpace(Customer?.Photo))
+            {
+                <img src="@Customer.Photo" alt="@Customer.AltName" class="customer-avatar-img" />
+            }
+            else
+            {
+                <RadzenIcon Icon="person" />
+            }
+        </div>
+        <div class="customer-header-info">
+            <div class="customer-name">@Customer?.AltName</div>
+            <div class="customer-sub">@Customer?.FullName</div>
+            @if (!string.IsNullOrWhiteSpace(Customer?.Salutation))
+            {
+                <span class="customer-badge">@Customer.Salutation</span>
+            }
+        </div>
+    </div>
+
     <!-- Section 1: ព័ត៌មានផ្ទាល់ខ្លួន -->
     <div class="info-section">
         <div class="info-section-title">
-            <RadzenIcon Icon="person" />
+            <RadzenIcon Icon="badge" />
             <span>ព័ត៌មានផ្ទាល់ខ្លួន</span>
         </div>
-        <RadzenRow RowGap="0.65rem">
-            <RadzenColumn Size="6" SizeMD="4">
-                <label class="info-label">ឈ្មោះអតិថិជន</label>
-                <span class="info-value">@Customer?.AltName (@Customer?.FullName)</span>
-            </RadzenColumn>
-            <RadzenColumn Size="6" SizeMD="4">
-                <label class="info-label">ទូរស័ព្ទ</label>
-                <span class="info-value">@Customer?.Phone</span>
-            </RadzenColumn>
-            <RadzenColumn Size="6" SizeMD="4">
-                <label class="info-label">ការគោរព</label>
-                <span class="info-value">@Customer?.Salutation</span>
-            </RadzenColumn>
-            <RadzenColumn Size="6" SizeMD="4">
-                <label class="info-label">ថ្ងៃខែឆ្នាំកំណើត</label>
-                <span class="info-value">@Customer?.DateOfBirth</span>
-            </RadzenColumn>
-            <RadzenColumn Size="6" SizeMD="4">
-                <label class="info-label">អត្តសញ្ញាណប័ណ្ណ</label>
-                <span class="info-value">@Customer?.IdCard</span>
-            </RadzenColumn>
-            <RadzenColumn Size="6" SizeMD="4">
-                <label class="info-label">មុខរបរ</label>
-                <span class="info-value">@Customer?.Occupation</span>
-            </RadzenColumn>
-        </RadzenRow>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-icon"><RadzenIcon Icon="phone" /></span>
+                <div>
+                    <label class="info-label">ទូរស័ព្ទ</label>
+                    <span class="info-value">@Customer?.Phone</span>
+                </div>
+            </div>
+            <div class="info-item">
+                <span class="info-icon"><RadzenIcon Icon="cake" /></span>
+                <div>
+                    <label class="info-label">ថ្ងៃខែឆ្នាំកំណើត</label>
+                    <span class="info-value">@Customer?.DateOfBirth.DayFirst()</span>
+                </div>
+            </div>
+            <div class="info-item">
+                <span class="info-icon"><RadzenIcon Icon="credit_card" /></span>
+                <div>
+                    <label class="info-label">អត្តសញ្ញាណប័ណ្ណ</label>
+                    <span class="info-value">@Customer?.IdCard</span>
+                </div>
+            </div>
+            <div class="info-item">
+                <span class="info-icon"><RadzenIcon Icon="work" /></span>
+                <div>
+                    <label class="info-label">មុខរបរ</label>
+                    <span class="info-value">@Customer?.Occupation</span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Section 2: អាសយដ្ឋាន និង ហិរញ្ញវត្ថុ -->
+    <!-- Section 2: ហិរញ្ញវត្ថុ -->
     <div class="info-section">
         <div class="info-section-title">
-            <RadzenIcon Icon="location_on" />
+            <RadzenIcon Icon="account_balance" />
             <span>ហិរញ្ញវត្ថុ</span>
         </div>
-        <RadzenRow RowGap="0.65rem">
-            <RadzenColumn Size="4" SizeMD="4">
-                <label class="info-label">រង្វង់</label>
+        <div class="finance-grid">
+            <div class="finance-card circle-card">
+                <RadzenIcon Icon="group" />
+                <label class="info-label">ខួប</label>
                 <span class="info-value">@Customer?.Circle</span>
-            </RadzenColumn>
-            <RadzenColumn Size="4" SizeMD="4">
+            </div>
+            <div class="finance-card income-card">
+                <RadzenIcon Icon="trending_up" />
                 <label class="info-label">ចំណូល</label>
-                <span class="info-value income">@Customer?.CustomerIncomes.Sum(x => x.IncomeAmount)</span>
-            </RadzenColumn>
-            <RadzenColumn Size="4" SizeMD="4">
+                <span class="info-value income">@_income</span>
+            </div>
+            <div class="finance-card expense-card">
+                <RadzenIcon Icon="trending_down" />
                 <label class="info-label">ចំណាយ</label>
-                <span class="info-value expense">@Customer?.CustomerExpenses.Sum(x => x.ExpendAmount)</span>
-            </RadzenColumn>
-        </RadzenRow>
+                <span class="info-value expense">@_expense</span>
+            </div>
+        </div>
     </div>
-    <!-- Section 2: អាសយដ្ឋាន និង ហិរញ្ញវត្ថុ -->
+
+    <!-- Section 3: អាសយដ្ឋាន -->
     <div class="info-section">
         <div class="info-section-title">
             <RadzenIcon Icon="location_on" />
             <span>អាសយដ្ឋាន</span>
         </div>
-        <RadzenRow RowGap="0.65rem">
-            <RadzenColumn Size="6" SizeMD="6">
-                <label class="info-label">អាសយដ្ឋាន</label>
-                <span class="info-value">@Customer?.ToString()</span>
-            </RadzenColumn>
-        </RadzenRow>
+        <div class="address-block">
+            <RadzenIcon Icon="place" />
+            <span class="info-value">@Customer?.ToString()</span>
+        </div>
     </div>
-    <!-- Section 3: ព័ត៌មានបន្ថែម -->
+
+    <!-- Section 4: ព័ត៌មានបន្ថែម -->
     @if (ShowAdditionalInfo)
     {
         <div class="info-section">
@@ -80,12 +110,27 @@
             </div>
             <RadzenRow RowGap="1rem">
                 <RadzenColumn Size="12">
-                    <CustomerProfit CustomerId="@CustomerId" ShowCommand="true" ShowAction="true" />
+                    <CustomerProfit CustomerId="@CustomerId"
+                                    ShowCommand="true"
+                                    ShowAction="true"
+                                    GetIncomeAndExpense="UpdateIncomeAndExpense" />
                 </RadzenColumn>
                 <RadzenColumn Size="12">
-                    <CollateralsCustomer CustomerId="@CustomerId" ShowAdd="true" ShowCommand="true" />
+                    <CollateralsCustomer CustomerId="@CustomerId"
+                                         ShowAdd="true"
+                                         ShowCommand="true" />
                 </RadzenColumn>
             </RadzenRow>
         </div>
     }
 </div>
+@code {
+    async Task UpdateIncomeAndExpense((decimal? income, decimal? expense) args)
+    {
+        _income= args.income;
+
+        _expense = args.expense;
+
+        StateHasChanged();
+    }
+}

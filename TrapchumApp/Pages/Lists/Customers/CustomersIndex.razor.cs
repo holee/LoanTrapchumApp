@@ -90,11 +90,14 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             var param = new Dictionary<string, object?>
             {
-                { "CollateralId", customerId}
+                { "CollateralId", customerId},
+                { "PageType", PageType.Dialog }
             };
             var options = new DialogOptions
             {
-                AutoFocusFirstElement = false
+                AutoFocusFirstElement = false,
+                Width = "100vw",
+
             };
 
             await DialogService.OpenAsync<CustomerCollateralLineCreate>("Collateral", param, options);

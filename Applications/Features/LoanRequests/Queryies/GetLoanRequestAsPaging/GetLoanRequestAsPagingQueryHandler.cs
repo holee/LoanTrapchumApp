@@ -1,9 +1,4 @@
-﻿using Applications.Interfaces.Loans;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans.Requests;
-using Applications.Utils;
-
-namespace Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
+﻿namespace Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
 
 public class GetLoanRequestAsPagingQueryHandler(ILoanRequestService loanRequestService)
     : IRequestHandler<GetLoanRequestAsPagingQuery, Pager<VLoanRequests>>

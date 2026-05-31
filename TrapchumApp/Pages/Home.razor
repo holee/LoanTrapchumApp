@@ -52,8 +52,8 @@
                         <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
                         <span>Performance Overview</span>
                     </div>
-                    <RadzenRow>
-                        <RadzenColumn Size="12" SizeMD="2">
+                    <div class="db-chart-row">
+                        <div class="db-period-col">
                             <RadzenListBox class="db-period-list"
                                            Data="@_periods"
                                            TextProperty="Label"
@@ -61,15 +61,13 @@
                                            @bind-Value="@_selectedPeriod"
                                            Change="@((v) => OnParentClicked(v))"
                                            TValue="string" />
-                        </RadzenColumn>
-                        <RadzenColumn Size="12" SizeMD="10">
-                            <RadzenChart>
-                                <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Principal" />
-                                <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Interest" />
-                                <RadzenLegend Position="LegendPosition.Bottom" />
-                            </RadzenChart>
-                        </RadzenColumn>
-                    </RadzenRow>
+                        </div>
+                        <div class="db-chart-col">
+                            <BarChart Labels="@ChartLabels"
+                                      Series1Values="@Chart1Values" Series1Label="Principal"
+                                      Series2Values="@Chart2Values" Series2Label="Interest" />
+                        </div>
+                    </div>
                 </RadzenCard>
             </div>
         }
@@ -109,11 +107,9 @@
                     <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
                     <span>Branch Lending Performance</span>
                 </div>
-                <RadzenChart>
-                    <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Principal" />
-                    <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Interest" />
-                    <RadzenLegend Position="LegendPosition.Bottom" />
-                </RadzenChart>
+                <BarChart Labels="@ChartLabels"
+                          Series1Values="@Chart1Values" Series1Label="Principal"
+                          Series2Values="@Chart2Values" Series2Label="Interest" />
             </RadzenCard>
         </div>
     </Authorized>
@@ -160,11 +156,9 @@
                     <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
                     <span>Loan Portfolio Overview</span>
                 </div>
-                <RadzenChart>
-                    <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Principal" />
-                    <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Interest" />
-                    <RadzenLegend Position="LegendPosition.Bottom" />
-                </RadzenChart>
+                <BarChart Labels="@ChartLabels"
+                          Series1Values="@Chart1Values" Series1Label="Principal"
+                          Series2Values="@Chart2Values" Series2Label="Interest" />
             </RadzenCard>
         </div>
     </Authorized>
@@ -202,11 +196,9 @@
                     <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
                     <span>Regional Performance Overview</span>
                 </div>
-                <RadzenChart>
-                    <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Principal" />
-                    <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Interest" />
-                    <RadzenLegend Position="LegendPosition.Bottom" />
-                </RadzenChart>
+                <BarChart Labels="@ChartLabels"
+                          Series1Values="@Chart1Values" Series1Label="Principal"
+                          Series2Values="@Chart2Values" Series2Label="Interest" />
             </RadzenCard>
         </div>
     </Authorized>

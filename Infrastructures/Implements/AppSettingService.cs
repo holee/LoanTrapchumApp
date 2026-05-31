@@ -273,8 +273,7 @@ public sealed class AppSettingService(
         return queries;
     }
 
-    public async Task<ErrorOr<UserLoanSizeDto>> GetUserLoanSizeByIdAsync(
-        long id, CancellationToken cancellation = default)
+    public async Task<ErrorOr<UserLoanSizeDto>> GetUserLoanSizeByIdAsync(long id, CancellationToken cancellation = default)
     {
         try
         {
@@ -308,6 +307,29 @@ public sealed class AppSettingService(
             return Error.Failure(description: ex.Message);
         }
     }
+
+    public async Task<ErrorOr<VUserLoanSizes>> GetUserLoanSizeByUserAsync(string? userId, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var item = await cxt.Set<VUserLoanSizes>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserRefId == userId, cancellation);
+
+            if (item is null)
+                return Error.NotFound(description: "User loan size not found.");
+
+            return item;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, ex.Message);
+            return Error.Failure(description: ex.Message);
+        }
+    }
+
 
     public async Task<ErrorOr<UserLoanSizeDto>> CreateUserLoanSizeAsync(
         UserLoanSizeDtoCreate request, CancellationToken cancellation = default)

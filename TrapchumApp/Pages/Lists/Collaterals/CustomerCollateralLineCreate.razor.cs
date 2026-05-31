@@ -59,6 +59,18 @@ public partial class CustomerCollateralLineCreate
         await GetCollateralSubTypes(id);
     }
 
+    void OnSelectedItemChanged(object? args)
+    {
+        if(args is not null)
+        {
+            var subType = (CollateralSubTypeDto)args;
+
+            model.SubTypeName = subType.CollateralSubTypeName;
+
+        }
+    }
+
+
     private async Task GetCollateralSubTypes(int? id)
     {
         allSubTypes = await mediator.Send(new GetCollateralSubTypesByIdQuery(id, null)); ///_service.GetCollateralSubTypes(id);
@@ -167,7 +179,7 @@ public partial class CustomerCollateralLineCreate
         }
         else
         {
-            DialogService.Close();
+            DialogService.Close(success);
         }
 
     }
@@ -184,13 +196,13 @@ public partial class CustomerCollateralLineCreate
 
             var rsp = await mediator.Send(command);
 
-            if (!rsp.IsError)
+            if (rsp.IsSuccess())
             {
                 success = true;
 
                 _toastService.ShowSuccess(rsp.Value);
 
-                await OnClose.InvokeAsync();
+                await OnCloseTab();
 
             }
             else

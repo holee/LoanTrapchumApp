@@ -1,22 +1,75 @@
-﻿<AuthorizeView Policy="@Policies.CanExchanged">
+﻿@using TrapchumApp.Pages.Transactions.Exchanges
+<AuthorizeView Policy="@Policies.CanExchanged">
     <Authorized>
-        <RadzenMenu>
-            <RadzenMenuItem Text="Currencies" Icon="payment" Visible="@IsBranchOpen">
-                <RadzenMenuItem Text="Exchnage"
-                                Click="@ShowCurrencyDialogue"
-                                Icon="check_circle"></RadzenMenuItem>
-            </RadzenMenuItem>
-        </RadzenMenu>
+        @if (IsBranchOpen)
+        {
+            <div class="tm-wrap">
+                <div class="tm-trigger" @onclick="ToggleMenu" @onclick:stopPropagation="true">
+                    <span class="tm-trigger__icon">
+                        <RadzenIcon Icon="currency_exchange" />
+                    </span>
+                    <span class="tm-trigger__label">Currencies</span>
+                    <span class="tm-trigger__chevron @(_open ? "tm-trigger__chevron--up" : "")">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7 10l5 5 5-5z" />
+                        </svg>
+                    </span>
+                </div>
+
+                @if (_open)
+                {
+                    <div class="tm-backdrop" @onclick="CloseMenu"></div>
+                    <div class="tm-dropdown" @onclick:stopPropagation="true">
+
+                        <div class="tm-dropdown__header">
+                            <span class="tm-dropdown__header-title">
+                                <RadzenIcon Icon="currency_exchange" Style="font-size:1rem;vertical-align:middle;margin-right:0.35rem;" />
+                                Currency Exchange
+                            </span>
+                            <span class="tm-status-badge">
+                                <span class="tm-status-dot"></span>Branch Active
+                            </span>
+                        </div>
+
+                        <div class="tm-section-label">New Transaction</div>
+
+                        <div class="tm-menu-item">
+                            <div class="tm-menu-item__body">
+                                <ExchangesTopMenu BranchId="@BranchId" OnClose="CloseMenu" />
+                            </div>
+                        </div>
+
+                        <div class="tm-dropdown__footer">
+                            <span>Changes take effect immediately after submission</span>
+                        </div>
+
+                    </div>
+                }
+            </div>
+        }
     </Authorized>
 </AuthorizeView>
 
 @code {
     [Parameter]
     public EventCallback ShowDialogue { get; set; } = default!;
-    [Parameter,EditorRequired]
+
+    [Parameter]
+    public int? BranchId { get; set; } = default!;
+
+    [Parameter, EditorRequired]
     public bool IsBranchOpen { get; set; }
-    async Task ShowCurrencyDialogue()
+
+    private bool _open = false;
+
+    private void ToggleMenu() => _open = !_open;
+
+    private void CloseMenu() => _open = false;
+
+    private async Task OnExchangeClick()
     {
+        _open = false;
+
         await ShowDialogue.InvokeAsync();
     }
 }

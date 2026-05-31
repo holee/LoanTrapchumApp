@@ -58,6 +58,7 @@ public partial class RepaymentMultiple
     public RepaymentMultiple(ILoanService scheduleService, ILoanPaymentServiceImpl paymentService)
     {
         _loanService = scheduleService;
+
         _paymentService = paymentService;
     }
 

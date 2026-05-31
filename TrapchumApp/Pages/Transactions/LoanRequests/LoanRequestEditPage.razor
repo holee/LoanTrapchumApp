@@ -20,31 +20,17 @@
 }
 else
 {
-    <AppActions>
-        <RadzenButton Disabled="model.RequestAmount <= 0"
-                      Size="@Styles.DefaultSize"
-                      Click="@HandleSaveLoanRequest"
-                      Text="Save"
-                      Icon="save"
-                      ButtonStyle="ButtonStyle.Primary" />
-        <RadzenButton Disabled="model.RequestAmount <= 0"
-                      Size="@Styles.DefaultSize"
-                      Click="@HandleCreateRequest"
-                      Text="Request"
-                      Icon="save"
-                      ButtonStyle="ButtonStyle.Success" />
-        <BackButton Href="@($"/App/Loans/Requests/{BranchId}/branches")" />
-    </AppActions>
-    <RadzenCard class="rz-background-color-base-200">
+    <RadzenCard Variant="Variant.Outlined">
         <EditForm Model="model" @ref="editForm">
             <input type="hidden" @bind="model.LoanRequestId" />
             <input type="hidden" @bind="model.CreditAgentRefId" />
             <input type="hidden" @bind="model.RequestUserRefId" />
             <input type="hidden" @bind="model.CustomerRefId" />
-            <FluentValidationValidator DisableAssemblyScanning="true" />
-            <RadzenTabs SelectedIndexChanged="SelectTabIndexChanged" RenderMode="TabRenderMode.Client" aria-hidden="true">
-                <Tabs>
-                    <RadzenTabsItem Text="សំណើរ" Icon="@IconNames.RequestQuote">
+            <Blazilla.FluentValidator />
+            <RadzenSteps SelectedIndex="@selectedTabIndex"
+                         SelectedIndexChanged="@SelectTabIndexChanged">
+                <Steps>
+                    <RadzenStepsItem Text="សំណើរ">
                         <LoanRequestInfo Model="@model"
                                          CustomerId="@CustomerId"
                                          LoanRequestId="@LoanRequestId"
@@ -60,26 +46,24 @@ else
                                 </RadzenColumn>
                             </RadzenRow>
                         </RadzenCard>
-                    </RadzenTabsItem>
+                    </RadzenStepsItem>
 
-                    <RadzenTabsItem Text="អ្នករួមខ្ខី" Icon="@IconNames.Group">
+                    <RadzenStepsItem Text="អ្នករួមខ្ខី">
                         <CoRequestCustomerBox Customers="@CoCustomers"
-                                ShowCommand="true" 
-                                ShowAdd="true" 
-                                @ref="CoCustomerRef"
-                                Remove="@OnRemoveCoPawnCustomer"
-                                Add="@AddCoPawnCustomer"
-                                ShowRemove="true">
+                                              ShowCommand="true"
+                                              ShowAdd="true"
+                                              @ref="CoCustomerRef"
+                                              Remove="@OnRemoveCoPawnCustomer"
+                                              Add="@AddCoPawnCustomer"
+                                              ShowRemove="true">
                             <SearchBoxTemplate>
-                                <CoRequestSearchList 
-                                    OnSelected="@OnSelectedCoCustomer" 
-                                    OnSelecteds="@OnSelectedCoCustomers"/>
+                                <CoRequestSearchList OnSelected="@OnSelectedCoCustomer"
+                                                     OnSelecteds="@OnSelectedCoCustomers" />
                             </SearchBoxTemplate>
                         </CoRequestCustomerBox>
+                    </RadzenStepsItem>
 
-                    </RadzenTabsItem>
-
-                    <RadzenTabsItem Icon="@IconNames.Collaterals" Text="ទ្រព្យសម្បត្តិបញ្ចាំ">
+                    <RadzenStepsItem Text="ទ្រព្យសម្បត្តិបញ្ចាំ">
                         <LoanRequestCollaterals CustomerId="@CustomerId"
                                                 ShowCommand="true"
                                                 ShowAdd="true"
@@ -94,9 +78,9 @@ else
                                                       SingleSelected="SelectedCollateral" />
                             </SearchBoxTemplate>
                         </LoanRequestCollaterals>
-                    </RadzenTabsItem>
-                    
-                    <RadzenTabsItem Icon="@IconNames.Group" Text="អ្នកធានា">
+                    </RadzenStepsItem>
+
+                    <RadzenStepsItem Text="អ្នកធានា">
                         <LoanRequestGaurantor Guarantors="Guarantors"
                                               ShowAdd="true"
                                               Add="@AddGuarantors"
@@ -109,27 +93,24 @@ else
                                                      SelectMany="SelectMany" />
                             </SearchBoxTemplate>
                         </LoanRequestGaurantor>
-                    </RadzenTabsItem>
-                   
-                    <RadzenTabsItem Icon="@IconNames.AttachFile" Text="ឯកសារភ្ជាប់">
+                    </RadzenStepsItem>
+
+                    <RadzenStepsItem Text="ឯកសារភ្ជាប់">
                         <LoanRequestDocument Documents="@Documents"
                                              UploadDocument="@HandleFileDialogue"
                                              RemoveDocument="@RemoveFile"
                                              @ref="DocumentRef"
-                                             @key="@Guid.NewGuid().ToString("N")"
                                              ShowDelete="true" />
-                    </RadzenTabsItem>
-                    
-                    <RadzenTabsItem Text="អតិថិជន" Icon="@IconNames.Customers">
-                        <RadzenFieldset>
-                            <CustomerRequest CustomerId="@CustomerId" ShowAdditionalInfo="true" @key="@Guid.NewGuid().ToString("N")" />
-                        </RadzenFieldset>
-                    </RadzenTabsItem>
-                    <RadzenTabsItem Text="កំណត់ចំណាំ" Icon="@IconNames.Comment">
-                        <LoanRequestNotes Data="@_loanDescriptions" @key="@Guid.NewGuid().ToString("N")" />
-                    </RadzenTabsItem>
-                </Tabs>
-            </RadzenTabs>
+                    </RadzenStepsItem>
+
+                    <RadzenStepsItem Text="អតិថិជន">
+                        <CustomerRequest CustomerId="@CustomerId" ShowAdditionalInfo="true" />
+                    </RadzenStepsItem>
+                    <RadzenStepsItem Text="កំណត់ចំណាំ">
+                        <LoanRequestNotes Data="@_loanDescriptions" />
+                    </RadzenStepsItem>
+                </Steps>
+            </RadzenSteps>
             <AppActions>
                 <RadzenButton Disabled="model.RequestAmount <= 0"
                               Size="@Styles.DefaultSize"
@@ -147,7 +128,7 @@ else
             </AppActions>
         </EditForm>
     </RadzenCard>
-    
+
 }
 
 @code
@@ -282,7 +263,8 @@ else
 
         if (CollateralLines.Any(x => x.Id == c.Id))
         {
-            NotificationService.Notify(NotificationSeverity.Info, "Collateral already exists");
+
+            _toastService.ShowInfo("Collateral already exists");
 
             return;
         }
@@ -313,7 +295,11 @@ else
                 OwnerName = c.OwnerName,
                 ReferenceNo = c.ReferenceNo,
                 TypeName = c.TypeName,
+                SubTypeName = c.SubTypeName,
                 Quantity = c.Quantity,
+                PawnPrice = c.PawnPrice,
+                MarketPrice = c.MarketPrice,
+                HotPrice = c.HotPrice
             };
 
             CollateralLines.Add(item);
@@ -350,6 +336,10 @@ else
                 ReferenceNo = g.ReferenceNo,
                 TypeName = g.TypeName,
                 Quantity = g.Quantity,
+                SubTypeName = g.SubTypeName,
+                PawnPrice = g.PawnPrice,
+                MarketPrice = g.MarketPrice,
+                HotPrice = g.HotPrice
             };
 
             CollateralLines.Add(item);
@@ -369,74 +359,5 @@ else
         }
 
     }
-
-    // async Task OnRowSelect(VCustomerList customer)
-    // {
-    //     FullName = "";
-    //     Model.CustomerRefId = customer.CustomerId;
-    //     CustomerId = customer.CustomerId;
-    //     FullName = customer.FullName;
-    //     await popup.CloseAsync();
-    // }
-
-
-    // int selectedIndex = 0;
-
-    // async Task OnInput(ChangeEventArgs args)
-    // {
-    //     selectedIndex = 0;
-
-    //     filterText = args.Value!.ToString();
-
-    //     if (string.IsNullOrEmpty(filterText))
-    //     {
-    //         Model.CustomerRefId = string.Empty;
-    //         CustomerId = string.Empty;
-    //         FullName = string.Empty;
-    //     }
-
-    //     await GetCustomers(CustomerId, 25, filterText);
-
-    //     await grid.Reload();
-    // }
-
-    // async Task OnKeyDown(KeyboardEventArgs args)
-    // {
-    //     var items = Customers;
-
-    //     var popupOpened = await js.InvokeAsync<bool>("popupOpened", "popup");
-
-    //     var key = args.Code != null ? args.Code : args.Key;
-
-    //     if (!args.AltKey && (key == "ArrowDown" || key == "ArrowUp"))
-    //     {
-    //         var result = await js.InvokeAsync<int[]>("focusTableRow", "grid", key, selectedIndex, null, false);
-
-    //         selectedIndex = result.First();
-    //     }
-    //     else if (args.AltKey && key == "ArrowDown" || key == "Enter" || key == "NumpadEnter")
-    //     {
-    //         if (popupOpened && (key == "Enter" || key == "NumpadEnter"))
-    //         {
-    //             CustomerId = items.ElementAtOrDefault(selectedIndex)?.CustomerId;
-    //         }
-
-    //         await popup.ToggleAsync(textBox.Element);
-    //     }
-    //     else if (key == "Escape" || key == "Tab")
-    //     {
-    //         await popup.CloseAsync();
-    //     }
-    // }
-
-
-    // async Task OpenPopup(MouseEventArgs arg)
-    // {
-    //     if (isCustomerSelected) return;
-
-    //     await popup.ToggleAsync(textBox.Element);
-    // }
-
-
 
 }

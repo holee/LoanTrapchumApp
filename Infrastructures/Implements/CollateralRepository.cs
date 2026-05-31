@@ -376,7 +376,7 @@ public sealed class CollateralRepository : ICollateralService
             string[] defaultColumns =
             [
                 nameof(VCollateralLines.TypeName),
-                nameof(VCollateralLines.CollateralSubTypeName),
+                nameof(VCollateralLines.SubTypeName),
                 nameof(VCollateralLines.OwnerName),
                 nameof(VCollateralLines.CollateralNo)
             ];
@@ -400,7 +400,7 @@ public sealed class CollateralRepository : ICollateralService
             ReferenceNo = x.ReferenceNo,
             CollateralId = x.CollateralRefId,
             OwnerName = x.OwnerName,
-            CollateralSubTypeName = x.SubTypeName,
+            SubTypeName = x.SubTypeName,
             CollateralNo = x.CollateralNo,
             TypeName = x.TypeName,
             Size = x.Size,

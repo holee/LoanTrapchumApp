@@ -49,10 +49,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                 (c.CollateralNo?.Contains(filterText, StringComparison.OrdinalIgnoreCase) ?? false) ||
                 (c.OwnerName?.Contains(filterText, StringComparison.OrdinalIgnoreCase) ?? false) ||
                 (c.TypeName?.Contains(filterText, StringComparison.OrdinalIgnoreCase) ?? false));
-        protected override void OnInitialized()
-        {
-            base.OnInitialized();
-        }
+
 
         async Task OnRowCollateralSelect(VCollateralLines g)
         {

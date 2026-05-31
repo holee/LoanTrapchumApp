@@ -1,38 +1,83 @@
 ﻿@page "/App/Loans/Disbursements/{BranchId:int}/Branches"
 @using Applications.Features.Loans.Dtos.Responses
 @using TrapchumApp.Pages.Transactions.Loans.LoanTabs
-<PageTitle>All</PageTitle>
-<RadzenTabs TabPosition="TabPosition.Top" RenderMode="TabRenderMode.Server" SelectedIndex="@_selectedIndex">
-    <Tabs>
-        <RadzenTabsItem Text="All Loans">
-            <Template>
-                <span class="rz-ms-2">
-                    All Loans
-                    <RadzenBadge BadgeStyle="BadgeStyle.Secondary" IsPill="@true" Text="@loanCount.ToString()" class="rz-ms-1" />
-                </span>
-            </Template>
-            <ChildContent>
-                <AllLoansTab GetLoanChanged="GetLoanCount"
-                             OpenDetailTab="@OpenDetailsTab"
-                             BranchId="@BranchId" UserId="@_userId" />
-            </ChildContent>
-        </RadzenTabsItem>
 
-        @foreach (var item in _loanTabs)
-        {
-            <RadzenTabsItem Text="@item.Title" @key="@item.TabId">
-                <Template>
-                    <ClosedTab Closed="@CloseTab" Title="@item.Title" TabId="@item.TabId" />
-                </Template>
-                <ChildContent>
-                    @item.ChildContent
-                </ChildContent>
-            </RadzenTabsItem>
+<PageTitle>Loan Disbursements</PageTitle>
 
-        }
+<div class="page-wrapper">
 
-    </Tabs>
-</RadzenTabs>
+    <div class="page-header rz-mb-4">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.75rem">
+            <div class="header-icon-wrap">
+                <RadzenIcon Icon="account_balance_wallet" style="font-size:1.6rem;color:var(--rz-primary);" />
+            </div>
+            <div>
+                <RadzenText TagName="TagName.H2" TextStyle="TextStyle.H6"
+                            style="margin:0;font-weight:700;letter-spacing:-0.01em;">
+                    Loan Disbursements
+                </RadzenText>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem" style="margin-top:0.1rem;">
+                    <RadzenIcon Icon="home" style="font-size:0.75rem;color:var(--rz-text-tertiary-color);" />
+                    <RadzenText TextStyle="TextStyle.Caption" style="color:var(--rz-text-tertiary-color);margin:0;">Transactions</RadzenText>
+                    <RadzenIcon Icon="chevron_right" style="font-size:0.75rem;color:var(--rz-text-tertiary-color);" />
+                    <RadzenText TextStyle="TextStyle.Caption" style="color:var(--rz-text-secondary-color);margin:0;font-weight:500;">Loans</RadzenText>
+                    <RadzenIcon Icon="chevron_right" style="font-size:0.75rem;color:var(--rz-text-tertiary-color);" />
+                    <RadzenText TextStyle="TextStyle.Caption" style="color:var(--rz-primary);margin:0;font-weight:600;">Disbursements</RadzenText>
+                </RadzenStack>
+            </div>
+            <RadzenBadge BadgeStyle="BadgeStyle.Primary"
+                         IsPill="@true"
+                         Text="@loanCount.ToString()"
+                         style="margin-left:auto;font-size:0.85rem;padding:0.25rem 0.75rem;" />
+        </RadzenStack>
+    </div>
+
+    <RadzenCard Variant="Variant.Outlined" class="tabs-card">
+        <RadzenTabs TabPosition="TabPosition.Top"
+                    RenderMode="TabRenderMode.Server"
+                    @bind-SelectedIndex="@_selectedIndex">
+            <Tabs>
+
+                <RadzenTabsItem>
+                    <Template>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+                            <RadzenIcon Icon="list_alt" style="font-size:1rem;" />
+                            <span>All Loans</span>
+                            <RadzenBadge BadgeStyle="BadgeStyle.Secondary" IsPill="@true" Text="@loanCount.ToString()" class="rz-ms-1" />
+                        </RadzenStack>
+                    </Template>
+                    <ChildContent>
+                        <div class="tab-content-wrapper">
+                            <AllLoansTab GetLoanChanged="GetLoanCount"
+                                         OpenDetailTab="@OpenDetailsTab"
+                                         BranchId="@BranchId"
+                                         UserId="@_userId" />
+                        </div>
+                    </ChildContent>
+                </RadzenTabsItem>
+
+                @foreach (var item in _loanTabs)
+                {
+                    <RadzenTabsItem @key="@item.TabId">
+                        <Template>
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.35rem">
+                                <RadzenIcon Icon="person" style="font-size:0.95rem;" />
+                                <ClosedTab Closed="@CloseTab" Title="@item.Title" TabId="@item.TabId" />
+                            </RadzenStack>
+                        </Template>
+                        <ChildContent>
+                            <div class="tab-content-wrapper">
+                                @item.ChildContent
+                            </div>
+                        </ChildContent>
+                    </RadzenTabsItem>
+                }
+
+            </Tabs>
+        </RadzenTabs>
+    </RadzenCard>
+
+</div>
 
 @code {
 
@@ -41,7 +86,6 @@
 
     void OpenDetailsTab(VLoanDisbursments item)
     {
-
         var existingIndex = _loanTabs.FindIndex(x => x.TabId == item.LoanId);
 
         if (existingIndex != -1)
@@ -52,71 +96,33 @@
         }
 
         RenderFragment content = builder =>
-       {
-           builder.OpenComponent<LoanDetails>(0);
-           builder.AddAttribute(1, "LoanId", item.LoanId);
-           builder.AddAttribute(2, "BranchId", item.BranchId);
-           builder.AddAttribute(3, "CurrencyId", item.CurrencyId);
-           builder.SetKey(item.LoanId);
-           builder.CloseComponent();
-       };
+        {
+            builder.OpenComponent<LoanDetails>(0);
+            builder.AddAttribute(1, "LoanId", item.LoanId);
+            builder.AddAttribute(2, "BranchId", item.BranchId);
+            builder.AddAttribute(3, "CurrencyId", item.CurrencyId);
+            builder.SetKey(item.LoanId);
+            builder.CloseComponent();
+        };
 
-        var newTab = new LoanTab
+        _loanTabs.Add(new LoanTab
         {
             TabId = item.LoanId ?? string.Empty,
             Title = item.AltName ?? string.Empty,
             ChildContent = content
-        };
+        });
 
-
-        _loanTabs.Add(newTab);
-
-        _selectedIndex = _loanTabs.Count; // Select the newly added tab
-
+        _selectedIndex = _loanTabs.Count;
     }
-
 
     private void CloseTab(string id)
     {
         var tab = _loanTabs.FirstOrDefault(t => t.TabId == id);
 
-        if (tab != null)
-        {
-            var idx = _loanTabs.IndexOf(tab);
+        if (tab is null) return;
 
-            _loanTabs.Remove(tab);
-
-            _selectedIndex = Math.Max(0, idx);
-        }
+        var idx = _loanTabs.IndexOf(tab);
+        _loanTabs.Remove(tab);
+        _selectedIndex = Math.Max(0, idx);
     }
-
-
-
-
-
-    // void ShowContextMenuWithContent(MouseEventArgs args, VLoanDisbursments p)
-    // {
-    //     ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
-    //     <RadzenMenuItem Icon="money"
-    //                     Click="@(()=>GetPaymentSchedules(p))"
-    //                     Text="Recieve Payment"></RadzenMenuItem>
-    //     <RadzenMenuItem Icon="paid"
-    //                     Click="@(()=>CustomerPayOff(p))"
-    //                     Text="PayOff"></RadzenMenuItem>
-    //     <RadzenMenuItem Icon="change_circle"
-    //                     Click="@(()=>ChangeCreditAgent(p))"
-    //                     Text="Change Credit Agent"></RadzenMenuItem>
-    //     <RadzenMenuItem Icon="info"
-    //                     Click="@(()=>GetLoanDetails(p))"
-    //                     Text="Loan Details"></RadzenMenuItem>
-    //     <RadzenMenuItem Icon="file_download"
-    //                     Click="@(()=>DownLoadScheduleAsExcel(p.LoanId,p.BranchId!.Value))"
-    //                     Text="Export Loan to Excel" />
-    //     <RadzenMenuItem Icon="picture_as_pdf"
-    //                     Click="@(()=>DownLoadScheduleAsPdf(p.LoanId,p.BranchId!.Value))"
-    //                     Text="Export Loan to Pdf" />
-    // </RadzenMenu>
-    // );
-    // }
-
 }

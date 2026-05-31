@@ -101,7 +101,8 @@ public partial class DueDateSchedulesPage
 
         if (!isAllowMultiplePayment && !isPaidNow)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Please select schedule to apply payment.");
+
+            _toastService.ShowError("Please select schedule to apply payment.");
 
             return;
         }
@@ -119,7 +120,7 @@ public partial class DueDateSchedulesPage
 
         if (LoanPaymentLines.Count <= 0)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "There is any schedule selected yet!");
+            _toastService.ShowError("There is any schedule selected yet!");
 
             return;
         }
@@ -156,7 +157,8 @@ public partial class DueDateSchedulesPage
 
         if (confirm is not null && confirm == true)
         {
-            NotificationService.Notify(NotificationSeverity.Success, "Receive successfully.");
+
+            _toastService.ShowSuccess("Receive successfully.");
 
             await GetSchedules();
 

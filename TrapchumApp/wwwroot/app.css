@@ -38,7 +38,21 @@
     --bs-success: #198754;
 }
 
-table.table th {
+/* ── Khmer font registration ── */
+@font-face {
+    font-family: kh_siemreap;
+    src: url('/lib/dist/fonts/SiemreapSans.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Noto Sans Khmer as a web-safe fallback (loaded from Google Fonts via App.razor <link>) */
+
+html,
+body {
+    font-family: kh_siemreap, "Noto Sans Khmer", "Khmer OS Siemreap", Arial, sans-serif !important;
+}
     background-color: var(--rz-base-200);
 }
 
@@ -75,11 +89,6 @@ table.table th {
         text-align: left;
         padding-left: 0.35rem;
     }
-
-html,
-body {
-    font-family: kh_siemreap,"Khmer OS Siemreap",Arial, sans-serif !important;
-}
 
 a,
 .btn-link {
@@ -431,7 +440,21 @@ h1:focus {
 
 
 .rz-text-caption {
-    font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif !important;
+    font-family: kh_siemreap, "Noto Sans Khmer", 'Khmer OS Siemreap', sans-serif !important;
+}
+
+/* Ensure all RadzenText variants inherit the Khmer-capable font */
+.rz-text,
+[class*="rz-text-"],
+.rz-cell-data,
+.rz-grid-table td,
+.rz-grid-table th,
+.rz-tabview-panel,
+.rz-fieldset-content,
+.rz-card,
+.rz-panel,
+.rz-dialog-content {
+    font-family: kh_siemreap, "Noto Sans Khmer", "Khmer OS Siemreap", Arial, sans-serif !important;
 }
 
 
@@ -458,13 +481,16 @@ h1:focus {
 #app-loading {
     position: fixed;
     inset: 0;
-    background: linear-gradient(135deg, #f0f4ff 0%, #e8edf8 100%);
+    background: linear-gradient(135deg, #0f0c29 0%, #1a1a4e 40%, #24243e 70%, #0f3460 100%);
+    background-size: 300% 300%;
+    animation: gradientShift 14s ease infinite;
     z-index: 99999;
     display: flex;
     justify-content: center;
     align-items: center;
     opacity: 1;
     transition: opacity 0.4s ease;
+    overflow: hidden;
 }
 
     #app-loading.app-loading-fade-out {
@@ -472,15 +498,58 @@ h1:focus {
         pointer-events: none;
     }
 
+/* Floating bubbles inside app-loading */
+#app-loading .app-loading-bubbles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+#app-loading .app-loading-bubble {
+    position: absolute;
+    bottom: -80px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.45), rgba(255,255,255,0.06));
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(4px);
+    animation: flyBubble linear infinite;
+}
+
+#app-loading .app-loading-bubble:nth-child(1)  { left:  5%; width: 40px;  height: 40px;  animation-duration: 9s;  animation-delay: 0s;   }
+#app-loading .app-loading-bubble:nth-child(2)  { left: 12%; width: 20px;  height: 20px;  animation-duration: 12s; animation-delay: 2s;   }
+#app-loading .app-loading-bubble:nth-child(3)  { left: 22%; width: 55px;  height: 55px;  animation-duration: 8s;  animation-delay: 1s;   }
+#app-loading .app-loading-bubble:nth-child(4)  { left: 33%; width: 30px;  height: 30px;  animation-duration: 14s; animation-delay: 4s;   }
+#app-loading .app-loading-bubble:nth-child(5)  { left: 45%; width: 16px;  height: 16px;  animation-duration: 10s; animation-delay: 0.5s; }
+#app-loading .app-loading-bubble:nth-child(6)  { left: 55%; width: 48px;  height: 48px;  animation-duration: 11s; animation-delay: 3s;   }
+#app-loading .app-loading-bubble:nth-child(7)  { left: 63%; width: 22px;  height: 22px;  animation-duration: 7s;  animation-delay: 1.5s; }
+#app-loading .app-loading-bubble:nth-child(8)  { left: 72%; width: 62px;  height: 62px;  animation-duration: 13s; animation-delay: 5s;   }
+#app-loading .app-loading-bubble:nth-child(9)  { left: 82%; width: 26px;  height: 26px;  animation-duration: 9s;  animation-delay: 2.5s; }
+#app-loading .app-loading-bubble:nth-child(10) { left: 90%; width: 18px;  height: 18px;  animation-duration: 11s; animation-delay: 0s;   }
+#app-loading .app-loading-bubble:nth-child(11) { left: 18%; width: 34px;  height: 34px;  animation-duration: 15s; animation-delay: 6s;   }
+#app-loading .app-loading-bubble:nth-child(12) { left: 50%; width: 44px;  height: 44px;  animation-duration: 10s; animation-delay: 3.5s; }
+
+@keyframes flyBubble {
+    0%   { transform: translateY(0)   scale(1);    opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.7; }
+    100% { transform: translateY(-110vh) scale(1.15); opacity: 0; }
+}
+
 .app-loading-card {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
     padding: 40px 52px;
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(18px) saturate(1.6);
+    -webkit-backdrop-filter: blur(18px) saturate(1.6);
     border-radius: 20px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+    position: relative;
+    z-index: 1;
 }
 
 .app-loading-logo {
@@ -490,7 +559,8 @@ h1:focus {
     align-items: center;
     justify-content: center;
     border-radius: 16px;
-    background: #f5f7ff;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     padding: 10px;
     animation: app-loading-pulse 2s ease-in-out infinite;
 }
@@ -512,7 +582,7 @@ h1:focus {
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background: #4f6ef7;
+        background: rgba(255, 255, 255, 0.85);
         animation: app-loading-bounce 1.2s ease-in-out infinite;
     }
 
@@ -530,7 +600,7 @@ h1:focus {
 
 .app-loading-text {
     font-size: 0.85rem;
-    color: #9aa3b8;
+    color: rgba(255, 255, 255, 0.75);
     letter-spacing: 0.04em;
     font-family: 'Khmer OS Siemreap', sans-serif;
     margin: 0;
@@ -605,4 +675,19 @@ h1:focus {
 @keyframes fadeSlideUp {
     from { opacity: 0; transform: translateY(24px); }
     to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    .up-card {
+        flex-direction: column;
+    }
+
+    .up-left {
+        width: 100%;
+        padding: 2rem 1rem 1.5rem;
+    }
+
+    .up-right {
+        padding: 1.5rem 1rem;
+    }
 }

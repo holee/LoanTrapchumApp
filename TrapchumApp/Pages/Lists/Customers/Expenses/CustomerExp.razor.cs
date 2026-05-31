@@ -35,7 +35,8 @@ namespace TrapchumApp.Pages.Lists.Customers.Expenses
 
             if (rsp.IsError)
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+                _toastService.ShowError(rsp.FirstError.Description, "Load Failed");
+
                 return;
             }
 
@@ -55,9 +56,9 @@ namespace TrapchumApp.Pages.Lists.Customers.Expenses
 
         async Task DeleteExpense(VCustomerExpenses c)
         {
-            var confirm = await DialogService.Confirm(ExpenseMessage.ConfirmDelete, "Delete");
-
-            if (confirm == false) return;
+            var confirm = await MsgBox.ConfirmAsync(ExpenseMessage.ConfirmDelete, "Delete");
+          
+            if (confirm == MsgBoxResult.No) return;
 
             var command = new DeleteExpenseCommand(c.ExpendId, CustomerId);
 
@@ -65,11 +66,12 @@ namespace TrapchumApp.Pages.Lists.Customers.Expenses
 
             if (rsp.IsError)
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+                _toastService.ShowError(rsp.FirstError.Description, "Delete Failed");
+
                 return;
             }
 
-            NotificationService.Notify(NotificationSeverity.Success, rsp.Value);
+            _toastService.ShowSuccess(rsp.Value, "Delete Success");
 
             await GetCustomerExpense(CustomerId);
 

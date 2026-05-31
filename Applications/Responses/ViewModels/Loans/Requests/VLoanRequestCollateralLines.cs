@@ -1,4 +1,5 @@
 ﻿using Domains.Models.Lists;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;
 
@@ -21,18 +22,7 @@ public sealed class VLoanRequestCollateralLines
     public string? TypeName { get; set; }
     public string? SubTypeName { get; set; }
     public bool? InUsed { get; set; } = true;
-
-    //public int? CategoryRefId { get; set; }
-    //public int? SubCategoryRefId { get; set; }
-    //public string? CollateralSubTypeName { get; set; }
-    //public bool IsAvailable { get; set; } = true;
-    //public bool? IsReturn { get; set; } = false;
-    //public DateTime? ReturnDate { get; set; }
-    //public DateTime? RegisterDate { get; set; }
-    //public string? WareHouse { get; set; }
-    //public string? Size { get; set; }
-    //public string? Description { get; set; }
-    //public bool IsUsed { get; set; } = false;
+    [NotMapped]public int RowIndex { get; set; } = 0;
 
 }
 

@@ -14,10 +14,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
     {
 
         private readonly ILoanScheduleServiceImpl _scheduleService;
+
         private readonly ILoanServiceImpl _loanService;
         public LateScheduleDetail(ILoanScheduleServiceImpl scheduleService, ILoanServiceImpl loanService)
         {
             _scheduleService = scheduleService;
+
             _loanService = loanService;
         }
 

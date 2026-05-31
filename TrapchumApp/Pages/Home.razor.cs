@@ -245,6 +245,10 @@ namespace TrapchumApp.Pages
             new DataItem { Quarter = "Q4", Revenue = 564000 }
         };
 
+        private string[] ChartLabels => revenue1.Select(d => d.Quarter ?? "").ToArray();
+        private double[] Chart1Values => revenue1.Select(d => d.Revenue).ToArray();
+        private double[] Chart2Values => revenue2.Select(d => d.Revenue).ToArray();
+
 
     }
 }

@@ -1,74 +1,180 @@
 ﻿@using Applications.Responses.ViewModels.Loans.Requests
-<RadzenFieldset>
-    <HeaderTemplate>
-        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
-            <RadzenIcon Icon="house" /><b>Collateral Information</b>
+
+<RadzenCard class="rz-border-radius-3 rz-shadow-3" Style="padding:0;overflow:hidden;background:var(--rz-base-200);">
+    <RadzenStack AlignItems="AlignItems.Center"
+                 Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.SpaceBetween"
+                 Style="padding:0.6rem 1rem;background:var(--rz-primary);color:#fff;">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+            <RadzenIcon Icon="home_work" Style="font-size:1.2rem;" />
+            <RadzenText TextStyle="TextStyle.Subtitle1"
+                        Style="margin:0;font-weight:600;color:#fff;">
+                Collateral Information
+            </RadzenText>
+            <RadzenBadge BadgeStyle="BadgeStyle.Light"
+                         Text="@($"{Collaterals.Count} item{(Collaterals.Count == 1 ? "" : "s")}")"
+                         Style="font-size:0.7rem;" />
         </RadzenStack>
-    </HeaderTemplate>
-    <ChildContent>
-        <RadzenRow Visible="@ShowCommand" AlignItems="AlignItems.Center">
-            <RadzenColumn Size="8">
-                @if (SearchBoxTemplate is not null)
-                {
-                    @SearchBoxTemplate
-                }
-            </RadzenColumn>
-            <RadzenColumn Size="4">
-                <RadzenStack Orientation="Orientation.Horizontal"
-                             JustifyContent="JustifyContent.End">
-                    <RadzenButton Text="Add New"
-                                  ButtonStyle="ButtonStyle.Primary"
-                                  Icon="add"
-                                  Click="@ClickedAdd"
-                                  Size="ButtonSize.Small"
-                                  Visible="@(ShowAdd && ShowCommand)"
-                                  ButtonType="ButtonType.Button"></RadzenButton>
-                </RadzenStack>
-            </RadzenColumn>
-        </RadzenRow>
-        <RadzenDataGrid GridLines="DataGridGridLines.Both"
-                        Responsive
-                        TItem="VLoanRequestCollateralLines"
-                        Density="Density.Compact"
-                        @ref="gridColaterals"
-                        Style="min-height:15rem;height:15rem;max-height:15rem;"
-                        Data="Collaterals">
-            <Columns>
-                <RadzenDataGridColumn Title="#"
-                                      TextAlign="TextAlign.Center"
-                                      Property="@(nameof(VLoanRequestCollateralLines.CollateralId))"
-                                      Width="3rem" Context="g">
-                    <Template>
-                        <input type="hidden" @bind="@g.CollateralId" />
-                        @(Collaterals.ToList().IndexOf(g) + 1)
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="ReferenceNo" Property="@(nameof(VLoanRequestCollateralLines.ReferenceNo))" Context="c" />
-                <RadzenDataGridColumn Title="Type" Property="@(nameof(VLoanRequestCollateralLines.TypeName))" Context="c" />
-                <RadzenDataGridColumn Title="Owner" Property="@(nameof(VLoanRequestCollateralLines.OwnerName))" Context="c" />
-                <RadzenDataGridColumn Title="Quantity" Property="@(nameof(VLoanRequestCollateralLines.Quantity))" Context="c" />
-                <RadzenDataGridColumn Title="MarketPrice" Property="@(nameof(VLoanRequestCollateralLines.MarketPrice))" Context="c" />
-                <RadzenDataGridColumn Title="PawnPrice" Property="@(nameof(VLoanRequestCollateralLines.PawnPrice))" Context="c" />
-                <RadzenDataGridColumn Title="HotPrice" Property="@(nameof(VLoanRequestCollateralLines.HotPrice))" Context="c" />
-                <RadzenDataGridColumn Context="g" TextAlign="TextAlign.Center"
-                                      Width="4rem" Property="@(nameof(VLoanRequestCollateralLines.Id))"
-                                      Visible="@ShowRemove"
-                                      Title="Action">
-                    <Template>
-                        <RadzenButton Icon="delete"
-                                      Visible="@ShowRemove"
-                                      Size="ButtonSize.ExtraSmall"
-                                      Click="()=>ClickedRemove(g)"
-                                      Variant="Variant.Text" />
-                    </Template>
-                </RadzenDataGridColumn>
-            </Columns>
-        </RadzenDataGrid>
-    </ChildContent>
-</RadzenFieldset>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.SpaceBetween"
+                     AlignItems="AlignItems.Center"
+                     Gap="0.5rem">
+
+            @if (ShowAdd && ShowCommand)
+            {
+                <RadzenButton Text="Add New"
+                              ButtonStyle="ButtonStyle.Light"
+                              Icon="add_circle_outline"
+                              Click="@ClickedAdd"
+                              Size="ButtonSize.Small"
+                              Variant="Variant.Outlined"
+                              ButtonType="ButtonType.Button"
+                              Style="font-weight:600;" />
+            }
+        </RadzenStack>
+    </RadzenStack>
+    <RadzenStack>
+        @if (ShowCommand && SearchBoxTemplate is not null)
+        {
+            <div style="min-width:12rem;">@SearchBoxTemplate</div>
+        }
+    </RadzenStack>
+    <RadzenDataGrid GridLines="DataGridGridLines.Horizontal"
+                    Responsive
+                    TItem="VLoanRequestCollateralLines"
+                    Density="Density.Compact"
+                    @ref="gridColaterals"
+                    AllowSorting="true"
+                    Style="min-height:15rem;height:15rem;max-height:15rem;border:none;"
+                    Data="Collaterals">
+        <Columns>
+
+            <RadzenDataGridColumn Title="#"
+                                  TextAlign="TextAlign.Center"
+                                  Property="@(nameof(VLoanRequestCollateralLines.CollateralId))"
+                                  Width="2.8rem"
+                                  Sortable="false"
+                                  Context="g">
+                <HeaderTemplate>
+                    <span style="color:var(--rz-text-secondary-color);font-size:0.72rem;">#</span>
+                </HeaderTemplate>
+                <Template>
+                    <input type="hidden" @bind="@g.CollateralId" />
+                    <RadzenBadge BadgeStyle="BadgeStyle.Light"
+                                 Text="@((Collaterals.ToList().IndexOf(g) + 1).ToString())"
+                                 Style="min-width:1.4rem;font-size:0.72rem;" />
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Title="Collateral"
+                                  Property="@(nameof(VLoanRequestCollateralLines.SubTypeName))"
+                                  Context="c">
+                <HeaderTemplate>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                        <RadzenIcon Icon="category"
+                                    Style="font-size:0.9rem;color:var(--rz-primary);" />
+                        <span>Collateral</span>
+                    </RadzenStack>
+                </HeaderTemplate>
+                <Template>
+                    <span style="font-weight:500;">@c.SubTypeName</span>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Title="Type"
+                                  Property="@(nameof(VLoanRequestCollateralLines.TypeName))"
+                                  Context="c">
+                <HeaderTemplate>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                        <RadzenIcon Icon="label" Style="font-size:0.9rem;color:var(--rz-primary);" />
+                        <span>Type</span>
+                    </RadzenStack>
+                </HeaderTemplate>
+                <Template>@c.TypeName</Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Title="Owner"
+                                  Property="@(nameof(VLoanRequestCollateralLines.OwnerName))"
+                                  Context="c">
+                <HeaderTemplate>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                        <RadzenIcon Icon="person" Style="font-size:0.9rem;color:var(--rz-primary);" />
+                        <span>Owner</span>
+                    </RadzenStack>
+                </HeaderTemplate>
+                <Template>@c.OwnerName</Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Title="Qty"
+                                  Width="4rem"
+                                  TextAlign="TextAlign.Center"
+                                  Property="@(nameof(VLoanRequestCollateralLines.Quantity))"
+                                  Context="c">
+                <Template>
+                    <RadzenBadge BadgeStyle="BadgeStyle.Info"
+                                 Text="@c.Quantity.ToString()"
+                                 Style="font-size:0.72rem;" />
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="📈 Market Price"
+                                  Property="@(nameof(VLoanRequestCollateralLines.MarketPrice))"
+                                  Context="c">
+                <Template>
+                    <span style="font-variant-numeric:tabular-nums;">@($"{c.MarketPrice:N2}")</span>
+                </Template>
+                <FooterTemplate>
+                    <strong style="font-variant-numeric:tabular-nums;color:var(--rz-success);">@($"{Collaterals.Sum(x => x.MarketPrice):N2}")</strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="🔥 Hot Price"
+                                  Property="@(nameof(VLoanRequestCollateralLines.HotPrice))"
+                                  Context="c">
+                <Template>
+                    <span style="font-variant-numeric:tabular-nums;">@($"{c.HotPrice:N2}")</span>
+                </Template>
+                <FooterTemplate>
+                    <strong style="font-variant-numeric:tabular-nums;color:var(--rz-danger);">@($"{Collaterals.Sum(x => x.HotPrice):N2}")</strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="🔨 Pawn Price"
+                                  Property="@(nameof(VLoanRequestCollateralLines.PawnPrice))"
+                                  Context="c">
+                <Template>
+                    <span style="font-variant-numeric:tabular-nums;">@($"{c.PawnPrice:N2}")</span>
+                </Template>
+                <FooterTemplate>
+                    <strong style="font-variant-numeric:tabular-nums;color:var(--rz-warning);">@($"{Collaterals.Sum(x => x.PawnPrice):N2}")</strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Context="g"
+                                  TextAlign="TextAlign.Center"
+                                  Width="3.5rem"
+                                  Sortable="false"
+                                  Property="@(nameof(VLoanRequestCollateralLines.Id))"
+                                  Visible="@ShowRemove"
+                                  Title="">
+                <Template>
+                    <RadzenButton Icon="delete_outline"
+                                  ButtonStyle="ButtonStyle.Danger"
+                                  Variant="Variant.Text"
+                                  Size="ButtonSize.ExtraSmall"
+                                  Click="() => ClickedRemove(g)"
+                                  title="Remove" />
+                </Template>
+            </RadzenDataGridColumn>
+
+        </Columns>
+    </RadzenDataGrid>
+
+</RadzenCard>
+
 @code {
     [Parameter] public RenderFragment? SearchBoxTemplate { get; set; }
-
 }
 
 

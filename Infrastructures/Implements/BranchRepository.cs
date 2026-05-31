@@ -264,30 +264,6 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
                             .ToListAsync(cancellation);
 
         return branches;
-
-        //if (branches is null || !branches.Any())
-        //{
-        //    return Error.NotFound("No User found in the branch.");
-        //}
-
-        //if (string.IsNullOrEmpty(user.First().EmployeeRefId))
-        //{
-        //    return Error.NotFound("No User found in the branch.");
-        //}
-
-        //var queries = context.VBranchs.Where(x => x.BranchId == user.BranchId);
-
-        //if (branchId > 0)
-        //{
-        //    queries = queries.Where(x => x.BranchId == branchId);
-        //}
-
-        //var items = await queries
-        //                    .AsNoTracking()
-        //                    .ToListAsync(cancellation);
-
-
-
     }
 
     public async Task<ErrorOr<VBranch>> GetBranchByUser(string? userId, CancellationToken cancellation = default)
@@ -301,7 +277,8 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
                             .Select(b => new VBranch
                             {
                                 BranchId = b.BranchId,
-                                BranchName = b.BranchName
+                                BranchName = b.BranchName,
+                                IsHeadOffice = b.IsHeadOffice,
                             })
                             .FirstOrDefaultAsync(cancellation);
 

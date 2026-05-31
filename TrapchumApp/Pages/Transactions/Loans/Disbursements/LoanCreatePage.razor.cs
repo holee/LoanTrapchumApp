@@ -21,19 +21,29 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
     private const int FixedTabCount = 3;
 
     private int selectedTabIndex;
+
     private bool IsLoading;
+
     private bool disburseStatus;
+
     private int RequestStatusId;
+
     private string memo = string.Empty;
+
     private string? _userId = string.Empty;
+
     private decimal penaltyRate;
+
     private IEnumerable<HolidayDto> holidays = [];
+
     private List<CustomTab> _tabs = [];
 
     protected LoanDtoCreate model = new();
+
     protected EditForm editForm = default!;
 
     private VLoanRequests req = new();
+
     private VCustomerDetails _customer = new();
 
     [Parameter] public int BranchId { get; set; }
@@ -137,16 +147,6 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
         model.LoanProductRefId = (int)ProductTypeOption.Mortgage;
     }
 
-    private void ShowLoanPreviews()
-    {
-        if (model.Principle == 0) return;
-
-        PrepareModelDefaults();
-
-        var schedules = model.CreateSchedules().MapToLoanSchedules();
-        ShowPreviewTab(schedules, model.CurrencyRefId);
-    }
-
     private async Task<bool> ConfirmActionAsync(string message)
     {
         var confirmed = await DialogService.Confirm(message, "Confirm");
@@ -155,9 +155,14 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
     private async Task HandleFormSubmit()
     {
-        if (!await ConfirmActionAsync("Do you want to disburse this loan request?"))
+
+        var confirmed = await MsgBox.ConfirmAsync("Do you want to disburse this loan request?", "Confirm");
+
+
+        if (confirmed == MsgBoxResult.No)
         {
-            NotificationService.Notify(NotificationSeverity.Info, "Loan disburse was cancelled.");
+            _toastService.ShowError("Loan disburse was cancelled.");
+
             return;
         }
 
@@ -169,7 +174,7 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
         try
         {
-            editForm.EditContext!.Validate();
+            editForm.EditContext?.Validate();
 
             model.LoanId = $"dis-{Guid.CreateVersion7()}";
 

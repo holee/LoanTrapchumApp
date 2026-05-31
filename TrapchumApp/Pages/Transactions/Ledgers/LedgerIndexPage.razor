@@ -1,0 +1,185 @@
+﻿@page "/App/Account/Ledgers/{BranchId:int}/Branches"
+@using Applications.Responses.ViewModels.Ledgers
+@using TrapchumApp.Components.Indicatros
+<PageTitle>Chart of Accounts</PageTitle>
+@attribute [StreamRendering]
+@attribute [Authorize]
+@if (isLoading)
+{
+    <Loading Text="Loading ledgers..." />
+}
+else
+{
+    <div class="ledger-page">
+        <div class="ledger-card">
+            <div class="ledger-header">
+                <div class="ledger-header-left">
+                    <span class="ledger-header-icon"><RadzenIcon Icon="account_tree" /></span>
+                    <div>
+                        <h3 class="ledger-title">Chart of Accounts</h3>
+                        <span class="ledger-subtitle">Manage your general ledger structure</span>
+                    </div>
+                </div>
+                <RadzenButton Click="DisplayModal"
+                              ButtonStyle="ButtonStyle.Success"
+                              Shade="Shade.Default"
+                              Icon="add"
+                              Text="New Account"
+                              Size="ButtonSize.Small"
+                              class="ledger-add-btn" />
+            </div>
+
+            <div class="ledger-divider"></div>
+            <div class="rz-px-2">
+                <GridToolbar SearchChanged="OnFilters" ShowSearchBox="true">
+                    <LeftChildren>
+
+                        <RadzenDropDown TValue="int"
+                                        Data="StorageConstant.Currencies"
+                                        TextProperty="@nameof(Items.Label)"
+                                        ValueProperty="@nameof(Items.Value)"
+                                        @bind-Value="currencyId"
+                                        Placeholder="All currencies"
+                                        Style="min-width: 170px;"
+                                        @bind-Value:after="SelectedCurrencyChanged" />
+                        <div class="toolbar-toggle">
+                            <RadzenCheckBox TValue="bool"
+                                            Name="IncludeInactive"
+                                            @bind-Value:after="OnIncludeInActive"
+                                            @bind-Value="includeInactive" />
+                            <RadzenLabel Text="Include inactive"
+                                         Component="IncludeInactive"
+                                         class="rz-ms-1 toolbar-toggle-label" />
+                        </div>
+
+                    </LeftChildren>
+                </GridToolbar>
+            </div>
+            <RadzenDataGrid Data="Ledgers"
+                            Density="Density.Compact"
+                            AllowAlternatingRows="false"
+                            AllowPaging="true"
+                            ShowPagingSummary="true"
+                            Count="@counts"
+                            PageSize="pageSize"
+                            LoadData="@LoadData"
+                            AllowSorting="true"
+                            AllowMultiColumnSorting="false"
+                            PagerHorizontalAlign="HorizontalAlign.Right"
+                            PageSizeOptions="@StorageConstant.PageSizeOptions"
+                            PageSizeChanged="ChangedPageSize"
+                            GridLines="DataGridGridLines.Horizontal"
+                            Style="min-height:var(--min-height);height:var(--normal-height);max-height:var(--max-height);"
+                            class="ledger-grid">
+                <Columns>
+                    <RadzenDataGridColumn Property="LedgerCode"
+                                          Title="Code"
+                                          Width="7rem"
+                                          Sortable="true" />
+                    <RadzenDataGridColumn Property="LedgerName"
+                                          Title="Account Name"
+                                          Context="g"
+                                          Sortable="true">
+                        <Template>
+                            @if (g.ParentRefId > 0)
+                            {
+                                <span class="ledger-child-indent">
+                                    <span class="ledger-child-dot"></span>
+                                    @g.LedgerName
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="ledger-parent-name">@g.LedgerName</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="LedgerTypeCode"
+                                          Title="Type"
+                                          Width="10rem"
+                                          Sortable="true">
+                        <Template Context="r">
+                            <span class="ledger-type-badge">@r.LedgerTypeCode</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="CurrencyCode"
+                                          Width="9rem"
+                                          Title="Currency"
+                                          Sortable="true">
+                        <Template Context="r">
+                            <span class="ledger-currency-chip">@r.CurrencyCode</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Main"
+                                          Width="5rem"
+                                          TextAlign="TextAlign.Center"
+                                          Sortable="false"
+                                          Context="emp">
+                        <Template>
+                            @if (emp.IsMainGl == true)
+                            {
+                                <span class="ledger-main-badge">Main</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="c"
+                                          Title="Active"
+                                          Width="6rem"
+                                          TextAlign="TextAlign.Center"
+                                          Sortable="false">
+                        <Template>
+                            <span class="@(c.IsActive == true ? "ledger-status-badge active" : "ledger-status-badge inactive")"
+                                  @onclick="@(async () => { c.IsActive = !(c.IsActive ?? false); await OnCheckChanged(c.IsActive, c.LedgerId); })">
+                                @(c.IsActive == true ? "Active" : "Inactive")
+                            </span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Width="5rem"
+                                          Title=""
+                                          TextAlign="TextAlign.Center"
+                                          Context="c"
+                                          Sortable="false">
+                        <Template>
+                            <div class="row-actions">
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
+                                              Icon="more_vert"
+                                              Variant="Variant.Text"
+                                              ButtonStyle="ButtonStyle.Base"
+                                              Click="@(args => ShowContextMenu(args, c))" />
+                            </div>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+
+        </div>
+    </div>
+}
+
+@code {
+
+    async Task ChangedPageSize(int page)
+    {
+        pageSize = page;
+        pageIndex = 0;
+        await LoadLedgerPageList(searchField);
+    }
+
+    void ShowContextMenu(MouseEventArgs args, VLedger ledger)
+    {
+        ContextMenuService.Open(args, ds =>
+            @<RadzenMenu Style="font-size:0.8rem;">
+                <RadzenMenuItem Icon="info"
+                                Click="@(() => LedgerDetails(ledger.LedgerId))"
+                                Text="Details" />
+                <RadzenMenuItem Icon="edit"
+                                Click="@(() => Edit(ledger.LedgerId))"
+                                Text="Edit" />
+                <RadzenMenuItem Icon="delete"
+                                Click="@(() => OnDelete(ledger.LedgerId))"
+                                Text="Delete" />
+            </RadzenMenu>
+        );
+    }
+
+}

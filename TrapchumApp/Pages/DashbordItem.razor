@@ -1,20 +1,26 @@
 @using TrapchumApp.Helpers.Enums
 <div class="stat-card @ColorCss">
-    <div class="stat-icon">
-        <RadzenIcon Icon="@Icon" />
-    </div>
-    <div class="stat-body">
-        <div class="stat-label">@Title</div>
-        <div class="stat-value">
-            @if (ValueTemplete is not null)
+    <div class="stat-top">
+        <div class="stat-body">
+            <div class="stat-label">@Title</div>
+            <div class="stat-value">
+                @if (ValueTemplete is not null)
+                {
+                    @ValueTemplete
+                }
+            </div>
+            @if (!string.IsNullOrEmpty(Subtitle))
             {
-                @ValueTemplete
+                <div class="stat-subtitle">@Subtitle</div>
             }
         </div>
-        @if (!string.IsNullOrEmpty(Subtitle))
-        {
-            <div class="stat-subtitle">@Subtitle</div>
-        }
+        <div class="stat-icon">
+            <RadzenIcon Icon="@Icon" />
+        </div>
+    </div>
+    <div class="stat-footer">
+        <span class="stat-trend-dot"></span>
+        <span class="stat-trend-text">Updated just now</span>
     </div>
 </div>
 

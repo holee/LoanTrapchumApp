@@ -9,6 +9,7 @@ using Domains.Models.Identity;
 using Microsoft.JSInterop;
 using Applications.Commons.Mappers;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
+using Applications.Exceptions;
 namespace TrapchumApp.Pages.Transactions.RecievePayements;
 
 public partial class RecievePaymentSidebar
@@ -61,23 +62,14 @@ public partial class RecievePaymentSidebar
 
             LoanPaymentCreate.LoanPaymentLines.Add(schedule);
 
+            LoanPaymentCreate.BranchRefId = schedule.BranchRefId;
+
             OriginalLoanCopy();
 
             DoCopyLoanPayment();
         }
 
 
-    }
-
-
-
-    protected override void OnInitialized()
-    {
-        //OriginalLoanCopy();
-
-        //DoCopyLoanPayment();
-
-        base.OnInitialized();
     }
 
     private void OriginalLoanCopy()
@@ -174,7 +166,7 @@ public partial class RecievePaymentSidebar
 
             if (LoanRepayment.RecieveAmount <= 0)
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Please provide payment amount.");
+                _toastService.ShowError("Please provide payment amount.");
 
                 isBusy = false;
 
@@ -208,44 +200,54 @@ public partial class RecievePaymentSidebar
 
             tran.LoanPayment = LoanRepayment;
 
-            string message = $"Receive money from {LoanRepayment.CustomerName} with amount {LoanRepayment.AmountWithPenalty}";
-
-            var confirmPayment = await DialogService.Confirm(message, "Payment", confirmOption);
-
-            if (confirmPayment == false) return;
-
-            var confirm = await DialogService.OpenAsync<ConfirmDialogue>("Confirm Payment", new Dictionary<string, object>
+            var confirm = await DialogService.OpenAsync<ConfirmDialogue>("Confirm Payment", new Dictionary<string, object?>
             {
                 { "CustomerName",  LoanRepayment.CustomerName!},
                 { "Amount", LoanRepayment.AmountWithPenalty! },
                 { "CurrencyId", CurrencyId }
             }, new DialogOptions
             {
-                Left = "10%",
                 CloseDialogOnOverlayClick = false,
+                Left = "15%",
                 CloseDialogOnEsc = true,
             });
 
-            var command = new RecievePaymentCommand(tran);
 
-            var result = await mediator.Send(command);//_loanPaymentService.RecievePayment(tran, LoanRepayment.BranchRefId);
+            if(confirm is bool && confirm == false)
+            {
+                isBusy = false;
 
+                return;
+            }
+
+            var command = new RecievePaymentCommand(tran); 
+
+            var result = await mediator.Send(command);
+  
             if (result.IsSuccess())
             {
-                DialogService.Close(true);
+                //DialogService.Close(true);
+
+                DialogService.CloseSide(true);
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, result.GetMessage());
+                _toastService.ShowError(result.GetMessage()); 
             }
 
             isBusy = false;
+        }
+        catch(MediatorException ex)
+        {
+            isBusy = false;
+
+            _toastService.ShowError(ex.GetErrorMessage()); 
         }
         catch (Exception ex)
         {
             isBusy = false;
 
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+            _toastService.ShowError(ex.Message);
         }
     }
 
@@ -296,7 +298,7 @@ public partial class RecievePaymentSidebar
         {
             amount = OriginalLoanPayment.PenaltyAmount;
 
-            NotificationService.Notify(NotificationSeverity.Error, "Amount must be less than penalty amount.");
+            _toastService.ShowError("Amount must be less than penalty amount.");
 
             RestoreDefault();
         }
@@ -314,10 +316,6 @@ public partial class RecievePaymentSidebar
         DoCopyLoanPayment();
 
     }
-    private async Task CalculateExhanged(MouseEventArgs args)
-    {
-        await js.InvokeVoidAsync("alert");
-        Console.WriteLine("dsdsdsdsdsd");
-    }
+  
 }
 

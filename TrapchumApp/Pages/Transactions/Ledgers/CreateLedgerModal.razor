@@ -1,184 +1,212 @@
-﻿<EditForm Model="model" @ref="editForm">
-    <FluentValidationValidator DisableAssemblyScanning="true"/>
-    <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-2">
-        <RadzenColumn Size="12">
-            <RadzenFormField Text="Ledger Type" AllowFloatingLabel="true" class="@Styles.W100">
-                <ChildContent>
-                    <RadzenDropDownDataGrid Data="LedgerTypes"
-                                            AllowColumnResize="true"
-                                            @bind-Value="model.LedgerTypeRefId"
-                                            TextProperty="LedgerTypeCode"
-                                            ValueProperty="LedgerTypeId"
-                                            Density="Density.Compact"
-                                            class="w-100"
-                                            ShowSearch="false"
-                                            PageSize="10"
-                                            ShowPagingSummary="true"
-                                            Placeholder="Ledger Type">
-                        <Columns>
-                            <RadzenDropDownDataGridColumn Property="LedgerTypeCode"
-                                                          Title="LedgerType"
-                                                          Sortable="false"
-                                                          Width="200px"/>
-                        </Columns>
-                    </RadzenDropDownDataGrid>
+﻿<RadzenCard>
+    <EditForm Model="model" @ref="editForm">
+        <FluentValidator />
 
-                </ChildContent>
-                <Helper>
-                    <ValidationMessage For="@(() => model.LedgerTypeRefId)"/>
-                </Helper>
-            </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
-        <RadzenColumn Size="12">
-            <RadzenFormField Text="Number #" AllowFloatingLabel="true" class="@Styles.W100">
-                <ChildContent>
-                    <RadzenTextBox @bind-Value="model.LedgerCode"
-                                   class="@Styles.W100"
-                                   Placeholder="Reference Number..."/>
-                </ChildContent>
-                <Helper>
-                    <ValidationMessage For="@(() => model.LedgerCode)"/>
-                </Helper>
-            </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-mb-3">
+            <RadzenIcon Icon="category" Style="color: var(--rz-primary); font-size:1.1rem;" />
+            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:600; letter-spacing:.03em; text-transform:uppercase; color: var(--rz-text-tertiary-color);">Classification</RadzenText>
+        </RadzenStack>
 
-    <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-2">
-        @if (model.LedgerTypeRefId == 1)
-        {
-            <RadzenColumn Size="9">
-                <RadzenFormField Text="Bank #" AllowFloatingLabel="true" class="@Styles.W100">
+        <RadzenRow AlignItems="AlignItems.Start" Gap="1rem">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenFormField Text="Ledger Type" AllowFloatingLabel="true" class="@Styles.W100">
                     <ChildContent>
-                        <RadzenTextBox class="w-100" @bind-Value="model.BankNumber" Name="BankNumber" />
+                        <RadzenDropDownDataGrid Data="LedgerTypes"
+                                                AllowColumnResize="true"
+                                                @bind-Value="model.LedgerTypeRefId"
+                                                TextProperty="LedgerTypeCode"
+                                                ValueProperty="LedgerTypeId"
+                                                Density="Density.Compact"
+                                                class="w-100"
+                                                ShowSearch="false"
+                                                PageSize="10"
+                                                ShowPagingSummary="true"
+                                                Placeholder="Select a ledger type">
+                            <Columns>
+                                <RadzenDropDownDataGridColumn Property="LedgerTypeCode"
+                                                              Title="Type"
+                                                              Sortable="false"
+                                                              Width="200px" />
+                            </Columns>
+                        </RadzenDropDownDataGrid>
                     </ChildContent>
                     <Helper>
-                        <ValidationMessage For="() => model.BankNumber"/>
+                        <ValidationMessage For="@(() => model.LedgerTypeRefId)" />
                     </Helper>
                 </RadzenFormField>
             </RadzenColumn>
-            <RadzenColumn Size="3">
-                <RadzenFormField Text="Currency">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenFormField Text="Reference Number" AllowFloatingLabel="true" class="@Styles.W100">
                     <ChildContent>
-                        <RadzenDropDown @bind-Value="model.CurrencyRefId"
-                                        @bind-Value:after="SelectedValueChanged"
-                                        TextProperty="CurrencyCode"
-                                        class="w-100"
-                                        ValueProperty="CurrencyId"
-                                        Data="Currencies">
-                        </RadzenDropDown>
+                        <RadzenTextBox @bind-Value="model.LedgerCode"
+                                       class="@Styles.W100"
+                                       Placeholder="e.g. GL-0001" />
                     </ChildContent>
                     <Helper>
-                        <ValidationMessage For="@(() => model.CurrencyRefId)"/>
+                        <ValidationMessage For="@(() => model.LedgerCode)" />
                     </Helper>
                 </RadzenFormField>
             </RadzenColumn>
-        }
-        else
-        {
-            <RadzenColumn Size="12">
-                <RadzenFormField Text="Currency" AllowFloatingLabel="true" class="@Styles.W100">
-                    <ChildContent>
-                        <RadzenDropDown @bind-Value="model.CurrencyRefId"
-                                        TextProperty="CurrencyCode"
-                                        ValueProperty="CurrencyId"
-                                        class="w-75"
-                                        SelectedItemChanged="SelectedCurrencyChanged"
-                                        Data="Currencies">
-                        </RadzenDropDown>
-                    </ChildContent>
-                    <Helper>
-                        <ValidationMessage For="@(() => model.CurrencyRefId)"/>
-                    </Helper>
-                </RadzenFormField>
-            </RadzenColumn>
-        }
-    </RadzenRow>
+        </RadzenRow>
 
-    <RadzenRow AlignItems="AlignItems.Start" RowGap="0" class="rz-mb-2">
-        <RadzenColumn Size="12">
-            <RadzenFormField Text="Ledger Name" AllowFloatingLabel="true" class="@Styles.W100">
-                <ChildContent>
-                    <RadzenTextBox @bind-Value="model.LedgerName"
-                                   class="form-control"
-                                   Placeholder="Ledger Name"/>
-                </ChildContent>
-                <End>
-                    <div class="rz-text-center rz-background-color-base-100 rz-p-1 rz-m-0">
-                        <RadzenCheckBox @bind-Value="model.IsMainGl"
-                                        Change="SelectCheckedChanged"
-                                        TValue="bool"/>
-                        Is Main GL
-                    </div>
-                </End>
-                <Helper>
-                    <ValidationMessage For="@(() => model.LedgerName)"/>
-                </Helper>
-            </RadzenFormField>
-        </RadzenColumn>
-        <RadzenColumn Size="12"  Visible="!model.IsMainGl" class="rz-mt-2">
-            <RadzenFormField Text="Ledger Name" class="@Styles.W100" AllowFloatingLabel="true">
-                <Start>
-                    <div class="rz-text-center rz-background-color-base-100 rz-p-1 rz-m-0">
-                        <RadzenCheckBox TValue="bool"
-                                        Change="SubTypeChanged"
-                                        @bind-Value="model.IsSubTypeOf"/>
-                        Sub Type Of
-                    </div>
-                </Start>
-                <ChildContent>
-                    <RadzenDropDownDataGrid Data="FilterLedgers"
-                                            AllowColumnResize="true"
-                                            @bind-Value="model.ParentRefId"
-                                            TextProperty="LedgerName"
-                                            ValueProperty="LedgerId"
-                                            Disabled="!model.IsSubTypeOf"
-                                            Density="Density.Compact"
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     Gap="0.5rem" class="rz-my-2">
+            <RadzenIcon Icon="account_balance" Style="color: var(--rz-primary); font-size:1.1rem;" />
+            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:600; letter-spacing:.03em; text-transform:uppercase; color: var(--rz-text-tertiary-color);">Banking &amp; Currency</RadzenText>
+        </RadzenStack>
+
+        <RadzenRow AlignItems="AlignItems.Start" Gap="1rem">
+            @if (model.LedgerTypeRefId == 1)
+            {
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenFormField Text="Bank Account Number" AllowFloatingLabel="true" class="@Styles.W100">
+                        <ChildContent>
+                            <RadzenTextBox class="@Styles.W100" @bind-Value="model.BankNumber" Name="BankNumber" Placeholder="Enter bank account number" />
+                        </ChildContent>
+                        <Helper>
+                            <ValidationMessage For="() => model.BankNumber" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenFormField Text="Currency" AllowFloatingLabel="true" class="@Styles.W100">
+                        <ChildContent>
+                            <RadzenDropDown @bind-Value="model.CurrencyRefId"
+                                            @bind-Value:after="SelectedValueChanged"
+                                            TextProperty="CurrencyCode"
                                             class="@Styles.W100"
-                                            ShowSearch="false"
-                                            PageSize="10"
-                                            LoadData="LoadDataTextChanged"
-                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                            >
-                        <Columns>
-                            <RadzenDropDownDataGridColumn Property="LedgerName"
-                                                          Sortable="false"
-                                                          Title="Ledger Name"/>
-                            <RadzenDropDownDataGridColumn Property="LedgerTypeCode"
-                                                          Sortable="false"
-                                                          Title="LedgerType"
-                                                          Width="200px"/>
-                        </Columns>
-                    </RadzenDropDownDataGrid>
-                </ChildContent>
-                <Helper>
-                    <ValidationMessage For="@(() => model.IsSubTypeOf)"/>
-                    <ValidationMessage For="@(() => model.ParentRefId)"/>
-                </Helper>
-            </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow AlignItems="AlignItems.Center" RowGap="1rem" class="rz-mb-2">
-        <RadzenColumn Size="12">
-            <TTextArea Label="Description" @bind-Text="model.Description" IsFloatLabel="true" />
-        </RadzenColumn>
-    </RadzenRow>
+                                            ValueProperty="CurrencyId"
+                                            Data="Currencies" />
+                        </ChildContent>
+                        <Helper>
+                            <ValidationMessage For="@(() => model.CurrencyRefId)" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+            }
+            else
+            {
+                <RadzenColumn Size="12">
+                    <RadzenFormField Text="Currency" AllowFloatingLabel="true" class="@Styles.W100">
+                        <ChildContent>
+                            <RadzenDropDown @bind-Value="model.CurrencyRefId"
+                                            TextProperty="CurrencyCode"
+                                            ValueProperty="CurrencyId"
+                                            class="@Styles.W100"
+                                            SelectedItemChanged="SelectedCurrencyChanged"
+                                            Data="Currencies" />
+                        </ChildContent>
+                        <Helper>
+                            <ValidationMessage For="@(() => model.CurrencyRefId)" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+            }
+        </RadzenRow>
+      
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-my-2">
+            <RadzenIcon Icon="account_tree" Style="color: var(--rz-primary); font-size:1.1rem;" />
+            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:600; letter-spacing:.03em; text-transform:uppercase; color: var(--rz-text-tertiary-color);">Identity &amp; Hierarchy</RadzenText>
+        </RadzenStack>
 
-</EditForm>
-<RadzenStack Orientation="Orientation.Horizontal"
-             AlignItems="AlignItems.Center"
-             Gap="1rem"
-             class="rz-mt-2"
-             JustifyContent="JustifyContent.End">
-    <RadzenButton ButtonStyle="ButtonStyle.Success"
-                  Click="FormValidSubmit"
-                  Text="Save"
-                  Icon="save"
-                  Size="ButtonSize.Small"/>
-    <RadzenButton ButtonStyle="ButtonStyle.Danger"
-                  Icon="cancel"
-                  Text="Cancel"
-                  Click="@(() => Close())" Size="ButtonSize.Small"/>
-</RadzenStack>
+        <RadzenRow AlignItems="AlignItems.Start" Gap="0.75rem">
+            <RadzenColumn Size="12">
+                <RadzenFormField Text="Ledger Name" AllowFloatingLabel="true" class="@Styles.W100">
+                    <ChildContent>
+                        <RadzenTextBox @bind-Value="model.LedgerName"
+                                       class="@Styles.W100"
+                                       Placeholder="Enter ledger name" />
+                    </ChildContent>
+                    <End>
+                        <RadzenStack Orientation="Orientation.Horizontal"
+                                     AlignItems="AlignItems.Center"
+                                     Gap="0.35rem"
+                                     class="rz-px-2 rz-py-1"
+                                     style="background:var(--rz-base-100); border-left:1px solid var(--rz-border-disabled-color);">
+                            <RadzenCheckBox @bind-Value="model.IsMainGl"
+                                            Change="SelectCheckedChanged"
+                                            TValue="bool" />
+                            <RadzenText TextStyle="TextStyle.Caption" class="rz-m-0" style="white-space:nowrap; font-weight:500;">Main GL</RadzenText>
+                        </RadzenStack>
+                    </End>
+                    <Helper>
+                        <ValidationMessage For="@(() => model.LedgerName)" />
+                    </Helper>
+                </RadzenFormField>
+            </RadzenColumn>
 
+            <RadzenColumn Size="12" Visible="!model.IsMainGl">
+                <RadzenFormField Text="Parent Ledger" AllowFloatingLabel="true" class="@Styles.W100">
+                    <Start>
+                        <RadzenStack Orientation="Orientation.Horizontal"
+                                     AlignItems="AlignItems.Center"
+                                     Gap="0.35rem"
+                                     class="rz-px-2 rz-py-1"
+                                     style="background:var(--rz-base-100); border-right:1px solid var(--rz-border-disabled-color);">
+                            <RadzenCheckBox TValue="bool"
+                                            Change="SubTypeChanged"
+                                            @bind-Value="model.IsSubTypeOf" />
+                            <RadzenText TextStyle="TextStyle.Caption" class="rz-m-0" style="white-space:nowrap; font-weight:500;">Sub Type Of</RadzenText>
+                        </RadzenStack>
+                    </Start>
+                    <ChildContent>
+                        <RadzenDropDownDataGrid Data="FilterLedgers"
+                                                AllowColumnResize="true"
+                                                @bind-Value="model.ParentRefId"
+                                                TextProperty="LedgerName"
+                                                ValueProperty="LedgerId"
+                                                Disabled="!model.IsSubTypeOf"
+                                                Density="Density.Compact"
+                                                class="@Styles.W100"
+                                                ShowSearch="false"
+                                                PageSize="10"
+                                                LoadData="LoadDataTextChanged"
+                                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                Placeholder="Select parent ledger">
+                            <Columns>
+                                <RadzenDropDownDataGridColumn Property="LedgerName"
+                                                              Sortable="false"
+                                                              Title="Ledger Name" />
+                                <RadzenDropDownDataGridColumn Property="LedgerTypeCode"
+                                                              Sortable="false"
+                                                              Title="Type"
+                                                              Width="120px" />
+                            </Columns>
+                        </RadzenDropDownDataGrid>
+                    </ChildContent>
+                    <Helper>
+                        <ValidationMessage For="@(() => model.IsSubTypeOf)" />
+                        <ValidationMessage For="@(() => model.ParentRefId)" />
+                    </Helper>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-my-2">
+            <RadzenIcon Icon="notes" Style="color: var(--rz-primary); font-size:1.1rem;" />
+            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:600; letter-spacing:.03em; text-transform:uppercase; color: var(--rz-text-tertiary-color);">Notes</RadzenText>
+        </RadzenStack>
+       
+        <TTextArea Label="Description" @bind-Text="model.Description" IsFloatLabel="true" />
+    </EditForm>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 Gap="0.75rem"
+                 class="rz-mt-4"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel"
+                      Text="Cancel"
+                      Click="@(() => Close())"
+                      Size="ButtonSize.Small"
+                      Variant="Variant.Filled" />
+        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                      Click="FormValidSubmit"
+                      Text="Save Ledger"
+                      Icon="save"
+                      Size="ButtonSize.Small"
+                      Variant="Variant.Filled" />
+    </RadzenStack>
+
+</RadzenCard>

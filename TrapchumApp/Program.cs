@@ -1,8 +1,6 @@
 using Applications;
 using Applications.Commons.Authorizations;
-using Applications.Validations;
 using Domains.Models.Identity;
-using Domains.Models.Loans;
 using Infrastructures;
 using Infrastructures.DependencyInjects;
 using Mapster;
@@ -37,7 +35,6 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddPolicyServices();
 builder.Services.AddApplicationServices();
 builder.Services.AddOtherServices();
-builder.Services.AddValidationServiceInjections();
 builder.Services.AddValidationServices();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddMapster();
@@ -47,6 +44,10 @@ builder.Services.AddScoped<IAuthorizationHandler, SameUserRequestAuthorizationHa
 builder.Services.AddScoped<IAuthorizationHandler, SameUserApprovedAuthorizationHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, IsCanApprovedNormalAmountHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, IsCanApprovedMaximumAmountHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, CanApprovedRequestHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, CanDisburseRequestHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, CanRequestHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, CanReceivePaymentHandler>();
 builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
 builder.Services.AddScoped<NotificationServices>();
 builder.Services.AddScoped<NotificationHubService>();
@@ -60,11 +61,14 @@ builder.Services.AddToastService(options =>
     options.PreventDuplicates = false;
 });
 builder.Services.AddSignalR();
-builder.Services.AddScoped<TrapchumApp.Components.Messageboxes.MessageBoxService>();
+builder.Services.AddScoped<MessageBoxService>();
 builder.Services.AddScoped<SwalService>();
 builder.Services.AddScoped<TrapchumApp.Components.Modals.Dialoques.ModalService>();
 builder.Services.AddSingleton<IAppNotificationService, AppNotificationService>();
-
+builder.Services.AddSingleton<IProfilePhotoService, ProfilePhotoService>();
+builder.Services.AddSingleton<UserServices>();
+builder.Services.AddSingleton<BranchService>();
+builder.Services.AddSingleton<CurrencyServices>();
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 104857600; // 100 MB
@@ -101,8 +105,7 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 app.UseStaticFiles();
 app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.MapControllers();
 
@@ -123,3 +126,6 @@ app.Run();
 //// or for large amounts:
 //var result = await AuthorizationService.AuthorizeAsync(
 //    user, loanRequest, new IsCanApprovedMaximumAmountRequirement());
+
+//var resource = (loanRequest, userLoanSize);
+//await _authService.AuthorizeAsync(user, resource, new CanApprovedRequestRequirement());

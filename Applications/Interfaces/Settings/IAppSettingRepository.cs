@@ -21,4 +21,5 @@ public interface IAppSettingRepository
 
     // CollateralSubType
     Task<Pager<CollateralSubTypeDto>> GetCollateralSubTypesAsync(QueryParam param, CancellationToken cancellation = default);
+    Task<ErrorOr<VUserLoanSizes>> GetUserLoanSizeByUserAsync(string? userId, CancellationToken cancellation = default);
 }

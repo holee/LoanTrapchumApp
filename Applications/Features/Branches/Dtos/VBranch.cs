@@ -28,6 +28,7 @@ public sealed class VBranch
     public int? ProvinceRefId { get; set; }
     public int? DistrictRefId { get; set; }
     public int? CommuneRefId { get; set; }
-     public int? VillageRefId { get; set; }
+    public int? VillageRefId { get; set; }
+    public bool? IsHeadOffice { get; set; } = false;
 
 }

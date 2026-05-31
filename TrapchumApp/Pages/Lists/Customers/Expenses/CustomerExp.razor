@@ -1,92 +1,177 @@
-﻿<RadzenFieldset>
-    <HeaderTemplate>
-        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
-            <RadzenIcon Icon="payments"/>
-            <b>Expense</b>
+﻿<div class="inc-exp-panel exp-panel">
+    <div class="inc-exp-header">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <div class="inc-exp-header__icon exp-icon">
+                <RadzenIcon Icon="trending_down" />
+            </div>
+            <div>
+                <div class="inc-exp-header__title">Expense</div>
+                <div class="inc-exp-header__subtitle">@Items.Count() record(s)</div>
+            </div>
         </RadzenStack>
-    </HeaderTemplate>
-    <ChildContent>
-        <RadzenStack AlignItems="AlignItems.Center"
-                     Gap="1rem" Orientation="Orientation.Horizontal"
-                     JustifyContent="JustifyContent.End"
-                     Visible="@ShowCommand"
-                     class="rz-mb-2">
-            <RadzenButton Text="Expense"
-                          Click="@AddExpenseModal"
-                          Icon="add"
-                          Visible="@(ShowAdd && ShowCommand)"
-                          ButtonStyle="ButtonStyle.Primary"
-                          Size="ButtonSize.ExtraSmall"/>
-            <RadzenButton Click="RefreshIncome"
-                          Icon="refresh"
-                          ButtonStyle="ButtonStyle.Secondary"
-                          class="ml-2"
-                          Visible="@(ShowReload && ShowCommand)"
-                          Size="ButtonSize.ExtraSmall"/>
-        </RadzenStack>
-        <RadzenDataGrid Data="@Items"
-                        GridLines="DataGridGridLines.Both"
-                        Responsive
-                        IsLoading="isLoading"
-                        ColumnWidth="10rem"
-                        Style="height:20rem;max-height:30rem;"
-                        Density="Density.Compact">
-            <Columns>
-                <RadzenDataGridColumn Property="ExpendId" Context="c" Title="#" Width="3rem">
-                    <Template>
-                        @{
-                            var index = Items.ToList()!.IndexOf(c) + 1;
-                        }
-                        @index
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Context="c"
-                                      Width="10rem"
-                                      Property="ExpenseTitle" Title="Expense">
-                    <Template>
-                        @c.ExpenseTitle
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Context="c"
-                                      Property="ExDescription" Title="Description">
-                    <Template>
-                        @c.ExDescription
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Context="c"
-                                      Width="10rem"
-                                      TextAlign="TextAlign.Right"
-                                      Property="expendAmount" Title="Amount">
-                    <Template>
-                        @c?.ExpendAmount
-                    </Template>
-                    <FooterTemplate>
-                        <strong>
-                            @Items!.Sum(x => x.ExpendAmount)
-                        </strong>
-                    </FooterTemplate>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Context="c"
-                                      TextAlign="TextAlign.Center"
-                                      Width="3.5rem"
-                                      Property="InDescription"
-                                      Visible="@ShowAction"
-                                      Title="Actions">
-                    <Template>
-                        <RadzenButton Size="ButtonSize.ExtraSmall"
-                                      Variant="Variant.Text"
-                                      Click="@((arg) => ShowContextMenu(arg, c))"
-                                      Icon="@IconNames.MoreVert"/>
-                    </Template>
-                </RadzenDataGridColumn>
-            </Columns>
-            <LoadingTemplate>
-                <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false"
-                                           Mode="ProgressBarMode.Indeterminate"/>
-            </LoadingTemplate>
-        </RadzenDataGrid>
-    </ChildContent>
-</RadzenFieldset>
+        @if (ShowCommand)
+        {
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.4rem">
+                @if (ShowAdd)
+                {
+                    <RadzenButton Text="Add Expense"
+                                  Click="@AddExpenseModal"
+                                  Icon="add_circle_outline"
+                                  ButtonStyle="ButtonStyle.Warning"
+                                  Variant="Variant.Filled"
+                                  Size="ButtonSize.Small" />
+                }
+                @if (ShowReload)
+                {
+                    <RadzenButton Click="RefreshIncome"
+                                  Icon="refresh"
+                                  ButtonStyle="ButtonStyle.Light"
+                                  Variant="Variant.Outlined"
+                                  Size="ButtonSize.Small" />
+                }
+            </RadzenStack>
+        }
+    </div>
+
+    <RadzenDataGrid Data="@Items"
+                    GridLines="DataGridGridLines.Horizontal"
+                    Responsive
+                    IsLoading="isLoading"
+                    Style="min-height:18rem;max-height:24rem;"
+                    Density="Density.Compact"
+                    EmptyText="No expense records found."
+                    class="inc-exp-grid">
+        <Columns>
+            <RadzenDataGridColumn Property="ExpendId" Context="c" Title="#" Width="3rem" TextAlign="TextAlign.Center" Sortable="false">
+                <Template>
+                    @{
+                        var index = Items.ToList()!.IndexOf(c) + 1;
+                    }
+                    <span class="row-idx">@index</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Context="c" Property="ExpenseTitle" Title="Expense">
+                <Template>
+                    <span class="cell-semibold">@c.ExpenseTitle</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Context="c" Property="ExDescription" Title="Description">
+                <Template>
+                    <span class="cell-muted">@c.ExDescription</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Context="c" Width="7.5rem" TextAlign="TextAlign.Right"
+                                  Property="expendAmount" Title="Amount" Sortable="false">
+                <Template>
+                    <span class="cell-amount cell-amount--expense">@(c?.ExpendAmount?.ToString("N2"))</span>
+                </Template>
+                <FooterTemplate>
+                    <span class="cell-amount cell-amount--expense cell-amount--total">
+                        @((Items!.Sum(x => x.ExpendAmount) ?? 0m).ToString("N2"))
+                    </span>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Context="c" TextAlign="TextAlign.Center" Width="3rem"
+                                  Property="ExpendId" Visible="@ShowAction" Title="" Sortable="false">
+                <Template>
+                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                  Variant="Variant.Text"
+                                  ButtonStyle="ButtonStyle.Light"
+                                  Click="@((arg) => ShowContextMenu(arg, c))"
+                                  Icon="@IconNames.MoreVert"
+                                  class="action-overflow" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+        <LoadingTemplate>
+            <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Warning" Value="100"
+                                       ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+        </LoadingTemplate>
+    </RadzenDataGrid>
+</div>
+
+<style>
+    /* ── Shared panel shell ─────────────────────────────────────── */
+    .inc-exp-panel {
+        border: 1px solid var(--rz-border-color, #e5e7eb);
+        border-radius: 0.75rem;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+
+    .inc-exp-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.7rem 1rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-bottom: 1px solid var(--rz-border-color, #e5e7eb);
+    }
+
+    .inc-exp-header__icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: 0.45rem;
+        flex-shrink: 0;
+    }
+
+    .inc-icon  { background: #ecfdf5; color: #059669; }
+    .exp-icon  { background: #fff7ed; color: #ea580c; }
+
+    .inc-exp-header__icon .rzi { font-size: 1.1rem; }
+
+    .inc-exp-header__title {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #1e293b;
+        line-height: 1.2;
+    }
+
+    .inc-exp-header__subtitle {
+        font-size: 0.7rem;
+        color: #64748b;
+        margin-top: 0.08rem;
+    }
+
+    /* ── Grid tweaks ────────────────────────────────────────────── */
+    .inc-exp-grid .rz-data-grid { border: none !important; border-radius: 0 !important; }
+
+    .row-idx {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.35rem;
+        height: 1.35rem;
+        background: #f1f5f9;
+        border-radius: 50%;
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: #475569;
+    }
+
+    .cell-semibold { font-weight: 600; color: #1e293b; }
+    .cell-muted    { color: #64748b; font-size: 0.82rem; }
+
+    .cell-amount {
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+    }
+
+    .cell-amount--income  { color: #059669; }
+    .cell-amount--expense { color: #ea580c; }
+
+    .cell-amount--total {
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .action-overflow { opacity: 0.55; transition: opacity 0.15s; }
+    .action-overflow:hover { opacity: 1; }
+</style>
 
 @code{
     void ShowContextMenu(MouseEventArgs args, VCustomerExpenses c)

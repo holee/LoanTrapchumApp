@@ -1,4 +1,5 @@
 ﻿@implements IDisposable
+@inject TrapchumApp.Services.IProfilePhotoService ProfilePhotoService
 
 <div class="fb-profile-wrap">
 <div class="fb-profile-trigger" @ref="_triggerRef" data-fb-trigger @onclick="ToggleMenu" @onclick:stopPropagation="true">
@@ -121,16 +122,21 @@
         if (user.Identity != null && user.Identity.IsAuthenticated)
         {
             _userId = authState.GetUserId();
+
             _displayName = user.Identity.Name ?? string.Empty;
+
             _initials = BuildInitials(_displayName);
 
             var profile = await _userService.GetUserProfile(_userId);
-            if (profile.IsSuccess)
-                _photoUrl = profile.Data?.FileUrl;
+            if (!profile.IsError)
+                _photoUrl = profile.Value?.FileUrl;
         }
 
         _currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+
         NavigationManager.LocationChanged += OnLocationChanged;
+
+        ProfilePhotoService.OnPhotoChanged += OnProfilePhotoChanged;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -143,6 +149,7 @@
     private async Task ToggleMenu()
     {
         _open = !_open;
+
         if (_open)
         {
             var rect = await js.InvokeAsync<BoundingRect>("getElementRect", _triggerRef);
@@ -160,7 +167,18 @@
             : char.ToUpper(parts[0][0]).ToString();
     }
 
-    public void Dispose() => NavigationManager.LocationChanged -= OnLocationChanged;
+    private void OnProfilePhotoChanged(string userId, string? newUrl)
+    {
+        if (userId != _userId) return;
+        _photoUrl = newUrl;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+        ProfilePhotoService.OnPhotoChanged -= OnProfilePhotoChanged;
+    }
 
     private sealed record BoundingRect(double Bottom, double Right);
 }

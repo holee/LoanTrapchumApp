@@ -11,7 +11,7 @@ namespace TrapchumApp.Pages.Lists.Customers.Notes
     public partial class CustomerNotes
     {
 
-        [Parameter] public IEnumerable<VCustomerNotes> Notes { get; set; } = [];
+        private IEnumerable<VCustomerNotes> Notes = [];
         [Parameter] public string? CustomerId { get; set; } = string.Empty;
         [Parameter] public bool ShowAdd { get; set; } = false;
         [Parameter] public bool ShowCommand { get; set; } = false;
@@ -31,17 +31,9 @@ namespace TrapchumApp.Pages.Lists.Customers.Notes
 
             var auth = await AuthenticationState;
 
+            _userId = auth.User.GetId();
 
-            if (auth.User.Identity!.IsAuthenticated)
-            {
-                _userId = auth.User.GetId();
-            }
-
-
-            if (CustomerId.IsNotNullOrEmpty() && !Notes.Any())
-            {
-                await GetCustomerNotes(CustomerId);
-            }
+            await GetCustomerNotes(CustomerId);
 
             await base.OnInitializedAsync();
         }
@@ -49,11 +41,6 @@ namespace TrapchumApp.Pages.Lists.Customers.Notes
         async Task AddNewNote()
         {
             var auth = await AuthenticationState;
-
-            if (auth.User.Identity!.IsAuthenticated == false)
-            {
-                return;
-            }
 
             var userId = auth.User!.GetId();
 
@@ -167,10 +154,10 @@ namespace TrapchumApp.Pages.Lists.Customers.Notes
 
                 var rsp = await mediator.Send(new DeleteNoteCommand(note.NoteId, note.CustomerRefId));
 
-                if(rsp.IsError)
+                if (rsp.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description ?? "An error occurred while deleting the note.");
-                   
+
                     return;
                 }
 
@@ -192,6 +179,8 @@ namespace TrapchumApp.Pages.Lists.Customers.Notes
 
         void OnRowRender(RowRenderEventArgs<VCustomerNotes> args)
         {
+            if(args.Data is null) return;
+
             args.Data.RowIndex = args.Index + 1; // store 1-based index
         }
 

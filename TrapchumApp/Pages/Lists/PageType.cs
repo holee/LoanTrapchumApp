@@ -3,5 +3,5 @@
 public enum PageType
 {
     Tab,
-    Modal
+    Dialog
 }

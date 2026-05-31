@@ -496,7 +496,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
                 row.CategoryRefId = original.CategoryRefId;
                 row.CollateralNo = original.CollateralNo;
                 row.TypeName = original.TypeName;
-                row.CollateralSubTypeName = original.CollateralSubTypeName;
+                row.SubTypeName = original.SubTypeName;
                 row.SubCategoryRefId = original.SubCategoryRefId;
                 row.OwnerName = original.OwnerName;
                 row.Size = original.Size;
@@ -517,7 +517,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
                 row.CategoryRefId = origin.CategoryRefId;
                 row.TypeName = origin.TypeName;
                 row.SubCategoryRefId = origin.SubCategoryRefId;
-                row.CollateralSubTypeName = origin.CollateralSubTypeName;
+                row.SubTypeName = origin.SubTypeName;
                 row.OwnerName = origin.OwnerName;
                 row.Size = origin.Size;
                 row.Quantity = origin.Quantity;
@@ -542,7 +542,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
                     CollateralNo = row.CollateralNo,
                     SubCategoryRefId = row.SubCategoryRefId,
                     CategoryRefId = row.CategoryRefId,
-                    CollateralSubTypeName = row.CollateralSubTypeName,
+                    SubTypeName = row.SubTypeName,
                     OwnerName = row.OwnerName,
                     Size = row.Size,
                     Quantity = row.Quantity,
@@ -564,7 +564,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
                     CollateralNo = row.CollateralNo,
                     SubCategoryRefId = row.SubCategoryRefId,
                     CategoryRefId = row.CategoryRefId,
-                    CollateralSubTypeName = row.CollateralSubTypeName,
+                    SubTypeName = row.SubTypeName,
                     TypeName = row.TypeName,
                     OwnerName = row.OwnerName,
                     Size = row.Size,

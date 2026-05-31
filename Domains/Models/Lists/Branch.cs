@@ -27,7 +27,7 @@ public class Branch:BaseEntity
     public string? VilInKhmer { get; set; }
     public bool IsActive { get; set; }
     public Bank? Bank { get; set; }
-    public List<Employee>? Employees { get; set; }
-
+    public List<Employee>? Employees { get; set; } = [];
+    public bool? IsHeadOffice { get; set; } = false;
 
 }
