@@ -226,8 +226,6 @@ public partial class RecievePaymentSidebar
   
             if (result.IsSuccess())
             {
-                //DialogService.Close(true);
-
                 DialogService.CloseSide(true);
             }
             else

@@ -55,6 +55,7 @@ using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Models.Collaterals;
 using ErrorOr;
+using Applications.Features.Dashbaord.Dto;
 namespace Applications;
 
 public static class ApplicationServiceInjection
@@ -147,9 +148,9 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetBranchByUserQuery, ErrorOr<VBranch>>, GetBranchByUserQueryHandler>();
         services.AddScoped<IRequestHandler<GetDbManagerLoanSummaryQuery, ErrorOr<DbManagerLoanSummary>>, GetDbManagerLoanSummaryQueryHandler>();
         services.AddScoped<IRequestHandler<GetNumberLoanRequestQuery, ErrorOr<NumerLoanRequest>>, GetNumberLoanRequestQueryHandler>();
-        services.AddScoped<IRequestHandler<GetDbCreditOfficeLoanSummaryQuery, Pager<DbCoLoanSummary>>, GetDbCreditOfficeLoanSummaryQueryHandler>();
+        services.AddScoped<IRequestHandler<GetDbCreditOfficeLoanSummaryQuery, ErrorOr<CoLoanSummary>>, GetDbCreditOfficeLoanSummaryQueryHandler>();
         services.AddScoped<IRequestHandler<GetDbApprovedRequestQuery, ErrorOr<int>>, GetDbApprovedRequestHandler>();
-        services.AddScoped<IRequestHandler<GetDbAccountLoanSummaryQuery, Pager<AccountantLoanSummary>>, GetDbAccountLoanSummaryQueryHandler>();
+        services.AddScoped<IRequestHandler<GetDbAccountLoanSummaryQuery, ErrorOr<AccountSummary>>, GetDbAccountLoanSummaryQueryHandler>();
         services.AddScoped<IRequestHandler<GetRolesQuery, IEnumerable<string>>, GetRolesQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanScheduleByScheduleQuery, ErrorOr<LoanResponse>>, GetLoanScheduleByScheduleQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanWithScheduleQuery, ErrorOr<LoanResponse>>, GetLoanWithScheduleQueryHandler>();

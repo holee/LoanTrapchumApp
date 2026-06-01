@@ -11,7 +11,7 @@
         padding: 1.2rem;
         border: var(--rz-panel-border);
         box-shadow: var(--rz-panel-shadow);
-        background:var(--rz-base-300);
+        background: var(--rz-base-300);
         border-radius: var(--rz-border-radius)
     }
 </style>
@@ -37,7 +37,9 @@
            CloseOnClickOutside="true"
            PreventDefault="true"
            class="my-popup">
-        <ExchangesPopup CurrencyId="2" Amount="100" ClosePopup="@ClosedPopup" />
+        <ExchangesPopup CurrencyId="@_selectedCurrencyId"
+                        Amount="@_exchangedAmount"
+                        ClosePopup="@ClosedPopup" />
     </Popup>
     <RadzenRow class="rz-px-3 rz-pt-3 rz-pb-1" Gap="0.5rem">
         <RadzenColumn Size="6">
@@ -191,9 +193,9 @@
 
     Popup _exchangePopup = default!;
 
-    private int _selectedCurrencyId=0;
+    private int? _selectedCurrencyId = 0;
 
-    private decimal _exchangedAmount=0;
+    private decimal? _exchangedAmount = 0;
 
     DialogOptions options = new DialogOptions
     {
@@ -204,10 +206,23 @@
 
     async Task OpenPopup()
     {
+        if (LoanRepayment.ChangeAmount <= 0)
+        {
+            _selectedCurrencyId = LoanRepayment.CurrencyRefId;
+
+            _exchangedAmount = LoanRepayment.RecieveAmount ?? 0;
+        }
+        else
+        {
+            _selectedCurrencyId = LoanRepayment.CurrencyRefId;
+
+            _exchangedAmount = LoanRepayment.ChangeAmount;
+        }
+        
         await _exchangePopup.ToggleAsync(_exchangeBtn.Element);
     }
 
-    async Task ClosedPopup()  
+    async Task ClosedPopup()
     {
         await _exchangePopup.CloseAsync(_exchangeBtn.Element);
     }

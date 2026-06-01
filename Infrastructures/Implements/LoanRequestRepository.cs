@@ -271,12 +271,17 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         try
         {
             existingLoanRequest.LoanRequestStatusRefId = (int)req.RequestStatus;
+
             existingLoanRequest.IsSubmitted = false;
+
             existingLoanRequest.ModifiedDt = DateTime.UtcNow;
+
             existingLoanRequest.Remark = req.Remark;
+
             existingLoanRequest.LoanDescriptions.Add(new LoanDescriptions
             {
                 Memo = req.Memo,
+
                 UserRefId = currentUserService.UserId,
             });
 

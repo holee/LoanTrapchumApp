@@ -1,8 +1,8 @@
 using Applications.Commons.Extensions;
+using Applications.Exceptions;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.Currencies.Dto;
-using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Interfaces.setting;
@@ -13,7 +13,6 @@ using Domains.Models.Settings;
 using Domains.Models.Transaction;
 using Mapster;
 using TrapchumApp.Helpers.Constants;
-using TrapchumApp.Services;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
@@ -55,46 +54,81 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             _userId = auth.GetUserId();
 
-            await branchService.GetCurrentBranchIdAsync();
-
-            var resultSetting = await settingsServiceImpl.GetSysSettings();
-
-            if (resultSetting.IsSuccess)
+            try
             {
-                _settings = resultSetting.Data!;
-            }
 
-            if (Amount > 0)
+                await branchService.GetCurrentBranchIdAsync();
+
+                var resultSetting = await settingsServiceImpl.GetSysSettings();
+
+                if (resultSetting.IsSuccess)
+                {
+                    _settings = resultSetting.Data!;
+                }
+
+                _currency = await currencyService.GetExchangedCurrencies((int)CurrencyEnum.KHR);
+
+                if (_currency is not null)
+                {
+                    _mx.ExchangeRate = _currency.BuyingRate;
+
+                    _mx.SpotRate = _currency.SpotRate;
+                }
+                else
+                {
+                    _mx.ExchangeRate = Defaults.ExchangeRate;
+
+                    _mx.SpotRate = Defaults.SpotRate;
+
+                }
+
+                if (Amount > 0)
+                {
+                    _mx.Amount = Amount.Value;
+
+                    var temp = _mx.ExchangeRate * _mx.Amount;
+
+                    _mx.TotalAmount = _isBuy ? temp.RoundDown(-2) : temp.RoundUp(-2);
+
+                }
+
+                if (CurrencyId == (int)CurrencyEnum.KHR)
+                {
+                    _mx.SellCurrencyId = (int)CurrencyEnum.KHR;
+
+                    _mx.BuyCurrencyId = (int)CurrencyEnum.USD;
+
+                    _mx.ActionTypeId = 1;
+
+                    _isBuy = true;
+                }
+                else
+                {
+                    _mx.SellCurrencyId = (int)CurrencyEnum.USD;
+
+                    _mx.BuyCurrencyId = (int)CurrencyEnum.KHR;
+
+                    _mx.ActionTypeId = 2;//1
+
+                    _isBuy = false;
+                }
+
+
+
+            }
+            catch (MediatorException ex)
             {
-                _mx.Amount = Amount.Value;
+
+                _isBuy = false;
+
+                _toastService.ShowError(ex.GetErrorMessage(), "Error");
             }
-
-            _currency = await currencyService.GetExchangedCurrencies((int)CurrencyEnum.KHR);
-
-            if (_currency is not null)
+            catch (Exception ex)
             {
-                _mx.ExchangeRate = _currency.BuyingRate;
+                _isBusy = false;
 
-                _mx.SpotRate = _currency.SpotRate;
+                _toastService.ShowError(ex.Message, "Error");
             }
-            else
-            {
-                _mx.ExchangeRate = Defaults.ExchangeRate;
-
-                _mx.SpotRate = Defaults.SpotRate;
-
-            }
-
-
-            _mx.SellCurrencyId = 1;
-
-            _mx.BuyCurrencyId = 2;
-
-            _mx.ActionTypeId = 1;
-
-            _isBuy = true;
-
-
 
             await base.OnInitializedAsync();
         }
@@ -113,25 +147,29 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         void CurrencyModeSelected(object o)
         {
 
+            if (_currency is null) return;
+
             var selectedValue = ((Items)o).Value;
 
             switch (selectedValue)
             {
                 case 1:
+
                     _isBuy = true;
 
                     _mx.ExchangedMode = Defaults.SellCurrency;
 
-                    _mx.ExchangeRate = _currency!.BuyingRate!.Value;
+                    _mx.ExchangeRate = _currency.BuyingRate;
 
                     break;
+
                 case 2:
 
                     _isBuy = false;
 
                     _mx.ExchangedMode = Defaults.BuyCurrency;
 
-                    _mx.ExchangeRate = _currency!.SellingRate;
+                    _mx.ExchangeRate = _currency.SellingRate;
 
                     break;
             }

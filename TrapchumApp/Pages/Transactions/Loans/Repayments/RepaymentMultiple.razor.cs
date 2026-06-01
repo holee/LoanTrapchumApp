@@ -17,23 +17,39 @@ public partial class RepaymentMultiple
     [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
     [Parameter, SupplyParameterFromQuery] public long CreditAgentId { get; set; }
     [Parameter, SupplyParameterFromQuery] public int CurrencyId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public string UserId { get; set; }
+
+    private string? _userId = null;
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     List<VSchedule> schedules { get; set; } = [];
+
     List<LoanRepaymentDto> RepaymentLists = [];
+
     List<LoanPaymentLineDtoCreate> loanRepaymentLines = [];
+
     LoanPaymentLineDtoCreate? LineStore = new();
+
     LoanPaymentDtoCreate LoanRepayment = new();
+
     IEnumerable<VBranch> Branches = [];
+
     VBranch _selectedBranchResponse = new();
+
     VSchedule? selectedRepayment = new();
+
     List<VSchedule>? selectedRepayments = [];
+
     DateTime paymentDate = DateTime.Now;
+
     bool allowSelectedRow = false;
+
     string recieptNumber = "";
+
     private bool btnDisabled = false;
+
     private VLoanDisbursments? LoanSchedule = new();
+
     private int selectedIndex = 0;
+
     protected decimal? penaltyRate = 0;
 
     RadzenNumeric<decimal?> tb;
@@ -53,19 +69,9 @@ public partial class RepaymentMultiple
     int disableIndex = 0;
     int nextIndex = 1;
 
-    private readonly ILoanService _loanService;
-    private readonly ILoanPaymentServiceImpl _paymentService;
-    public RepaymentMultiple(ILoanService scheduleService, ILoanPaymentServiceImpl paymentService)
-    {
-        _loanService = scheduleService;
-
-        _paymentService = paymentService;
-    }
-
-
     void GetLoanDetails()
     {
-        NavigationManager.NavigateTo($"/Loans/Details/{LoanId}?BranchId={BranchId}&CreditAgentId={CreditAgentId}&CurrencyId={CurrencyId}&UserId={UserId}");
+        NavigationManager.NavigateTo($"/Loans/Details/{LoanId}?BranchId={BranchId}&CreditAgentId={CreditAgentId}&CurrencyId={CurrencyId}&UserId={_userId}");
         return;
     }
 
@@ -99,11 +105,11 @@ public partial class RepaymentMultiple
             Draggable = true,
             Resizable = false
         };
-        var parameters = new Dictionary<string, object>{
+        var parameters = new Dictionary<string, object?>{
                         { "LoanPayment",payment},
                         { "CurrencyId",payment.CurrencyId!.Value },
                         { "LoanId",payment.LoanId ! },
-                        { "UserId",UserId },
+                        { "UserId",_userId },
                         { "BranchId",BranchId },
                         { "CreditAgentId",payment.CreditAgentId!
                         }};
@@ -161,7 +167,7 @@ public partial class RepaymentMultiple
                 { "BranchId",BranchId },
                 { "ReceiptNo",receiptNo },
                 { "CustomerName",""},
-                {"UserId",UserId}
+                {"UserId",_userId}
             };
 
         var message = $"Recieve Payment from Name";

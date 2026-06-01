@@ -63,12 +63,14 @@ builder.Services.AddToastService(options =>
 builder.Services.AddSignalR();
 builder.Services.AddScoped<MessageBoxService>();
 builder.Services.AddScoped<SwalService>();
+builder.Services.AddScoped<DashboardServices>();
 builder.Services.AddScoped<TrapchumApp.Components.Modals.Dialoques.ModalService>();
 builder.Services.AddSingleton<IAppNotificationService, AppNotificationService>();
 builder.Services.AddSingleton<IProfilePhotoService, ProfilePhotoService>();
 builder.Services.AddSingleton<UserServices>();
 builder.Services.AddSingleton<BranchService>();
 builder.Services.AddSingleton<CurrencyServices>();
+
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 104857600; // 100 MB

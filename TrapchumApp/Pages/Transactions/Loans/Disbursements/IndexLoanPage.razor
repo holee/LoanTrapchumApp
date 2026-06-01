@@ -6,32 +6,74 @@
 
 <div class="page-wrapper">
 
-    <div class="page-header rz-mb-4">
-        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.75rem">
-            <div class="header-icon-wrap">
-                <RadzenIcon Icon="account_balance_wallet" style="font-size:1.6rem;color:var(--rz-primary);" />
-            </div>
-            <div>
-                <RadzenText TagName="TagName.H2" TextStyle="TextStyle.H6"
-                            style="margin:0;font-weight:700;letter-spacing:-0.01em;">
-                    Loan Disbursements
-                </RadzenText>
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem" style="margin-top:0.1rem;">
-                    <RadzenIcon Icon="home" style="font-size:0.75rem;color:var(--rz-text-tertiary-color);" />
-                    <RadzenText TextStyle="TextStyle.Caption" style="color:var(--rz-text-tertiary-color);margin:0;">Transactions</RadzenText>
-                    <RadzenIcon Icon="chevron_right" style="font-size:0.75rem;color:var(--rz-text-tertiary-color);" />
-                    <RadzenText TextStyle="TextStyle.Caption" style="color:var(--rz-text-secondary-color);margin:0;font-weight:500;">Loans</RadzenText>
-                    <RadzenIcon Icon="chevron_right" style="font-size:0.75rem;color:var(--rz-text-tertiary-color);" />
-                    <RadzenText TextStyle="TextStyle.Caption" style="color:var(--rz-primary);margin:0;font-weight:600;">Disbursements</RadzenText>
+    @* ── Currency Summary Cards ── *@
+    @if (_summaries.Count > 0)
+    {
+        <RadzenFieldset AllowCollapse="true"
+                        Collapsed="true" class="rz-pl-2 rz-mb-2 summary-fieldset">
+            <HeaderTemplate>
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+                    <RadzenIcon Icon="account_balance_wallet" /><b>Disbursement Summary</b>
                 </RadzenStack>
-            </div>
-            <RadzenBadge BadgeStyle="BadgeStyle.Primary"
-                         IsPill="@true"
-                         Text="@loanCount.ToString()"
-                         style="margin-left:auto;font-size:0.85rem;padding:0.25rem 0.75rem;" />
-        </RadzenStack>
-    </div>
+            </HeaderTemplate>
+            <ChildContent>
+                <div class="summary-section">
+                    @foreach (var s in _summaries)
+                    {
+                        <div class="currency-group">
+                            <div class="currency-group-header">
+                                <RadzenIcon Icon="paid" style="font-size:1rem;color:var(--rz-primary);" />
+                                <span class="currency-label">@s.CurrencyName</span>
+                                <RadzenBadge BadgeStyle="BadgeStyle.Primary" IsPill="@true"
+                                             Text="@($"{s.LoanCount} loans")"
+                                             style="font-size:0.75rem;" />
+                            </div>
+                            <div class="kpi-grid">
+                                <div class="kpi-card kpi-count">
+                                    <div class="kpi-icon-wrap" style="background:var(--rz-primary-lighter);">
+                                        <RadzenIcon Icon="format_list_numbered" style="color:var(--rz-primary);font-size:1.25rem;" />
+                                    </div>
+                                    <div class="kpi-body">
+                                        <span class="kpi-label">Total Loans</span>
+                                        <span class="kpi-value" style="color:var(--rz-primary);">@s.LoanCount</span>
+                                    </div>
+                                </div>
+                                <div class="kpi-card kpi-principle">
+                                    <div class="kpi-icon-wrap" style="background:var(--rz-info-lighter);">
+                                        <RadzenIcon Icon="account_balance" style="color:var(--rz-info);font-size:1.25rem;" />
+                                    </div>
+                                    <div class="kpi-body">
+                                        <span class="kpi-label">Principle</span>
+                                        <span class="kpi-value" style="color:var(--rz-info);">@s.TotalPrinciple.ToString("N2")</span>
+                                    </div>
+                                </div>
+                                <div class="kpi-card kpi-paid">
+                                    <div class="kpi-icon-wrap" style="background:var(--rz-success-lighter);">
+                                        <RadzenIcon Icon="check_circle" style="color:var(--rz-success);font-size:1.25rem;" />
+                                    </div>
+                                    <div class="kpi-body">
+                                        <span class="kpi-label">Paid Principle</span>
+                                        <span class="kpi-value" style="color:var(--rz-success);">@s.TotalPaidPrinciple.ToString("N2")</span>
+                                    </div>
+                                </div>
+                                <div class="kpi-card kpi-outstanding">
+                                    <div class="kpi-icon-wrap" style="background:var(--rz-danger-lighter);">
+                                        <RadzenIcon Icon="pending" style="color:var(--rz-danger);font-size:1.25rem;" />
+                                    </div>
+                                    <div class="kpi-body">
+                                        <span class="kpi-label">Outstanding</span>
+                                        <span class="kpi-value" style="color:var(--rz-danger);">@s.TotalOutstanding.ToString("N2")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </ChildContent>
+        </RadzenFieldset>
+    }
 
+    @* ── Tabs ── *@
     <RadzenCard Variant="Variant.Outlined" class="tabs-card">
         <RadzenTabs TabPosition="TabPosition.Top"
                     RenderMode="TabRenderMode.Server"
@@ -49,6 +91,7 @@
                     <ChildContent>
                         <div class="tab-content-wrapper">
                             <AllLoansTab GetLoanChanged="GetLoanCount"
+                                         SummaryChanged="GetSummaryChanged"
                                          OpenDetailTab="@OpenDetailsTab"
                                          BranchId="@BranchId"
                                          UserId="@_userId" />
@@ -126,3 +169,11 @@
         _selectedIndex = Math.Max(0, idx);
     }
 }
+
+<style>
+    .summary-fieldset .rz-fieldset-legend {
+        display: flex;
+        align-items: center;
+    }
+</style>
+

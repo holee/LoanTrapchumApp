@@ -1,4 +1,4 @@
-﻿using Applications.Features.Dashbaord.CreditOfficers.Dtos;
+﻿using Applications.Features.Dashbaord.Dto;
 using Applications.Interfaces;
 using ErrorOr;
 

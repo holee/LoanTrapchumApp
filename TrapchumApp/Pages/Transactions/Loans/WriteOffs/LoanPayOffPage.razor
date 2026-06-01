@@ -1,13 +1,10 @@
-﻿@page "/app/loan/disbursement/pay-off/{branchId:int}"
+﻿@page "/App/Loans/Disbursements/{branchId:int}/Pay-Off"
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
 <PageTitle>Loan Pay Off</PageTitle>
 <RadzenTabs>
     <Tabs>
         <RadzenTabsItem Text="All">
             <AllLoansTab BranchId="@BranchId" />
-        </RadzenTabsItem>
-        <RadzenTabsItem Text="Some">
-
         </RadzenTabsItem>
     </Tabs>
 </RadzenTabs>

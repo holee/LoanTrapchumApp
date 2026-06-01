@@ -1,0 +1,35 @@
+@using Applications.Enumerations
+@using Applications.Features.Dashbaord.Dto
+@using TrapchumApp.Helpers.Enums
+@using TrapchumApp.Pages
+
+@foreach (var item in Items ?? [])
+{
+    <DashbordItem BackgroundColor="@GetColor(item.Status)"
+                  Icon="@GetIcon(item.Status)"
+                  Title="@item.Status">
+        <ValueTemplete>@item.TotalRequests</ValueTemplete>
+    </DashbordItem>
+}
+
+@code {
+    [Parameter] public IEnumerable<LoanRequestSummary>? Items { get; set; }
+
+    private static ColorEnum GetColor(string? state) => state switch
+    {
+        nameof(RequestStatus.New)      => ColorEnum.Primary,
+        nameof(RequestStatus.Approved) => ColorEnum.Success,
+        nameof(RequestStatus.Rejected) => ColorEnum.Warning,
+        nameof(RequestStatus.Denied)   => ColorEnum.Danger,
+        _                              => ColorEnum.Secondary
+    };
+
+    private static string GetIcon(string? state) => state switch
+    {
+        nameof(RequestStatus.New)      => IconNames.FiberNew,
+        nameof(RequestStatus.Approved) => IconNames.CheckCircle,
+        nameof(RequestStatus.Rejected) => IconNames.Cancel,
+        nameof(RequestStatus.Denied)   => IconNames.Block,
+        _                              => IconNames.RequestQuote
+    };
+}

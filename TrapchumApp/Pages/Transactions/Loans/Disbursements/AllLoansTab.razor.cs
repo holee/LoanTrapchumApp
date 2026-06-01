@@ -10,6 +10,7 @@ public partial class AllLoansTab
     [Parameter] public int BranchId { get; set; } = 0;
     [Parameter] public string? UserId { get; set; }
     [Parameter] public EventCallback<int> GetLoanChanged { get; set; }
+    [Parameter] public EventCallback<List<LoanCurrencySummary>> SummaryChanged { get; set; }
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     [CascadingParameter] CascadingAppState bState { get; set; } = default!;
 
@@ -100,8 +101,27 @@ public partial class AllLoansTab
 
         isLoading = false;
 
+        await InvokeSummaryChanged();
+
         StateHasChanged();
 
+    }
+
+    private async Task InvokeSummaryChanged()
+    {
+        var summaries = LoanItems
+            .GroupBy(x => new { x.CurrencyId, x.CurrencyName })
+            .Select(g => new LoanCurrencySummary(
+                g.Key.CurrencyId,
+                g.Key.CurrencyName ?? string.Empty,
+                g.Count(),
+                g.Sum(x => x.Principle ?? 0m),
+                g.Sum(x => x.PaidPrinciple ?? 0m),
+                g.Sum(x => x.OutStanding ?? 0m)
+            ))
+            .ToList();
+
+        await SummaryChanged.InvokeAsync(summaries);
     }
 
 

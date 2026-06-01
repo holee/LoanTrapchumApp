@@ -1,7 +1,6 @@
 ﻿@page "/App/Loans/Requests/{BranchId:int}/Branches/CreateNew"
 @page "/App/Loans/Requests/{BranchId:int}/Branches/CreateNew/{CustomerId}/Customers"
 @using Applications.Features.Collaterals.Dtos
-@using TrapchumApp.Components.Actionbars
 @attribute [MustHasPermission(Modules.LoanRequest, Actions.Create)]
 <PageTitle>Create New</PageTitle>
 <EditForm Model="model" @ref="editForm">

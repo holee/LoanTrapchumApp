@@ -67,19 +67,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
             var query = new GetLoanByIdQuery(LoanId, BranchId, ScheduleStatus.All, true);
 
-            var rsp = await mediator.Send(query);  //_dService.GetLoanByIdAsync();
+            var rsp = await mediator.Send(query);  
 
-            //var rsp = await _loanService.GetLoanByIdAsync(loanId, BranchId, ScheduleStatus.All, false);
 
             if (!rsp.IsSuccess())
             {
-                NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Error,
-                    Summary = "Error",
-                    Detail = rsp.GetMessage(),
-                    Duration = 3000
-                });
+
+                _toastService.ShowError(rsp.GetMessage(), "Error");
+
             }
             else
             {

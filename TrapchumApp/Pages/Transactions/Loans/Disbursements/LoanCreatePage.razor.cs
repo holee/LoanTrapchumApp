@@ -1,4 +1,5 @@
 using Applications.Calculations;
+using Applications.Exceptions;
 using Applications.Extensions;
 using Applications.Features.Customers.Response;
 using Applications.Features.Holidays.Dtos;
@@ -186,7 +187,8 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
             if (!rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+
+                _toastService.ShowError(rsp.GetMessage());
 
                 return;
             }
@@ -203,13 +205,10 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
     private async Task SaveLoanDisbursement()
     {
-        if (!await ConfirmActionAsync("Do you want to save this loan request?"))
-        {
-            NotificationService.Notify(NotificationSeverity.Info, "Loan save was cancelled.");
 
-            return;
-        }
+        var confirm=await MsgBox.ConfirmAsync("Do you want to save this loan request?", "Confirm");
 
+        if (confirm == MsgBoxResult.No) return;
 
         var mod = new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo, RequestStatus.Approved);
 
@@ -225,25 +224,35 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
             if (!rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+
+                _toastService.ShowError(rsp.GetMessage());
 
                 return;
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
+
+                _toastService.ShowSuccess(rsp.Value.Message);
             }
 
             StateHasChanged();
         }
+        catch(MediatorException ex)
+        {
+            _toastService.ShowError($"An error occurred while saving the loan request due to {ex.Message}");
+        }
         catch (Exception ex)
         {
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+            _toastService.ShowError($"An error occurred while saving the loan request due to {ex.Message}.");
         }
     }
 
     private async Task SendRechecked()
     {
+
+        var comfirm = await MsgBox.ConfirmAsync("Do you want to send this loan request for rechecking?");
+
+        if (comfirm == MsgBoxResult.No) return;
 
         var mod = new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo, RequestStatus.Rechecked);
 
@@ -256,13 +265,15 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
         if (rsp.IsSuccess())
         {
 
-            NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
+            _toastService.ShowSuccess($"{rsp.Value.Message}");
+
+            disburseStatus = rsp.Value.Success;
 
             StateHasChanged();
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+            _toastService.ShowError(rsp.GetMessage());
         }
     }
 
@@ -275,7 +286,9 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
         if (exists != -1)
         {
             selectedTabIndex = exists + FixedTabCount;
+
             StateHasChanged();
+
             return;
         }
 
@@ -288,6 +301,7 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
         };
 
         _tabs.Add(new CustomTab(tabId, "Customer Info", TabActions.Details, content));
+
         selectedTabIndex = _tabs.Count + FixedTabCount - 1;
     }
 

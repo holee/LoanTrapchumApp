@@ -1,5 +1,6 @@
 ﻿using Applications.Features.Dashbaord.Accountants.Dtos;
 using Applications.Features.Dashbaord.CreditOfficers.Dtos;
+using Applications.Features.Dashbaord.Dto;
 using Applications.Features.Dashbaord.Managers.Dto;
 using Applications.Interfaces;
 using Applications.Responses.Paginations;
@@ -16,6 +17,8 @@ namespace Infrastructures.Implements
         private const string DBCreditOfficerLoanSummary = "dbCreditOfficeLoanSummary";
 
         private const string DBManagerLoanSummary = "spDbManagerSummaryByBranch";
+
+
         public async Task<Pager<AccountantLoanSummary>> GetAccountantLoanSummaries(int? branchId, DateTime? dueDate, CancellationToken cancellation = default)
         {
             using var connection = await connectionFactory.CreateConnectionAsync(cancellation);
@@ -25,6 +28,38 @@ namespace Infrastructures.Implements
             var counts = result.Count();
 
             return PagerExtensions.Create(result.ToList(), counts);
+        }
+
+
+        public async Task<AccountSummary> GetAccountantSummaries(int? branchId, DateTime? dueDate, CancellationToken cancellation = default)
+        {
+            using var connection = await connectionFactory.CreateConnectionAsync(cancellation);
+
+            var loanTask = connection.QueryAsync<AccountantLoanSummary>(DBAccountLoanSummary, new { BranchId = branchId, DueDate = dueDate });
+
+            var dbCoRequestSummaryTask = connection.QueryAsync<LoanRequestSummary>(@"SET NOCOUNT ON;
+                                                                SELECT
+                                                                    s.Id,
+                                                                    s.Status,
+                                                                    ISNULL(r.TotalRequests, 0) AS TotalRequests
+                                                                FROM st_loanRequestStatus s
+                                                                LEFT JOIN
+                                                                (
+                                                                    SELECT
+                                                                        statusId,
+                                                                        COUNT(*) AS TotalRequests
+                                                                    FROM VLoanRequests
+                                                                    WHERE statusId BETWEEN 1 AND 12 AND BranchId = @BranchId
+                                                                    GROUP BY statusId
+                                                                ) r ON r.statusId = s.Id
+                                                                WHERE s.Id BETWEEN 1 AND 12
+                                                                ORDER BY s.Id;
+                                                                ", new { BranchId = branchId });
+
+            await Task.WhenAll(loanTask, dbCoRequestSummaryTask).WaitAsync(cancellation);
+
+            return new AccountSummary(loanTask.Result.ToList(),dbCoRequestSummaryTask.Result.ToList());
+
         }
 
 
@@ -81,9 +116,58 @@ namespace Infrastructures.Implements
 
             var result = await connection.QueryAsync<DbCoLoanSummary>(DBCreditOfficerLoanSummary, new { BranchId = branchId, UserId = UserId, DueDate = dueDate });
 
+            if (result is null)
+            {
+                result = new List<DbCoLoanSummary>
+                {
+                    new DbCoLoanSummary
+                    {
+                        TotalCustomer=0,
+                        CurrencyId=0,
+                        TotalPrinciple=0,
+                        TotalInterest=0
+                    }
+                };
+            }
+
             var counts = result.Count();
 
             return PagerExtensions.Create(result.ToList(), counts);
+        }
+
+
+
+        public async Task<CoLoanSummary> GetCreditOfficerSummaries(int? branchId, string? UserId, DateTime? dueDate, CancellationToken cancellation = default)
+
+        {
+
+            using var connection = await connectionFactory.CreateConnectionAsync(cancellation);
+
+            var dbCoLoanSummaryTask = connection.QueryAsync<DbCoLoanSummary>(DBCreditOfficerLoanSummary, new { BranchId = branchId, UserId = UserId, DueDate = dueDate });
+
+            var dbCoRequestSummaryTask = connection.QueryAsync<LoanRequestSummary>(@"SET NOCOUNT ON;
+                                                                SELECT
+                                                                    s.Id,
+                                                                    s.Status,
+                                                                    ISNULL(r.TotalRequests, 0) AS TotalRequests
+                                                                FROM st_loanRequestStatus s
+                                                                LEFT JOIN
+                                                                (
+                                                                    SELECT
+                                                                        statusId,
+                                                                        COUNT(*) AS TotalRequests
+                                                                    FROM VLoanRequests
+                                                                    WHERE statusId BETWEEN 1 AND 12 AND BranchId = @BranchId
+                                                                    GROUP BY statusId
+                                                                ) r ON r.statusId = s.Id
+                                                                WHERE s.Id BETWEEN 1 AND 12
+                                                                ORDER BY s.Id;
+                                                                ", new { BranchId = branchId });
+
+            await Task.WhenAll(dbCoLoanSummaryTask, dbCoRequestSummaryTask).WaitAsync(cancellation);
+
+            return new CoLoanSummary(dbCoLoanSummaryTask.Result.ToList(),dbCoRequestSummaryTask.Result.ToList());
+
         }
 
 

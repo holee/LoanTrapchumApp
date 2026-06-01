@@ -1,9 +1,11 @@
 ﻿@page "/"
 @using TrapchumApp.Components.Indicatros
+@using TrapchumApp.Components.Dashboard
 @using TrapchumApp.Helpers.Enums
 <PageTitle>Home</PageTitle>
 @attribute [Authorize]
 @attribute [StreamRendering]
+@inject DashboardServices dashboardServices
 <AuthorizeView Policy="@Policies.CreditOfficerOnly">
     <Authorized>
         @if (_isPageLoading)
@@ -22,7 +24,8 @@
                 </div>
 
                 <div class="db-cards">
-                    @foreach (var item in CoSummaries ?? [])
+
+                    @foreach (var item in CoSummaries?.LoanSummaries ?? [])
                     {
                         <DashbordItem BackgroundColor="@GetGradientColor(item.CurrencyId)"
                                       Icon="@IconNames.Customers"
@@ -40,35 +43,10 @@
                             <ValueTemplete>@item.TotalInterest.Format(item.CurrencyId)</ValueTemplete>
                         </DashbordItem>
                     }
-                    <DashbordItem BackgroundColor="ColorEnum.Success"
-                                  Icon="@IconNames.Group"
-                                  Title="Pending Requests">
-                        <ValueTemplete>1000</ValueTemplete>
-                    </DashbordItem>
-                </div>
 
-                <RadzenCard class="db-chart-card" Variant="Variant.Outlined">
-                    <div class="db-chart-header">
-                        <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
-                        <span>Performance Overview</span>
-                    </div>
-                    <div class="db-chart-row">
-                        <div class="db-period-col">
-                            <RadzenListBox class="db-period-list"
-                                           Data="@_periods"
-                                           TextProperty="Label"
-                                           ValueProperty="Key"
-                                           @bind-Value="@_selectedPeriod"
-                                           Change="@((v) => OnParentClicked(v))"
-                                           TValue="string" />
-                        </div>
-                        <div class="db-chart-col">
-                            <BarChart Labels="@ChartLabels"
-                                      Series1Values="@Chart1Values" Series1Label="Principal"
-                                      Series2Values="@Chart2Values" Series2Label="Interest" />
-                        </div>
-                    </div>
-                </RadzenCard>
+                    <RequestSummaryCards Items="@CoSummaries?.RequestSummaries" />
+
+                </div>
             </div>
         }
        
@@ -107,9 +85,6 @@
                     <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
                     <span>Branch Lending Performance</span>
                 </div>
-                <BarChart Labels="@ChartLabels"
-                          Series1Values="@Chart1Values" Series1Label="Principal"
-                          Series2Values="@Chart2Values" Series2Label="Interest" />
             </RadzenCard>
         </div>
     </Authorized>
@@ -127,7 +102,7 @@
             </div>
 
             <div class="db-cards">
-                @foreach (var item in AccSummaries ?? [])
+                @foreach (var item in AccSummaries?.LoanSummaries ?? [])
                 {
                     <DashbordItem Title="@GetTitle(item.CurrencyId)"
                                   BackgroundColor="@GetGradientColor(item.CurrencyId)">
@@ -144,11 +119,7 @@
                         <ValueTemplete>@item.TotalInterest.Format(item.CurrencyId)</ValueTemplete>
                     </DashbordItem>
                 }
-                <DashbordItem Title="Approved Requests"
-                              Icon="@IconNames.Group"
-                              BackgroundColor="@ColorEnum.Info">
-                    <ValueTemplete>@_numberOfLoanRequest</ValueTemplete>
-                </DashbordItem>
+                <RequestSummaryCards Items="@AccSummaries?.RequestSummaries" />
             </div>
 
             <RadzenCard class="db-chart-card" Variant="Variant.Outlined">
@@ -156,9 +127,6 @@
                     <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
                     <span>Loan Portfolio Overview</span>
                 </div>
-                <BarChart Labels="@ChartLabels"
-                          Series1Values="@Chart1Values" Series1Label="Principal"
-                          Series2Values="@Chart2Values" Series2Label="Interest" />
             </RadzenCard>
         </div>
     </Authorized>
@@ -196,11 +164,9 @@
                     <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
                     <span>Regional Performance Overview</span>
                 </div>
-                <BarChart Labels="@ChartLabels"
-                          Series1Values="@Chart1Values" Series1Label="Principal"
-                          Series2Values="@Chart2Values" Series2Label="Interest" />
             </RadzenCard>
         </div>
     </Authorized>
 </AuthorizeView>
 
+<BarChart @ref="barChart" Width="600" />

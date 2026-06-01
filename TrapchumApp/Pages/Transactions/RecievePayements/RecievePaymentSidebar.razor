@@ -11,6 +11,7 @@
         width: 550px;
         padding: 1.2rem;
         border: var(--rz-panel-border);
+        background: var(--rz-base-300);
         box-shadow: var(--rz-panel-shadow);
         border-radius: var(--rz-border-radius)
     }
@@ -37,8 +38,11 @@
            AutoFocusFirstElement="false"
            CloseOnClickOutside="true"
            PreventDefault="true"
-           class="my-popup rz-background-color-base-300">
-        <ExchangesSidebar />
+           class="my-popup">
+        <ExchangesPopup 
+            CurrencyId="@_selectedCurrencyId" 
+            Amount="@_exchangeAmount" 
+                        ClosePopup="@ClosePopup"      />
     </Popup>
 
     <RadzenRow class="rz-px-3 rz-pt-3 rz-pb-1" Gap="0.5rem">
@@ -189,8 +193,29 @@
 
     Popup _exchangePopup = default!;
 
+    private int? _selectedCurrencyId = 0;
+
+    private decimal? _exchangeAmount = 0;
+
     async Task OpenSide()
     {
+        if (LoanPaymentCreate.ChangeAmount > 0)
+        {
+            _exchangeAmount = LoanPaymentCreate.ChangeAmount;
+        }
+        else
+        {
+            _exchangeAmount = LoanPaymentCreate.AmountWithoutPenalty;
+        }
+
+        _selectedCurrencyId = LoanPaymentCreate.CurrencyRefId;
+
         await _exchangePopup.ToggleAsync(_exchangeBtn.Element);
     }
+
+    async Task ClosePopup() 
+    {
+        await _exchangePopup.CloseAsync(_exchangeBtn.Element);
+    }
+
 }

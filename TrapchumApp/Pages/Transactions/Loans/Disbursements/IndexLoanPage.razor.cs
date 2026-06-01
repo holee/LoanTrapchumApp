@@ -53,9 +53,17 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         }
 
 
+        private List<LoanCurrencySummary> _summaries = [];
+
         void GetLoanCount(int count)
         {
             loanCount = count;
+        }
+
+        void GetSummaryChanged(List<LoanCurrencySummary> summaries)
+        {
+            _summaries = summaries;
+            StateHasChanged();
         }
 
         void GetLoanDetails(VLoanDisbursments p)

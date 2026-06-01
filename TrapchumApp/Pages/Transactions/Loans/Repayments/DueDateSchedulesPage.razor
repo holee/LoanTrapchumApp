@@ -23,7 +23,7 @@
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.75rem">
                 <RadzenFormField Text="Payment Date" Variant="Variant.Outlined" Style="min-width:160px;">
                     <ChildContent>
-                        <RadzenDatePicker @bind-Value="paymentDate" TValue="DateTime" Disabled />
+                        <RadzenDatePicker @bind-Value="paymentDate" TValue="DateTime" ReadOnly />
                     </ChildContent>
                 </RadzenFormField>
             </RadzenStack>
@@ -70,7 +70,9 @@
                                       Sortable="false">
                     <Template>
                         <input type="hidden" @bind="c.LoanId" />
-                        <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@c.InstallmentNo.ToString()" />
+                        <RadzenBadge 
+                                BadgeStyle="BadgeStyle.Danger" 
+                                Text="@c.InstallmentNo.ToString()" />
                     </Template>
                 </RadzenDataGridColumn>
 
