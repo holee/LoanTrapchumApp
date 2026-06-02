@@ -62,7 +62,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Playwright" Version="1.59.0" />
-    <PackageReference Include="QuestPDF" Version="2026.5.0" />
     <PackageReference Include="Radzen.Blazor" Version="10.4.7" />
     <PackageReference Include="Razor.Templating.Core" Version="3.1.0" />
   </ItemGroup>
