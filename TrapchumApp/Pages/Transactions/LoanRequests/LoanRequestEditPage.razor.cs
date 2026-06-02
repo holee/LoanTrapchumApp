@@ -1,4 +1,5 @@
 using Applications.Calculations;
+using Microsoft.AspNetCore.Components.Routing;
 using Applications.Commons.Mappers;
 using Applications.Commons.Mappers.Notifications;
 using Applications.Extensions;
@@ -31,7 +32,6 @@ using Domains.Models.Files;
 using Infrastructures.Authorizations;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using TrapchumApp.Components.Messageboxes;
 using TrapchumApp.Pages.Lists;
 using TrapchumApp.Pages.Lists.Collaterals;
 using TrapchumApp.Pages.Lists.Customers;
@@ -40,7 +40,7 @@ using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.LoanRequests;
 
-public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
+public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger) : IDisposable
 {
     [Parameter] public int? BranchId { get; set; } = 0;
     [Parameter] public string? CustomerId { get; set; }
@@ -77,6 +77,9 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
     private bool isLoading = false;
     private bool isProgressing = false;
     private bool isAllow = false;
+    private bool _isDirty = false;
+    private bool _editContextHooked = false;
+    private IDisposable? _locationChangingRegistration;
     private int SelectedCollectionFee = 1;
     private decimal? TotalAdminFee = 0;
     private decimal? LoanRequestAmount = 0;
@@ -89,10 +92,42 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
     private IEnumerable<System.IO.FileInfo> UploadFiles = [];
     private void SelectTabIndexChanged(int tabIndex)
     {
-        if (tabIndex == 1 && selectedCustomer?.CustomerId == string.Empty)
+        selectedTabIndex = tabIndex;
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            return;
+            _locationChangingRegistration = NavigationManager.RegisterLocationChangingHandler(OnLocationChanging);
         }
+
+        if (!_editContextHooked && editForm?.EditContext is not null)
+        {
+            editForm.EditContext.OnFieldChanged += (_, _) => _isDirty = true;
+
+            _editContextHooked = true;
+        }
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async ValueTask OnLocationChanging(LocationChangingContext context)
+    {
+        if (!_isDirty) return;
+
+        var confirmed = await DialogService.Confirm(
+            "You have unsaved changes. Are you sure you want to leave?",
+            "Unsaved Changes");
+
+        if (confirmed != true)
+        {
+            context.PreventNavigation();
+        }
+    }
+
+    public void Dispose()
+    {
+        _locationChangingRegistration?.Dispose();
     }
 
     async Task HandleFileDialogue()
@@ -137,7 +172,7 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
 
         if (!Documents.Any())
         {
-            NotificationService.Notify(NotificationSeverity.Error, "There is no any file to upload");
+            _toastService.ShowError("There is no any file to upload");
 
             return;
         }
@@ -148,13 +183,14 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
 
         if (!res.IsSuccess())
         {
-            NotificationService.Notify(NotificationSeverity.Error, res.GetMessage());
+            _toastService.ShowError(res.GetMessage());
+
             return;
         }
 
         await GetLoanRequestDocuments();
 
-        NotificationService.Notify(NotificationSeverity.Success, res.Value);
+        _toastService.ShowSuccess(res.Value);
 
     }
 
@@ -176,9 +212,9 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
 
     async void RemoveFile(VLoanRequestsDocuments doc)
     {
-        var confirm = await DialogService.Confirm("Do you want to remove this document?", "Remove Document");
+        var confirm = await MsgBox.ConfirmAsync("Do you want to remove this document?", "Remove Document");
 
-        if (confirm == false) return;
+        if (confirm == MsgBoxResult.No) return;
 
         if (!Documents.Any()) return;
 
@@ -186,7 +222,8 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
 
         if (lastItem != doc)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Please selected last document to delete.");
+            _toastService.ShowError("Please selected last document to delete.");
+
             return;
         }
 
@@ -203,12 +240,12 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
 
                 DocumentRef.ReloadDocument();
 
-                NotificationService.Notify(NotificationSeverity.Success, "Document was removed.");
+                _toastService.ShowSuccess("Document was removed.");
 
                 return;
             }
 
-            NotificationService.Notify(NotificationSeverity.Error, resp.FirstError.Description);
+            _toastService.ShowError(resp.GetMessage());
         }
         if (doc.LoanRequestId.IsNotNullOrEmpty() || doc.Id == 0)
         {
@@ -216,7 +253,7 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
 
             DocumentRef.ReloadDocument();
 
-            NotificationService.Notify(NotificationSeverity.Success, "Document was removed.");
+            _toastService.ShowSuccess("Document was removed.");
 
             return;
         }
@@ -268,12 +305,15 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
     void AddCoPawnCustomer()
     {
 
-        var options=new DialogOptions
+        var options = new DialogOptions
         {
-            Width = "100vw"
+            Width = "100vw",
         };
 
-        DialogService.OpenAsync<CustomerCreatePage>("Add Customer", options: options);
+        DialogService.OpenAsync<CustomerCreatePage>("Add Customer", parameters: new Dictionary<string, object?>
+        {
+            { "PageType",PageType.Dialog }
+        }, options: options);
     }
 
 
@@ -282,7 +322,7 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
         var param = new Dictionary<string, object?>
         {
             { "CollateralId", model.CustomerRefId },
-            { "PageType", PageType.Modal },
+            { "PageType", PageType.Dialog },
         };
         var options = new DialogOptions
         {
@@ -294,9 +334,9 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
 
     async void RemovedCollateral(VLoanRequestCollateralLines c)
     {
-        var confirm = await DialogService.Confirm("Do you want to remove this collateral?", "Remove Collateral");
+        var confirm = await MsgBox.ConfirmAsync("Do you want to remove this collateral?", "Remove Collateral");
 
-        if (confirm == false) return;
+        if (confirm == MsgBoxResult.No) return;
 
         if (CollateralLines.Any() && c.Id > 0)
         {
@@ -307,7 +347,8 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
 
             if (!res.IsError)
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Collateral was removed.");
+
+                _toastService.ShowSuccess("Collateral was removed.");
 
                 CollateralLines.Remove(c);
 
@@ -496,6 +537,7 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
 
             NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message!);
 
+            _isDirty = false;
             NavigationManager.NavigateTo($"/App/Loans/Requests/{BranchId}/Branches");
 
         }

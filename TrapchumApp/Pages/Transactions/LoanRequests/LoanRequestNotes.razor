@@ -1,20 +1,154 @@
 ﻿@using Applications.Responses.ViewModels.Loans.LoanRequests
-@foreach (var item in Data ?? [])
-{
-    <div class="comment">
-        <div class="comment-header">
-            <span class="comment-author">@item.FullName</span>
-            <span class="comment-date">
-                <i>@item.CreatedDT</i><br/>
-                <em>@item.PretierDate</em>
-            </span>
+
+<div class="notes-feed">
+    @if (Data is null || !Data.Any())
+    {
+        <div class="notes-empty">
+            <span class="notes-empty__icon material-icons">chat_bubble_outline</span>
+            <span class="notes-empty__text">No notes yet.</span>
         </div>
-        <p>
-            @item.Memo
-        </p>
-    </div>
-}
+    }
+    else
+    {
+        @foreach (var item in Data)
+        {
+            <div class="note-card">
+                <div class="note-card__avatar">
+                    @GetInitials(item.FullName)
+                </div>
+                <div class="note-card__body">
+                    <div class="note-card__header">
+                        <span class="note-card__author">@item.FullName</span>
+                        <span class="note-card__meta" title="@item.CreatedDT?.ToString("yyyy-MM-dd HH:mm")">
+                            <span class="material-icons note-card__clock">schedule</span>
+                            @item.PretierDate
+                        </span>
+                    </div>
+                    <p class="note-card__memo">@item.Memo</p>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .notes-feed {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        padding: 0.25rem 0;
+    }
+
+    /* Empty state */
+    .notes-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        padding: 2.5rem 1rem;
+        color: #94a3b8;
+    }
+
+    .notes-empty__icon {
+        font-size: 2rem;
+        opacity: 0.5;
+    }
+
+    .notes-empty__text {
+        font-size: 0.82rem;
+        font-style: italic;
+    }
+
+    /* Note card */
+    .note-card {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+        padding: 0.75rem 1rem;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-left: 3px solid var(--rz-primary, #3b82f6);
+        border-radius: 0.6rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,.05);
+        transition: box-shadow 0.15s;
+    }
+
+    .note-card:hover {
+        box-shadow: 0 3px 8px rgba(0,0,0,.09);
+    }
+
+    /* Avatar circle */
+    .note-card__avatar {
+        flex-shrink: 0;
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: 50%;
+        background: var(--rz-primary, #3b82f6);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+
+    /* Body */
+    .note-card__body {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .note-card__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        margin-bottom: 0.3rem;
+    }
+
+    .note-card__author {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .note-card__meta {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+        font-size: 0.72rem;
+        color: #94a3b8;
+        cursor: default;
+    }
+
+    .note-card__clock {
+        font-size: 0.75rem;
+        line-height: 1;
+    }
+
+    .note-card__memo {
+        margin: 0;
+        font-size: 0.82rem;
+        color: #334155;
+        line-height: 1.55;
+        word-break: break-word;
+    }
+</style>
+
 @code {
     [Parameter]
     public IEnumerable<VLoanRequestDescription> Data { get; set; } = [];
+
+    private static string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length >= 2
+            ? $"{parts[0][0]}{parts[^1][0]}"
+            : name[..Math.Min(2, name.Length)];
+    }
 }

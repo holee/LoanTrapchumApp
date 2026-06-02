@@ -1,4 +1,9 @@
-﻿using Applications.Features.Identity.Users;
+﻿using Applications.Features.Identity.Command.ChangePassword;
+using Applications.Features.Identity.Command.UpdateUserRole;
+using Applications.Features.Identity.Queries.GetUserById;
+using Applications.Features.Identity.Queries.GetUserPermissions;
+using Applications.Features.Identity.Roles.Queries.GetRoles;
+using Applications.Features.Identity.Users;
 using Applications.Interfaces.Identity;
 using Applications.Responses.Auths;
 using Applications.Responses.ViewModels.Auths;
@@ -6,71 +11,73 @@ using Microsoft.AspNetCore.Components.Forms;
 
 namespace TrapchumApp.Pages.Identity.Users;
 
-public partial class UserManagement
+public partial class UserManagement(ILogger<UserManagement> logger)
 {
     [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
     bool IsLoading = true;
+
     UserPermissions userPermission = new();
+
     ChangePasswordDto model = new();
+
     UserDto userModel = new UserDto();
+
     Dictionary<string, List<UserPermissionViewModel>> UserClaimsGrouped { get; } = new();
+
     UserPermissions rolePermissions = new();
+
     List<string> groups = [];
+
     IEnumerable<string> roles = [];
+
+
     bool isBusy = false;
+
     UserRoleDtoUpdate formRequest = new();
+
     string? message = string.Empty;
-    private readonly IRoleService _roleService;
-    public UserManagement(IRoleService roleService)
-    {
-        _roleService = roleService;
-    }
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             model.UserId = Id;
+
             await GetPermissions();
+
             await GetRoles();
-            var resp = await _userService.GetUserDetailsById(Id);
-            if (resp.IsSuccess)
+
+            var resp = await mediator.Send(new GetUserByIdQuery(Id));
+
+            if (resp.IsSuccess())
             {
-                userModel = resp.Data!;
+                userModel = resp.Value;
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
+                _toastService.ShowError(resp.GetMessage());
             }
         }
         catch (Exception ex)
         {
             Console.Write(ex.Message);
         }
+
         await base.OnInitializedAsync();
     }
     protected async Task SubmitOnValid()
     {
-        try
+        var comamnd = new ChangePasswordCommand(model);
+
+        var response = await mediator.Send(comamnd);  //_userService.ChangePassword(model);
+
+        if (response.IsError)
         {
-            var response = await _userService.ChangePassword(model);
-
-            if (!response.IsSuccess)
-            {
-                NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
-
-                return;
-            }
-            else
-            {
-                //message=response.
-                NotificationService.Notify(NotificationSeverity.Success, "");
-            }
-
+            _toastService.ShowError(response.GetMessage());
         }
-        catch (Exception ex)
+        else
         {
-            Console.WriteLine(ex.Message);
+            _toastService.ShowSuccess("Password was change successfully.");
         }
 
     }
@@ -81,18 +88,23 @@ public partial class UserManagement
         {
             formRequest.UserId = Id;
 
-            var response = await _userService.UpdateUserRoleAsync(formRequest);
 
-            if (!response.IsSuccess)
+            var commmand = new UpdateUserRoleCommand(formRequest);
+
+            var response = await mediator.Send(commmand);  //_userService.UpdateUserRoleAsync(formRequest);
+
+            if (response.IsError)
             {
-                NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                _toastService.ShowError(response.GetMessage());
+
                 return;
             }
-            NotificationService.Notify(NotificationSeverity.Success, "Success");
+
+            _toastService.ShowSuccess("User role was updated successfully!");
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            logger.LogError(ex, "Error updating user role: {Message}", ex.Message);
         }
 
     }
@@ -100,9 +112,21 @@ public partial class UserManagement
 
     async Task GetRoles()
     {
-        var getRoles = await _roleService.GetRolesAsync();
+        logger.LogInformation("Fetching roles for user management with UserId: {UserId}", Id);
 
-        roles = getRoles.IsError ? [] : getRoles.Value.Where(x => !x.Contains(userModel.Role)).Select(r => r);
+        try
+        {
+            var command = new GetRolesQuery(string.Empty);
+
+            var getRoles = await mediator.Send(command);  //_roleService.GetRolesAsync();
+
+            roles = getRoles.Where(x => !x.Contains(userModel.Role)).Select(r => r);
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error fetching roles: {Message}", ex.Message);
+        }
 
     }
 
@@ -110,11 +134,11 @@ public partial class UserManagement
     {
         IsLoading = true;
 
-        var resultResponse = await _userService.GetUserPermissionsAsync(Id);
+        var rsp = await mediator.Send(new GetUserPermissionsQuery(Id)); // _userService.GetUserPermissionsAsync(Id);
 
-        if (resultResponse.IsSuccess)
+        if (rsp.IsSuccess())
         {
-            userPermission = resultResponse.Data!;
+            userPermission = rsp.Value;
 
             if (userPermission is not null)
             {
@@ -143,9 +167,10 @@ public partial class UserManagement
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
+            _toastService.ShowError(rsp.GetMessage());
         }
         IsLoading = false;
+
         StateHasChanged();
     }
 
@@ -157,26 +182,30 @@ public partial class UserManagement
 
         var request = new UserPermissionRequest(Id, userPermission!.Permissions);
 
-        var resultResponse = await _userService.AddOrRemovedUserPermissionsAsync(Id, request);
+        var rsp = await _userService.AddOrRemovedUserPermissionsAsync(Id, request);
 
-        if (!resultResponse.IsSuccess)
+        if (rsp.IsError)
         {
-            NotificationService.Notify(NotificationSeverity.Success, resultResponse!.ErrMessage);
+            _toastService.ShowError(rsp.GetMessage());
         }
         else
         {
-            Console.WriteLine(resultResponse.Data);
-            message = resultResponse.Data;
+            message = rsp.Value;
         }
         isBusy = false;
 
     }
 
     bool _permSelectAll = false;
+
     private string _permGroupFilter = string.Empty;
+
     ProfileDtoCreate _profileUploadModel = new();
+
     string? _profilePreviewUrl = null;
+
     bool _profileBusy = false;
+
     const long _maxProfileFileSize = 10 * 1024 * 1024;
 
     private IEnumerable<KeyValuePair<string, List<UserPermissionViewModel>>> FilteredUserGroups =>
@@ -204,6 +233,7 @@ public partial class UserManagement
     private void OnUserPermissionChanged(UserPermissionViewModel item, bool isChecked)
     {
         item.IsAssignedToRole = isChecked;
+
         _permSelectAll = userPermission?.Permissions?.All(p => p.IsAssignedToRole) ?? false;
     }
 
@@ -238,20 +268,21 @@ public partial class UserManagement
 
         var rsp = await _userService.ChangeProfile(Id, _profileUploadModel);
 
-        if (rsp.IsSuccess)
+        if (!rsp.IsError)
         {
             if (userModel.Profile is null)
                 userModel.Profile = new();
 
             userModel.Profile.FileUrl = _profilePreviewUrl;
 
-            NotificationService.Notify(NotificationSeverity.Success, "Profile photo updated.");
+            _toastService.ShowSuccess("Profile photo updated successfully!");
+
 
             CancelProfileUpload();
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            _toastService.ShowError(rsp.GetMessage());
         }
         _profileBusy = false;
     }
@@ -259,6 +290,7 @@ public partial class UserManagement
     private void CancelProfileUpload()
     {
         _profileUploadModel = new();
+
         _profilePreviewUrl = null;
     }
 

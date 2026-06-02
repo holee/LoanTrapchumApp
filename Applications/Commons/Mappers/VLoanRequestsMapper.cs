@@ -12,7 +12,24 @@ public static class VLoanRequestsMapper
 
     public static List<VLoanRequestCollateralLines> ToLoanRequestCollaterals(this VLoanRequests req)
     {
-        return req.Collaterals.ToList() ?? [];
+        return req.Collaterals.Select(x => new VLoanRequestCollateralLines
+        {
+            Id = x.Id,
+            BranchId = x.BranchId,
+            CollateralId = x.CollateralId,
+            CollateralLineId = x.CollateralLineId,
+            CollateralNo = x.CollateralNo,
+            InUsed = x.InUsed,
+            Location = x.Location,
+            MarketPrice = x.MarketPrice,
+            OwnerName = x.OwnerName,
+            PawnPrice = x.PawnPrice,
+            Quantity = x.Quantity,
+            HotPrice = x.HotPrice,
+            ReferenceNo = x.ReferenceNo,
+            SubTypeName = x.SubTypeName,
+            TypeName = x.TypeName,
+        }).ToList() ?? [];
     }
 
     public static List<VLoanRequestsDocuments> ToLoanRequestDocuments(this VLoanRequests req)

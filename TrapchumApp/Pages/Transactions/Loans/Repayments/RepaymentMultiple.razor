@@ -1,5 +1,4 @@
-﻿@page "/Loans/Repayment/{LoanId:long}/Multiple"
-@* @attribute [Authorize(Policy=@Policies.AllowMultiplePayment) ]*@
+﻿@page "/App/Loans/Repayment/{LoanId}/Multiple"
 <PageTitle>Repayment</PageTitle>
 <div class="container-fluid">
     <CustomerLoanInformation LoanSchedule="LoanSchedule" />
@@ -147,7 +146,7 @@
                               ButtonStyle="ButtonStyle.Success"
                               Click="ApplySchedulePayment"
                               Text="Applied Payment" />
-                <RadzenLink Path="@($"/Loans?BranchId={BranchId}&UserId={UserId}")"
+                <RadzenLink Path="@($"/Loans?BranchId={BranchId}&UserId={_userId}")"
                             Text="Cancel" />
             </RadzenStack>
         </CardFooter>

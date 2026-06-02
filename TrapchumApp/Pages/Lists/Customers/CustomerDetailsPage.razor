@@ -5,6 +5,7 @@
 @using TrapchumApp.Pages.Lists.Customers.Activties
 @using TrapchumApp.Pages.Lists.Customers.Notes
 <PageTitle>Customer Details</PageTitle>
+@attribute [Authorize]
 @attribute [StreamRendering]
 @if (_isLoading)
 {

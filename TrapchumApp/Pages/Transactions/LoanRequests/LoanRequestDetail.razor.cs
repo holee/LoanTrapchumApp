@@ -10,6 +10,7 @@ using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using TrapchumApp.Services;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.LoanRequests
@@ -46,7 +47,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         BadgeStyle StatusBadgeStyle => _request?.StatusId switch
         {
             (int)RequestStatus.Approved => BadgeStyle.Success,
-            (int)RequestStatus.Completed => BadgeStyle.Info,
+            (int)RequestStatus.Disbursed => BadgeStyle.Info,
             (int)RequestStatus.Denied => BadgeStyle.Danger,
             (int)RequestStatus.Rechecked or (int)RequestStatus.Rechecking => BadgeStyle.Warning,
             _ => BadgeStyle.Light
@@ -58,9 +59,18 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
             aprovedUserId = user.GetId();
 
-            await AppState.GetAuthenticatedUser(user);
+            _ = userServices.GetLoanSizeByUserAsync();
+
+            //await AppState.GetAuthenticatedUser(user);
 
             await LoadDataAsync();
+
+            _ = AppState.WhoCanApproved((_request, userServices.UserLoanSize));
+
+            _ = AppState.WhoCanRequest(_request);
+
+            _ = AppState.WhoCanDisbursemnt(_request);
+
 
             if (_request is not null)
             {
@@ -101,14 +111,16 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
         async Task CreateLoanRequest()
         {
-            if (!await ConfirmActionAsync("Do you want to approve this request?"))
-                return;
+
+            if (await MsgBox.ConfirmAsync("Do you want to approve this request?") == MsgBoxResult.No) return;
 
             var model = _request?.MapToLoanRequestCreate();
 
             if (model is null)
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Loan request data is null.");
+
+                _toastService.ShowInfo("Loan request data is null.");
+
                 return;
             }
 
@@ -132,13 +144,15 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                     Success = rsp.Value.Success
                 };
 
-                NotificationService.Notify(NotificationSeverity.Success, "Success");
-                StateHasChanged();
+                _toastService.ShowSuccess("New Loan Request was request successfully.");
+
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+                _toastService.ShowError(rsp.GetMessage());
             }
+
+            StateHasChanged();
         }
 
         async Task GetLoanRequestDetails(ClaimsPrincipal user, bool include = true)
@@ -176,8 +190,10 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
         async Task DeniedLoanRequest()
         {
-            if (!await ConfirmActionAsync("Do you want to reject this request?"))
-                return;
+
+            var confirm = await MsgBox.ConfirmAsync("Do you want to reject this request?");
+
+            if (confirm == MsgBoxResult.No) return;
 
             var req = new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo, RequestStatus.Denied);
 
@@ -200,8 +216,10 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
         async Task RecheckedLoanRequest()
         {
-            if (!await ConfirmActionAsync("Do you want to return back this request?"))
-                return;
+
+            var confirm = await MsgBox.ConfirmAsync("Do you want to return back this request?", "Loan Request");
+
+            if (confirm == MsgBoxResult.No) return;
 
             var req = new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo, RequestStatus.Rechecked);
 
@@ -211,20 +229,21 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
             if (rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
+
+                _toastService.ShowSuccess(rsp.Value.Message);
 
                 await RefreshDataAsync();
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+                _toastService.ShowError(rsp.GetMessage());
             }
         }
 
         async Task SaveLoanRequestAccount()
         {
-            if (!await ConfirmActionAsync("Do you want to save this request?"))
-                return;
+
+            if (await MsgBox.ConfirmAsync("Do you want to save this request?") == MsgBoxResult.No) return;
 
             var saveReq = new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo, RequestStatus.Approved);
 
@@ -234,13 +253,15 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
             if (rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
+                _toastService.ShowSuccess(rsp.Value.Message);
 
                 await RefreshDataAsync();
             }
             else
             {
                 NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+
+                _toastService.ShowError(rsp.GetMessage());
             }
         }
 
@@ -249,7 +270,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
             var dia = await MsgBox.ShowAsync("Do you want to save this request?", "Loan Request", MsgBoxButtons.YesNo, MsgBoxBoxIcon.Question);
 
-            if(dia == MsgBoxResult.No)
+            if (dia == MsgBoxResult.No)
             {
                 _toastService.ShowInfo("Request was cancelled.");
 
@@ -302,7 +323,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
 
 
-        async Task SendLoanRequest() 
+        async Task SendLoanRequest()
         {
             var options = new DialogOptions
             {
@@ -333,6 +354,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             if (user is not null)
             {
                 await GetLoanRequestDetails(user, true);
+
                 StateHasChanged();
             }
         }

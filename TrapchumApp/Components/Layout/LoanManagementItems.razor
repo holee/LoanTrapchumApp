@@ -1,13 +1,21 @@
 ﻿@using Applications.Extensions.Identity.Authorizations.Extensions
 @using TrapchumApp.Helpers.Extensions
 <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
-    <RadzenPanelMenuItem Text="Loans Disbursement" Icon="lists" Path="@($"/App/Loans/Disbursements/{BranchId}/Branches")" Visible="@_canShowLoan" />
+    <RadzenPanelMenuItem Text="Loans Disbursement"
+                         Icon="lists"
+                         Path="@($"/App/Loans/Disbursements/{BranchId}/Branches")"
+                         Visible="@_canShowLoan" />
     <RadzenPanelMenuItem Text="Client Due Pay"
                          Icon="schedule"
-                         Path="@($"/App/Loans/Schedules/{BranchId}/Branches")" Visible="@_canShowLoan" />
-    <RadzenPanelMenuItem Text="Loan Write Off" Icon="person_off" Path="@($"/App/Loans/Disbursements/{BranchId}/Write-Off")" Visible="@BState.IsAccount" />
-    <RadzenPanelMenuItem Text="Loan Pay Off" Icon="person_off" Path="@($"/App/Loans/Disbursements/{BranchId}/Pay-Off")" Visible="@BState.IsAccount" />
+                         Path="@($"/App/Loans/Schedules/{BranchId}/Branches")"
+                         Visible="@_canShowLoan" />
     <RadzenPanelMenuItem Text="Loans Request" Icon="request_quote" Path="@($"/App/Loans/Requests/{BranchId}/Branches")"
+                         Visible="@BState.IsAccount" />
+    <RadzenPanelMenuItem Text="Loan Write Off"
+                         Icon="person_off" Path="@($"/App/Loans/Disbursements/{BranchId}/Write-Off")"
+                         Visible="@BState.IsAccount" />
+    <RadzenPanelMenuItem Text="Loan Pay Off"
+                         Icon="person_off" Path="@($"/App/Loans/Disbursements/{BranchId}/Pay-Off")"
                          Visible="@BState.IsAccount" />
     <RadzenPanelMenuItem Text="Notifications"
                          Icon="notifications"
@@ -29,12 +37,6 @@
     private string? _userId = string.Empty;
     bool _canShowLoan = false;
     bool _canShowLoanRequest = false;
-    bool _isAdminOnly = false;
-    bool _isCreditAgentOnly = false;
-    bool _isManagerOnly = false;
-    bool _canReadLoanRequest = false;
-    bool _isAccountOnly = false;
-
     protected override async Task OnInitializedAsync()
     {
         var state = await AuthenticationState;
@@ -50,16 +52,6 @@
 
         _canShowLoanRequest = await _authorizeService.MustHasPermissionAsync(user, Policies.ReadLoanRequest);
 
-        _isAdminOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.AdminOnly);
-
-        _isCreditAgentOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.CreditOfficerOnly);
-
-        _isManagerOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.ManagerOnly);
-
-        _canReadLoanRequest = await _authorizeService.MustHasPermissionAsync(user, AppPermission.RuleFor(Modules.LoanRequest, Actions.Read));
-
-        _isAccountOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.AccountOnly);
-
         _changeCreditUrl = $"/App/Loan/CreditAgent/{BranchId}/Branches";
 
         _loanRequestUrl = $"/App/Request/{BranchId}/Branches";
@@ -73,4 +65,18 @@
         await base.OnInitializedAsync();
     }
 
+
+
+// _isAdminOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.AdminOnly);
+// _isCreditAgentOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.CreditOfficerOnly);
+// _isManagerOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.ManagerOnly);
+// _canReadLoanRequest = await _authorizeService.MustHasPermissionAsync(user, AppPermission.RuleFor(Modules.LoanRequest, Actions.Read));
+// _isAccountOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.AccountOnly);
+//bool _canReadLoanRequest = false;
+//bool _isAccountOnly = false;
+// bool _isAdminOnly = false;
+// bool _isCreditAgentOnly = false;
+// bool _isManagerOnly = false;
+
 }
+

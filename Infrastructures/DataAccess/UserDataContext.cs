@@ -41,7 +41,8 @@ namespace Infrastructures.DataAccess
             builder.Entity<ApplicationUser>()
                 .HasOne<UserProfiles>()
                 .WithOne()
-                .HasForeignKey<UserProfiles>(u => u.UserRefId);
+                .HasForeignKey<UserProfiles>(u => u.UserRefId)
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
 

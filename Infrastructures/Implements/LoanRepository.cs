@@ -65,7 +65,7 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
                          && r.CustomerRefId == req.CustomerRefId
                          && r.BranchRefId == req.BranchRefId)
                 .ExecuteUpdateAsync(s => s
-                    .SetProperty(r => r.LoanRequestStatusRefId, (int)RequestStatus.Completed)
+                    .SetProperty(r => r.LoanRequestStatusRefId, (int)RequestStatus.Disbursed)
                     .SetProperty(r => r.ModifiedDt, DateTimeOffset.UtcNow), cancellation);
 
             await context.CollateralsLinks
@@ -564,7 +564,33 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
             queries = queries.Take(param.Take);
         }
 
-        var item1 = await queries.AsNoTracking().ToListAsync(cancellation);
+        var item1 = await queries
+            .AsNoTracking()
+            .Select(x => new VSchedule
+            {
+                LoanScheduleId = x.LoanScheduleId,
+                CreditAgentId = x.CreditAgentId,
+                CustomerId = x.CustomerId,
+                LoanId = x.LoanId,
+                BranchId = x.BranchId,
+                CurrencyId = x.CurrencyId,
+                InstallmentNo = x.InstallmentNo,
+                PaymentDate = x.PaymentDate,
+                PenaltyRate = x.PenaltyRate,
+                DayArrea = x.DayArrea,
+                PenaltyAmount = x.PenaltyAmount,
+                TotalPay = x.TotalPay,
+                LoanOutstanding = x.LoanOutstanding,
+                LeftInterestAmount = x.LeftInterestAmount,
+                LeftCollectionFeeAmount = x.LeftCollectionFeeAmount,
+                LeftPrinciple = x.LeftPrinciple,
+                LeftAmount = x.LeftAmount,
+                ScheduleStatusId = x.ScheduleStatusId,
+                ScheduleStatus = x.ScheduleStatus,
+                IsLate = x.IsLate,
+                ScheduleNum = x.ScheduleNum
+            })
+            .ToListAsync(cancellation);
 
         return item1;
 

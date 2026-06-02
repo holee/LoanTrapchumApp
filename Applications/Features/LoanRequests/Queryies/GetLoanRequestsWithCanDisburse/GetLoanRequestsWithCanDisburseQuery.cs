@@ -1,7 +1,4 @@
 ﻿using Applications.Enumerations;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans.Requests;
-using Applications.Utils;
 
 namespace Applications.Features.LoanRequests.Queryies.GetLoanRequestsWithCanDisburse;
 

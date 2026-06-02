@@ -85,17 +85,6 @@ public partial class LoanRequestAllTab
 
         var param = new QueryParam(pageIndex, pageSize, sortColumn, false, sortDescending, filtertext);
 
-        if (bState.CanDisbursed)
-        {
-            userId = string.Empty;
-        }
-        else
-        {
-            await bState.GetUserId();
-
-            userId = bState.UserId;
-        }
-
         var query = new GetLoanRequestAsPagingQuery(null, 0, RequestStatus.All, param);
 
         var rsp = await mediator.Send(query);
@@ -103,8 +92,6 @@ public partial class LoanRequestAllTab
         LoanRequests = rsp.Items;
 
         counts = rsp.Count;
-
-        isLoading = false;
 
         Tracker.Hide();
 

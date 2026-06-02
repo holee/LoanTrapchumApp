@@ -1,0 +1,35 @@
+@using Microsoft.AspNetCore.Components.Web
+
+<div class="ge-container">
+    <div class="ge-card">
+
+        <span class="material-icons ge-icon">error</span>
+
+        <h2 class="ge-title">Something went wrong</h2>
+        <p class="ge-subtitle">An unexpected error occurred. Please try again or return to the home page.</p>
+
+        @if (Exception is not null)
+        {
+            <details class="ge-details">
+                <summary>Error details</summary>
+                <pre class="ge-message">@Exception.Message</pre>
+            </details>
+        }
+
+        <div class="ge-actions">
+            <button class="ge-btn ge-btn-primary" @onclick="OnRecover">
+                <RadzenIcon Icon="@IconNames.Refresh" />Try Again
+            </button>
+            <a class="ge-btn ge-btn-outline" href="/">
+                <RadzenIcon Icon="@IconNames.Home" />Go Home
+            </a>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    [Parameter] public Exception? Exception { get; set; }
+    [Parameter] public EventCallback OnRecover { get; set; }
+}
+

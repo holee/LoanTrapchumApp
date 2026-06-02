@@ -3,6 +3,7 @@
               Click="@HandleClick"
               ButtonStyle="ButtonStyle.Danger"
               ButtonType="@ButtonType"
+              Disabled="@Disabled"
               Icon="@Icon"></RadzenButton>
 @code {
     [Parameter]
@@ -15,6 +16,8 @@
     public ButtonType ButtonType { get; set; } = ButtonType.Button;
     [Parameter]
     public ButtonSize Size { get; set; } = ButtonSize.ExtraSmall;
+    [Parameter]
+    public bool Disabled { get; set; } = false;
 
     private void HandleClick()
     {

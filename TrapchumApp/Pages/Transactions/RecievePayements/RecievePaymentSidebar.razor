@@ -1,80 +1,106 @@
 ﻿@using TrapchumApp.Pages.Transactions.Exchanges
-<PageTitle>Recieve Payment</PageTitle>
-<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-             JustifyContent="JustifyContent.End">
-    <RadzenButton Size="ButtonSize.ExtraSmall" Click="OpenSide">Show Exchange</RadzenButton>
-</RadzenStack>
-<RadzenRow AlignItems="AlignItems.Center" class="rz-px-1 rz-py-2 rz-m-0">
-    <RadzenColumn Size="5">
-        <RadzenButton class="@Styles.W100"
-                      Size="ButtonSize.Small"
-                      ButtonStyle="ButtonStyle.Primary">
-            Paid Amount
-            <RadzenBadge BadgeStyle="BadgeStyle.Secondary"
-                         IsPill="@true"
-                         class="rz-ms-2">
-                <ChildContent>
+@using Radzen.Blazor.Rendering
+<PageTitle>Receive Payments.....</PageTitle>
+
+<style type="text/css">
+    .my-popup {
+        display: none;
+        position: absolute;
+        overflow: hidden;
+        height: 420px;
+        width: 550px;
+        padding: 1.2rem;
+        border: var(--rz-panel-border);
+        background: var(--rz-base-300);
+        box-shadow: var(--rz-panel-shadow);
+        border-radius: var(--rz-border-radius)
+    }
+</style>
+<RadzenStack Gap="0">
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.SpaceBetween"
+                 class="rz-px-3 rz-py-2 rz-border-bottom">
+        <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0 rz-color-on-base-2">
+            <RadzenIcon Icon="payments" class="rz-me-1" style="vertical-align:middle;font-size:1rem;" />
+            Receive Payment
+        </RadzenText>
+        <RadzenButton @ref="@_exchangeBtn"
+                      Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Light"
+                      Icon="currency_exchange"
+                      Text="Exchange"
+                      Click="OpenSide" />
+    </RadzenStack>
+
+    <Popup @ref="_exchangePopup" Lazy="true"
+           AutoFocusFirstElement="false"
+           CloseOnClickOutside="true"
+           PreventDefault="true"
+           class="my-popup">
+        <ExchangesPopup 
+            CurrencyId="@_selectedCurrencyId" 
+            Amount="@_exchangeAmount" 
+                        ClosePopup="@ClosePopup"      />
+    </Popup>
+
+    <RadzenRow class="rz-px-3 rz-pt-3 rz-pb-1" Gap="0.5rem">
+        <RadzenColumn Size="6">
+            <RadzenCard class="rz-p-2 rz-text-align-center" style="border-radius:0.75rem;background:var(--rz-primary-lighter);">
+                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-on-base-2 rz-mb-1">Paid Amount</RadzenText>
+                <RadzenText TextStyle="TextStyle.H6" class="rz-m-0 rz-color-primary">
                     @LoanRepayment.AmountWithoutPenalty.Format(CurrencyId)
-                </ChildContent>
-            </RadzenBadge>
-        </RadzenButton>
-    </RadzenColumn>
-    <RadzenColumn Size="5">
-        <RadzenButton class="rz-w-100"
-                      Size="ButtonSize.Small"
-                      ButtonStyle="ButtonStyle.Primary">
-            Penalty Amount
-            <RadzenBadge BadgeStyle="BadgeStyle.Danger"
-                         IsPill="@true"
-                         class="rz-ms-2">
-                <ChildContent>
-                    @(LoanRepayment.PaidPenaltyAmount.Format(CurrencyId))
-                </ChildContent>
-            </RadzenBadge>
-        </RadzenButton>
-    </RadzenColumn>
-    <RadzenColumn Size="2">
-        <RadzenStack Orientation="Orientation.Horizontal"
-                     JustifyContent="JustifyContent.End"
-                     AlignItems="AlignItems.Center">
-            <RadzenButton Click="RestoreDefault"
-                          ButtonStyle="ButtonStyle.Primary"
-                          Text="Default"
-                          Size="ButtonSize.Small">
-            </RadzenButton>
-        </RadzenStack>
-    </RadzenColumn>
-</RadzenRow>
-<EditForm Model="LoanRepayment" @ref="@editForm">
-    <FluentValidationValidator DisableAssemblyScanning="true" />
-    <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
-        <RadzenColumn Size="12">
+                </RadzenText>
+            </RadzenCard>
+        </RadzenColumn>
+        <RadzenColumn Size="6">
+            <RadzenCard class="rz-p-2 rz-text-align-center" style="border-radius:0.75rem;background:var(--rz-danger-lighter);">
+                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-on-base-2 rz-mb-1">Penalty</RadzenText>
+                <RadzenText TextStyle="TextStyle.H6" class="rz-m-0 rz-color-danger">
+                    @LoanRepayment.PaidPenaltyAmount.Format(CurrencyId)
+                </RadzenText>
+            </RadzenCard>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <EditForm Model="LoanRepayment" @ref="@editForm">
+        <FluentValidator />
+        <RadzenStack Gap="0.75rem" class="rz-px-3 rz-pt-2 rz-pb-3">
+
             <RadzenFormField Text="Receipt No" AllowFloatingLabel="true" class="@Styles.W100">
-                <RadzenTextBox @bind-Value="LoanRepayment.OfficialReceiptNo"
-                               Disabled="@isBusy"
-                               class="@Styles.W100" />
+                <Start>
+                    <RadzenIcon Icon="receipt" class="rz-color-on-base-2" />
+                </Start>
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="LoanRepayment.OfficialReceiptNo"
+                                   Disabled="@isBusy"
+                                   class="@Styles.W100" />
+                </ChildContent>
             </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
-        <RadzenColumn Size="12">
+
             <RadzenFormField Text="Penalty Amount" AllowFloatingLabel="true" class="@Styles.W100">
-                <RadzenNumeric TValue="decimal?"
-                               Value="LoanRepayment.PenaltyAmount"
-                               onclick="this.querySelector('.rz-numeric-input').select()"
-                               TextAlign="TextAlign.End"
-                               class="@Styles.W100"
-                               Format="@Defaults.DefaultCurrencyFormat"
-                               Min="0"
-                               Disabled="@isBusy"
-                               @oninput="CalculatePenaltyAmount"
-                               ShowUpDown="false" />
+                <Start>
+                    <RadzenIcon Icon="warning_amber" class="rz-color-on-base-2" />
+                </Start>
+                <ChildContent>
+                    <RadzenNumeric TValue="decimal?"
+                                   Value="LoanRepayment.PenaltyAmount"
+                                   onclick="this.querySelector('.rz-numeric-input').select()"
+                                   TextAlign="TextAlign.End"
+                                   class="@Styles.W100"
+                                   Format="@Defaults.DefaultCurrencyFormat"
+                                   Min="0"
+                                   Disabled="@isBusy"
+                                   @oninput="CalculatePenaltyAmount"
+                                   ShowUpDown="false" />
+                </ChildContent>
             </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow AlignItems="AlignItems.Center" class="@Styles.Mt2">
-        <RadzenColumn Size="12">
+
             <RadzenFormField Text="Total Amount" AllowFloatingLabel="true" class="@Styles.W100">
+                <Start>
+                    <RadzenIcon Icon="calculate" class="rz-color-on-base-2" />
+                </Start>
                 <ChildContent>
                     <RadzenNumeric TValue="decimal?"
                                    Value="LoanRepayment.SubTotal"
@@ -89,11 +115,11 @@
                     <ValidationMessage For="@(() => LoanRepayment.SubTotal)" />
                 </Helper>
             </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow AlignItems="AlignItems.Center" class="@Styles.Mt2">
-        <RadzenColumn Size="12">
-            <RadzenFormField Text="Recieve Amount" AllowFloatingLabel="true" class="@Styles.W100">
+
+            <RadzenFormField Text="Receive Amount" AllowFloatingLabel="true" class="@Styles.W100">
+                <Start>
+                    <RadzenIcon Icon="payments" class="rz-color-on-base-2" />
+                </Start>
                 <ChildContent>
                     <RadzenNumeric TValue="decimal?"
                                    ShowUpDown="false"
@@ -111,56 +137,85 @@
                     <ValidationMessage For="@(() => LoanRepayment.RecieveAmount)" />
                 </Helper>
             </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow AlignItems="AlignItems.Center" class="@Styles.Mt2">
-        <RadzenColumn Size="12">
+
             <RadzenFormField Text="Change" AllowFloatingLabel="true" class="@Styles.W100">
-                <RadzenNumeric TValue="decimal?"
-                               @bind-Value="LoanRepayment.ChangeAmount"
-                               TextAlign="TextAlign.End"
-                               class="rz-w-100"
-                               Format="#,##0.00"
-                               ReadOnly
-                               Min="0"
-                               ShowUpDown="false">
-                </RadzenNumeric>
+                <Start>
+                    <RadzenIcon Icon="currency_exchange" class="rz-color-on-base-2" />
+                </Start>
+                <ChildContent>
+                    <RadzenNumeric TValue="decimal?"
+                                   @bind-Value="LoanRepayment.ChangeAmount"
+                                   TextAlign="TextAlign.End"
+                                   class="@Styles.W100"
+                                   Format="#,##0.00"
+                                   ReadOnly
+                                   Min="0"
+                                   ShowUpDown="false" />
+                </ChildContent>
             </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenStack Orientation="Orientation.Horizontal"
-                 AlignItems="AlignItems.Center"
-                 class="@Styles.Mt2"
-                 JustifyContent="JustifyContent.End"
-                 Gap="1rem">
-        <RadzenButton ButtonStyle="ButtonStyle.Success"
-                      Size="ButtonSize.Small"
-                      Icon="@IconNames.Save"
-                      Text="Confirm"
-                      IsBusy="isBusy"
-                      BusyText="Recieving..."
-                      Click="@OnSaveChanges">
-        </RadzenButton>
-        <RadzenButton Size="ButtonSize.Small"
-                      ButtonStyle="ButtonStyle.Danger"
-                      Icon="cancel"
-                      Text="Close"
-                      Disabled="@isBusy"
-                      Click="@CloseModal">
-        </RadzenButton>
-    </RadzenStack>
-</EditForm>
+
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.SpaceBetween"
+                         class="rz-pt-1"
+                         Gap="0.5rem">
+                <RadzenButton ButtonStyle="ButtonStyle.Light"
+                              Size="ButtonSize.Small"
+                              Icon="restart_alt"
+                              Text="Default"
+                              Disabled="@isBusy"
+                              Click="RestoreDefault" />
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                  Size="ButtonSize.Small"
+                                  Icon="cancel"
+                                  Text="Close"
+                                  Disabled="@isBusy"
+                                  Click="@CloseModal" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                  Size="ButtonSize.Small"
+                                  Icon="@IconNames.Save"
+                                  Text="Confirm"
+                                  IsBusy="isBusy"
+                                  BusyText="Processing..."
+                                  Click="@OnSaveChanges" />
+                </RadzenStack>
+            </RadzenStack>
+
+        </RadzenStack>
+    </EditForm>
+
+</RadzenStack>
+
 @code {
 
-    DialogOptions options = new DialogOptions
-    {
-        CloseDialogOnOverlayClick = true,
-        Draggable = true,
-        Left = "0rem"
-    };
+    RadzenButton _exchangeBtn = default!;
 
-    void OpenSide()
+    Popup _exchangePopup = default!;
+
+    private int? _selectedCurrencyId = 0;
+
+    private decimal? _exchangeAmount = 0;
+
+    async Task OpenSide()
     {
-        DialogService.Open<ExchangesSidebar>("Money Exchanged", options: options);
+        if (LoanPaymentCreate.ChangeAmount > 0)
+        {
+            _exchangeAmount = LoanPaymentCreate.ChangeAmount;
+        }
+        else
+        {
+            _exchangeAmount = LoanPaymentCreate.AmountWithoutPenalty;
+        }
+
+        _selectedCurrencyId = LoanPaymentCreate.CurrencyRefId;
+
+        await _exchangePopup.ToggleAsync(_exchangeBtn.Element);
     }
+
+    async Task ClosePopup() 
+    {
+        await _exchangePopup.CloseAsync(_exchangeBtn.Element);
+    }
+
 }

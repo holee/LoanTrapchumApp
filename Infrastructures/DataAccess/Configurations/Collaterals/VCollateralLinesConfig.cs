@@ -21,7 +21,9 @@ public class VCollateralLinesConfig : IBaseEntityTypeConfigurations<VCollateralL
         builder.Property(x => x.Description).HasMaxLength(200);
         builder.Property(x => x.WareHouse).HasMaxLength(200);
         builder.Property(x => x.RegisterDate).HasColumnName("RegisterDate");
-        builder.Property(x => x.CollateralSubTypeName).HasMaxLength(250);
+        builder.Property(x => x.SubTypeName)
+                    .HasColumnName("CollateralSubTypeName")
+                    .HasMaxLength(250);//SubTypeName
         builder.Property(x => x.IsUsed).HasColumnName("IsUsed");
     }
 }

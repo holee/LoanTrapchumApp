@@ -1,5 +1,5 @@
 ﻿@page "/App/Loans/{LoanRequestId}/Requests/{BranchId:int}/Branches/{CustomerId}/Details"
-@using Domains.Enumerations
+@using TrapchumApp.Components.Indicatros
 @using TrapchumApp.Pages.Lists.Customers
 @attribute [MustHasPermission(Modules.LoanRequest, Actions.Read)]
 @attribute [StreamRendering]
@@ -7,15 +7,8 @@
 
 @if (_isLoading)
 {
-    <RadzenStack AlignItems="AlignItems.Center"
-                 JustifyContent="JustifyContent.Center"
-                 Style="min-height:20rem;">
-        <RadzenProgressBarCircular ShowValue="false"
-                                   Mode="ProgressBarMode.Indeterminate"
-                                   Size="ProgressBarCircularSize.Medium" />
-        <RadzenText TextStyle="TextStyle.Body2"
-                    class="rz-color-base-600">កំពុងផ្ទុកសំណើរកម្ចី...</RadzenText>
-    </RadzenStack>
+
+    <Loading Text="កំពុងផ្ទុកសំណើរកម្ចី..." />
 }
 else if (_request is not null)
 {
@@ -31,57 +24,72 @@ else if (_request is not null)
         </HeaderTemplate>
         <ChildContent>
             <RadzenRow Gap="0.5rem" class="rz-py-2">
-                <RadzenColumn SizeSM="6" SizeMD="3">
+                <RadzenColumn SizeSM="6" SizeMD="2">
                     <RadzenText TextStyle="TextStyle.Caption" class="rz-text-caption rz-color-base-600">ចំនួនទឹកប្រាក់ស្នើរសុំ</RadzenText>
                     <RadzenText TextStyle="TextStyle.Body1"><strong>@_request.RequestAmount.Format(_request.CurrencyId)</strong></RadzenText>
                 </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="3">
+                <RadzenColumn SizeSM="6" SizeMD="2">
                     <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រភេទបង់រំលោះ</RadzenText>
                     <RadzenText TextStyle="TextStyle.Body1">@_request.RepaymentMode</RadzenText>
                 </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="3">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ខ្ចីលើកទី</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@_request.Circle</RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="3">
+                <RadzenColumn SizeSM="6" SizeMD="2">
                     <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">រយៈពេលខ្ចីប្រាក់</RadzenText>
                     <RadzenText TextStyle="TextStyle.Body1">@_request.Installments @_request.InstallmentType</RadzenText>
                 </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="2">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ខ្ចីលើកទី</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@_request.Circle</RadzenText>
+                </RadzenColumn>
             </RadzenRow>
             <RadzenRow Gap="0.5rem" class="rz-py-2">
-                <RadzenColumn SizeSM="6" SizeMD="3">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រាក់ប្រសិទ្ធិភាព</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@_request.CollectionFeeRate (%)</RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="3">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រភេទកម្ចី</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@_request.LoanCategoryName</RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="3">
+                <RadzenColumn SizeSM="6" SizeMD="2">
                     <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អត្រាការប្រាក់</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@_request.InterestRate (%)</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@(_request.InterestRate.AsPercent())</RadzenText>
                 </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="3">
+                <RadzenColumn SizeSM="6" SizeMD="2">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អត្រាប្រាក់ប្រសិទ្ធិភាព</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@(_request.CollectionFeeRate.AsPercent())</RadzenText>
+                </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="2">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អត្រាសេវារដ្ឋបាល</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@(_request.AdminFeeRate.AsPercent())</RadzenText>
+                </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="2">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រាក់សេវារដ្ឋបាល</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@(_request.AdminFeeAmount.ToFormattedNumber(2))</RadzenText>
+                </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="2">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រាក់ប្រសិទ្ធិភាព</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">
+                        @{
+                            decimal? amount = (_request.CollectionFeeRate / 100) * _request.AprovedAmount;
+                        }
+                        @amount.ToFormattedNumber(2)
+                    </RadzenText>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow Gap="0.5rem" class="rz-py-2">
+                <RadzenColumn SizeSM="6" SizeMD="2">
                     <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ថ្ងៃខ្ចីប្រាក់</RadzenText>
                     <RadzenText TextStyle="TextStyle.Body1">@_request.RequestDate.DayFirst()</RadzenText>
                 </RadzenColumn>
-            </RadzenRow>
-            <RadzenRow Gap="0.5rem" class="rz-py-2">
-                <RadzenColumn SizeSM="6" SizeMD="3">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">សេវារដ្ឋបាល</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@_request.AdminFeeAmount.Format(_request.CurrencyId)</RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="3">
+                <RadzenColumn SizeSM="6" SizeMD="2">
                     <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ថ្ងៃបង់ប្រាក់លើកដំបូង</RadzenText>
                     <RadzenText TextStyle="TextStyle.Body1">@_request.FirstPaymentDate.DayFirst()</RadzenText>
                 </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="3">
+                <RadzenColumn SizeSM="6" SizeMD="2">
                     <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">មន្ត្រីស្នើរសុំ</RadzenText>
                     <RadzenText TextStyle="TextStyle.Body1">@_request.Summiter</RadzenText>
                 </RadzenColumn>
                 <RadzenColumn SizeSM="6" SizeMD="3">
                     <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អ្នកអនុម័ត្ត</RadzenText>
                     <RadzenText TextStyle="TextStyle.Body1">@_request.AprovedBy</RadzenText>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow Gap="0.5rem" class="rz-py-2">
+                <RadzenColumn SizeSM="6" SizeMD="2">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រភេទកម្ចី</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@_request.LoanCategoryName</RadzenText>
                 </RadzenColumn>
             </RadzenRow>
         </ChildContent>
@@ -91,16 +99,13 @@ else if (_request is not null)
         <RadzenTabs RenderMode="TabRenderMode.Client">
             <Tabs>
                 <RadzenTabsItem Text="ព័ត៌មានអតិថិជន" Icon="@IconNames.Priority">
-                    <CustomerInfo Customer="@_request.Customer" @key="@CustomerId" />
+                    <CustomerInfo Customer="@_request!.Customer" @key="@CustomerId" />
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="ទ្រព្យបញ្ចាំនិងអ្នកធានា" Icon="@IconNames.Collaterals">
                     <LoanRequestCollaterals CustomerId="@CustomerId"
                                             ShowAdd="false"
                                             ShowCommand="false"
-                                            Collaterals="@_request.Collaterals.ToList()">
-                        <SearchBoxTemplate>
-                            <CollateralSearchList CustomerId="@CustomerId" />
-                        </SearchBoxTemplate>
+                                            Collaterals="@_request!.Collaterals.ToList()">
                     </LoanRequestCollaterals>
                     <LoanRequestGaurantor ShowAdd="false"
                                           ShowCommand="false"
@@ -111,7 +116,7 @@ else if (_request is not null)
                     <CustomerProfit CustomerId="@CustomerId" ShowAction="false" ShowCommand="false" />
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="ឯកសារផ្សេងៗ" Icon="@IconNames.AttachFile">
-                    <LoanRequestDocument Documents="@_request.Documents.ToList()"
+                    <LoanRequestDocument Documents="@_request!.Documents.ToList()"
                                          ShowUpload="false"
                                          @key="@LoanRequestId" />
                 </RadzenTabsItem>
@@ -143,7 +148,7 @@ else if (_request is not null)
 
         <AuthorizeView Policy="@Policies.RequestLoanRequest">
             <Authorized>
-                @if (_request.IsRequesting && !_result.Success)
+                @if (_request!.IsRequesting && !_result.Success)
                 {
                     <RadzenButton ButtonStyle="@Styles.Save"
                                   Icon="@IconNames.RequestQuote"
@@ -157,35 +162,38 @@ else if (_request is not null)
 
         <AuthorizeView Policy="@Policies.ApproveLoanRequest">
             <Authorized>
-                @if (_request.IsRequested)
+                @if (_request!.IsRequested)
                 {
                     <RadzenButton ButtonStyle="ButtonStyle.Primary"
                                   Icon="@IconNames.Save"
                                   Size="@Styles.DefaultSize"
                                   Click="SaveLoanRequestManager"
+                                  Disabled="@(_request.IsSubmitted==true && !AppState.CanApproved)"
                                   Text="រក្សាទុក" />
                     <RadzenButton ButtonStyle="ButtonStyle.Success"
                                   Icon="@IconNames.RequestQuote"
                                   Size="@Styles.DefaultSize"
-                                  Click="ApproveLoanRequest"
-                                  Visible="@(AppState.NormalAmountApproved || AppState.MaximumAmountApproved)"
+                                  Click="@ApproveLoanRequest"
+                                  Visible="@AppState.CanApproved"
                                   Text="អនុម័ត" />
                     <RadzenButton ButtonStyle="ButtonStyle.Success"
                                   Icon="@IconNames.RequestQuote"
                                   Size="@Styles.DefaultSize"
                                   Click="SendLoanRequest"
                                   Disabled="@(_request.IsSubmitted==true)"
-                                  Visible="@(!AppState.NormalAmountApproved && !AppState.MaximumAmountApproved)"
+                                  Visible="!AppState.CanApproved"
                                   Text="បញ្ជូនបន្ត" />
                     <RadzenButton ButtonStyle="ButtonStyle.Secondary"
                                   Icon="@IconNames.Block"
                                   Size="@Styles.DefaultSize"
                                   Click="DeniedLoanRequest"
+                                  Disabled="@(_request.IsSubmitted==true && !AppState.CanApproved)"
                                   Text="បដិសេធ" />
                     <RadzenButton ButtonStyle="ButtonStyle.Primary"
                                   Icon="@IconNames.Undo"
                                   Size="@Styles.DefaultSize"
-                                  Click="RecheckedLoanRequest"
+                                  Click="@RecheckedLoanRequest"
+                                  Disabled="@(_request.IsSubmitted==true && !AppState.CanApproved)"
                                   Text="ពិនិត្យឡើងវិញ" />
                 }
             </Authorized>
@@ -193,7 +201,7 @@ else if (_request is not null)
 
         <AuthorizeView Policy="@Policies.Disburse">
             <Authorized>
-                @if (_request.IsApproved)
+                @if (_request!.IsApproved)
                 {
                     <RadzenButton ButtonStyle="ButtonStyle.Primary"
                                   Icon="@IconNames.Save"

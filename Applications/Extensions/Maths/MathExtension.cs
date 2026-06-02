@@ -6,6 +6,7 @@ namespace Applications.Extensions.Maths
 {
     public static class MathExtension
     {
+        private static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
 
         public static decimal RoundUsd(this decimal? number, int decimalPlaces)
         {
@@ -148,6 +149,24 @@ namespace Applications.Extensions.Maths
 
             return rounding.Format(currencyId);
         }
+
+        public static MarkupString FormatUp(this decimal? number, int decimalPlaces, int? currencyId)
+        {
+            var arg = number ?? 0;
+
+            var rounding = 0.0M;
+
+            if (currencyId == 1)
+            {
+                rounding = arg.RoundUp(-decimalPlaces);
+            }
+            else
+            {
+                rounding = arg.RoundUp(decimalPlaces);
+            }
+
+            return rounding.Format(currencyId);
+        }
         public static MarkupString FormatDown(this decimal number, int decimalPlaces, int currencyId)
         {
             var rounding = 0.0M;
@@ -201,8 +220,6 @@ namespace Applications.Extensions.Maths
         public static MarkupString Format(this decimal? d, int? currencyId = 1)
         {
 
-            //if (!d.HasValue || d == 0) return (MarkupString)"-";
-
             return currencyId switch
             {
                 1 => (MarkupString)string.Format("{0:##,0.##} {1}", d, "&#6107;"),
@@ -211,6 +228,17 @@ namespace Applications.Extensions.Maths
             };
         }
 
+
+        public static string ToFormattedNumber(this decimal value, int decimalPlaces = 2)
+        {
+            var format = $"#,##0.{new string('0', decimalPlaces)}";
+            return value.ToString(format, Culture);
+        }
+
+        public static string ToFormattedNumber(this decimal? value, int decimalPlaces = 2)
+        {
+            return (value ?? 0m).ToFormattedNumber(decimalPlaces);
+        }
 
         public static MarkupString Format(this decimal? d, CurrenciesType type)
         {
@@ -234,7 +262,7 @@ namespace Applications.Extensions.Maths
 
         public static string AsPercent(this decimal? d)
         {
-            return $"{d}%";
+            return $"{d:N2}%";
         }
 
         public static string SetFormat(this decimal? d, int? currencyId)

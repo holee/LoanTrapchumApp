@@ -14,7 +14,7 @@
                                   ButtonType="ButtonType.Button" Text="New Journal" />
                 </LeftChildren> 
             </GridToolbar>
-            <RadzenDataGrid GridLines="DataGridGridLines.Horizontal"
+            <RadzenDataGrid GridLines="DataGridGridLines.Both"
                             AllowAlternatingRows="true"
                             Density="Density.Compact"
                             AllowPaging="true"
@@ -22,7 +22,6 @@
                             LoadData="@LoadData"
                             PagerHorizontalAlign="HorizontalAlign.Right"
                             Count="@counts"
-                            IsLoading="@Tracker.IsLoading"
                             TItem="JournalEntryVm"
                             RowSelect="RowSelecting"
                             PageSizeOptions="@StorageConstant.PageSizeOptions"
@@ -41,7 +40,8 @@
                                           Context="c"
                                           Sortable="false" Title="Adjustment">
                         <Template>
-                            <RadzenCheckBox Disabled @bind-Value="c.IsAdjustment"/>
+                            <RadzenBadge Text="@(c.IsAdjustment ? "Yes" : "No")"
+                                         BadgeStyle="@(c.IsAdjustment ? BadgeStyle.Success : BadgeStyle.Light)" />
                         </Template>
                     </RadzenDataGridColumn>
 

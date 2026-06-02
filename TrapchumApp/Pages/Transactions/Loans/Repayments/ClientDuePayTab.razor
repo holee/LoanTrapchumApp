@@ -24,14 +24,13 @@
                 PageSize="pageSize"
                 Density="Density.Compact"
                 GridLines="DataGridGridLines.Both"
-                LoadData="LoadData"
+                LoadData="@LoadData"
                 AllowSorting="true"
                 Responsive="true"
                 RowSelect="@RowSelected"
                 PagerPosition="PagerPosition.Bottom"
                 ShowPagingSummary="true"
                 PagerHorizontalAlign="HorizontalAlign.Right"
-                IsLoading="isLoading"
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
                 PageSizeChanged="ChangedPageSize"
                 AllowRowSelectOnRowClick="true"
@@ -138,11 +137,6 @@
             </Template>
         </RadzenDataGridColumn>
     </Columns>
-    <LoadingTemplate>
-        <RadzenProgressBarCircular Visible="isProgess" ShowValue="false"
-                                   ProgressBarStyle="ProgressBarStyle.Primary"
-                                   Mode="ProgressBarMode.Determinate"></RadzenProgressBarCircular>
-    </LoadingTemplate>
 </RadzenDataGrid>
 @code {
     void ShowContextMenuWithContent(MouseEventArgs args, VSchedule p)

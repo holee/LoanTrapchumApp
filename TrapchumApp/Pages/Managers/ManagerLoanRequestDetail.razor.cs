@@ -47,7 +47,7 @@ public partial class ManagerLoanRequestDetail
     BadgeStyle StatusBadgeStyle => data?.StatusId switch
     {
         (int)RequestStatus.Approved => BadgeStyle.Success,
-        (int)RequestStatus.Completed => BadgeStyle.Info,
+        (int)RequestStatus.Disbursed => BadgeStyle.Info,
         (int)RequestStatus.Denied => BadgeStyle.Danger,
         (int)RequestStatus.Rechecked or (int)RequestStatus.Rechecking => BadgeStyle.Warning,
         _ => BadgeStyle.Light

@@ -9,6 +9,9 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         [Parameter] public string? CustomerId { get; set; }
         [Parameter] public VCustomerDetails? Customer { get; set; } = new();
         [Parameter] public bool ShowAdditionalInfo { get; set; } = false;
+
+        private decimal? _income = 0;
+        private decimal? _expense = 0;
         protected override async Task OnInitializedAsync()
         {
             if (CustomerId.IsNotNullOrEmpty())
@@ -25,6 +28,13 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             if (resp.IsSuccess())
             {
                 Customer = resp.Value;
+
+                Customer.Photo ??= "/assets/profiles/profile.png";
+
+                _income = Customer.Income ?? 0;
+
+                _expense = Customer.Expenditure ?? 0;
+
             }
         }
 

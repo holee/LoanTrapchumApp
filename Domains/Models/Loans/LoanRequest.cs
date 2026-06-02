@@ -33,6 +33,7 @@ public sealed class LoanRequest : BaseEntity
     public int? Circle { get; set; } = 1;
     public DateTime? RequestDate { get; set; }
     public DateTime? AprovedDate { get; set; }
+    public string? ApprovedBy { get; set; } = string.Empty; 
     public DateTime? FirstPaymentDate { get; set; } = DateTime.UtcNow.AddMonths(1);
     public DateTime? LastPaymentDate { get; set; }
     public decimal? AdminFeeRate { get; set; }

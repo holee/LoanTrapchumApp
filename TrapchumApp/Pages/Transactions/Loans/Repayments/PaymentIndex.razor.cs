@@ -1,12 +1,14 @@
 using Applications.Features.Branches.Dtos;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Radzen.Blazor;
+using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
     public partial class PaymentIndex
     {
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+        [CascadingParameter] CascadingAppState bState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; } = 0;
         private string? _userId { get; set; } = string.Empty;
         bool isLoading = false;
@@ -38,6 +40,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         protected override async Task OnInitializedAsync()
         {
             _userId = (await AuthenticationState).GetUserId();
+
+            await AllTab_GetLoansAsync();
 
             await base.OnInitializedAsync();
         }
@@ -106,9 +110,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
             return;
         }
 
-        void GetCustomerLateSchedules(VSchedule p)
+        void GetCustomerLateSchedules(VSchedule? p)
         {
             ContextMenuService.Close();
+
+            LateScheduleDetails(p);
+
+            StateHasChanged();
         }
 
         void CustomerPayOff(VSchedule? p)
@@ -279,7 +287,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         async void ShowPaymentDialogue(VSchedule payment)
         {
-            var parameters = new Dictionary<string, object>
+            var parameters = new Dictionary<string, object?>
             {
                 { "LoanPayment", payment },
                 { "CurrencyId", payment.CurrencyId!.Value },

@@ -1,3 +1,3 @@
-﻿namespace Applications.Features.Dashbaord.CreditOfficers.Dtos;
+﻿namespace Applications.Features.Dashbaord.Dto;
 
 public record NumerLoanRequest(int? NewRequest,int? RecheckRequest);

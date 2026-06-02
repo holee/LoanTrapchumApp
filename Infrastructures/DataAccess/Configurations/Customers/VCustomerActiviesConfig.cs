@@ -9,7 +9,8 @@ namespace Infrastructures.DataAccess.Configurations.Customers
         public void Configure(EntityTypeBuilder<VCustomerActivities> builder)
         {
             builder.ToView("VCustomerActivities");
-            builder.HasKey(x => new { x.ActivityId, x.CustomerRefId });
+
+            builder.HasNoKey();
         }
     }
 }

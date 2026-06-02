@@ -16,11 +16,11 @@ using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {
-    public partial class ExchangesSidebar(ICurrencyService currencyService, IAppSettingService settingsServiceImpl, IForiegnCurrencyExchange exchangeServiceImpl)
+    public partial class ExchangesSidebar(IAppSettingService settingsServiceImpl, IForiegnCurrencyExchange exchangeServiceImpl)
     {
         [CascadingParameter] private CascadingAppState BState { get; set; } = default!;
         [CascadingParameter] private Task<AuthenticationState> AuthenticateState { get; set; } = default!;
-        [Parameter] public int BranchId { get; set; } = 0;
+        [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter] public bool IsSideBar { get; set; } = true;
 
         ForeignExchangeDtoCreate c = new ForeignExchangeDtoCreate();
@@ -248,7 +248,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             _model.TranTypeRefId = 67;
 
-            _model.BranchRefId = BranchId > 0 ? BranchId : BState.BranchId;
+            _model.BranchRefId = BranchId > 0 ? BranchId.Value : BState.BranchId;
 
             _model.TransactionTypeName = TransactionTypes.CFX.GetDescription();//"Currency Foreign Exchange";
 
@@ -256,7 +256,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             c.StaffAuthRefId = _userId ?? BState.UserId;
 
-            c.BranchRefId = BranchId > 0 ? BranchId : BState.BranchId;
+            c.BranchRefId = BranchId > 0 ? BranchId.Value : BState.BranchId;
 
             c.BankRefId = 11;
 

@@ -79,7 +79,10 @@
                               TextAlign="TextAlign.Right"
                               Sortable="true">
             <Template>
-                @p.Principle.Format(p.CurrencyId)
+                <RadzenText TextStyle="TextStyle.Body2"
+                            Style="font-weight:700; color:var(--rz-primary);">
+                    @p.Principle.Format(p.CurrencyId)
+                </RadzenText>
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
@@ -88,7 +91,10 @@
                               TextAlign="TextAlign.Right"
                               Sortable="true">
             <Template>
-                @p.InterestRate (%) / @p.PeriodName
+                <RadzenText TextStyle="TextStyle.Body2"
+                            Style="font-weight:700; color:var(--rz-warning-darker);">
+                    @p.InterestRate (%) / @p.PeriodName
+                </RadzenText>
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
@@ -97,7 +103,10 @@
                               TextAlign="TextAlign.Right"
                               Sortable="true">
             <Template>
-                @p.PaidPrinciple.Format(p.CurrencyId)
+                <RadzenText TextStyle="TextStyle.Body2"
+                            Style="font-weight:700; color:var(--rz-success-darker);">
+                    @p.PaidPrinciple.Format(p.CurrencyId)
+                </RadzenText>
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
@@ -106,7 +115,10 @@
                               TextAlign="TextAlign.Right"
                               Sortable="true">
             <Template>
-                @p.OutStanding.Format(p.CurrencyId)
+                <RadzenText TextStyle="TextStyle.Body2"
+                            Style="font-weight:700; color:var(--rz-danger);">
+                    @p.OutStanding.Format(p.CurrencyId)
+                </RadzenText>
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
@@ -245,6 +257,10 @@
 
         _loanCollateralWidthrawUrl = $"/App/Loans/{p.LoanId}/WidthrwalCollateral/{p.BranchId}/Branches";
 
+        _getLoanWriteOffUrl = $"/App/Loans/{p.LoanId}/WidthrwalCollateral/{p.BranchId}/Branches";
+
+        var multiplePaymentUrl = $"/App/Loans/Repayment/{p.LoanId}/Multiple?BranchId={p.BranchId}&CurrencyId={p.CurrencyId}";
+
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
             <RadzenMenuItem Icon="money"
                             Path="@_getPaymentSchedulesUrl"
@@ -266,6 +282,10 @@
                             Path="@_getChangeCreditAgentUrl"
                             Visible="@bState.IsManager"
                             Text="Change Credit Agent"></RadzenMenuItem>
+            <RadzenMenuItem Icon="change_circle"
+                            Path="@multiplePaymentUrl"
+                            Visible="@bState.CanRecieveMultiple"
+                            Text="Multiple Payment"></RadzenMenuItem>
             <RadzenMenuItem Icon="info"
                             Path="@_getLoanDetailsUrl"
                             Text="Schedule Details"></RadzenMenuItem>

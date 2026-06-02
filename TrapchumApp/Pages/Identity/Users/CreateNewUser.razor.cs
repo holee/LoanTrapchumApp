@@ -69,7 +69,7 @@ public partial class CreateNewUser(ILogger<CreateNewUser> logger)
 
             var result = await _userService.CreateUserAsync(model);
 
-            if (result.IsSuccess)
+            if (!result.IsError)
             {
                 _toastService.ShowSuccess("New user was created.");
 

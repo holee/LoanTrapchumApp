@@ -7,14 +7,14 @@ using Domains.Models.Identity;
 
 namespace TrapchumApp.Pages.Transactions.Journals
 {
-    public partial class JournalIndex
+    public partial class JournalIndexPage
     {
         [Parameter] public int BranchId { get; set; } = 0;
         private readonly IJournalServiceImpl _journalService;
         [Parameter] public int selectedIndex { get; set; } = 0;
         [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
 
-        public JournalIndex(IJournalServiceImpl journalService)
+        public JournalIndexPage(IJournalServiceImpl journalService)
         {
             _journalService = journalService;
         }
@@ -39,6 +39,7 @@ namespace TrapchumApp.Pages.Transactions.Journals
         List<int> SelectedRow = [10, 20, 50, 100];
         IEnumerable<JournalEntryVm> JournalItems = [];
         JournalEntryVm? modelDetails = new();
+        private readonly SemaphoreSlim _loadLock = new(1, 1);
         private string? _selectedJournalId;
         string? UserId = string.Empty;
         async Task ShowCreatedTab()
@@ -120,6 +121,8 @@ namespace TrapchumApp.Pages.Transactions.Journals
 
         private async Task GetJournals(string? filter = null)
         {
+            await _loadLock.WaitAsync();
+
             try
             {
                 Tracker.Show();
@@ -136,13 +139,15 @@ namespace TrapchumApp.Pages.Transactions.Journals
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
+                _toastService.ShowError($"{ex.Message}");
 
                 Tracker.Hide();
             }
             finally
             {
                 Tracker.Hide();
+
+                _loadLock.Release();
             }
 
             StateHasChanged();
@@ -151,11 +156,15 @@ namespace TrapchumApp.Pages.Transactions.Journals
         async Task LoadData(LoadDataArgs e)
         {
             pageIndex = e.Skip ?? 0;
+
             var filter = e.Filter ?? string.Empty;
+
             if (!string.IsNullOrEmpty(e.OrderBy))
             {
                 sortColumn = e.OrderBy.Split(" ")[0];
+
                 var dir = e.OrderBy.Split(" ")[1];
+
                 sortDescending = !dir.Contains("asc");
             }
 

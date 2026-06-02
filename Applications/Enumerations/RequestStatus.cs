@@ -11,7 +11,7 @@ public enum RequestStatus
     Approved = 4,
     Denied = 5,
     Rechecked = 6,
-    Completed = 7,
+    Disbursed = 7,
     ReApproved = 8,
     InProgress​ = 9,
     Rejected = 10,

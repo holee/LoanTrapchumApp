@@ -1,84 +1,141 @@
 ﻿@using Applications.Features.LoanRequests.Dtos
-<RadzenFieldset>
-    <HeaderTemplate>
-        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
-            <RadzenIcon Icon="house" /><b>Collateral Information</b>
+
+<div class="co-customer-card rz-shadow-3" style="border-radius:0.75rem;overflow:hidden;background:var(--rz-base-200);">
+
+    <RadzenStack Style="padding:0.6rem 1rem;background:var(--rz-primary);color:#fff;"
+                 JustifyContent="JustifyContent.SpaceBetween"
+                 Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+            <RadzenIcon Icon="home_work" Style="font-size:1.2rem;" />
+            <RadzenText TextStyle="TextStyle.Subtitle1"
+                        Style="margin:0;font-weight:600;color:#fff;">
+                Co-Borrower
+            </RadzenText>
+            <RadzenBadge BadgeStyle="BadgeStyle.Light"
+                         Text="@($"{Customers.Count()} item{(Customers.Count() == 1 ? "" : "s")}")"
+                         Style="font-size:0.7rem;" />
         </RadzenStack>
-    </HeaderTemplate>
-    <ChildContent>
-        <RadzenRow Visible="@ShowCommand" AlignItems="AlignItems.Center">
-            <RadzenColumn Size="8">
-                @if (SearchBoxTemplate is not null)
-                {
-                    @SearchBoxTemplate
-                }
-            </RadzenColumn>
-            <RadzenColumn Size="4">
-                <RadzenStack Orientation="Orientation.Horizontal"
-                             JustifyContent="JustifyContent.End">
-                    <RadzenButton Text="Add New"
-                                  ButtonStyle="ButtonStyle.Primary"
-                                  Icon="add"
-                                  Click="@ClickedAdd"
-                                  Size="ButtonSize.Small"
-                                  Visible="@(ShowAdd && ShowCommand)"
-                                  ButtonType="ButtonType.Button"></RadzenButton>
-                </RadzenStack>
-            </RadzenColumn>
-        </RadzenRow>
-        <RadzenDataGrid GridLines="DataGridGridLines.Both"
+        <RadzenStack AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.End"
+                     Orientation="Orientation.Horizontal" Gap="0.4rem">
+            @if (ShowAdd && ShowCommand)
+            {
+                <RadzenButton Text="Add"
+                              Icon="person_add"
+                              ButtonStyle="ButtonStyle.Light"
+                              Variant="Variant.Outlined"
+                              Size="ButtonSize.Small"
+                              Click="@ClickedAdd"
+                              ButtonType="ButtonType.Button"
+                              Style="color:#fff;border-color:rgba(255,255,255,0.6);font-size:0.8rem;" />
+            }
+        </RadzenStack>
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 Gap="0.5rem">
+        @if (ShowCommand && SearchBoxTemplate is not null)
+        {
+            <div style="min-width:12rem;">@SearchBoxTemplate</div>
+        }
+    </RadzenStack>
+    <div style="padding:0.5rem 0.75rem 0.75rem;">
+        <RadzenDataGrid GridLines="DataGridGridLines.Horizontal"
                         Responsive
                         TItem="CoPawnCustomerDto"
                         Density="Density.Compact"
                         @ref="gridCustomers"
-                        Style="min-height:15rem;height:15rem;max-height:15rem;"
+                        Style="min-height:14rem;height:14rem;max-height:14rem;border-radius:0.5rem;overflow:hidden;"
                         RowRender="@OnRowRender"
-                        Data="@Customers">
+                        Data="@Customers"
+                        EmptyText="No co-borrowers added yet.">
             <Columns>
                 <RadzenDataGridColumn Title="#"
                                       TextAlign="TextAlign.Center"
                                       Property="@(nameof(CoPawnCustomerDto.Id))"
-                                      Width="3rem" Context="g">
+                                      Width="2.8rem"
+                                      Context="g">
+                    <HeaderTemplate>
+                        <span style="color:var(--rz-text-secondary-color);font-size:0.75rem;">#</span>
+                    </HeaderTemplate>
                     <Template>
                         <input type="hidden" @bind="@g.CustomerId" />
-                        @g.RowIndex
+                        <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@g.RowIndex.ToString()" Style="font-size:0.7rem;padding:0.1rem 0.4rem;" />
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="ឈ្មោះ" Property="@(nameof(CoPawnCustomerDto.CustomerName))" Context="c" />
-                <RadzenDataGridColumn Title="លេខទូរស័ព្ទ" Property="@(nameof(CoPawnCustomerDto.CustomerPhone))" Context="c" />
-                <RadzenDataGridColumn Title="អាសយដ្ឋាន" Property="@(nameof(CoPawnCustomerDto.CustomerAddress))" Context="c">
+
+                <RadzenDataGridColumn Title="ឈ្មោះ"
+                                      Property="@(nameof(CoPawnCustomerDto.CustomerName))"
+                                      Context="c">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="person" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span>ឈ្មោះ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
                     <Template>
-                        @c.CustomerAddress
+                        <span style="font-weight:500;">@c.CustomerName</span>
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Context="g" TextAlign="TextAlign.Center"
-                                      Width="4rem"
+
+                <RadzenDataGridColumn Title="លេខទូរស័ព្ទ"
+                                      Property="@(nameof(CoPawnCustomerDto.CustomerPhone))"
+                                      Width="8rem"
+                                      Context="c">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="phone" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span>លេខទូរស័ព្ទ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template>
+                        <span style="font-family:monospace;font-size:0.85rem;">@c.CustomerPhone</span>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Title="អាសយដ្ឋាន"
+                                      Property="@(nameof(CoPawnCustomerDto.CustomerAddress))"
+                                      Context="c">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="location_on" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span>អាសយដ្ឋាន</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template>
+                        <span style="color:var(--rz-text-secondary-color);font-size:0.85rem;">@c.CustomerAddress</span>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Context="g"
+                                      TextAlign="TextAlign.Center"
+                                      Width="3.5rem"
                                       Property="@(nameof(CoPawnCustomerDto.CustomerId))"
                                       Visible="@ShowRemove"
-                                      Title="Action">
+                                      Title="">
                     <Template>
-                        <RadzenButton Icon="delete"
-                                      Visible="@ShowRemove"
+                        <RadzenButton Icon="delete_outline"
+                                      ButtonStyle="ButtonStyle.Danger"
+                                      Variant="Variant.Text"
                                       Size="ButtonSize.ExtraSmall"
-                                      Click="()=>ClickedRevmove(g)"
-                                      Variant="Variant.Text" />
+                                      Click="() => ClickedRevmove(g)"
+                                      title="Remove" />
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
         </RadzenDataGrid>
-    </ChildContent>
-</RadzenFieldset>
+    </div>
+</div>
+
 @code {
     [Parameter] public RenderFragment? SearchBoxTemplate { get; set; }
 
     void OnRowRender(RowRenderEventArgs<CoPawnCustomerDto> args)
     {
-
-        if(args.Data is null) return;
-
+        if (args.Data is null) return;
         args.Data.RowIndex = args.Index + 1;
     }
-
 }
 
 

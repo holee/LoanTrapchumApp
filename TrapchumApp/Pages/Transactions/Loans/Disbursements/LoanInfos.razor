@@ -1,108 +1,192 @@
-﻿<RadzenStack AlignItems="AlignItems.Center"
-             Gap="1rem"
-             class="rz-mb-2"
-             Orientation="Orientation.Horizontal"
-             JustifyContent="JustifyContent.End">
-    @if (ChildContent is not null)
-    {
-        @ChildContent
-    }
-    <RadzenButton Text="@buttonText"
-                  Size="ButtonSize.ExtraSmall"
-                  Click="@Toggle"
-                  ButtonStyle="ButtonStyle.Primary"
-                  Icon="@IconNames.Info" />
-    <RadzenButton Size=" ButtonSize.ExtraSmall"
-                  Click="@DownLoadScheduleAsExcel"
-                  ButtonStyle="ButtonStyle.Success"
-                  Icon="file_download" Text="Export Excel" />
-    <RadzenButton Click="@DownLoadScheduleAsPdf"
-                  Size="ButtonSize.ExtraSmall"
-                  ButtonStyle="ButtonStyle.Light"
-                  Text="Export Pdf"
-                  Icon="picture_as_pdf" />
+﻿@* ── Action Bar ── *@
+<RadzenStack Orientation="Orientation.Horizontal"
+             AlignItems="AlignItems.Center"
+             JustifyContent="JustifyContent.SpaceBetween"
+             Wrap="FlexWrap.Wrap"
+             Gap="0.5rem"
+             class="rz-mb-2">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.35rem">
+        @if (ChildContent is not null)
+        {
+            @ChildContent
+        }
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.35rem">
+        <RadzenButton Text="@buttonText"
+                      Size="ButtonSize.ExtraSmall"
+                      Click="@Toggle"
+                      Variant="Variant.Outlined"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Icon="@IconNames.Info" />
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      Click="@DownLoadScheduleAsExcel"
+                      ButtonStyle="ButtonStyle.Success"
+                      Variant="Variant.Outlined"
+                      Icon="file_download"
+                      Text="Excel" />
+        <RadzenButton Click="@DownLoadScheduleAsPdf"
+                      Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Variant="Variant.Outlined"
+                      Text="PDF"
+                      Icon="picture_as_pdf" />
+    </RadzenStack>
 </RadzenStack>
-<RadzenFieldset Visible="@_showCustomer">
-    <RadzenTabs RenderMode="TabRenderMode.Server">
-        <Tabs>
-            <RadzenTabsItem Text="Customer" Icon="@IconNames.ContactEmergency">
-                <table class="table-sm">
-                    <tbody>
-                        <tr>
-                            <th class="rz-w-25">Name</th>
-                            <td>@LoanSchedule?.AltName</td>
-                            <th>Address</th>
-                            <td colspan="3">@LoanSchedule?.Address</td>
-                        </tr>
-                        <tr>
-                            <th>Contract</th>
-                            <td>@LoanSchedule?.CurrencyName</td>
-                            <th>Amount</th>
-                            <td>
-                                @(string.Format("{0:#,###.00}", LoanSchedule?.Principle))
-                            </td>
-                            <th>Phone</th>
-                            <td>@LoanSchedule?.Phone</td>
-                        </tr>
-                        <tr>
-                            <th>Account Number</th>
-                            <td>@LoanSchedule?.PaidPrinciple</td>
-                            <th>Expiry Date</th>
-                            <td>
-                                @(string.Format("{0:dd/MM/yyyy}", LoanSchedule?.LastPaymentDate))
-                            </td>
-                            <th>Interest Rate</th>
-                            <td>@LoanSchedule?.InterestRate</td>
-                        </tr>
-                        <tr>
-                            <th>Date</th>
-                            <td>
-                                @(string.Format("{0:dd/MM/yyyy}", LoanSchedule?.RegisterDate))
-                            </td>
-                            <th>Agent</th>
-                            <td>@LoanSchedule?.AgentName</td>
-                            <th>Phone</th>
-                            <td>@LoanSchedule?.AgentPhone</td>
-                        </tr>
-                        <tr>
-                            <th>Period</th>
-                            <td>@LoanSchedule?.Period (Months)</td>
-                            <th>Office</th>
-                            <td>Trapchum</td>
-                            <th>Circle</th>
-                            <td>@LoanSchedule?.Circle</td>
-                        </tr>
-                        <tr>
-                            <th>Total Paid Principle</th>
-                            <td>@LoanSchedule?.PaidPrinciple.Format(LoanSchedule.CurrencyId)</td>
-                            <th>Total Paid Interest</th>
-                            <td>@LoanSchedule?.PaidInterest.Format(LoanSchedule.CurrencyId)</td>
-                            <th>Total Paid Collection Fee</th>
-                            <td>@LoanSchedule?.PaidCollectionFee.Format(LoanSchedule.CurrencyId)</td>
-                        </tr>
-                        <tr>
-                            <th>OutStanding</th>
-                            <td colspan="5">@LoanSchedule?.OutStanding.Format(LoanSchedule.CurrencyId)</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Collaterals" Icon="@IconNames.Collaterals">
-                <LoanRelatedCollaterals BranchId="@BranchId" LoanId="@LoanId" />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Gaurrantors" Icon="@IconNames.PersonBook">
-                <LoanRelatedGaurrantors BranchId="@BranchId" LoanId="@LoanId" />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Documents" Icon="@IconNames.AttachFile">
-                <LoanRelatedDocuments BranchId="@BranchId" LoanId="@LoanId" />
-            </RadzenTabsItem>
-        </Tabs>
-    </RadzenTabs>
-</RadzenFieldset>
+
+@* ── Expandable Detail Panel ── *@
+@if (_showCustomer)
+{
+    <RadzenCard Variant="Variant.Outlined"
+                Style="border-radius:0.875rem;overflow:hidden;padding:0;
+                       box-shadow:0 1px 6px rgba(0,0,0,.07);margin-bottom:0.75rem;">
+        <RadzenTabs RenderMode="TabRenderMode.Server">
+            <Tabs>
+
+                @* Customer *@
+                <RadzenTabsItem Text="Customer" Icon="@IconNames.ContactEmergency">
+                    <div class="rz-p-3">
+                        <RadzenStack Gap="0.75rem">
+
+                            @* Row 1 – identity *@
+                            <RadzenRow Gap="0.5rem">
+                                <RadzenColumn Size="12" SizeMD="3">
+                                    <RadzenStack Gap="0.15rem">
+                                        <RadzenText TextStyle="TextStyle.Caption"
+                                                    Style="color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.04em;font-size:0.68rem;">
+                                            Full Name
+                                        </RadzenText>
+                                        <RadzenText Style="font-weight:600;font-family:kh_siemreap,'Noto Sans Khmer','Khmer OS Siemreap',sans-serif;">@LoanSchedule?.AltName</RadzenText>
+                                    </RadzenStack>
+                                </RadzenColumn>
+                                <RadzenColumn Size="12" SizeMD="3">
+                                    <RadzenStack Gap="0.15rem">
+                                        <RadzenText TextStyle="TextStyle.Caption"
+                                                    Style="color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.04em;font-size:0.68rem;">
+                                            Phone
+                                        </RadzenText>
+                                        <RadzenText>@LoanSchedule?.Phone</RadzenText>
+                                    </RadzenStack>
+                                </RadzenColumn>
+                                <RadzenColumn Size="12" SizeMD="6">
+                                    <RadzenStack Gap="0.15rem">
+                                        <RadzenText TextStyle="TextStyle.Caption"
+                                                    Style="color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.04em;font-size:0.68rem;">
+                                            Address
+                                        </RadzenText>
+                                        <RadzenText Style="font-family:kh_siemreap,'Noto Sans Khmer','Khmer OS Siemreap',sans-serif;">@LoanSchedule?.Address</RadzenText>
+                                    </RadzenStack>
+                                </RadzenColumn>
+                            </RadzenRow>
+                            <RadzenRow Gap="0.5rem">
+                                <RadzenColumn Size="6" SizeMD="3">
+                                    <RadzenStack Gap="0.15rem">
+                                        <RadzenText TextStyle="TextStyle.Caption"
+                                                    Style="color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.04em;font-size:0.68rem;">
+                                            Agent
+                                        </RadzenText>
+                                        <RadzenText Style="font-family:kh_siemreap,'Noto Sans Khmer','Khmer OS Siemreap',sans-serif;">@LoanSchedule?.AgentName</RadzenText>
+                                    </RadzenStack>
+                                </RadzenColumn>
+                                <RadzenColumn Size="6" SizeMD="3">
+                                    <RadzenStack Gap="0.15rem">
+                                        <RadzenText TextStyle="TextStyle.Caption"
+                                                    Style="color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.04em;font-size:0.68rem;">
+                                            Agent Phone
+                                        </RadzenText>
+                                        <RadzenText>@LoanSchedule?.AgentPhone</RadzenText>
+                                    </RadzenStack>
+                                </RadzenColumn>
+                                <RadzenColumn Size="6" SizeMD="3">
+                                    <RadzenStack Gap="0.15rem">
+                                        <RadzenText TextStyle="TextStyle.Caption"
+                                                    Style="color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.04em;font-size:0.68rem;">
+                                            Circle
+                                        </RadzenText>
+                                        <RadzenText>@LoanSchedule?.Circle</RadzenText>
+                                    </RadzenStack>
+                                </RadzenColumn>
+                                <RadzenColumn Size="6" SizeMD="3">
+                                    <RadzenStack Gap="0.15rem">
+                                        <RadzenText TextStyle="TextStyle.Caption"
+                                                    Style="color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.04em;font-size:0.68rem;">
+                                            Office
+                                        </RadzenText>
+                                        <RadzenText>Trapchum</RadzenText>
+                                    </RadzenStack>
+                                </RadzenColumn>
+                            </RadzenRow>
+                            @* Row 4 – payment summary pills *@
+                            <RadzenRow Gap="0.5rem">
+                                <RadzenColumn Size="12" SizeMD="3">
+                                    <div style="background:var(--rz-success-lighter,#e6f4ea);border-radius:0.5rem;padding:0.6rem 0.875rem;">
+                                        <RadzenText Style="font-size:0.68rem;color:var(--rz-success-dark,#1e7e34);text-transform:uppercase;letter-spacing:.04em;margin:0;">
+                                            Paid Principal
+                                        </RadzenText>
+                                        <RadzenText Style="font-weight:700;font-size:0.95rem;color:var(--rz-success-dark,#1e7e34);margin:0;">
+                                            @LoanSchedule?.PaidPrinciple.Format(LoanSchedule.CurrencyId)
+                                        </RadzenText>
+                                    </div>
+                                </RadzenColumn>
+                                <RadzenColumn Size="12" SizeMD="3">
+                                    <div style="background:var(--rz-info-lighter,#e3f2fd);border-radius:0.5rem;padding:0.6rem 0.875rem;">
+                                        <RadzenText Style="font-size:0.68rem;color:var(--rz-info-dark,#1565c0);text-transform:uppercase;letter-spacing:.04em;margin:0;">
+                                            Paid Interest
+                                        </RadzenText>
+                                        <RadzenText Style="font-weight:700;font-size:0.95rem;color:var(--rz-info-dark,#1565c0);margin:0;">
+                                            @LoanSchedule?.PaidInterest.Format(LoanSchedule.CurrencyId)
+                                        </RadzenText>
+                                    </div>
+                                </RadzenColumn>
+                                <RadzenColumn Size="12" SizeMD="3">
+                                    <div style="background:var(--rz-warning-lighter,#fff8e1);border-radius:0.5rem;padding:0.6rem 0.875rem;">
+                                        <RadzenText Style="font-size:0.68rem;color:var(--rz-warning-dark,#e65100);text-transform:uppercase;letter-spacing:.04em;margin:0;">
+                                            Paid Collection Fee
+                                        </RadzenText>
+                                        <RadzenText Style="font-weight:700;font-size:0.95rem;color:var(--rz-warning-dark,#e65100);margin:0;">
+                                            @LoanSchedule?.PaidCollectionFee.Format(LoanSchedule.CurrencyId)
+                                        </RadzenText>
+                                    </div>
+                                </RadzenColumn>
+                                <RadzenColumn Size="12" SizeMD="3">
+                                    <div style="background:var(--rz-danger-lighter,#fdecea);border-radius:0.5rem;padding:0.6rem 0.875rem;">
+                                        <RadzenText Style="font-size:0.68rem;color:var(--rz-danger-dark,#c62828);text-transform:uppercase;letter-spacing:.04em;margin:0;">
+                                            Outstanding
+                                        </RadzenText>
+                                        <RadzenText Style="font-weight:700;font-size:0.95rem;color:var(--rz-danger-dark,#c62828);margin:0;">
+                                            @LoanSchedule?.OutStanding.Format(LoanSchedule.CurrencyId)
+                                        </RadzenText>
+                                    </div>
+                                </RadzenColumn>
+                            </RadzenRow>
+
+                        </RadzenStack>
+                    </div>
+                </RadzenTabsItem>
+
+                <RadzenTabsItem Text="Collaterals" Icon="@IconNames.Collaterals">
+                    <div class="rz-p-3">
+                        <LoanRelatedCollaterals BranchId="@BranchId" LoanId="@LoanId" />
+                    </div>
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Guarantors" Icon="@IconNames.PersonBook">
+                    <div class="rz-p-3">
+                        <LoanRelatedGaurrantors BranchId="@BranchId" LoanId="@LoanId" />
+                    </div>
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Documents" Icon="@IconNames.AttachFile">
+                    <div class="rz-p-3">
+                        <LoanRelatedDocuments BranchId="@BranchId" LoanId="@LoanId" />
+                    </div>
+                </RadzenTabsItem>
+
+            </Tabs>
+        </RadzenTabs>
+    </RadzenCard>
+}
 @code {
     [Parameter] public RenderFragment ChildContent { get; set; } = default!;
 
-    string buttonText => _showCustomer ? "Hide Customer Info" : "Show Customer Info";
+    string buttonText => _showCustomer ? "Hide Info" : "Customer Info";
 
     private bool _showCustomer = false;
 

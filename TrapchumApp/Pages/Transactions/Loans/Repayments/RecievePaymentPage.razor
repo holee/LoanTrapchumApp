@@ -2,38 +2,50 @@
 @using Applications.Features.LoanPayments.Requests
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
 @using TrapchumApp.Pages.Transactions.RecievePayements
-<PageTitle>Recieve Payments</PageTitle>
-<LoanInfos BranchId="@BranchId"
-           LoanId="@LoanId"
-           Currency="@CurrencyId"
-           LoanSchedule="@LoanSchedule" @key="@(Guid.NewGuid().ToString())">
-    <ChildContent>
-        <RadzenButton Text="Exchange"
-                      Visible="@_isPaymentTab"
-                      Size="ButtonSize.ExtraSmall"
-                      Icon="@IconNames.CurrencyExchange"
-                      Click="@ToggleExchangeChanged"
-                      ButtonStyle="ButtonStyle.Secondary" />
-    </ChildContent>
-</LoanInfos>
-<RadzenStack AlignItems="AlignItems.Center"
-             Orientation="Orientation.Horizontal"
-             JustifyContent="JustifyContent.Start" class="@Styles.M2">
-    <RadzenCheckBox TValue="bool" Name="CheckBox1" Change="OnShowScheduleChanged" @bind-Value="@isAllowShowSchedule" />
-    <RadzenLabel Text="Show Due Schedule Only" Component="CheckBox1" class="rz-ms-1" />
-</RadzenStack>
-<div class="rz-background-color-base-200 rz-m-0 rz-mt-2">
-    <RadzenTabs SelectedIndex="@selectedIndex">
+<PageTitle>Receive Payments</PageTitle>
+
+<RadzenStack Gap="0" class="rz-h-100">
+
+    <LoanInfos BranchId="@BranchId"
+               LoanId="@LoanId"
+               Currency="@CurrencyId"
+               LoanSchedule="@LoanSchedule"
+               @key="@(Guid.NewGuid().ToString())">
+        <ChildContent>
+            <RadzenButton Text="Exchange"
+                          Visible="@_isPaymentTab"
+                          Size="ButtonSize.ExtraSmall"
+                          Icon="@IconNames.CurrencyExchange"
+                          Click="@ToggleExchangeChanged"
+                          ButtonStyle="ButtonStyle.Secondary" />
+        </ChildContent>
+    </LoanInfos>
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.Start"
+                 class="rz-px-3 rz-py-2 rz-border-bottom"
+                 Gap="0.5rem">
+        <RadzenCheckBox TValue="bool"
+                        Name="CheckBox1"
+                        Change="OnShowScheduleChanged"
+                        @bind-Value="@isAllowShowSchedule" />
+        <RadzenLabel Text="Due Schedules Only"
+                     Component="CheckBox1"
+                     class="rz-ms-1"
+                     style="font-size:0.85rem;cursor:pointer;" />
+    </RadzenStack>
+
+    <RadzenTabs SelectedIndex="@selectedIndex" class="rz-flex-grow-1" style="min-height:0;">
         <Tabs>
             <RadzenTabsItem Text="Due Schedules" Icon="@IconNames.SendMoney">
-                <RadzenFieldset class="rz-m-0 rz-background-color-base-200">
-                    <DueDateSchedulesPage BranchId="@BranchId" LoanId="@LoanId"
+                <DueDateSchedulesPage BranchId="@BranchId"
+                                      LoanId="@LoanId"
                                       CurrencyId="@CurrencyId"
                                       @key="@Guid.NewGuid().ToString("N")"
                                       ShowOnScheduleOnly="isAllowShowSchedule"
                                       CustomerName="@LoanSchedule?.AltName"
                                       CreditAgentId="@CreditAgentId" />
-                </RadzenFieldset>
             </RadzenTabsItem>
             @foreach (var item in _tabs)
             {
@@ -48,7 +60,8 @@
             }
         </Tabs>
     </RadzenTabs>
-</div>
+
+</RadzenStack>
 
 @code {
     private List<CustomTab> _tabs = [];

@@ -1,4 +1,4 @@
-﻿using Applications.Features.Dashbaord.CreditOfficers.Dtos;
+﻿using Applications.Features.Dashbaord.Dto;
 using ErrorOr;
 
 namespace Applications.Features.Dashbaord.CreditOfficers.Queries.GetNumberLoanRequest;

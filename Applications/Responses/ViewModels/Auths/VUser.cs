@@ -17,5 +17,5 @@ public sealed class VUser
     public int? BranchId { get; set; }
     public string? BranchName { get; set; }
     public bool? IsActive { get; set; }
-
+    public bool? IsHeadOffice { get; set; } = false;
 }

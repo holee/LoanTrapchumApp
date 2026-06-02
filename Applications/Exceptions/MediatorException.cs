@@ -1,4 +1,5 @@
-﻿using FluentValidation.Results;
+﻿using Applications.Extensions;
+using FluentValidation.Results;
 
 namespace Applications.Exceptions;
 
@@ -17,8 +18,8 @@ public sealed class MediatorException : Exception
             ErrorMessages.Add(message);
         }
     }
-    
-    
+
+
     public MediatorException(ValidationResult validationResult)
     {
         if (validationResult == null)
@@ -35,5 +36,19 @@ public sealed class MediatorException : Exception
             }
         }
     }
-    
+
+
+
+
+}
+
+
+public static class MediatorExceptionExension
+{
+    public static string GetErrorMessage(this MediatorException ex)
+    {
+        if (ex.ErrorMessages.Count == 0) return string.Empty;
+
+        return ex.ErrorMessages.FirstOrDefault() ?? "An error occurred.";
+    }
 }

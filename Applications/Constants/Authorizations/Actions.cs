@@ -12,7 +12,7 @@
         public const string OpenBranch = nameof(OpenBranch);
         public const string MultiplePayment = nameof(MultiplePayment);
         public const string PayOff = nameof(PayOff);
-        public const string RecievePayment = nameof(RecievePayment);
+        public const string ReceivePayment = nameof(ReceivePayment);
         public const string WriteOff = nameof(WriteOff);
         public const string Restructure = nameof(Restructure);
         public const string Disburse = nameof(Disburse);

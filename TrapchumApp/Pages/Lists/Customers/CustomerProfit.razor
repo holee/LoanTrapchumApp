@@ -1,30 +1,115 @@
 ﻿@using TrapchumApp.Pages.Lists.Customers.Expenses
 @using TrapchumApp.Pages.Lists.Customers.Incomes
-<RadzenRow>
-    <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
-        <CustomerInc Items="@_incomes" ShowCommand="@ShowCommand"
-                     CustomerId="@CustomerId"
-                     GetIncomes="@GetIncomes"
-                     ShowAction="@ShowAction"
-                     ShowAdd="@ShowCommand" />
 
-    </RadzenColumn>
-    <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
-        <CustomerExp Items="@_expenses" ShowCommand="@ShowCommand"
-                     CustomerId="@CustomerId"
-                     GetExpenses="@GetExpenses"
-                     ShowAction="@ShowAction"
-                     ShowAdd="@ShowCommand" />
-    </RadzenColumn>
-</RadzenRow>
+<div class="profit-page">
 
-<RadzenStack AlignItems="AlignItems.Center"
-             JustifyContent="JustifyContent.Normal">
-    <RadzenButton ButtonStyle="ButtonStyle.Primary" class="rz-w-100">
-        Profit
-        <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Light"
-                     Text="@(_profits.ToString())" class="rz-ms-2" />
-    </RadzenButton>
+    <div class="profit-summary-bar">
+        <div class="profit-stat profit-stat--income">
+            <span class="profit-stat__icon"><RadzenIcon Icon="trending_up" /></span>
+            <div>
+                <div class="profit-stat__label">Total Income</div>
+                <div class="profit-stat__value">@((_income ?? 0m).ToString("N2"))</div>
+            </div>
+        </div>
+        <div class="profit-stat profit-stat--expense">
+            <span class="profit-stat__icon"><RadzenIcon Icon="trending_down" /></span>
+            <div>
+                <div class="profit-stat__label">Total Expense</div>
+                <div class="profit-stat__value">@((_expense ?? 0m).ToString("N2"))</div>
+            </div>
+        </div>
+        <div class="profit-stat @(_profits >= 0 ? "profit-stat--profit" : "profit-stat--loss")">
+            <span class="profit-stat__icon"><RadzenIcon Icon="@(_profits >= 0 ? "account_balance_wallet" : "warning")" /></span>
+            <div>
+                <div class="profit-stat__label">Net Profit</div>
+                <div class="profit-stat__value">@((_profits ?? 0m).ToString("N2"))</div>
+            </div>
+        </div>
+    </div>
 
-</RadzenStack>
+    <RadzenRow Gap="0.75rem" class="rz-mt-3">
+        <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
+            <CustomerInc Items="@_incomes"
+                         ShowCommand="@ShowCommand"
+                         CustomerId="@CustomerId"
+                         GetIncomes="@GetIncomes"
+                         ShowAction="@ShowAction"
+                         ShowAdd="@ShowCommand" />
+        </RadzenColumn>
+        <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
+            <CustomerExp Items="@_expenses"
+                         ShowCommand="@ShowCommand"
+                         CustomerId="@CustomerId"
+                         GetExpenses="@GetExpenses"
+                         ShowAction="@ShowAction"
+                         ShowAdd="@ShowCommand" />
+        </RadzenColumn>
+    </RadzenRow>
+</div>
+
+<style>
+    .profit-page {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .profit-summary-bar {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .profit-stat {
+        flex: 1;
+        min-width: 10rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.65rem;
+        border-left: 4px solid transparent;
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0,0,0,.07);
+    }
+
+    .profit-stat--income { border-left-color: #10b981; }
+    .profit-stat--expense { border-left-color: #f97316; }
+    .profit-stat--profit { border-left-color: #3b82f6; }
+    .profit-stat--loss   { border-left-color: #ef4444; }
+
+    .profit-stat__icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .profit-stat--income .profit-stat__icon  { background: #ecfdf5; color: #059669; }
+    .profit-stat--expense .profit-stat__icon { background: #fff7ed; color: #ea580c; }
+    .profit-stat--profit .profit-stat__icon  { background: #eff6ff; color: #2563eb; }
+    .profit-stat--loss .profit-stat__icon    { background: #fef2f2; color: #dc2626; }
+
+    .profit-stat__icon .rzi { font-size: 1.2rem; }
+
+    .profit-stat__label {
+        font-size: 0.68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #64748b;
+        line-height: 1.2;
+    }
+
+    .profit-stat__value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+        font-variant-numeric: tabular-nums;
+        margin-top: 0.1rem;
+    }
+</style>
 

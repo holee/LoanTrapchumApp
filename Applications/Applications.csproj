@@ -23,6 +23,9 @@
     <Compile Remove="Features\Employees\Extensions\**" />
     <Compile Remove="Features\Employees\Mappers\**" />
     <Compile Remove="Features\Employees\Responses\**" />
+    <Compile Remove="Features\Identity\Users\Interfaces\**" />
+    <Compile Remove="Features\Identity\Users\Mappers\**" />
+    <Compile Remove="Features\Identity\Users\Validations\**" />
     <Compile Remove="Features\LoanPayments\Enums\**" />
     <Compile Remove="Features\LoanPayments\Extensions\**" />
     <Compile Remove="Features\LoanPayments\Mappers\**" />
@@ -43,6 +46,7 @@
     <Compile Remove="Responses\ViewModels\Users\**" />
     <Compile Remove="Responses\ViewModels\Vendors\**" />
     <Compile Remove="Services\Customers\**" />
+    <Compile Remove="Validations\Loans\**" />
     <EmbeddedResource Remove="Commons\Mappers\activities\**" />
     <EmbeddedResource Remove="Commons\Mappers\Employees\**" />
     <EmbeddedResource Remove="Commons\Mappers\LoanDisbursements\**" />
@@ -59,6 +63,9 @@
     <EmbeddedResource Remove="Features\Employees\Extensions\**" />
     <EmbeddedResource Remove="Features\Employees\Mappers\**" />
     <EmbeddedResource Remove="Features\Employees\Responses\**" />
+    <EmbeddedResource Remove="Features\Identity\Users\Interfaces\**" />
+    <EmbeddedResource Remove="Features\Identity\Users\Mappers\**" />
+    <EmbeddedResource Remove="Features\Identity\Users\Validations\**" />
     <EmbeddedResource Remove="Features\LoanPayments\Enums\**" />
     <EmbeddedResource Remove="Features\LoanPayments\Extensions\**" />
     <EmbeddedResource Remove="Features\LoanPayments\Mappers\**" />
@@ -79,6 +86,7 @@
     <EmbeddedResource Remove="Responses\ViewModels\Users\**" />
     <EmbeddedResource Remove="Responses\ViewModels\Vendors\**" />
     <EmbeddedResource Remove="Services\Customers\**" />
+    <EmbeddedResource Remove="Validations\Loans\**" />
     <None Remove="Commons\Mappers\activities\**" />
     <None Remove="Commons\Mappers\Employees\**" />
     <None Remove="Commons\Mappers\LoanDisbursements\**" />
@@ -95,6 +103,9 @@
     <None Remove="Features\Employees\Extensions\**" />
     <None Remove="Features\Employees\Mappers\**" />
     <None Remove="Features\Employees\Responses\**" />
+    <None Remove="Features\Identity\Users\Interfaces\**" />
+    <None Remove="Features\Identity\Users\Mappers\**" />
+    <None Remove="Features\Identity\Users\Validations\**" />
     <None Remove="Features\LoanPayments\Enums\**" />
     <None Remove="Features\LoanPayments\Extensions\**" />
     <None Remove="Features\LoanPayments\Mappers\**" />
@@ -115,6 +126,7 @@
     <None Remove="Responses\ViewModels\Users\**" />
     <None Remove="Responses\ViewModels\Vendors\**" />
     <None Remove="Services\Customers\**" />
+    <None Remove="Validations\Loans\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -126,10 +138,6 @@
     <Folder Include="Features\CashManagements\Requests\" />
     <Folder Include="Features\CreditAgents\UseCases\" />
     <Folder Include="Features\Expenses\Mapper\" />
-    <Folder Include="Features\Identity\Roles\Service\" />
-    <Folder Include="Features\Identity\Users\Interfaces\" />
-    <Folder Include="Features\Identity\Users\Mappers\" />
-    <Folder Include="Features\Identity\Users\Validations\" />
     <Folder Include="Features\LoanTransactions\Journals\Extensions\" />
     <Folder Include="Features\LoanTransactions\Journals\Mappers\" />
     <Folder Include="Features\LoanTransactions\Journals\UseCases\" />
@@ -152,7 +160,6 @@
     <Folder Include="Responses\ViewModels\Holidays\" />
     <Folder Include="Responses\ViewModels\Loans\Payments\" />
     <Folder Include="Responses\ViewModels\Locations\" />
-    <Folder Include="Validations\Loans\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -174,7 +181,7 @@
     <PackageReference Include="MessagePack" Version="3.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.9" />
-    <PackageReference Include="QuestPDF" Version="2026.2.4" />
+	<PackageReference Include="QuestPDF" Version="2026.5.0" />
     <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.6.0" />
   </ItemGroup>
 

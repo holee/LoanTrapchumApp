@@ -102,26 +102,15 @@
     [Parameter] public bool ShowAdd { get; set; } = false;
     [Parameter] public bool ShowReload { get; set; } = false;
     [Parameter] public bool ShowCommand { get; set; } = false;
-    [Parameter] public IEnumerable<VCustomerActivities> Items { get; set; } = [];
-
-
-    private readonly GetCustomerActivityUseCase _custActivityGet;
-
-    public CustomerActivities(GetCustomerActivityUseCase custActivityGet)
-    {
-        _custActivityGet = custActivityGet;
-    }
+    private IEnumerable<VCustomerActivities> Items  = [];
 
     bool isLoading = false;
 
     protected override async Task OnInitializedAsync()
     {
 
-        if (!Items.Any())
-        {
             await RefreshActivity();
-        }
-
+    
         await base.OnInitializedAsync();
     }
 
@@ -132,7 +121,6 @@
         {
             {"ActivityId",c.ActivityId}
         };
-        //DialogService.OpenAsync<CustomerActivitiesDetails>("Activity Details", param);
     }
 
     async Task Edit(VCustomerActivities c)
@@ -166,11 +154,11 @@
 
             await RefreshActivity();
 
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Success", Detail = ActivityMessage.DeleteSuccess, Duration = 4000 });
+            _toastService.ShowSuccess("Success", ActivityMessage.DeleteSuccess);
         }
         else
         {
-            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = result.FirstError.Description, Duration = 4000 });
+            _toastService.ShowError("Error", result.FirstError.Description);
         }
 
     }
@@ -195,9 +183,10 @@
     {
 
         isLoading = true;
+
         var query = new GetActivityByCustomerIdQuery(CustomerId);
 
-        var rsp = await mediator.Send(query); //_custActivityGet.GetCustomerActivities(CustomerId);
+        var rsp = await mediator.Send(query);
 
         if (!rsp.IsError)
         {
@@ -210,6 +199,8 @@
 
     void OnRowRender(RowRenderEventArgs<VCustomerActivities> args)
     {
+        if (args.Data is null) return;
+
         args.Data.RowIndex = args.Index + 1; // store 1-based index
     }
 }

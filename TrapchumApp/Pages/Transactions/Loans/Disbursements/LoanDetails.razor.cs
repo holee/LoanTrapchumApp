@@ -106,7 +106,7 @@ public partial class LoanDetails
 
         if (!loanRepaymentLines.Any())
         {
-            NotificationService.Notify(NotificationSeverity.Error, "There is any schedule selected yet!");
+            _toastService.ShowError("There is any schedule selected yet!");
 
             return;
         }
@@ -131,7 +131,7 @@ public partial class LoanDetails
 
         if (loanPayment is null)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "There is any problem with payment");
+            _toastService.ShowError("There is any problem with payment");
 
             return;
         }
@@ -158,7 +158,7 @@ public partial class LoanDetails
 
             if (confirm is not null && confirm == true)
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Receive successfully.");
+                _toastService.ShowSuccess("Receive successfully.");
             }
 
         }
@@ -257,6 +257,18 @@ public partial class LoanDetails
 
 
 
+    async Task ShowAllScedules(bool? arg)
+    {
+        if (arg.HasValue && arg == true)
+        {
+            await GetLoanSchedulesById(ScheduleStatus.All);
+        }
+        else
+        {
+            await GetLoanSchedulesById(ScheduleStatus.Unpaid);
+        }
+    }
+
     async Task GetLoanSchedulesById(ScheduleStatus status = ScheduleStatus.All)
     {
         isVible = true;
@@ -286,18 +298,8 @@ public partial class LoanDetails
         StateHasChanged();
     }
 
-
-    void ShowPaidSchedules()
-    {
-        ContextMenuService.Close();
-
-        //_selectedTabIndex = 1;
-    }
-
     async Task ShowScheduleDetails(VSchedule p)
     {
-        //await popup.ToggleAsync(buttonItem.Element);
-
 
         ContextMenuService.Close();
 
@@ -320,9 +322,6 @@ public partial class LoanDetails
 
     }
 
-
-
-
     protected override async Task OnInitializedAsync()
     {
 
@@ -332,7 +331,7 @@ public partial class LoanDetails
 
         _userId = auth.GetUserId();
 
-        await GetLoanSchedulesById(ScheduleStatus.All);
+        await GetLoanSchedulesById(ScheduleStatus.Unpaid);
 
         await base.OnInitializedAsync();
     }
@@ -340,81 +339,3 @@ public partial class LoanDetails
 
 
 
-//var schedules = loanSchedule!.Schedules!.ToList();
-
-//int selectedIndex = schedules.IndexOf(p);
-
-//if (selectedIndex > 0)
-//{
-//    var preSchedule = schedules[selectedIndex - 1];
-
-//    if (!preSchedule.IsPaid)
-//    {
-//        NotificationService.Notify(NotificationSeverity.Info, "Previous schedule not pay yet.");
-
-//        return;
-//    }
-//}
-//var options = new DialogOptions { };
-
-//var paymentCreate = p.ToPaymentDtoCreate();
-
-//var line = p.ToPaymentLine(paymentCreate);
-
-//loanRepaymentLines.Add(line);
-//PaymentCreate create = new PaymentCreate();
-//create.TotalAmountWithPenalty = loanRepaymentLines.Total();
-//create.OriginalPaidAmount = loanRepaymentLines.TotalAmountWithPenalty();
-//create.TotalAmountNoPenalty = loanRepaymentLines.TotalAmountWithPenalty();
-//create.PenaltyAmount = loanRepaymentLines.Sum(x => x.PaidPenaltyAmount);
-//create.OriginalPenaltyAmount = loanRepaymentLines.Sum(x => x.PaidPenaltyAmount);
-//create.RecieptNumber = "";
-//if (CurrencyId == 1)
-//{
-//    create.RecieveKhrAmount = loanRepaymentLines.Total();
-//}
-//else
-//{
-//    create.RecieveAmount = loanRepaymentLines.Total();
-//}
-//create.ChangeAmount = 0;
-//create.ChangeKhrAmount = 0;
-//var data = new Dictionary<string, object?>
-//{
-//        {"LoanRepaymentLines" , loanRepaymentLines},
-//        {"PaymentCreate" ,create},
-//        {"CurrencyId" , CurrencyId},
-//        {"LoanId" , LoanId},
-//        {"CreditAgentId" , CreditAgentId},
-//        { "BranchId",BranchId },
-//        { "ReceiptNo",receiptNo },
-//        { "CustomerName",p.AltName},
-//        {"UserId",UserId}
-//};
-
-
-//bool confirm = await DialogService.OpenAsync<PaymentModal>("Confirm", data, options);
-
-//if (confirm)
-//{
-//    await GetLoanSchedulesById(ScheduleStatus.Unpaid);
-//}
-
-//var loanPayment = new LoanPaymentDtoCreate
-//{
-//    LoanRefId = LoanId,
-
-//    CreditAgentRefId = CreditAgentId,
-
-//    BranchRefId = BranchId,
-
-//    CurrencyRefId = CurrencyId,
-
-//    UserRefId = UserId,
-
-//    PayDate = DateTime.Now,
-
-//    CustomerName = loanSchedule!.AltName,
-
-//    OfficialReceiptNo = loanPaymentLine.OfficialReceiptNo
-//};

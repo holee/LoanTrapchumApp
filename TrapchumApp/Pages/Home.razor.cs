@@ -1,12 +1,7 @@
-using Applications.Features.Branches.Queries.GetBranchByUser;
 using Applications.Features.Dashbaord.Accountants.Dtos;
-using Applications.Features.Dashbaord.Accountants.Queries.GetDbAccountLoanSummaery;
-using Applications.Features.Dashbaord.Accountants.Queries.GetDbApprovedLoanRequest;
 using Applications.Features.Dashbaord.CreditOfficers.Dtos;
-using Applications.Features.Dashbaord.CreditOfficers.Queries.GetDbCreditOfficeLoanSummary;
 using Applications.Features.Dashbaord.Managers.Dto;
-using Applications.Features.Dashbaord.Managers.Queries.GetDbManagerLoanSummary;
-using Applications.Interfaces.Lists;
+using BlazorExpress.ChartJS;
 using TrapchumApp.Helpers.Enums;
 using TrapchumApp.Shared;
 
@@ -14,17 +9,15 @@ namespace TrapchumApp.Pages
 {
     public partial class Home
     {
-        private bool _isPageLoading = true;     
-        [Inject] private INationalityService NationalityService { get; set; } = default!;
-
+        private bool _isPageLoading = true;
         [CascadingParameter] Task<AuthenticationState> AuthState { get; set; } = default!;
         [CascadingParameter] CascadingAppState bState { get; set; } = default!;
 
         [PersistentState]
-        public IEnumerable<AccountantLoanSummary>? AccSummaries { get; set; }
+        public AccountSummary? AccSummaries { get; set; }
 
         [PersistentState]
-        public IEnumerable<DbCoLoanSummary>? CoSummaries { get; set; }
+        public CoLoanSummary? CoSummaries { get; set; }
 
         [PersistentState]
         public DbManagerLoanSummary? ManagerSummaries { get; set; }
@@ -35,6 +28,7 @@ namespace TrapchumApp.Pages
         private int _numberOfLoanRequest = 0;
 
         private string _selectedPeriod = "month";
+
         private readonly List<PeriodItem> _periods =
         [
             new("today",    "Today"),
@@ -47,6 +41,15 @@ namespace TrapchumApp.Pages
         ];
 
         private record PeriodItem(string Key, string Label);
+
+
+
+        private BarChart barChart = default!;
+        private BarChartOptions barChartOptions = default!;
+        private ChartData chartData = default!;
+
+
+
         protected override async Task OnInitializedAsync()
         {
             var auth = await AuthState;
@@ -55,16 +58,53 @@ namespace TrapchumApp.Pages
 
             UserId = auth.GetUserId();
 
-            if (AccSummaries is null && CoSummaries is null && ManagerSummaries is null)
+            await ShowDashboard();
+
+
+            var labels = new List<string> { "Chrome", "Firefox", "Safari", "Edge" };
+
+            var datasets = new List<IChartDataset>();
+
+            var dataset1 = new BarChartDataset()
             {
-                await ShowDashboard();
-            }
-            else
-            {
-                _isPageLoading = false;
-            }
+                Data = new List<double?> { 55000, 15000, 18000, 21000 },
+
+                BackgroundColor = new List<string> { ColorUtility.CategoricalTwelveColors[1] },
+
+                BorderColor = new List<string> { ColorUtility.CategoricalTwelveColors[0] },
+
+                BorderWidth = new List<double> { 0 },
+            };
+            datasets.Add(dataset1);
+
+            chartData = new ChartData { Labels = labels, Datasets = datasets };
+
+            barChartOptions = new BarChartOptions();
+
+            barChartOptions.Responsive = true;
+
+            barChartOptions.Interaction = new Interaction { Mode = InteractionMode.X };
+
+            barChartOptions.IndexAxis = "x";
+
+            barChartOptions.Scales.X!.Title = new ChartAxesTitle { Text = "Visitors", Display = true };
+
+            barChartOptions.Scales.Y!.Title = new ChartAxesTitle { Text = "Browser", Display = true };
+
+            barChartOptions.Plugins.Legend.Display = false;
+
 
             await base.OnInitializedAsync();
+        }
+
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await barChart.InitializeAsync(chartData, barChartOptions);
+            }
+            await base.OnAfterRenderAsync(firstRender);
         }
 
         void OnParentClicked(object? args)
@@ -75,53 +115,37 @@ namespace TrapchumApp.Pages
         private async Task ShowDashboard()
         {
 
-            _isPageLoading = true;
-
-            var command1 = new GetBranchByUserQuery(UserId);
-
-            var rsp1 = await mediator.Send(command1);
-
-            if (rsp1.IsError)
+            if (bState.IsAccount)
             {
-                return;
-            }
+                if (AccSummaries is null)
+                {
+                    await dashboardServices.GetAccDashboard();
 
-            var branchId = rsp1.Value.BranchId;
-
-            if (bState.IsAccount && branchId.HasValue && branchId > 0)
-            {
-                var command2 = new GetDbAccountLoanSummaryQuery(branchId, null);
-
-                var rsp2 = await mediator.Send(command2);
-
-                AccSummaries ??= rsp2.Items;
-
-                var command3 = new GetDbApprovedRequestQuery(branchId);
-
-                var rsp3 = await mediator.Send(command3);
-
-                _numberOfLoanRequest = rsp3.Value;
+                    AccSummaries = dashboardServices.AccSummaries;
+                }
 
             }
 
-            if (bState.IsCreditAgent && branchId.HasValue && branchId > 0)
+            if (bState.IsCreditAgent)
             {
-                var command3 = new GetDbCreditOfficeLoanSummaryQuery(branchId, UserId, null);
+                if (CoSummaries is null)
+                {
+                    await dashboardServices.GetCoDashboard();
 
-                var rsp3 = await mediator.Send(command3);
-
-                CoSummaries ??= rsp3.Items;
+                    CoSummaries = dashboardServices.CoSummaries;
+                }
 
             }
 
 
-            if (bState.IsManager && branchId.HasValue && branchId > 0)
+            if (bState.IsManager)
             {
-                var command4 = new GetDbManagerLoanSummaryQuery(branchId, UserId);
+                if (ManagerSummaries is null)
+                {
+                    await dashboardServices.GetManagerDashboard();
 
-                var rsp4 = await mediator.Send(command4);
-
-                ManagerSummaries ??= rsp4.Value;
+                    ManagerSummaries = dashboardServices.ManagerSummaries;
+                }
             }
 
             _isPageLoading = false;
@@ -141,6 +165,19 @@ namespace TrapchumApp.Pages
                 _ => ColorEnum.Secondary
             };
         }
+
+        private ColorEnum GetGradientColor(string? state)
+        {
+            return state switch
+            {
+                nameof(RequestStatus.New) => ColorEnum.Primary,
+                nameof(RequestStatus.Approved) => ColorEnum.Success,
+                nameof(RequestStatus.Rejected) => ColorEnum.Warning,
+                nameof(RequestStatus.Denied) => ColorEnum.Danger,
+                _ => ColorEnum.Secondary
+            };
+        }
+
 
         private string? GetTitle(int? currencyId)
         {
@@ -180,43 +217,6 @@ namespace TrapchumApp.Pages
 
 
 
-        // [Inject]
-        // private IServiceProvider ServiceProvider { get; set; }
-        // bool multiple = true;
-
-
-
-        // private async Task PrintPage()
-        // {
-        //     await js.InvokeVoidAsync("printPage");
-
-        //     var logFactory = ServiceProvider.GetRequiredService<ILoggerFactory>
-
-
-        //     var htmlRender = new HtmlRenderer(ServiceProvider, logFactory);
-
-        //     var htmlString =await htmlRender.Dispatcher.InvokeAsync(async () =>
-        //     {
-
-        //         var parameters = new Dictionary<string, object?>
-        //         {
-        //             {"Name","Mon Minh"}
-        //         };
-
-
-        //         var paraView = ParameterView.FromDictionary(parameters);
-
-        //         var output =await htmlRender.RenderComponentAsync<TestRazor>
-
-
-        //         return output.ToHtmlString();
-
-        //     });
-
-        //     Console.WriteLine(htmlString);
-        // }
-
-
         private void HandleMoreInfo()
         {
             // Handle more info click
@@ -245,6 +245,48 @@ namespace TrapchumApp.Pages
             new DataItem { Quarter = "Q4", Revenue = 564000 }
         };
 
+        private string[] ChartLabels => revenue1.Select(d => d.Quarter ?? "").ToArray();
+        private double[] Chart1Values => revenue1.Select(d => d.Revenue).ToArray();
+        private double[] Chart2Values => revenue2.Select(d => d.Revenue).ToArray();
+
 
     }
 }
+
+
+// [Inject]
+// private IServiceProvider ServiceProvider { get; set; }
+// bool multiple = true;
+
+
+
+// private async Task PrintPage()
+// {
+//     await js.InvokeVoidAsync("printPage");
+
+//     var logFactory = ServiceProvider.GetRequiredService<ILoggerFactory>
+
+
+//     var htmlRender = new HtmlRenderer(ServiceProvider, logFactory);
+
+//     var htmlString =await htmlRender.Dispatcher.InvokeAsync(async () =>
+//     {
+
+//         var parameters = new Dictionary<string, object?>
+//         {
+//             {"Name","Mon Minh"}
+//         };
+
+
+//         var paraView = ParameterView.FromDictionary(parameters);
+
+//         var output =await htmlRender.RenderComponentAsync<TestRazor>
+
+
+//         return output.ToHtmlString();
+
+//     });
+
+//     Console.WriteLine(htmlString);
+// }
+

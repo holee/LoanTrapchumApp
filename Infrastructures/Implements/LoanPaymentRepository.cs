@@ -25,7 +25,7 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
 
         if (await IsOfficialInused(req, db, cancellation))
         {
-            return ErrorOr.Error.Conflict("409", "The official receipt number is already in use.");
+            return Error.Conflict("409", "The official receipt number is already in use.");
         }
 
         using var tranx = await db.Database.BeginTransactionAsync(cancellation);

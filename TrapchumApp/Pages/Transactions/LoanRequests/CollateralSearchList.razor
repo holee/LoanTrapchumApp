@@ -20,6 +20,7 @@
                    @ref="@_collateralSearchText"
                    @onkeydown="@OnKeyDown"
                    Placeholder="Search Collateral...."
+                   Style="width:30rem;"
                    @oninput="@OnCollateralSearchText" />
 </RadzenStack>
 <Popup @ref="@_collateralPopup" id="collateralPopup"
@@ -64,15 +65,7 @@
                                     TValue="bool" />
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn Width="8rem"
-                                  Context="g"
-                                  Property="@nameof(VCollateralLines.RegisterDate)"
-                                  Title="RegisterDate">
-                <Template>
-                    @g.RegisterDate.DayFirst()
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn Property="@nameof(VCollateralLines.CollateralNo)" Title="CollateralNo" />
+            <RadzenDataGridColumn Property="@nameof(VCollateralLines.SubTypeName)" Title="Sub Type" />
             <RadzenDataGridColumn Width="8rem" Property="@nameof(VCollateralLines.OwnerName)" Title="OwnerName" />
             <RadzenDataGridColumn Width="10rem" Property="@nameof(VCollateralLines.TypeName)" Title="Type Name" />
             <RadzenDataGridColumn Context="g"

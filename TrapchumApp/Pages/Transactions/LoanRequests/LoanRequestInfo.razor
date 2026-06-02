@@ -39,7 +39,7 @@
             </RadzenColumn>
             <RadzenColumn SizeSM="6" SizeMD="3">
                 <RadzenFormField Text="ចំនួនទឹកប្រាក់ស្នើសុំ" class="rz-w-100">
-                    <TCNumbers @bind-Value="Model.RequestAmount" />
+                    <TCNumbers OnValueChanged="PrincipleValueChanged" @bind-Value="Model.RequestAmount" />
                 </RadzenFormField>
                 <ValidationMessage For="@(() => Model.RequestAmount)" />
             </RadzenColumn>
@@ -60,7 +60,7 @@
                                    @bind-Value="Model.Circle" Min="1" />
                 </RadzenFormField>
             </RadzenColumn>
-           
+
         </RadzenRow>
 
         <RadzenRow Gap="0.75rem" RowGap="0.75rem" class="rz-mt-2">
@@ -239,6 +239,6 @@
     </div>
 </div>
 
-@code{
+@code {
 
 }

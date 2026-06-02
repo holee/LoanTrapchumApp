@@ -85,7 +85,8 @@ public partial class CollateralLinesIndex
     {
         if (string.IsNullOrEmpty(_customerId))
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Please select a customer first");
+            _toastService.ShowError("Please select a customer first");
+
             return;
         }
 
@@ -111,7 +112,9 @@ public partial class CollateralLinesIndex
         };
 
         _tabs.Add(new CustomTab(tabKey, "Add Collateral", TabActions.Create, content));
+
         selectedIndex = _tabs.Count;
+
         StateHasChanged();
     }
 
@@ -128,6 +131,7 @@ public partial class CollateralLinesIndex
 
     protected async Task GetCollateralLines(string? customerId = null, string? filter = null)
     {
+        Tracker.Show();
         try
         {
             var param = new QueryParam
@@ -147,11 +151,14 @@ public partial class CollateralLinesIndex
 
             _count = rsp.Count;
 
+
+            Tracker.Hide();
+
             StateHasChanged();
         }
-        catch (Exception ex)
+        catch 
         {
-            Console.WriteLine(ex.Message);
+            Tracker.Hide();
         }
     }
 }

@@ -2,163 +2,169 @@
 <PageTitle>Open Branch</PageTitle>
 @implements IDisposable
 @attribute [MustHasPermission(Modules.Transactions, Actions.OpenBranch)]
-<RadzenCard class="rz-mx-auto" Style="width:100%;">
+
+<RadzenCard Style="width:100%;">
+
+    @* Page Header *@
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.75rem" class="rz-mb-4">
+        <RadzenIcon Icon="@(bState.State ? "store" : "store_mall_directory")"
+                    Style="font-size:1.6rem; color:var(--rz-primary);" />
+        <RadzenStack Gap="0">
+            <RadzenText TextStyle="TextStyle.H6" class="rz-m-0" style="font-weight:700; line-height:1.2;">Open Branch</RadzenText>
+            <RadzenText TextStyle="TextStyle.Caption" class="rz-m-0" style="color:var(--rz-text-tertiary-color);">
+                @(bState.State ? "Branch is currently open" : "Branch is currently closed")
+            </RadzenText>
+        </RadzenStack>
+        <RadzenBadge BadgeStyle="@(bState.State ? BadgeStyle.Success : BadgeStyle.Warning)"
+                     Text="@(bState.State ? "Open" : "Closed")"
+                     Shade="Shade.Default"
+                     class="rz-ml-auto" />
+    </RadzenStack>
+
+    @* Closed Warning Banner *@
     <RadzenAlert AlertStyle="AlertStyle.Warning"
                  ShowIcon="true"
                  Visible="!bState.State"
                  AllowClose="false"
-                 Variant="Variant.Filled" Shade="Shade.Lighter">
-        <RadzenText TagName="TagName.P" TextAlign="TextAlign.Center"
-                    TextStyle="TextStyle.DisplayH6">
-            This branch is close!, please open branch to do operation.
+                 Variant="Variant.Filled"
+                 Shade="Shade.Lighter"
+                 class="rz-mb-4">
+        <RadzenText TextStyle="TextStyle.Body2" TextAlign="TextAlign.Center" class="rz-m-0">
+            This branch is closed. Please open the branch to perform operations.
         </RadzenText>
     </RadzenAlert>
-    <RadzenStack Gap="0.5rem" class="rz-my-2">
-        <RadzenCard class="rz-mx-auto h-100" Style="width:100%;">
-            <RadzenRow JustifyContent="JustifyContent.Center"
-                       AlignItems="AlignItems.Start"
-                       Visible="bState.State"
-                       Gap="1rem">
-                <RadzenColumn SizeMD="5" Size="12" SizeSM="12">
-                    <RadzenDataGrid Responsive
-                                    Density="Density.Compact"
-                                    GridLines="DataGridGridLines.Both"
-                                    Data="CashVaultBalances">
-                        <Columns>
-                            <RadzenDataGridColumn Title="Currency Name"
-                                                  Context="c"
-                                                  Property="CurrencyName">
-                                <Template>
-                                    @c.CurrencyName
-                                </Template>
-                            </RadzenDataGridColumn>
-                            <RadzenDataGridColumn Title="Vault Balance"
-                                                  Context="c"
-                                                  Property="VaultBalance">
-                                <Template>
-                                    @c.VaultBalance.Format(c.CurrencyId)
-                                </Template>
-                            </RadzenDataGridColumn>
-                            <RadzenDataGridColumn Title="Action"
-                                                  Context="c"
-                                                  Property="CurrencyId">
-                                <Template>
-                                    <RadzenButton Click="@(()=>OpenSideDialog(c.CurrencyId))"
-                                                  Size="ButtonSize.ExtraSmall"
-                                                  Icon="attach_money"
-                                                  class="rz-primary"
-                                                  Text="Cash Note"
-                                                  Variant="Variant.Filled" />
-                                </Template>
-                            </RadzenDataGridColumn>
-                        </Columns>
-                    </RadzenDataGrid>
-                </RadzenColumn>
-                <RadzenColumn SizeMD="7" Size="12" SizeSM="12">
-                    <RadzenDataGrid Density="Density.Compact"
-                                    Responsive
-                                    GridLines="DataGridGridLines.Both"
-                                    Data="@_currencyCounter">
-                        <Columns>
-                            <RadzenDataGridColumn Title="Currency Name"
-                                                  Context="c"
-                                                  Property="CurrencyName">
-                                <Template>
-                                    @c.CurrencyName
-                                </Template>
-                            </RadzenDataGridColumn>
-                            <RadzenDataGridColumn Title="Code"
-                                                  Context="c"
-                                                  Property="CurrencyCode">
-                                <Template>
-                                    @c.CurrencyCode
-                                </Template>
-                            </RadzenDataGridColumn>
-                            <RadzenDataGridColumn Title="Value"
-                                                  Context="c"
-                                                  TextAlign="TextAlign.Right"
-                                                  Property="CurrencyValue">
-                                <Template>
-                                    @c.CurrencyValue
-                                </Template>
-                            </RadzenDataGridColumn>
-                            <RadzenDataGridColumn Title="Quantity"
-                                                  Context="c"
-                                                  TextAlign="TextAlign.Right"
-                                                  Property="Quantity">
-                                <Template>
-                                    @(c.Quantity ?? 0)
-                                </Template>
-                                <FooterTemplate>
-                                    @_currencyCounter?.Sum(x => x.Quantity)
-                                </FooterTemplate>
-                            </RadzenDataGridColumn>
-                            <RadzenDataGridColumn Title="Sub Total"
-                                                  Context="c"
-                                                  TextAlign="TextAlign.Right"
-                                                  Property="Quantity">
-                                <Template>
-                                    @((c.Quantity * c.CurrencyValue) ?? 0)
-                                </Template>
-                                <FooterTemplate>
-                                    @{
-                                        var value = _currencyCounter?.Sum(x => x.Quantity * x.CurrencyValue);
-                                    }
-                                    @value.Format(currencyId)
-                                </FooterTemplate>
-                            </RadzenDataGridColumn>
-                        </Columns>
-                    </RadzenDataGrid>
-                </RadzenColumn>
-            </RadzenRow>
-            <AuthorizeView>
-                <Authorized>
-                    <RadzenStack Gap="1rem"
-                                 class="mt-2"
-                                 Orientation="Orientation.Horizontal"
-                                 AlignItems="AlignItems.Center">
-                        @if (bState.State)
-                        {
-                            @if (bState.VaultOut)
-                            {
-                                <RadzenButton Click="@OnCashVaultOut"
-                                              Size="ButtonSize.Small"
-                                              ButtonStyle="ButtonStyle.Success"
-                                              Icon="lock_open"
-                                              Text="Valut Out"
-                                              ButtonType="ButtonType.Button" />
 
+    @* Data Section *@
+    <RadzenRow JustifyContent="JustifyContent.Start"
+               AlignItems="AlignItems.Start"
+               Visible="bState.State"
+               Gap="1.5rem"
+               class="rz-mb-4">
+
+        @* Vault Balances *@
+        <RadzenColumn Size="12" SizeMD="5">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-mb-2">
+                <RadzenIcon Icon="account_balance" Style="color:var(--rz-primary); font-size:1.1rem;" />
+                <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0"
+                            style="font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:var(--rz-text-tertiary-color);">
+                    Vault Balances
+                </RadzenText>
+            </RadzenStack>
+            <RadzenDataGrid Responsive
+                            Density="Density.Compact"
+                            GridLines="DataGridGridLines.Both"
+                            Data="CashVaultBalances">
+                <Columns>
+                    <RadzenDataGridColumn Title="Currency" Context="c" Property="CurrencyName">
+                        <Template>@c.CurrencyName</Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Vault Balance" Context="c" Property="VaultBalance" TextAlign="TextAlign.Right">
+                        <Template>@c.VaultBalance.Format(c.CurrencyId)</Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="" Context="c" Property="CurrencyId" Width="110px" TextAlign="TextAlign.Center">
+                        <Template>
+                            <RadzenButton Click="@(() => OpenSideDialog(c.CurrencyId))"
+                                          Size="ButtonSize.ExtraSmall"
+                                          Icon="attach_money"
+                                          Text="Cash Note"
+                                          ButtonStyle="ButtonStyle.Primary"
+                                          Variant="Variant.Outlined" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </RadzenColumn>
+
+        @* Currency Counter *@
+        <RadzenColumn Size="12" SizeMD="7">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-mb-2">
+                <RadzenIcon Icon="calculate" Style="color:var(--rz-primary); font-size:1.1rem;" />
+                <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0"
+                            style="font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:var(--rz-text-tertiary-color);">
+                    Currency Counter
+                </RadzenText>
+            </RadzenStack>
+            <RadzenDataGrid Density="Density.Compact"
+                            Responsive
+                            GridLines="DataGridGridLines.Both"
+                            Data="@_currencyCounter">
+                <Columns>
+                    <RadzenDataGridColumn Title="Currency" Context="c" Property="CurrencyName">
+                        <Template>@c.CurrencyName</Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Code" Context="c" Property="CurrencyCode" Width="80px">
+                        <Template>@c.CurrencyCode</Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Value" Context="c" TextAlign="TextAlign.Right" Property="CurrencyValue">
+                        <Template>@c.CurrencyValue</Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Quantity" Context="c" TextAlign="TextAlign.Right" Property="Quantity">
+                        <Template>@(c.Quantity ?? 0)</Template>
+                        <FooterTemplate>@_currencyCounter?.Sum(x => x.Quantity)</FooterTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Sub Total" Context="c" TextAlign="TextAlign.Right" Property="Quantity">
+                        <Template>@((c.Quantity * c.CurrencyValue) ?? 0)</Template>
+                        <FooterTemplate>
+                            @{
+                                var value = _currencyCounter?.Sum(x => x.Quantity * x.CurrencyValue);
                             }
-                            @if (bState.CanOpenBranch)
-                            {
-                                <RadzenButton Click="@SubmitCloseBranch"
-                                              Icon="lock_open"
-                                              ButtonStyle="ButtonStyle.Secondary"
-                                              ButtonType="ButtonType.Button"
-                                              Size="ButtonSize.Small"
-                                              Text="Close Branch" />
-                            }
+                            @value.Format(currencyId)
+                        </FooterTemplate>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </RadzenColumn>
+    </RadzenRow>
 
-                        }
-                        else
-                        {
+    @* Actions *@
+    <AuthorizeView>
+        <Authorized>
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.End"
+                         Gap="0.75rem"
+                         class="rz-mt-2"
+                         style="border-top:1px solid var(--rz-border-disabled-color); padding-top:1rem;">
+                @if (bState.State)
+                {
+                    @if (bState.VaultOut)
+                    {
+                        <RadzenButton Click="@OnCashVaultOut"
+                                      Size="ButtonSize.Small"
+                                      ButtonStyle="ButtonStyle.Success"
+                                      Variant="Variant.Filled"
+                                      Icon="move_to_inbox"
+                                      Text="Vault Out"
+                                      ButtonType="ButtonType.Button" />
+                    }
+                    @if (bState.CanOpenBranch)
+                    {
+                        <RadzenButton Click="@SubmitCloseBranch"
+                                      Icon="lock"
+                                      ButtonStyle="ButtonStyle.Danger"
+                                      Variant="Variant.Filled"
+                                      ButtonType="ButtonType.Button"
+                                      Size="ButtonSize.Small"
+                                      Text="Close Branch" />
+                    }
+                }
+                else
+                {
+                    @if (bState.CanOpenBranch)
+                    {
+                        <RadzenButton Click="SubmitOpenBranch"
+                                      ButtonType="ButtonType.Button"
+                                      Size="ButtonSize.Small"
+                                      Variant="Variant.Filled"
+                                      Icon="lock_open"
+                                      Text="Open Branch"
+                                      ButtonStyle="ButtonStyle.Success" />
+                    }
+                }
+            </RadzenStack>
+        </Authorized>
+    </AuthorizeView>
 
-                            @if (bState.CanOpenBranch)
-                            {
-                                <RadzenButton Click="SubmitOpenBranch"
-                                              ButtonType="ButtonType.Button"
-                                              Size="ButtonSize.Small"
-                                              Icon="lock"
-                                              Text="Open Branch"
-                                              ButtonStyle="ButtonStyle.Success" />
-                            }
-
-                        }
-                    </RadzenStack>
-                </Authorized>
-            </AuthorizeView>
-        </RadzenCard>
-    </RadzenStack>
 </RadzenCard>
 
 

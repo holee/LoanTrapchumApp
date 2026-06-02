@@ -43,6 +43,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             if (dia == MsgBoxResult.No)
             {
                 _toastService.ShowInfo("Request was cancelled.");
+
                 return;
             }
 
@@ -64,7 +65,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
                     await mediator.Send(cmd);
 
-                    NotificationService.Notify(NotificationSeverity.Success, resp.GetMessage());
+                    _toastService.ShowSuccess("Successfully approved loan request");
 
                     isSaving = false;
 

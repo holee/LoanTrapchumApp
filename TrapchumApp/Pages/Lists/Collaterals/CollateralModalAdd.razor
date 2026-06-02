@@ -64,10 +64,10 @@
                                               Context="c">
                             <Template>
                                 @{
-                                    c.CollateralSubTypeName = CollateralProperties.FirstOrDefault(x => x.Id == c.SubCategoryRefId)?.CollateralSubTypeName;
+                                    c.SubTypeName = CollateralProperties.FirstOrDefault(x => x.Id == c.SubCategoryRefId)?.CollateralSubTypeName;
                                 }
-                                @c.CollateralSubTypeName
-                                <input type="hidden" @bind="@c.CollateralSubTypeName" />
+                                @c.SubTypeName
+                                <input type="hidden" @bind="@c.SubTypeName" />
                                 <input type="hidden" @bind="@c.SubCategoryRefId" />
                             </Template>
                             <EditTemplate>
@@ -244,9 +244,9 @@
                                               Context="c">
                             <Template>
                                 @{
-                                    c.CollateralSubTypeName = CollateralPersonals.FirstOrDefault(x => x.Id == c.SubCategoryRefId)?.CollateralSubTypeName;
+                                    c.SubTypeName = CollateralPersonals.FirstOrDefault(x => x.Id == c.SubCategoryRefId)?.CollateralSubTypeName;
                                 }
-                                @c.CollateralSubTypeName
+                                @c.SubTypeName
                             </Template>
                             <EditTemplate>
                                 <RadzenDropDown TValue="int?"

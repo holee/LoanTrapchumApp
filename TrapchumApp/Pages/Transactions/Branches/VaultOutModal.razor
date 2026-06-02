@@ -1,185 +1,374 @@
 ﻿@using Applications.Features.Transactions.CashManagements
 <PageTitle>Cash Vault Out</PageTitle>
 <style>
+    .vout-modal-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+        border-radius: 8px 8px 0 0;
+        padding: 18px 24px 14px;
+        margin-bottom: 0;
+    }
+
+    .vout-modal-header .modal-title-text {
+        color: #e2e8f0;
+        font-size: 1.05rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .vout-modal-header .modal-subtitle-text {
+        color: #94a3b8;
+        font-size: 0.78rem;
+        margin-top: 2px;
+    }
+
+    .vout-summary-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 14px 20px;
+        margin-bottom: 14px;
+    }
+
+    .vout-summary-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 4px;
+    }
+
+    .vout-summary-value {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f3460;
+        letter-spacing: 0.01em;
+    }
+
+    .vout-summary-value.is-positive {
+        color: #059669;
+    }
+
+    .vout-currency-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #e0f2fe;
+        border: 1px solid #bae6fd;
+        border-radius: 20px;
+        padding: 3px 12px 3px 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #0369a1;
+    }
+
+    .vout-section-body {
+        padding: 0 20px 16px;
+    }
+
+    .vout-grid-wrapper {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(15,52,96,0.06);
+    }
+
+    .vout-footer-actions {
+        padding: 14px 20px 16px;
+        border-top: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 0 0 8px 8px;
+        gap: 8px;
+    }
+
     .table-cell-edited {
         position: relative;
     }
 
-        .table-cell-edited::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 0;
-            height: 0;
-            border-top: 10px solid red;
-            border-left: 10px solid transparent;
-        }
+    .table-cell-edited::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 0;
+        height: 0;
+        border-top: 10px solid #ef4444;
+        border-left: 10px solid transparent;
+    }
+
+    .vout-note-value {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 0.88rem;
+    }
+
+    .vout-note-desc {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-left: 4px;
+    }
+
+    .vout-qty-onhand {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        color: #0369a1;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .divider-section {
+        border: none;
+        border-top: 1px solid #e2e8f0;
+        margin: 0 20px 14px;
+    }
 </style>
-<RadzenFieldset Text="Please verify amount and balance then start cash vault." class="rz-p-0 rz-m-0">
+
+<RadzenCard class="rz-p-0 rz-m-0" style="border-radius:8px; overflow:hidden; box-shadow: 0 4px 20px rgba(15,52,96,0.12);">
+
+    @* ── Header ── *@
+    <div class="vout-modal-header">
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenStack Orientation="Orientation.Vertical" Gap="2px">
+                <span class="modal-title-text">
+                    <RadzenIcon Icon="account_balance_wallet" style="font-size:1.1rem;vertical-align:middle;margin-right:6px;color:#60a5fa;" />
+                    Cash Vault Out
+                </span>
+                <span class="modal-subtitle-text">Verify denomination amounts before processing the vault withdrawal.</span>
+            </RadzenStack>
+            <div class="vout-currency-pill">
+                <RadzenIcon Icon="currency_exchange" style="font-size:0.95rem;" />
+                @(Currency?.CurrencyCode ?? "—")
+            </div>
+        </RadzenStack>
+    </div>
+
+    @* ── Summary Strip ── *@
+    <div class="vout-section-body" style="padding-top:8px;">
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="12px">
+
+            @* Currency selector card *@
+            <div class="vout-summary-card" style="flex:1;">
+                <div class="vout-summary-label">
+                    <RadzenIcon Icon="language" style="font-size:0.75rem;vertical-align:middle;margin-right:3px;" />
+                    Currency
+                </div>
+                <RadzenDropDown @bind-Value="@CurrencyId"
+                                ValueProperty="@nameof(Domains.Models.Currencies.Currency.CurrencyId)"
+                                TextProperty="@nameof(Currency.CurrencyCode)"
+                                Data="@CurrencyList"
+                                SelectedItemChanged="OnSelectChanges"
+                                Style="width:100%; height:38px;"
+                                Name="DropDownBindValue" />
+            </div>
+
+            @* Total amount card *@
+            <div class="vout-summary-card" style="flex:2; display:flex; flex-direction:column; justify-content:space-between;">
+                <div class="vout-summary-label">
+                    <RadzenIcon Icon="payments" style="font-size:0.75rem;vertical-align:middle;margin-right:3px;" />
+                    Total Vault-Out Amount
+                </div>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <span class="vout-summary-value @(totalAmount > 0 ? "is-positive" : "")">
+                        @((totalAmount ?? 0).ToString(sp))
+                    </span>
+                    <RadzenBadge BadgeStyle="@(totalAmount > 0 ? BadgeStyle.Success : BadgeStyle.Light)"
+                                 Text="@(totalAmount > 0 ? "READY" : "PENDING")"
+                                 style="font-size:0.7rem;letter-spacing:0.06em;" />
+                </RadzenStack>
+            </div>
+
+        </RadzenStack>
+    </div>
+
+    <hr class="divider-section" />
+
+    @* ── Denomination Grid ── *@
+    <div class="vout-section-body" style="padding-top:0;">
+        <div class="vout-grid-wrapper">
+            <RadzenDataGrid Responsive
+                            GridLines="DataGridGridLines.Both"
+                            Data="cashMDList"
+                            TItem="CashManagementDetailDtoCreate"
+                            @ref="@grid"
+                            EditMode="DataGridEditMode.Single"
+                            CellClick="@OnCellClick"
+                            RowUpdate="@OnUpdateRow"
+                            Density="Density.Compact"
+                            Style="border:none;">
+                <Columns>
+
+                    <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                          Property="CurrencyNoteValue"
+                                          Title="Denomination"
+                                          Width="160px">
+                        <HeaderTemplate>
+                            <RadzenIcon Icon="receipt_long" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
+                            Denomination
+                        </HeaderTemplate>
+                        <Template>
+                            <span class="vout-note-value">@context.CurrencyNoteValue</span>
+                            <span class="vout-note-desc">@context.CurrencyRefDesc</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                          Property="QOnHand"
+                                          Context="c"
+                                          TextAlign="TextAlign.Right"
+                                          Width="120px">
+                        <HeaderTemplate>
+                            <RadzenIcon Icon="inventory_2" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
+                            In Vault
+                        </HeaderTemplate>
+                        <Template>
+                            <span class="vout-qty-onhand">
+                                <RadzenIcon Icon="warehouse" style="font-size:0.75rem;color:#94a3b8;" />
+                                @c.QOnHand
+                            </span>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                          IsInEditMode="@IsEditing"
+                                          Property="@nameof(CashManagementDetailDtoCreate.Quantity)"
+                                          TextAlign="TextAlign.Right"
+                                          Context="c"
+                                          Width="130px">
+                        <HeaderTemplate>
+                            <RadzenIcon Icon="tag" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
+                            Qty Out
+                        </HeaderTemplate>
+                        <Template>
+                            <RadzenBadge BadgeStyle="@(c.Quantity > 0 ? BadgeStyle.Info : BadgeStyle.Light)"
+                                         Text="@(c.Quantity?.ToString() ?? "0")"
+                                         style="font-size:0.8rem;min-width:40px;" />
+                        </Template>
+                        <EditTemplate Context="item">
+                            <RadzenNumeric TValue="int?"
+                                           ShowUpDown="false"
+                                           TextAlign="TextAlign.Right"
+                                           class="@Styles.W100"
+                                           @bind-Value="item.Quantity"
+                                           Min="0"
+                                           Name="Quantity"
+                                           @ref="editor"
+                                           @key="item.CurrencyNoteValue"
+                                           InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Enter Quantity" }})"
+                                           Change="@(args => CalculateByQuantity(item, args))" />
+                            <RadzenCustomValidator Component="Quantity"
+                                                   Validator="@(() => ValidateInputQty(item))"
+                                                   Popup="true"
+                                                   Text="Exceeds vault quantity" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                          Property="@nameof(CashManagementDetailDtoCreate.TotalValue)"
+                                          Context="c"
+                                          IsInEditMode="@IsEditing"
+                                          CalculatedCssClass="@IsEdited"
+                                          TextAlign="TextAlign.Right"
+                                          Width="150px">
+                        <HeaderTemplate>
+                            <RadzenIcon Icon="calculate" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
+                            Sub Total
+                        </HeaderTemplate>
+                        <Template>
+                            <span style="font-weight:600; color:@(c.TotalValue > 0 ? "#059669" : "#94a3b8");">
+                                @c.TotalValue?.ToString(sp)
+                            </span>
+                        </Template>
+                        <EditTemplate Context="item">
+                            <RadzenNumeric TValue="decimal?"
+                                           ShowUpDown="false"
+                                           TextAlign="TextAlign.Right"
+                                           class="@Styles.W100"
+                                           @bind-Value="item.TotalValue"
+                                           Min="0"
+                                           Format="@sp"
+                                           @key="item.CurrencyNoteValue"
+                                           @ref="editor"
+                                           Name="TotalValue"
+                                           InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Enter Total Value" }})"
+                                           Change="@(args => CalculateByAmount(item, args))" />
+                            <RadzenCustomValidator Component="TotalValue"
+                                                   Validator="@(() => ValidateInputValue(item))"
+                                                   Popup="true"
+                                                   Text="Exceeds vault balance" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                          Property="@nameof(CashManagementDetailDtoCreate.TotalQuantity)"
+                                          Context="c"
+                                          TextAlign="TextAlign.Right"
+                                          Width="130px">
+                        <HeaderTemplate>
+                            <RadzenIcon Icon="numbers" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
+                            Total Qty
+                        </HeaderTemplate>
+                        <Template>
+                            @c.TotalQuantity
+                        </Template>
+                        <FooterTemplate>
+                            <strong>@cashMDList?.Sum(x => x.TotalQuantity)</strong>
+                        </FooterTemplate>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                          Property="@nameof(CashManagementDetailDtoCreate.TotalValue)"
+                                          Context="c"
+                                          TextAlign="TextAlign.Right">
+                        <HeaderTemplate>
+                            <RadzenIcon Icon="summarize" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
+                            Total Value
+                        </HeaderTemplate>
+                        <Template>
+                            <span style="font-weight:600;">@c.Value.Format(CurrencyId)</span>
+                        </Template>
+                        <FooterTemplate>
+                            <strong style="color:#0f3460;">@cashMDList?.Sum(x => x.Value).Format(CurrencyId)</strong>
+                        </FooterTemplate>
+                    </RadzenDataGridColumn>
+
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    </div>
+
+    @* ── Footer Actions ── *@
     <RadzenStack Orientation="Orientation.Horizontal"
-                 class="rz-mb-2"
-                 JustifyContent="JustifyContent.SpaceBetween">
-        <RadzenStack AlignItems="AlignItems.Center"
-                     class="w-50"
-                     Orientation="Orientation.Horizontal">
-            <RadzenLabel Text="CURRENCY" Component="DropDownBindValue" Style="margin-right: 8px" />
-            <RadzenDropDown @bind-Value="@CurrencyId"
-                            ValueProperty="@nameof(Domains.Models.Currencies.Currency.CurrencyId)"
-                            TextProperty="@nameof(Currency.CurrencyCode)"
-                            Data="@CurrencyList"
-                            SelectedItemChanged="OnSelectChanges"
-                            Style="height:35px"
-                            Name="DropDownBindValue" />
-        </RadzenStack>
-        <RadzenStack class="w-50" AlignItems="AlignItems.Center"
-                     Orientation="Orientation.Horizontal">
-            <RadzenLabel Text="AMOUNT" Component="Amount" Style="margin-right: 8px;" />
-            <RadzenNumeric TValue="decimal?"
-                           Disabled
-                           Name="Amount"
-                           TextAlign="TextAlign.End"
-                           Value="@totalAmount"
-                           ShowUpDown="false"
-                           Format="@sp" />
-        </RadzenStack>
-
-    </RadzenStack>
-
-    <RadzenDataGrid Responsive
-                    GridLines="DataGridGridLines.Both"
-                    Data="cashMDList"
-                    TItem="CashManagementDetailDtoCreate"
-                    @ref="@grid"
-                    EditMode="DataGridEditMode.Single"
-                    CellClick="@OnCellClick"
-                    RowUpdate="@OnUpdateRow"
-                    Density="Density.Compact">
-        <Columns>
-            <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
-                                  Property="CurrencyNoteValue"
-                                  Title="Note Value">
-                <Template>
-                    <strong>@context.CurrencyNoteValue</strong>
-                    (<span class="rz-ml-1">
-                        @context.CurrencyRefDesc
-                    </span>)
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
-                                  Property="QOnHand"
-                                  Context="c"
-                                  TextAlign="TextAlign.Right"
-                                  Title="Qty In Vault">
-                <Template>
-                    @c.QOnHand
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
-                                  IsInEditMode="@IsEditing"
-                                  Property="@nameof(CashManagementDetailDtoCreate.Quantity)"
-                                  TextAlign="TextAlign.Right"
-                                  Context="c"
-                                  Title="Quantity">
-                <Template>
-                    @c.Quantity
-                </Template>
-                <EditTemplate Context="item">
-                    <RadzenNumeric TValue="int?"
-                                   ShowUpDown="false"
-                                   TextAlign="TextAlign.Right"
-                                   class="@Styles.W100"
-                                   @bind-Value="item.Quantity"
-                                   Min="0"
-                                   Name="Quantity"
-                                   @ref="editor"
-                                   @key="item.CurrencyNoteValue"
-                                   InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Quantity" }})"
-                                   Change="@(args => CalculateByQuantity(item, args))" />
-                    <RadzenCustomValidator Component="Quantity"
-                                           Validator="@(() => ValidateInputQty(item))"
-                                           Popup="true"
-                                           Text="Invalid quantity" />
-                </EditTemplate>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
-                                  Property="@nameof(CashManagementDetailDtoCreate.TotalValue)"
-                                  Context="c"
-                                  IsInEditMode="@IsEditing"
-                                  CalculatedCssClass="@IsEdited"
-                                  TextAlign="TextAlign.Right"
-                                  Title="Sub Total">
-                <Template>
-                    @c.TotalValue
-                </Template>
-                <EditTemplate Context="item">
-                    <RadzenNumeric TValue="decimal?"
-                                   ShowUpDown="false"
-                                   TextAlign="TextAlign.Right"
-                                   class="@Styles.W100"
-                                   @bind-Value="item.TotalValue"
-                                   Min="0"
-                                   Format="@sp"
-                                   @key="item.CurrencyNoteValue"
-                                   @ref="editor"
-                                   Name="TotalValue"
-                                   InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Total Value" }})"
-                                   Change="@(args => CalculateByAmount(item, args))" />
-                    <RadzenCustomValidator Component="TotalValue"
-                                           Validator="@(() => ValidateInputValue(item))"
-                                           Popup="true"
-                                           Text="Invalid input quantity" />
-                </EditTemplate>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
-                                  Property="@nameof(CashManagementDetailDtoCreate.TotalQuantity)"
-                                  Context="c"
-                                  TextAlign="TextAlign.Right"
-                                  Title="Total Quantity">
-                <Template>
-                    @c.TotalQuantity
-                </Template>
-                <FooterTemplate>
-                    @cashMDList?.Sum(x => x.TotalQuantity)
-                </FooterTemplate>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
-                                  Property="@nameof(CashManagementDetailDtoCreate.TotalValue)"
-                                  Context="c"
-                                  TextAlign="TextAlign.Right"
-                                  Title="Total Value">
-                <Template>
-                    @c.Value.Format(CurrencyId)
-                </Template>
-                <FooterTemplate>
-                    @cashMDList?.Sum(x => x.Value).Format(CurrencyId)
-                </FooterTemplate>
-            </RadzenDataGridColumn>
-        </Columns>
-    </RadzenDataGrid>
-    <RadzenStack JustifyContent="JustifyContent.End"
+                 JustifyContent="JustifyContent.End"
                  AlignItems="AlignItems.Center"
-                 class="rz-mt-2"
-                 Orientation="Orientation.Horizontal">
+                 class="vout-footer-actions">
+        <RadzenButton ButtonStyle="ButtonStyle.Light"
+                      Icon="close"
+                      Text="Cancel"
+                      Click="@(()=>DialogService.Close(false))"
+                      Size="ButtonSize.Small"
+                      style="min-width:90px;" />
         <RadzenButton ButtonStyle="ButtonStyle.Success"
                       Icon="save"
                       Text="Save"
                       Disabled="total==0"
                       Click="@OnSaveChanges"
-                      Size="ButtonSize.Small" />
-        <RadzenButton ButtonStyle="ButtonStyle.Success"
-                      Text="Save & Close"
-                      Icon="save"
+                      Size="ButtonSize.Small"
+                      style="min-width:90px;" />
+        <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                      Text="Save &amp; Close"
+                      Icon="task_alt"
                       Disabled="total==0"
                       Size="ButtonSize.Small"
-                      Click="@OnSaveChangesClose" />
-        <RadzenButton Icon="close"
-                      ButtonStyle="ButtonStyle.Danger"
-                      Click="@(()=>DialogService.Close(false))"
-                      Text="Cancel"
-                      Size="ButtonSize.Small" />
+                      Click="@OnSaveChangesClose"
+                      style="min-width:120px;" />
     </RadzenStack>
-</RadzenFieldset>
+
+</RadzenCard>
 
 @code {
     RadzenDataGrid<CashManagementDetailDtoCreate> grid = default!;
@@ -391,32 +580,3 @@
     }
 }
 
-
-
-@* <table class="table table-bordered table-sm mt-2">
-        <thead
-            <tr>
-                <th class="text-end w-auto">Currency Note</th>
-                <th class="w-auto text-end">Quantity In Vault</th>
-                <th class="text-end">Quantity</th>
-                <th class="text-end">Sub Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var cn in cashMDList)
-            {
-                <VaultOutRow Item="@cn"
-                             CurrencyId="@CurrencyId"
-                             Calculate="@Calculate" />
-            }
-        </tbody>
-        <tbody>
-            <tr>
-                <td class="text-end" colspan="3">TOTAL</td>
-                <td class="text-end">
-                    @total.Format(CurrencyId)
-                </td>
-            </tr>
-        </tbody>
-    </table>
-   *@

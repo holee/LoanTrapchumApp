@@ -2,83 +2,260 @@
 @using Applications.Commons.Messages.Collaterals
 @using Applications.Features.Collaterals.Commands.DeleteCollateralLines
 @using Applications.Features.Collaterals.Dtos
-<RadzenFieldset>
-    <HeaderTemplate>
-        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
-            <RadzenIcon Icon="house" /><b>Collateral Information</b>
+
+<div class="collateral-panel">
+    <div class="collateral-header">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <div class="collateral-header-icon">
+                <RadzenIcon Icon="house" />
+            </div>
+            <div>
+                <div class="collateral-header-title">Collateral Information</div>
+                <div class="collateral-header-subtitle">@CollateralLines.Count() item(s) registered</div>
+            </div>
         </RadzenStack>
-    </HeaderTemplate>
-    <ChildContent>
-        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-                     class="rz-mb-2"
-                     Visible="@ShowCommand"
-                     JustifyContent="JustifyContent.End">
-            <RadzenButton Size="ButtonSize.Small"
-                          Click="@AddOne"
-                          Icon="add"
-                          Text="Add New"
-                          Visible="@(ShowAdd && ShowCommand)"
-                          ButtonStyle="ButtonStyle.Primary"></RadzenButton>
-            <RadzenButton Size="ButtonSize.Small"
-                          Click="@Add"
-                          Icon="add"
-                          Text="Add New"
-                          Visible="false"
-                          ButtonStyle="ButtonStyle.Primary"></RadzenButton>
-        </RadzenStack>
-        <RadzenDataGrid GridLines="DataGridGridLines.Both"
+
+        @if (ShowCommand)
+        {
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.4rem">
+                @if (ShowAdd)
+                {
+                    <RadzenButton Size="ButtonSize.Small"
+                                  Click="@AddOne"
+                                  Icon="add_circle_outline"
+                                  Text="Add Collateral"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Variant="Variant.Filled" />
+                }
+            </RadzenStack>
+        }
+    </div>
+
+    @if (CollateralLines.Any())
+    {
+        <div class="collateral-summary-cards">
+            <div class="summary-card summary-card--market">
+                <div class="summary-card__label">Market Price</div>
+                <div class="summary-card__value">@((CollateralLines.Sum(x => x.MarketPrice) ?? 0m).ToString("N2"))</div>
+            </div>
+            <div class="summary-card summary-card--hot">
+                <div class="summary-card__label">Hot Price</div>
+                <div class="summary-card__value">@((CollateralLines.Sum(x => x.HotPrice) ?? 0m).ToString("N2"))</div>
+            </div>
+            <div class="summary-card summary-card--pawn">
+                <div class="summary-card__label">Pawn Price</div>
+                <div class="summary-card__value">@((CollateralLines.Sum(x => x.PawnPrice) ?? 0m).ToString("N2"))</div>
+            </div>
+        </div>
+    }
+
+    <div class="collateral-grid-wrapper">
+        <RadzenDataGrid GridLines="DataGridGridLines.Horizontal"
                         Responsive
                         @ref="@refGrid"
                         TItem="VCollateralLines"
                         Density="Density.Compact"
                         RowRender="@OnRowRender"
-                        Data="CollateralLines">
+                        Data="CollateralLines"
+                        EmptyText="No collateral records found."
+                        AllowSorting="true"
+                        class="collateral-grid">
             <Columns>
-                <RadzenDataGridColumn Title="#" Width="3rem" Property="ReferenceNo" Context="c">
+                <RadzenDataGridColumn Title="#" Width="3rem" Sortable="false" TextAlign="TextAlign.Center" Context="c">
                     <Template>
-                        @c.RowIndex
+                        <span class="row-index">@c.RowIndex</span>
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="ReferenceNo" Property="ReferenceNo" Context="c" />
-                <RadzenDataGridColumn Title="Type Name" Property="TypeName" Context="c" />
-                <RadzenDataGridColumn Title="Owner Name" Property="OwnerName" Context="c" />
+                <RadzenDataGridColumn Title="Sub Type" Property="@nameof(VCollateralLines.SubTypeName)" Context="c">
+                    <Template>
+                        <span class="text-semibold">@c.SubTypeName</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Type" Property="TypeName" Context="c" />
+                <RadzenDataGridColumn Title="Owner" Property="OwnerName" Context="c" />
                 <RadzenDataGridColumn Title="Location" Property="Location" Context="c" />
-                <RadzenDataGridColumn Width="3rem" Title="Qty" Property="Quantity" Sortable="false" />
-                <RadzenDataGridColumn Title="Market Price" Context="c" TextAlign="TextAlign.Right">
+                <RadzenDataGridColumn Width="3.5rem" Title="Qty" Property="Quantity" Sortable="false" TextAlign="TextAlign.Center" />
+                <RadzenDataGridColumn Title="Market Price" Context="c" TextAlign="TextAlign.Right" Sortable="false">
                     <Template>
-                        @c.MarketPrice
+                        <span class="price-value">@((c.MarketPrice ?? 0m).ToString("N2"))</span>
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right">
+                <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right" Sortable="false">
                     <Template>
-                        @c.HotPrice
+                        <span class="price-value price-value--hot">@((c.HotPrice ?? 0m).ToString("N2"))</span>
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Pawn Price" Context="c" TextAlign="TextAlign.Right">
+                <RadzenDataGridColumn Title="Pawn Price" Context="c" TextAlign="TextAlign.Right" Sortable="false">
                     <Template>
-                        @c.PawnPrice
+                        <span class="price-value price-value--pawn">@((c.PawnPrice ?? 0m).ToString("N2"))</span>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Size" Property="Size" Sortable="false" />
-                <RadzenDataGridColumn Width="3.5rem" Context="c" TextAlign="TextAlign.Center" Title="IsUsed" Sortable="false">
+                <RadzenDataGridColumn Width="4.5rem" Context="c" TextAlign="TextAlign.Center" Title="Status" Sortable="false">
                     <Template>
-                        <RadzenCheckBox @bind-Value="c.IsUsed" Disabled></RadzenCheckBox>
+                        @if (c.IsUsed)
+                        {
+                            <span class="status-badge status-badge--used">In Use</span>
+                        }
+                        else
+                        {
+                            <span class="status-badge status-badge--free">Free</span>
+                        }
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Visible="@ShowAcction" Width="3.5rem" Context="c" TextAlign="TextAlign.Center" Title="Action" Sortable="false">
+                <RadzenDataGridColumn Visible="@ShowAcction" Width="3.5rem" Context="c" TextAlign="TextAlign.Center" Title="" Sortable="false">
                     <Template>
                         <RadzenButton Size="ButtonSize.ExtraSmall"
-                                      ButtonStyle="ButtonStyle.Primary"
+                                      ButtonStyle="ButtonStyle.Light"
                                       Variant="Variant.Text"
-                                      Shade="Shade.Dark"
-                                      Click="@((args)=>ShowContextMenuWithContent(args,c))"
-                                      Icon="@IconNames.MoreVert" />
+                                      Click="@((args) => ShowContextMenuWithContent(args, c))"
+                                      Icon="@IconNames.MoreVert"
+                                      class="action-btn" />
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
         </RadzenDataGrid>
-    </ChildContent>
-</RadzenFieldset>
+    </div>
+</div>
+
+<style>
+    .collateral-panel {
+        border: 1px solid var(--rz-border-color, #e5e7eb);
+        border-radius: 0.75rem;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+
+    .collateral-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        background: var(--rz-primary);
+        border-bottom: 1px solid var(--rz-border-color, #e5e7eb);
+    }
+
+    .collateral-header-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 0.5rem;
+        background: var(--rz-primary, #3b82f6);
+        color: #fff;
+    }
+
+    .collateral-header-icon .rzi {
+        font-size: 1.1rem;
+    }
+
+    .collateral-header-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.2;
+    }
+
+    .collateral-header-subtitle {
+        font-size: 0.72rem;
+        color: #64748b;
+        margin-top: 0.1rem;
+    }
+
+    .collateral-summary-cards {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: #f8fafc;
+        border-bottom: 1px solid var(--rz-border-color, #e5e7eb);
+    }
+
+    .summary-card {
+        flex: 1;
+        padding: 0.6rem 0.85rem;
+        border-radius: 0.5rem;
+        border-left: 3px solid transparent;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,.07);
+    }
+
+    .summary-card--market { border-left-color: #3b82f6; }
+    .summary-card--hot    { border-left-color: #f97316; }
+    .summary-card--pawn   { border-left-color: #10b981; }
+
+    .summary-card__label {
+        font-size: 0.68rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 0.15rem;
+    }
+
+    .summary-card__value {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .collateral-grid-wrapper {
+        padding: 0;
+    }
+
+    .collateral-grid .rz-data-grid {
+        border: none !important;
+        border-radius: 0 !important;
+    }
+
+    .row-index {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.4rem;
+        height: 1.4rem;
+        background: #f1f5f9;
+        border-radius: 50%;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #475569;
+    }
+
+    .text-semibold {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .price-value {
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .price-value--hot  { color: #ea580c; }
+    .price-value--pawn { color: #059669; }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.15rem 0.45rem;
+        border-radius: 9999px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+
+    .status-badge--used { background: #fef2f2; color: #dc2626; }
+    .status-badge--free { background: #f0fdf4; color: #16a34a; }
+
+    .action-btn {
+        opacity: 0.6;
+        transition: opacity 0.15s;
+    }
+
+    .action-btn:hover { opacity: 1; }
+</style>
 
 @code {
 
@@ -86,18 +263,18 @@
     {
         ContextMenuService.Open(args, ds =>
             @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Click="() => HandleDetails(c)" Icon="@IconNames.Info" Text="Details" Value="@c.Id"></RadzenMenuItem>
-    <RadzenMenuItem Click="() => OnCollateralLineEdit(c)" Icon="@IconNames.Edit" Text="Edit Collateral" Value="@c.Id"></RadzenMenuItem>
-    <RadzenMenuItem Click="() => HandleDelete(c)" Icon="@IconNames.Delete"
-                    Disabled="@c.IsUsed" Text="Delete Collateral" Value="@c.Id"></RadzenMenuItem>
-</RadzenMenu>
+                <RadzenMenuItem Click="() => HandleDetails(c)" Icon="@IconNames.Info" Text="Details" Value="@c.Id"></RadzenMenuItem>
+                <RadzenMenuItem Click="() => OnCollateralLineEdit(c)" Icon="@IconNames.Edit" Text="Edit Collateral" Value="@c.Id"></RadzenMenuItem>
+                <RadzenMenuItem Click="() => HandleDelete(c)" Icon="@IconNames.Delete"
+                                Disabled="@c.IsUsed" Text="Delete Collateral" Value="@c.Id"></RadzenMenuItem>
+            </RadzenMenu>
         );
     }
     private async Task HandleDetails(VCollateralLines c)
     {
 
         ContextMenuService.Close();
-        
+
         var parameters = new Dictionary<string, object?>
         {
            { "Id",c.Id},
@@ -134,7 +311,7 @@
 
         if (confirm == false) return;
 
-        var rsp = await mediator.Send(new DeleteCollateralLineCommand(c.Id,c.CollateralId!));
+        var rsp = await mediator.Send(new DeleteCollateralLineCommand(c.Id, c.CollateralId!));
 
         if (rsp.IsError)
         {

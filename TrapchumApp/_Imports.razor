@@ -23,6 +23,7 @@
 @using Applications.Services.Identity
 @using Applications.Services.Lists
 @using Applications.Services.Loans
+@using Blazilla
 @using Blazored.FluentValidation
 @using Domains.Models.Lists
 @using Microsoft.AspNetCore.Authorization
@@ -52,6 +53,7 @@
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Applications.Enumerations
 @using Applications.Responses.Paginations
+@using BlazorExpress.ChartJS
 @attribute [Authorize]
 @inject IJSRuntime js
 @inject NavigationService _navService
@@ -71,3 +73,6 @@
 @inject ToastService _toastService
 @inject MessageBoxService MsgBox
 @inject SwalService Swal
+@inject BranchService branchService 
+@inject UserServices userServices
+@inject CurrencyServices currencyServices 

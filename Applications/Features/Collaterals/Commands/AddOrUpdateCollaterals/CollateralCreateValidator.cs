@@ -16,11 +16,6 @@ namespace Applications.Features.Collaterals.Commands.AddOrUpdateCollaterals
             RuleFor(x => x.CustomerName)
                         .NotEmpty()
                             .WithMessage("Customer Is Required.");
-
-            //RuleFor(x => x.CollateralLines)
-            //                .NotEmpty()
-            //                    .WithMessage("At least one collateral line is required.");
-
             RuleForEach(x => x.CollateralLines)
                     .SetValidator(new CollateralLineCreateValidator());
 

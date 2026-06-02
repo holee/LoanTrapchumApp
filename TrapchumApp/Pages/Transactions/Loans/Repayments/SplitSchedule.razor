@@ -1,88 +1,99 @@
 ﻿@using Applications.Features.Loans.Dtos.Responses
 @using Mapster;
-<div class="rz-mt-2">
-    <RadzenFieldset AllowCollapse="true" Collapsed="true">
-        <HeaderTemplate>
-            <strong>
-                <strong>Schedule @ScheduleNum of @TotalScedules</strong>
-            </strong>
-        </HeaderTemplate>
-        <ChildContent>
-            <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
-                         class="rz-p-2"
-                         JustifyContent="JustifyContent.End">
-                <RadzenButton Click="() => DownLoadScheduleAsPdf(ScheduleNum)"
-                              Size="ButtonSize.ExtraSmall"
-                              ButtonStyle="ButtonStyle.Primary"
-                              Text="Export Pdf"
-                              Icon="picture_as_pdf" />
-                <RadzenButton Click="() => ExportToExcel(ScheduleNum)"
-                              Size="ButtonSize.ExtraSmall"
-                              ButtonStyle="ButtonStyle.Success"
-                              Text="Export Excel"
-                              Icon="file_download" />
-            </RadzenStack>
-            <table class="table-sm">
-                <tbody>
-                    <tr>
-                        <th class="rz-w-25">Name</th>
-                        <td>@LoanSchedule?.AltName</td>
-                        <th>Address</th>
-                        <td colspan="3">@LoanSchedule?.Address</td>
-                    </tr>
-                    <tr>
-                        <th>Contract</th>
-                        <td>#</td>
-                        <th>Amount</th>
-                        <td>
-                            @LoanSchedule?.Principle.Format(_currencyId)
-                        </td>
-                        <th>Phone</th>
-                        <td>@LoanSchedule?.Phone</td>
-                    </tr>
-                    <tr>
-                        <th>Account Number</th>
-                        <td>@LoanSchedule?.LoanAccount</td>
-                        <th>Expiry Date</th>
-                        <td>
-                            @LoanSchedule?.LastPaymentDate.DayFirst()
-                        </td>
-                        <th>Interest Rate</th>
-                        <td>@LoanSchedule?.InterestRate</td>
-                    </tr>
-                    <tr>
-                        <th>Date</th>
-                        <td>
-                            @LoanSchedule?.RegisterDate.DayFirst()
-                        </td>
-                        <th>Agent</th>
-                        <td>@LoanSchedule?.CreditAgentKhmer</td>
-                        <th>Phone</th>
-                        <td>@LoanSchedule?.AgentPhone</td>
-                    </tr>
-                    <tr>
-                        <th>Period</th>
-                        <td>@LoanSchedule?.PeriodName</td>
-                        <th>Office</th>
-                        <td>Trapchum</td>
-                        <th>Circle</th>
-                        <td>@LoanSchedule?.Circle</td>
-                    </tr>
-                    <tr>
-                        <th>OutStanding</th>
-                        <td colspan="5">@LoanSchedule?.OutStanding.Format(_currencyId)</td>
-                    </tr>
-                </tbody>
-            </table>
-        </ChildContent>
-    </RadzenFieldset>
+
+<RadzenCard class="rz-border-radius-3 rz-shadow-3 rz-mb-4" style="overflow:hidden; border: 1px solid var(--rz-border-disabled-color);">
+
+    @* Header bar *@
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.SpaceBetween"
+                 class="rz-px-4 rz-py-3"
+                 style="background: var(--rz-base-background-color); border-bottom: 1px solid var(--rz-border-disabled-color);">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenIcon Icon="event_note" style="color: var(--rz-primary); font-size:1.2rem;" />
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-mb-0">
+                <strong>Schedule @ScheduleNum</strong>
+            </RadzenText>
+            <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@($"of {TotalScedules}")" class="rz-ml-1" />
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+            <RadzenButton Click="() => DownLoadScheduleAsPdf(ScheduleNum)"
+                          Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Variant="Variant.Outlined"
+                          Text="PDF"
+                          Icon="picture_as_pdf" />
+            <RadzenButton Click="() => ExportToExcel(ScheduleNum)"
+                          Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Success"
+                          Variant="Variant.Outlined"
+                          Text="Excel"
+                          Icon="file_download" />
+        </RadzenStack>
+    </RadzenStack>
+
+    @* Info grid *@
+    <div class="rz-px-4 rz-py-3">
+        <RadzenRow Gap="1rem" RowGap="0.75rem">
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Name", LoanSchedule?.AltName)
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Phone", LoanSchedule?.Phone)
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Address", LoanSchedule?.Address)
+            </RadzenColumn>
+
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Account Number", LoanSchedule?.LoanAccount)
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Amount", LoanSchedule?.Principle.Format(_currencyId).ToString())
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Outstanding", LoanSchedule?.OutStanding.Format(_currencyId).ToString())
+            </RadzenColumn>
+
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Date", LoanSchedule?.RegisterDate.DayFirst())
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Expiry Date", LoanSchedule?.LastPaymentDate.DayFirst())
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Interest Rate", LoanSchedule?.InterestRate?.ToString())
+            </RadzenColumn>
+
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Agent", LoanSchedule?.CreditAgentKhmer)
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Agent Phone", LoanSchedule?.AgentPhone)
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Period", LoanSchedule?.PeriodName)
+            </RadzenColumn>
+
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Office", "Trapchum")
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Circle", LoanSchedule?.Circle?.ToString())
+            </RadzenColumn>
+        </RadzenRow>
+    </div>
+
+    @* Schedule data grid *@
     <RadzenDataGrid Data="@LoanSchedule?.Schedules"
                     Density="Density.Compact"
                     Responsive
                     AllowAlternatingRows="true"
                     GridLines="DataGridGridLines.Both"
                     RowSelect="@OnRowSelect"
-                    TItem="ScheduleResponse">
+                    TItem="ScheduleResponse"
+                    class="rz-border-radius-0"
+                    style="border-top: 1px solid var(--rz-border-disabled-color);">
         <Columns>
             <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.RowNum))"
                                   Title="#"
@@ -183,7 +194,7 @@
             </RadzenDataGridColumn>
         </Columns>
     </RadzenDataGrid>
-</div>
+</RadzenCard>
 
 @code {
 
@@ -196,7 +207,18 @@
     private bool isProgess = false;
     
     [Inject] ExcelExportService _excelExportService { get; set; } = default!;
-  
+
+    RenderFragment InfoField(string label, string? value) =>
+        @<div style="display:flex; flex-direction:column; gap:2px;">
+            <RadzenText TextStyle="TextStyle.Overline"
+                        style="color:var(--rz-text-secondary-color); font-size:0.68rem; letter-spacing:.06em; text-transform:uppercase; line-height:1;">
+                @label
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Body2" style="font-weight:500;">
+                @(string.IsNullOrWhiteSpace(value) ? "—" : value)
+            </RadzenText>
+        </div>;
+
     protected override void OnParametersSet()
     {
         _currencyId = LoanSchedule?.CurrencyId ?? 0;

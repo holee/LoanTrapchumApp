@@ -10,22 +10,27 @@
                    ProgressBarStyle="ProgressBarStyle.Danger"
                    Style="height: 2px; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999;" />
 <RadzenLayout>
-    <RadzenHeader Style="background:var(--rz-success);">
+    <RadzenHeader Style="background: linear-gradient(135deg, var(--rz-success) 0%, #1a7a4a 100%); box-shadow: 0 2px 8px rgba(0,0,0,0.18); padding: 0 1rem;">
         <RadzenStack Orientation="Orientation.Horizontal"
                      JustifyContent="JustifyContent.SpaceBetween"
-                     AlignItems="AlignItems.Center" Gap="0">
+                     AlignItems="AlignItems.Center"
+                     Gap="0"
+                     Style="height: 56px;">
             <RadzenStack Orientation="Orientation.Horizontal"
-                         JustifyContent="JustifyContent.SpaceBetween"
-                         AlignItems="AlignItems.Center">
-                <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
+                         AlignItems="AlignItems.Center"
+                         Gap="8px">
+                <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)"
+                                     Style="color: white;" />
             </RadzenStack>
             <RadzenStack Orientation="Orientation.Horizontal"
-                         JustifyContent="JustifyContent.SpaceBetween"
-                         AlignItems="AlignItems.Center">
+                         AlignItems="AlignItems.Center"
+                         Gap="12px">
+               
                 <NotificationBell />
-                <TopMenus IsBranchOpen="true" ShowDialogue="ShowCurrencyDialogue" />
+                <TopMenus BranchId="@branchId" IsBranchOpen="true"/>
                 <Profiles />
             </RadzenStack>
+
         </RadzenStack>
     </RadzenHeader>
     <SectionOutlet SectionName="FabMenu"></SectionOutlet>
@@ -70,7 +75,7 @@
             </AuthorizeView>
             <AuthorizeView Policy="@Policies.AccountOnly">
                 <Authorized>
-                    <AccountsItems UserId="@userId" BranchId="@branchId" IsBranchOpen="@bState.State" />
+                    <AccountsItems  BranchId="@branchId" IsBranchOpen="@bState.State" />
                 </Authorized>
             </AuthorizeView>
             <AuthorizeView Policy="@Policies.AdminOnly">
@@ -124,7 +129,7 @@
                                              Icon="notifications"
                                              Path="/App/Notifications" />
                     </RadzenPanelMenuItem>
-                    
+
                     <RadzenPanelMenuItem Text="Loan Management" Icon="@IconNames.AccountBalance" Visible="@bState.IsManager">
                         <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote"
                                              Path="@($"/App/Loans/Managers/Requests/{branchId}/Branches")" />
@@ -137,6 +142,8 @@
 
             <AuthorizeView Policy="@Policies.AccountOnly">
                 <Authorized>
+
+                  
                     <ReportsItems IsBranchOpen="@bState.State" />
                 </Authorized>
             </AuthorizeView>
@@ -160,9 +167,17 @@
         </RadzenPanelMenu>
     </RadzenSidebar>
     <RadzenBody>
-        <main class="page-animate" @key="currentUrl">
-                @Body
-        </main>
+        <ErrorBoundary @ref="@_errorBoundary">
+            <ChildContent>
+                <main class="page-animate" @key="currentUrl">
+                    @Body
+                </main>
+            </ChildContent>
+            <ErrorContent>
+                <GlobalErrorPage Exception="@context"
+                                 OnRecover="@(() => _errorBoundary.Recover())" />
+            </ErrorContent>
+        </ErrorBoundary>
     </RadzenBody>
 </RadzenLayout>
 
@@ -172,6 +187,7 @@
     private bool isLoading;
     private bool ShowPanel;
     private Action<bool>? _loadingHandler;
+    private ErrorBoundary _errorBoundary = default!;
 
     private void TogglePanel() => ShowPanel = !ShowPanel;
 
@@ -184,6 +200,7 @@
         _loadingHandler = state =>
         {
             isLoading = state;
+
             InvokeAsync(StateHasChanged);
         };
 
@@ -192,22 +209,16 @@
         bState.OnChange += StateHasChanged;
     }
 
+
+
+
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
 
+        _errorBoundary?.Recover();
+
         StateHasChanged();
-    }
-
-    async Task ShowCurrencyDialogue()
-    {
-        var param = new Dictionary<string, object?> { { "BranchId", branchId } };
-
-        var options = new SideDialogOptions
-        {
-        };
-
-        await DialogService.OpenSideAsync<ExchangesSidebar>("Currency Exchange", param, options);
     }
 
 }

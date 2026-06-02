@@ -17,15 +17,13 @@ public sealed class GetActivityByIdQueryHandler :IRequestHandler<GetActivityById
 
     public async Task<ErrorOr<VCustomerActivities>> Handle(GetActivityByIdQuery request, CancellationToken cancellationToken = default)
     {
-        
-        var rsp =await _cusActivityService.GetCustomerActivity(request.Id, request.CustomerId, cancellationToken);
-
-        if (rsp is { IsSuccess: true, Data: not null })
+        var act= await _cusActivityService.GetCustomerActivity(request.Id, request.CustomerId, cancellationToken);
+    
+        if(act is null)
         {
-            return rsp.Data; 
+            return Error.NotFound(description:"Customer has no any activies.");
         }
-        
-        return Error.NotFound(rsp.ErrMessage);
-        
+
+        return act;
     }
 }

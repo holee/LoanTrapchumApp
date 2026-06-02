@@ -1,4 +1,5 @@
 using Applications.Commons.Mappers.LoanRequests;
+using Microsoft.AspNetCore.Components.Routing;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Response;
 using Applications.Features.Documents.Dto;
@@ -19,7 +20,7 @@ using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.LoanRequests
 {
-    public partial class LoanRequestCreate(ILogger<LoanRequestCreate> logger)
+    public partial class LoanRequestCreate(ILogger<LoanRequestCreate> logger) : IDisposable
     {
         [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter] public string? CustomerId { get; set; } = string.Empty;
@@ -51,6 +52,41 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         private List<CoPawnCustomerDto> CoCustomers = [];
 
         private CoRequestCustomerBox CoCustomerRef = default!;
+
+        private bool _isDirty = false;
+
+        private IDisposable? _locationChangingRegistration;
+
+        protected override Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                editForm.EditContext!.OnFieldChanged += (_, _) => _isDirty = true;
+
+                _locationChangingRegistration = NavigationManager.RegisterLocationChangingHandler(OnLocationChanging);
+            }
+            return base.OnAfterRenderAsync(firstRender);
+        }
+
+        private async ValueTask OnLocationChanging(LocationChangingContext context)
+        {
+            if (!_isDirty) return;
+
+            var confirmed = await DialogService.Confirm(
+                "You have unsaved changes. Are you sure you want to leave?",
+                "Unsaved Changes");
+
+            if (confirmed != true)
+            {
+                context.PreventNavigation();
+            }
+        }
+
+        public void Dispose()
+        {
+            _locationChangingRegistration?.Dispose();
+        }
+
         protected override async Task OnInitializedAsync()
         {
             _userId = (await AuthenticationState).GetUserId();
@@ -98,80 +134,80 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             {
                 { "BranchId", BranchId },
 
-                { "PageType", PageType.Modal }
+                { "PageType", PageType.Dialog }
             };
 
             DialogService.OpenAsync<CustomerCreatePage>("Add Customer", param, options: options);
         }
 
-   
 
 
 
-     private async Task OnSelectedCoCustomers(IEnumerable<VCustomerList> args)
-         {
-             var candidates = args as ICollection<VCustomerList> ?? args.ToList();
 
-             if (candidates.Count == 0) return;
+        private async Task OnSelectedCoCustomers(IEnumerable<VCustomerList> args)
+        {
+            var candidates = args as ICollection<VCustomerList> ?? args.ToList();
 
-             if (candidates.Count > 3)
-             {
-                 _toastService.ShowWarning("You can only select up to 3 co-customers.");
-                 return;
-             }
+            if (candidates.Count == 0) return;
 
-             int slots = 3 - CoCustomers.Count;
+            if (candidates.Count > 3)
+            {
+                _toastService.ShowWarning("You can only select up to 3 co-customers.");
+                return;
+            }
 
-             if (slots <= 0 || candidates.Count > slots)
-             {
-                 _toastService.ShowWarning($"You can only select {slots} more co-customer(s).");
-                 return;
-             }
+            int slots = 3 - CoCustomers.Count;
 
-             var newCustomers = candidates
-                 .Where(c => CoCustomers.All(existing => existing.CustomerId != c.CustomerId))
-                 .ToList();
+            if (slots <= 0 || candidates.Count > slots)
+            {
+                _toastService.ShowWarning($"You can only select {slots} more co-customer(s).");
+                return;
+            }
 
-             if (newCustomers.Count == 0) return;
+            var newCustomers = candidates
+                .Where(c => CoCustomers.All(existing => existing.CustomerId != c.CustomerId))
+                .ToList();
 
-             // Check all candidates in parallel
-             var checks = await Task.WhenAll(
-                 newCustomers.Select(c => mediator
-                     .Send(new IsCoPawnExistQuery(BranchId, c.CustomerId))
-                     .ContinueWith(t => (Customer: c, Result: t.Result), TaskScheduler.Default)));
+            if (newCustomers.Count == 0) return;
 
-             var newCoPawnCustomers = new List<CoPawnCustomerDto>(newCustomers.Count);
+            // Check all candidates in parallel
+            var checks = await Task.WhenAll(
+                newCustomers.Select(c => mediator
+                    .Send(new IsCoPawnExistQuery(BranchId, c.CustomerId))
+                    .ContinueWith(t => (Customer: c, Result: t.Result), TaskScheduler.Default)));
 
-             foreach (var (customer, result) in checks)
-             {
-                 if (result.IsError)
-                 {
-                     _toastService.ShowError($"Could not verify co-customer {customer.AltName}.");
-                     continue;
-                 }
+            var newCoPawnCustomers = new List<CoPawnCustomerDto>(newCustomers.Count);
 
-                 if (result.Value)
-                 {
-                     _toastService.ShowWarning($"{customer.AltName} is already a co-customer in an active loan request or loan disbursement.");
-                     continue;
-                 }
+            foreach (var (customer, result) in checks)
+            {
+                if (result.IsError)
+                {
+                    _toastService.ShowError($"Could not verify co-customer {customer.AltName}.");
+                    continue;
+                }
 
-                 newCoPawnCustomers.Add(new CoPawnCustomerDto
-                 {
-                     CustomerId = customer.CustomerId,
-                     CustomerPhone = customer.Phone,
-                     CustomerAddress = customer.ToString(),
-                     CustomerName = customer.AltName,
-                     BranchId = BranchId ?? 0
-                 });
-             }
+                if (result.Value)
+                {
+                    _toastService.ShowWarning($"{customer.AltName} is already a co-customer in an active loan request or loan disbursement.");
+                    continue;
+                }
 
-             if (newCoPawnCustomers.Count == 0) return;
+                newCoPawnCustomers.Add(new CoPawnCustomerDto
+                {
+                    CustomerId = customer.CustomerId,
+                    CustomerPhone = customer.Phone,
+                    CustomerAddress = customer.ToString(),
+                    CustomerName = customer.AltName,
+                    BranchId = BranchId ?? 0
+                });
+            }
 
-             CoCustomers.AddRange(newCoPawnCustomers);
+            if (newCoPawnCustomers.Count == 0) return;
 
-             await CoCustomerRef.CustomerReload();
-         }
+            CoCustomers.AddRange(newCoPawnCustomers);
+
+            await CoCustomerRef.CustomerReload();
+        }
 
         private async Task OnSelectedCoCustomer(VCustomerList args)
         {
@@ -359,7 +395,11 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                 OwnerName = c.OwnerName,
                 ReferenceNo = c.ReferenceNo,
                 TypeName = c.TypeName,
+                SubTypeName = c.SubTypeName,
                 Quantity = c.Quantity,
+                PawnPrice = c.PawnPrice,
+                MarketPrice = c.MarketPrice,
+                HotPrice = c.HotPrice
             };
 
             if (requestCollateralLines.Any(x => x.Id == item.Id))
@@ -387,8 +427,12 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                     CollateralId = g.CollateralId,
                     OwnerName = g.OwnerName,
                     ReferenceNo = g.ReferenceNo,
+                    SubTypeName = g.SubTypeName,
                     TypeName = g.TypeName,
                     Quantity = g.Quantity,
+                    PawnPrice = g.PawnPrice,
+                    MarketPrice = g.MarketPrice,
+                    HotPrice = g.HotPrice
                 });
             }
 
@@ -414,8 +458,8 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
         async Task RemovedCollateral(VLoanRequestCollateralLines c)
         {
-            if (!await ConfirmActionAsync("Do you want to remove this collateral?", "Remove Collateral"))
-                return;
+
+            if (await MsgBox.ConfirmAsync("Do you want to remove this collateral?", "Remove Collateral") == MsgBoxResult.No) return;
 
             if (!requestCollateralLines.Any()) return;
 
@@ -423,7 +467,8 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
             if (lastItem != c)
             {
-                NotificationService.Notify(NotificationSeverity.Info, "Please select the last item to remove.");
+                _toastService.ShowInfo("Please select the last item to remove.");
+
                 return;
             }
 
@@ -437,8 +482,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         {
             if (editForm.EditContext?.Validate() == false) return;
 
-            if (!await ConfirmActionAsync("Do you want to save this loan request?"))
-                return;
+            if (await MsgBox.ConfirmAsync("Do you want to save this loan request?") == MsgBoxResult.No) return;
 
             await HandleLoanRequest(RequestStatus.New);
         }
@@ -450,8 +494,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                 return;
             }
 
-            if (!await ConfirmActionAsync("Do you want to save this loan request?"))
-                return;
+            if (await MsgBox.ConfirmAsync("Do you want to save this loan request?") == MsgBoxResult.No) return;
 
             await HandleLoanRequest(RequestStatus.Requested);
         }
@@ -505,13 +548,16 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
             if (!resp.IsError)
             {
-                NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message!);
+
+                _toastService.ShowSuccess(resp.Value.Message);
+
+                _isDirty = false;
 
                 NavigationManager.NavigateTo($"/App/Loans/Requests/{BranchId}/Branches");
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
+                _toastService.ShowError(resp.GetMessage());
             }
         }
 

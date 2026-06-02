@@ -8,11 +8,9 @@
 
 <a href="/Reports/Schedules/120">Download</a>
 
+<button @onclick="DevideByZero">Devide By Zero</button>
 
 <RadzenButton Click="Print">Print</RadzenButton>
-@* ══════════════════════════════════════════════════════════════
-   BlabSelect2 Demo
-   ══════════════════════════════════════════════════════════════ *@
 
 <BlabFileUploader Url="upload/customers/profiles"></BlabFileUploader>
 
@@ -395,3 +393,9 @@
         <small class="text-muted">Last result: <strong>@_msgBoxLastResult</strong></small>
     </div>
 </RadzenCard>
+@code{
+    void DevideByZero()
+    {
+        var x = 1 / int.Parse("0");
+    }
+}

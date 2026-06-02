@@ -1,5 +1,6 @@
 ﻿using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Features.Settings.Dto;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +12,7 @@ namespace TrapchumApp.Shared
 {
     public partial class CascadingAppState : ComponentBase, IAppStateService
     {
+
         public event Action? OnChange;
         [Parameter] public RenderFragment ChildContent { get; set; } = default!;
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
@@ -110,11 +112,13 @@ namespace TrapchumApp.Shared
             set
             {
                 _vaultIn = value;
+
                 StateHasChanged();
             }
         }
 
         private bool _vaultOut;
+
         private bool _canWriteOff;
         public bool VaultOut
         {
@@ -399,6 +403,26 @@ namespace TrapchumApp.Shared
 
         }
 
+        internal async Task WhoCanDisbursemnt(VLoanRequests? resource)
+        {
+            if (resource is null)
+            {
+                _canDisbursed = false;
+
+                return;
+            }
+
+            var user = (await AuthenticationState).User;
+
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                var result = await _authorizeService.AuthorizeAsync(user, resource, new CanDisburseRequestRequirement());
+
+                _canDisbursed = result.Succeeded;
+            }
+
+
+        }
 
 
 
@@ -432,14 +456,16 @@ namespace TrapchumApp.Shared
 
             if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _canApproved = await _authorizeService.MustHasPermissionAsync(user!, Policies.ApproveLoanRequest);
+                _canApproved = await _authorizeService.MustHasPermissionAsync(user, Policies.ApproveLoanRequest);
 
                 return;
             }
 
-
-
         }
+
+
+
+
 
 
         internal async Task CheckedCanOpenBranch(ClaimsPrincipal user)
@@ -482,7 +508,7 @@ namespace TrapchumApp.Shared
             if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
                 var result = await _authorizeService.AuthorizeAsync(user, resource, new IsCanApprovedNormalAmountRequirement());
-               
+
                 _normalAmountApproved = result.Succeeded;
             }
         }
@@ -496,6 +522,43 @@ namespace TrapchumApp.Shared
                 _maximumAmountApproved = result.Succeeded;
 
             }
+        }
+
+
+        internal async Task WhoCanApproved((VLoanRequests? request, VUserLoanSizes? loanSizes) resource)
+        {
+            if (resource.loanSizes is null || resource.request is null)
+            {
+                _canApproved = false;
+
+                return;
+            }
+
+            var user = (await AuthenticationState).User;
+
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                _canApproved = (await _authorizeService.AuthorizeAsync(user, resource, new CanApprovedRequestRequirement())).Succeeded;
+            }
+
+        }
+
+        internal async Task WhoCanRequest(VLoanRequests? resource)
+        {
+            if (resource is null)
+            {
+                _canRequest = false;
+
+                return;
+            }
+
+            var user = (await AuthenticationState).User;
+
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                _canRequest = (await _authorizeService.AuthorizeAsync(user, resource, new CanRequestRequirement())).Succeeded; 
+            }
+
         }
 
         public async Task GetAuthenticatedUser(ClaimsPrincipal user)
@@ -547,7 +610,7 @@ namespace TrapchumApp.Shared
 
                 var rsp = await _userService.GetUserByIdAsync(user.GetId());
 
-                _employeeId = rsp.Data?.EmployeeRefId;
+                _employeeId = rsp.IsError ? null : rsp.Value?.EmployeeRefId;
             }
             else
             {

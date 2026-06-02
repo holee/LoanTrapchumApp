@@ -9,35 +9,25 @@ using FluentValidation;
 namespace Applications.Features.Activities.ActitvityQuery.GetActivityByCustomer;
 
 public sealed class GetActivityByCustomerIdQueryHandler
-    :IRequestHandler<GetActivityByCustomerIdQuery,ErrorOr<IEnumerable<VCustomerActivities>>>
+    : IRequestHandler<GetActivityByCustomerIdQuery, ErrorOr<IEnumerable<VCustomerActivities>>>
 {
-    private readonly ICustomerActivityService  _customerActivityService;
+    private readonly ICustomerActivityService _customerActivityService;
 
-    private readonly IValidator<GetActivityByCustomerIdQuery> _validator;
-    public GetActivityByCustomerIdQueryHandler(ICustomerActivityService customerActivityService, IValidator<GetActivityByCustomerIdQuery> validator)
+    public GetActivityByCustomerIdQueryHandler(ICustomerActivityService customerActivityService)
     {
         _customerActivityService = customerActivityService;
-        _validator = validator;
     }
 
 
     public async Task<ErrorOr<IEnumerable<VCustomerActivities>>> Handle(GetActivityByCustomerIdQuery request, CancellationToken cancellationToken = default)
     {
-        
-        var validator =await _validator.ValidateAsync(request, cancellationToken);
+        var rsp = await _customerActivityService.GetCustomerActivies(request.CustomerId, cancellationToken);
 
-        if (!validator.IsValid)
+        if (rsp == null)
         {
-            return validator.ToErrorOr<IEnumerable<VCustomerActivities>>();
-        }
-        
-        var rsp =await _customerActivityService.GetCustomerActivies(request.CustomerId, cancellationToken);
-
-        if (rsp.IsSuccess && rsp.Data != null)
-        {
-            return ErrorOrFactory.From(rsp.Data);
+            return Error.NotFound("There is no any customer notes.");
         }
 
-        return Error.NotFound(rsp.ErrMessage);
+        return rsp.ToList();
     }
 }

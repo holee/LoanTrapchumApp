@@ -11,11 +11,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
     public partial class ClientDuePayTab
     {
         private readonly ILoanScheduleServiceImpl _scheduleService;
-        //private readonly ILoanServiceImpl _loanService;
         public ClientDuePayTab(ILoanScheduleServiceImpl loanScheduleService, ILoanServiceImpl loanService)
         {
             _scheduleService = loanScheduleService;
-            //_loanService = loanService;
         }
 
         [Parameter] public int BranchId { get; set; } = 0;
@@ -90,6 +88,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         private async Task GetLoanSchedulesDueDate()
         {
 
+            Tracker.Show();
+
             isLoading = true;
 
             var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filterText);
@@ -104,37 +104,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
             isLoading = false;
 
+            Tracker.Hide();
+
             StateHasChanged();
         }
-
 
 
     }
 }
 
-//async Task DownLoadScheduleAsExcel(long loanRefId, int branchId)
-//{
-//    ContextMenuService.Close();
-//    isProgess = true;
-
-//    var stream = await _dService.DownLoadScheduleAsExcel(loanRefId, branchId);
-//    using var streamRef = new DotNetStreamReference(stream: stream);
-//    await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.xlsx", streamRef);
-//    isProgess = false;
-//    StateHasChanged();
-//}
-
-//async Task DownLoadScheduleAsPdf(long loanRefId, int branchId)
-//{
-
-//    ContextMenuService.Close();
-
-//    isProgess = true;
-//    var stream = await _dService.DownLoadScheduleAsPdf(loanRefId, branchId);
-
-//    using var streamRef = new DotNetStreamReference(stream: stream);
-
-//    await _js.InvokeVoidAsync("downloadFileFromStream", "Schedule.pdf", streamRef);
-//    isProgess = false;
-//    StateHasChanged();
-//}

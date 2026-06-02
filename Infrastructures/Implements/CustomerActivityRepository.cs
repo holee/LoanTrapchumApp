@@ -17,7 +17,8 @@ namespace Infrastructures.Implements
 
         private readonly ILogger<CustomerActivityRepository> _logger;
 
-        public CustomerActivityRepository(IDbContextFactory<DataContext> contextFactory, ILogger<CustomerActivityRepository> logger)
+        public CustomerActivityRepository(IDbContextFactory<DataContext> contextFactory,
+            ILogger<CustomerActivityRepository> logger)
         {
             _contextFactory = contextFactory;
             _logger = logger;
@@ -64,9 +65,9 @@ namespace Infrastructures.Implements
 
                 var model = await context.CustomerActivites.FirstOrDefaultAsync(x => x.Id == id && x.CustomerRefId == customerId, cancellation);
 
-                if(model is null)
+                if (model is null)
                 {
-                    return Error.NotFound(ActivityMessage.NotFound);
+                    return Error.NotFound(description: ActivityMessage.NotFound);
                 }
 
                 context.CustomerActivites.Remove(model);
@@ -79,42 +80,40 @@ namespace Infrastructures.Implements
             {
                 _logger.LogError(e.Message, e);
 
-                return Error.Unexpected(e.Message);
+                return Error.Unexpected(description: e.Message);
             }
         }
 
 
-        public async Task<Result<IEnumerable<VCustomerActivities>>> GetCustomerActivies(string? customerId, CancellationToken cancellation = default)
+        public async Task<IEnumerable<VCustomerActivities>> GetCustomerActivies(string? customerId, CancellationToken cancellation = default)
         {
             _logger.LogInformation("try adding new customer note");
 
             try
             {
-
                 await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
-
-                var notes = await context.Database
-                    .SqlQuery<VCustomerActivities>($"SELECT * FROM VCustomerActivities WHERE CustomerRefId={customerId}")
+                var notes = await context.Set<VCustomerActivities>()
                     .AsNoTracking()
+                    .Where(x => x.CustomerRefId == customerId)
                     .Select(ProjectTo())
                     .ToListAsync();
 
                 if (notes.Any())
                 {
-                    return Result.Success<IEnumerable<VCustomerActivities>>(notes);
+                    return notes;
                 }
 
-                return Result.Failure<IEnumerable<VCustomerActivities>>(ErrorResponse.NotFound("Something went wrong with server."));
+                return [];
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message, e);
 
-                return Result.Failure<IEnumerable<VCustomerActivities>>(ErrorResponse.ServerError(e.Message));
+                throw new Exception(e.Message, e);
             }
         }
 
-        public async Task<Result<VCustomerActivities>> GetCustomerActivity(int? id, string? customerId, CancellationToken cancellationToken = default)
+        public async Task<VCustomerActivities> GetCustomerActivity(int? id, string? customerId, CancellationToken cancellationToken = default)
         {
             await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -123,19 +122,19 @@ namespace Infrastructures.Implements
                                                 .Select(x => new VCustomerActivities
                                                 {
                                                     ActivityId = x.Id,
-                                                    Description = x.Description,
+                                                    Description = x.Description ?? string.Empty,
                                                     ActivityDate = x.ActivityDate,
-                                                    Status = x.Status.Value,
+                                                    Status = x.Status ?? false,
                                                     CustomerRefId = x.CustomerRefId,
                                                 })
                                                 .FirstOrDefaultAsync(x => x.ActivityId == id && x.CustomerRefId == customerId);
 
             if (activity is not null)
             {
-                return Result.Success<VCustomerActivities>(activity);
+                return activity;
             }
 
-            return Result.Failure<VCustomerActivities>(ErrorResponse.ServerError("Unable to find customer activity."));
+            throw new Exception("Unable to find customer activity.");
         }
 
         private static System.Linq.Expressions.Expression<Func<VCustomerActivities, VCustomerActivities>> ProjectTo()

@@ -64,13 +64,16 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         {
             if (CustomerId.IsNullOrEmpty())
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
+
+                _toastService.ShowError("Please selected customer first");
+
                 return;
             }
 
             var parameters = new Dictionary<string, object?> {
 
-            {"CollateralId", CustomerId }
+            {"CollateralId", CustomerId },
+            { "PageType", PageType.Dialog  }
         };
 
             var options = new DialogOptions
@@ -98,7 +101,9 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             }
 
             if (refGrid is not null)
+            {
                 await refGrid.Reload();
+            }
 
             StateHasChanged();
         }
@@ -111,7 +116,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
             var options = new DialogOptions
             {
-              
+
             };
 
             var parameters = new Dictionary<string, object?>

@@ -87,7 +87,7 @@ namespace TrapchumApp.Pages.Identity.Users
 
                 var result = await _userService.CreateUserAsync(model);
 
-                if (result.IsSuccess)
+                if (!result.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "New user was created.");
 
@@ -95,7 +95,7 @@ namespace TrapchumApp.Pages.Identity.Users
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, result.FirstError.Description);
                 }
 
             }

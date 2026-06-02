@@ -54,9 +54,9 @@ namespace TrapchumApp.Pages.Lists.Customers.Incomes
                 CancelButtonText = "Cancel"
             };
 
-            var confirm = await DialogService.Confirm(IncomeMessage.confirmDelete, "Confirm Delete", options);
+            var dia=await MsgBox.ConfirmAsync(IncomeMessage.confirmDelete, "Confirm Delete");
 
-            if (confirm == false) return;
+            if (dia == MsgBoxResult.No) return;
 
             var command = new DeleteIncomeCommand(c.IncomeId, CustomerId);
 
@@ -64,7 +64,8 @@ namespace TrapchumApp.Pages.Lists.Customers.Incomes
 
             if (rsp.IsError)
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+                _toastService.ShowError(rsp.GetMessage(), "Error");
+
                 return;
             }
 

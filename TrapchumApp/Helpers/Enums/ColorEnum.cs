@@ -17,12 +17,12 @@ public static class ColorEnumExtension
     {
         return color switch
         {
-            ColorEnum.Info => "rz-background-color-info",
-            ColorEnum.Success => "rz-background-color-success",
-            ColorEnum.Warning => "rz-background-color-warning",
-            ColorEnum.Primary => "rz-background-color-primary",
-            ColorEnum.Secondary => "rz-background-color-secondary",
-            ColorEnum.Danger => "rz-background-color-danger",
+            ColorEnum.Info => "card-info",
+            ColorEnum.Success => "card-success",
+            ColorEnum.Warning => "card-warning",
+            ColorEnum.Primary => "card-primary",
+            ColorEnum.Secondary => "card-secondary",
+            ColorEnum.Danger => "card-danger",
             _ => throw new ArgumentOutOfRangeException(nameof(color), color, null)
         };
     }
