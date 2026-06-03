@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Microsoft.Extensions.Localization
 @using TrapchumApp.Components.Indicatros
 @using TrapchumApp.Components.Dashboard
 @using TrapchumApp.Helpers.Enums
@@ -6,19 +7,24 @@
 @attribute [Authorize]
 @attribute [StreamRendering]
 @inject DashboardServices dashboardServices
+@inject IStringLocalizer<Home> Loc
+
+
+@Loc["Loading..."]
+
 <AuthorizeView Policy="@Policies.CreditOfficerOnly">
     <Authorized>
         @if (_isPageLoading)
         {
-            <Loading Text="កំពុងផ្ទុកទិន្នន័យ..." />
+            <Loading Text="@Loc["Loading..."]" />
         }
         else
         {
             <div class="db-page">
                 <div class="db-header">
                     <div class="db-header-text">
-                        <span class="db-title">Credit Officer</span>
-                        <span class="db-subtitle">Dashboard overview — due customers and performance</span>
+                        <span class="db-title">@Loc["Credit Officer"]</span>
+                        <span class="db-subtitle">@Loc["Dashboard overview — due customers and performance"]</span>
                     </div>
                     <RadzenBadge Text="CO" BadgeStyle="BadgeStyle.Primary" IsPill="true" />
                 </div>
@@ -29,7 +35,7 @@
                     {
                         <DashbordItem BackgroundColor="@GetGradientColor(item.CurrencyId)"
                                       Icon="@IconNames.Customers"
-                                      Title="Due Customers">
+                                      Title="@Loc["Due Customers"]">
                             <ValueTemplete>@item.TotalCustomer</ValueTemplete>
                         </DashbordItem>
                         <DashbordItem BackgroundColor="ColorEnum.Danger"
@@ -58,8 +64,8 @@
         <div class="db-page">
             <div class="db-header">
                 <div class="db-header-text">
-                    <span class="db-title">Branch Manager</span>
-                    <span class="db-subtitle">Monitor branch performance and lending activities</span>
+                    <span class="db-title">@Loc["Branch Manager"]</span>
+                    <span class="db-subtitle">@Loc["Monitor branch performance and lending activities"]</span>
                 </div>
                 <RadzenBadge Text="BM" BadgeStyle="BadgeStyle.Info" IsPill="true" />
             </div>
@@ -67,12 +73,12 @@
             <div class="db-cards">
                 @if (ManagerSummaries is not null)
                 {
-                    <DashbordItem Title="New Requests"
+                    <DashbordItem Title="@Loc["New Requests"]"
                                   Icon="@IconNames.Group"
                                   BackgroundColor="ColorEnum.Primary">
                         <ValueTemplete>@ManagerSummaries.NewRequest</ValueTemplete>
                     </DashbordItem>
-                    <DashbordItem Title="Approved Requests"
+                    <DashbordItem Title="@Loc["Approved Requests"]"
                                   Icon="@IconNames.AccountBalanceWallet"
                                   BackgroundColor="ColorEnum.Success">
                         <ValueTemplete>@ManagerSummaries.NumberApproved</ValueTemplete>
@@ -83,7 +89,7 @@
             <RadzenCard class="db-chart-card" Variant="Variant.Outlined">
                 <div class="db-chart-header">
                     <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
-                    <span>Branch Lending Performance</span>
+                    <span>@Loc["Branch Lending Performance"]</span>
                 </div>
             </RadzenCard>
         </div>
@@ -95,8 +101,8 @@
         <div class="db-page">
             <div class="db-header">
                 <div class="db-header-text">
-                    <span class="db-title">Account &amp; Teller</span>
-                    <span class="db-subtitle">Track due customers and daily approved loan requests</span>
+                    <span class="db-title">@Loc["Account & Teller"]</span>
+                    <span class="db-subtitle">@Loc["Track due customers and daily approved loan requests"]</span>
                 </div>
                 <RadzenBadge Text="ACC" BadgeStyle="BadgeStyle.Warning" IsPill="true" />
             </div>
@@ -125,7 +131,7 @@
             <RadzenCard class="db-chart-card" Variant="Variant.Outlined">
                 <div class="db-chart-header">
                     <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
-                    <span>Loan Portfolio Overview</span>
+                    <span>@Loc["Loan Portfolio Overview"]</span>
                 </div>
             </RadzenCard>
         </div>
@@ -137,8 +143,8 @@
         <div class="db-page">
             <div class="db-header">
                 <div class="db-header-text">
-                    <span class="db-title">Regional Branch Manager</span>
-                    <span class="db-subtitle">Review requests and approvals across the assigned branch</span>
+                    <span class="db-title">@Loc["Regional Branch Manager"]</span>
+                    <span class="db-subtitle">@Loc["Review requests and approvals across the assigned branch"]</span>
                 </div>
                 <RadzenBadge Text="RBM" BadgeStyle="BadgeStyle.Danger" IsPill="true" />
             </div>
@@ -146,12 +152,12 @@
             <div class="db-cards">
                 @if (ManagerSummaries is not null)
                 {
-                    <DashbordItem Title="New Requests"
+                    <DashbordItem Title="@Loc["New Requests"]"
                                   Icon="@IconNames.Group"
                                   BackgroundColor="ColorEnum.Primary">
                         <ValueTemplete>@ManagerSummaries.NewRequest</ValueTemplete>
                     </DashbordItem>
-                    <DashbordItem Title="Approved Requests"
+                    <DashbordItem Title="@Loc["Approved Requests"]"
                                   Icon="@IconNames.AccountBalanceWallet"
                                   BackgroundColor="ColorEnum.Success">
                         <ValueTemplete>@ManagerSummaries.NumberApproved</ValueTemplete>
@@ -162,7 +168,7 @@
             <RadzenCard class="db-chart-card" Variant="Variant.Outlined">
                 <div class="db-chart-header">
                     <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
-                    <span>Regional Performance Overview</span>
+                    <span>@Loc["Regional Performance Overview"]</span>
                 </div>
             </RadzenCard>
         </div>

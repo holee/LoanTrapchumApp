@@ -1,0 +1,48 @@
+@using System.Globalization
+@using Microsoft.AspNetCore.Components.Web
+@inject NavigationManager NavigationManager
+
+<RadzenDropDown TValue="string" 
+                Value="@currentCulture"
+                Data="@cultures" 
+                Change="@OnCultureChanged" 
+                Style="width: 120px; border-radius: 20px; background-color: rgba(255,255,255,0.2); color: white;" 
+                ValueProperty="Value" 
+                TextProperty="Text" />
+
+@code {
+    private string currentCulture = "en-US";
+    private List<CultureItem> cultures = new()
+    {
+        new CultureItem { Value = "en-US", Text = "English" },
+        new CultureItem { Value = "km-KH", Text = "ខ្មែរ" }
+    };
+
+    protected override void OnInitialized()
+    {
+        currentCulture = CultureInfo.CurrentCulture.Name;
+        // fallback if it doesn't match our specific list exactly
+        if (currentCulture != "km-KH")
+        {
+            currentCulture = "en-US";
+        }
+    }
+
+    private void OnCultureChanged(object value)
+    {
+        var culture = (string)value;
+        var uri = new Uri(NavigationManager.Uri)
+            .GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+
+        var query = $"?culture={Uri.EscapeDataString(culture)}&" +
+                    $"redirectionUri={Uri.EscapeDataString(uri)}";
+
+        NavigationManager.NavigateTo("/Culture/SetCulture" + query, forceLoad: true);
+    }
+
+    private class CultureItem
+    {
+        public string Value { get; set; } = string.Empty;
+        public string Text { get; set; } = string.Empty;
+    }
+}

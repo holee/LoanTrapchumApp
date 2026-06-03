@@ -2,12 +2,13 @@
 @using Applications.Features.Dashbaord.Dto
 @using TrapchumApp.Helpers.Enums
 @using TrapchumApp.Pages
-
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<RequestSummaryCards> Loc
 @foreach (var item in Items ?? [])
 {
     <DashbordItem BackgroundColor="@GetColor(item.Status)"
                   Icon="@GetIcon(item.Status)"
-                  Title="@item.Status">
+                  Title="@(Loc[item.Status])">
         <ValueTemplete>@item.TotalRequests</ValueTemplete>
     </DashbordItem>
 }
