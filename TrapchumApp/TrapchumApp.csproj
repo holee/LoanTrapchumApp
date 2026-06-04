@@ -6,7 +6,6 @@
 	<ImplicitUsings>enable</ImplicitUsings>
 	<UserSecretsId>aspnet-TrapchumApp-8e8b7bb5-61c2-4b8f-9b61-141a0a471e07</UserSecretsId>
 	<BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
-	<NoWarn>CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8620;CS8629;CS8714;CS0168;CS0169;CS0414;CS0649;BL0005;BL0007;BL0008</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -53,15 +52,15 @@
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.2">
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Playwright" Version="1.59.0" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.60.0" />
     <PackageReference Include="Radzen.Blazor" Version="10.4.7" />
     <PackageReference Include="Razor.Templating.Core" Version="3.1.0" />
   </ItemGroup>
@@ -125,7 +124,6 @@
     <AdditionalFiles Include="Pages\Lists\CreditAgents\AgentIndex.razor" />
     <AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentDialog.razor" />
     <AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentSwitch.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\Activties\CustomerActivities.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\Activties\CustomerActivitiesAdd.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerAddress.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerCreate.razor" />
@@ -141,7 +139,6 @@
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerUpdatePage.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\GuarantorModalCreate.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\LoanHistory.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\SpouseInfo.razor" />
     <AdditionalFiles Include="Pages\Lists\Departments\DepartmentDetailModal.razor" />
     <AdditionalFiles Include="Pages\Lists\Departments\DepartmentModalCreate.razor" />
     <AdditionalFiles Include="Pages\Lists\Departments\DepartmentModalUpdate.razor" />
@@ -165,7 +162,7 @@
     <AdditionalFiles Include="Pages\Lists\OtherNames\ConvertToCustomer.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\ConvertToEmployee.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\ConvertToVendor.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GaurantorCreateComp.razor" />
+    <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GaurantorCreateComPage.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorAddModal.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorDetails.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorEditPage.razor" />
@@ -177,7 +174,6 @@
     <AdditionalFiles Include="Pages\Lists\OtherNames\NameCreateModal.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\NameDetailModal.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\NameEditModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\SalutationDropDown.razor" />
     <AdditionalFiles Include="Pages\Lists\Vendors\CreateComp.razor" />
     <AdditionalFiles Include="Pages\Lists\Vendors\VendorIndexPage.razor" />
     <AdditionalFiles Include="Pages\Lists\Vendors\VendorCreatePage.razor" />
@@ -255,7 +251,7 @@
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanDetails.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentIndex.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentLines.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentSideBar.razor" />
+    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentSideBars.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentMultiples.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentScedule.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PayOffModal.razor" />

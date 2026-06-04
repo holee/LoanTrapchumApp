@@ -187,8 +187,11 @@
             <RadzenIcon Icon="notes" Style="color: var(--rz-primary); font-size:1.1rem;" />
             <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:600; letter-spacing:.03em; text-transform:uppercase; color: var(--rz-text-tertiary-color);">Notes</RadzenText>
         </RadzenStack>
-       
-        <TTextArea Label="Description" @bind-Text="model.Description" IsFloatLabel="true" />
+         <RadzenFormField Text="Description" class="@Styles.W100">
+        <ChildContent>
+            <RadzenTextArea class="@Styles.W100" @bind-Text="model.Description" />
+        </ChildContent>
+    </RadzenFormField>
     </EditForm>
     <RadzenStack Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center"

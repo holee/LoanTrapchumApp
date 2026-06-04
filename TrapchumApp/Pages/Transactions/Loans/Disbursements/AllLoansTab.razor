@@ -261,6 +261,8 @@
 
         var multiplePaymentUrl = $"/App/Loans/Repayment/{p.LoanId}/Multiple?BranchId={p.BranchId}&CurrencyId={p.CurrencyId}";
 
+        var multiUrl = $"/app/loans/{p.LoanId}/collection-repayment-schedules/{p.BranchId}/Branches?creditAgentId={p.CreditAgentRefId}&currencyId={p.CurrencyId}";
+
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
             <RadzenMenuItem Icon="money"
                             Path="@_getPaymentSchedulesUrl"
@@ -283,9 +285,9 @@
                             Visible="@bState.IsManager"
                             Text="Change Credit Agent"></RadzenMenuItem>
             <RadzenMenuItem Icon="change_circle"
-                            Path="@multiplePaymentUrl"
+                            Path="@multiUrl"
                             Visible="@bState.CanRecieveMultiple"
-                            Text="Multiple Payment"></RadzenMenuItem>
+                            Text="Collection Payment"></RadzenMenuItem>
             <RadzenMenuItem Icon="info"
                             Path="@_getLoanDetailsUrl"
                             Text="Schedule Details"></RadzenMenuItem>
@@ -327,6 +329,7 @@
             new ContextMenuItem { Text = "Recieve Payment", Value="1",Icon="money_bag",Disabled=!bState.CanRecievePayment},
             new ContextMenuItem { Text = "Schedule Detials", Value="2",Icon="info"},
             new ContextMenuItem { Text = "Pay Off", Value="7",Icon="money",Disabled=!bState.CanPayOff},
+            new ContextMenuItem { Text = "Collection Payment", Value="9",Icon="money",Disabled=!bState.CanRecieveMultiple},
             new ContextMenuItem { Text = "Change Credit Agent", Value="5",Icon="find_replace",Disabled=!bState.IsManager},
             new ContextMenuItem { Text = "Pre Paid", Value="6",Icon="money",Disabled=!bState.CanRecievePayment},
             new ContextMenuItem { Text = "Widthraw Collaterals", Value="8",Icon="remove"},

@@ -236,7 +236,7 @@ public partial class SchedulesPage
 
         var message = $"Recieve Payment from {LoanSchedule!.AltName}";
 
-        bool? confirm = await DialogService.OpenSideAsync<PaymentSideBar>(message, parameters!, options);
+        bool? confirm = await DialogService.OpenSideAsync<PaymentSideBars>(message, parameters!, options);
 
         if (confirm is not null && confirm == true)
         {

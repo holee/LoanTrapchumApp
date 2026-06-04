@@ -1,4 +1,4 @@
-﻿@page "/App/Loans/{BranchId:int}/Branches/{LoanId}/Schedules"
+﻿@page "/app/loans/{BranchId:int}/branches/{LoanId}/schedules"
 @using Applications.Features.LoanPayments.Requests
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
 @using TrapchumApp.Pages.Transactions.RecievePayements
@@ -132,14 +132,19 @@
         RenderFragment content = builder =>
         {
             builder.OpenComponent(0, typeof(PaymentMultiples));
+
             builder.AddAttribute(1, "Schedules", Schedules);
+
             builder.AddAttribute(2, "LoanPayment", LoanPayment);
+
             builder.AddAttribute(3, "CurrencyId", CurrencyId);
+
             builder.AddAttribute(4, "OnClose", EventCallback.Factory.Create(this, () =>
             {
                 CloseTab(newKey);
             }));
             builder.SetKey(newKey);
+
             builder.CloseComponent();
         };
 

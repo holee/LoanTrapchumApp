@@ -1,4 +1,5 @@
-﻿using Applications.Features.Schedules.Dto;
+﻿using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Schedules.Dto;
 using Applications.Responses.Paginations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -52,4 +53,8 @@ public sealed class VSchedule
     [NotMapped] public bool IsPartialPaid => ScheduleStatusId == 4;
     [NotMapped] public List<PaymentLineDetailsDto> PaymentLines { get; set; } = [];
 
+    public LoanPaymentLineDtoCreate MapToLoanPaymentLine()
+    {
+        throw new NotImplementedException();
+    }
 }

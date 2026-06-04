@@ -9,7 +9,7 @@ using Microsoft.JSInterop;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 
-public partial class PaymentSideBar
+public partial class PaymentSideBars
 {
 
     [Parameter] public int? CurrencyId { get; set; }

@@ -1,6 +1,7 @@
-﻿@using TrapchumApp.Pages.Transactions.Loans.Disbursements
+﻿@page "/app/loans/{LoanId}/collection-repayment-schedules/{BranchId:int}/branches"
+@using TrapchumApp.Pages.Transactions.Loans.Disbursements
 @using TrapchumApp.Pages.Transactions.Loans.Repayments
-<PageTitle>Loan Repayment</PageTitle>
+<PageTitle>Collection Repayment</PageTitle>
 <LoanInfos BranchId="@BranchId"
            LoanId="@LoanId"
            Currency="@CurrencyId"
@@ -30,14 +31,11 @@
                         Data="@schedules"
                         Responsive
                         Density="Density.Compact"
-                        SelectionMode="@gridSelectionMode"
+                        SelectionMode="DataGridSelectionMode.Multiple"
                         GridLines="DataGridGridLines.Both"
-                        @bind-Value="@_selectedSchedules"
-                        RowSelect="SelectedRowEvt"
-                        RowDeselect="DeSelectedRowEvt"
-                        AllowRowSelectOnRowClick="@allowRowSelected"
+                        Value="@_selectedSchedules"
+                        AllowRowSelectOnRowClick="false"
                         CellContextMenu="@OnCellContextMenu"
-                        IsLoading="isLoading"
                         @ref="gridSchedule">
             <Columns>
                 <RadzenDataGridColumn Width="3.5rem"

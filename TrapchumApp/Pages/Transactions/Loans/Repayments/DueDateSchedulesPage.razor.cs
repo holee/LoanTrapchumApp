@@ -41,21 +41,37 @@ public partial class DueDateSchedulesPage
     IEnumerable<VLoanRepaymentLine> VLoanRepaymentLines = [];
 
     VLoanDisbursments? vLoan = new();
+
     private string? _userId = string.Empty;
+
     IList<VSchedule>? _selectedSchedules = null;
+
     DataGridSelectionMode gridSelectionMode = DataGridSelectionMode.Single;
+
     bool isAllowMultiplePayment = false;
+
     bool allowRowSelected = true;
+
     PaymentDtoCreate recievePayment = new();
+
     decimal? principleAmount = 0;
+
     decimal? interestAmount = 0;
+
     decimal? collectionfeeAmount = 0;
+
     decimal? totalPaidAmount = 0;
+
     decimal? penaltyAmount = 0;
+
     decimal? totalPaymentAmount = 0.00M;
+
     decimal? penaltyRate = 0;
+
     int selectedIndex = 0;
+
     bool isPaidNow = false;
+
     bool isLoading = false;
     bool includePaid = false;
     bool? canPaidNow = false;
@@ -152,7 +168,7 @@ public partial class DueDateSchedulesPage
 
         var message = $"Recieve Payment from {CustomerName}";
 
-        bool? confirm = await DialogService.OpenSideAsync<PaymentSideBar>(message, parameters!, options);
+        bool? confirm = await DialogService.OpenSideAsync<PaymentSideBars>(message, parameters!, options);
 
         if (confirm is not null && confirm == true)
         {

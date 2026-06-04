@@ -311,7 +311,7 @@ public partial class PaymentMultiples
             {"CurrencyId",CurrencyId }
         };
 
-        DialogService.OpenAsync<PaymentSideBar>($"{LoanPayment.CustomerName}",parameters,options);
+        DialogService.OpenAsync<PaymentSideBars>($"{LoanPayment.CustomerName}",parameters,options);
 
     }
 }

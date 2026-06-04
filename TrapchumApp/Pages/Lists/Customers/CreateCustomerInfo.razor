@@ -83,9 +83,6 @@
                                                    Change="@FirstNameChanged"
                                                    Placeholder="នាមខ្លួនជាឡាតាំង..." />
                                 </ChildContent>
-                                @* <Helper>
-                        <ValidationMessage For="@(() => Model.FirstName)" />
-                    </Helper> *@
                             </RadzenFormField>
                         </RadzenColumn>
                         <RadzenColumn Size="12" SizeMD="4">
@@ -107,9 +104,6 @@
                                                    Change="@LastNameChanged"
                                                    Placeholder="នាមត្រកូលជាឡាតាំង..." />
                                 </ChildContent>
-                                @* <Helper>
-                        <ValidationMessage For="@(() => Model.LastName)" />
-                    </Helper> *@
                             </RadzenFormField>
                         </RadzenColumn>
                     </RadzenRow>
@@ -246,7 +240,7 @@
 
 @if (Model.MarritalStatus != MarritalStateEnum.Single.ToString())
 {
-    <SpouseInfo model="@Model" />
+    <SpouseInformation model="@Model" />
 }
 <CustomerAddress model="@Model" />
 

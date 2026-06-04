@@ -12,7 +12,7 @@ using Radzen.Blazor;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
 namespace TrapchumApp.Pages.Transactions.RecievePayements;
 
-public partial class RecievePayementSchesulesPage
+public partial class CollectionPaymentPage
 {
     [Parameter] public string? LoanId { get; set; }
     [Parameter] public int BranchId { get; set; } = 0;
@@ -48,51 +48,76 @@ public partial class RecievePayementSchesulesPage
     VLoanDisbursments? vLoan = new();
 
     IList<VSchedule>? _selectedSchedules = null;
-    DataGridSelectionMode gridSelectionMode = DataGridSelectionMode.Single;
-    bool isAllowMultiplePayment = false;
-    bool allowRowSelected = true;
+
+    DataGridSelectionMode gridSelectionMode = DataGridSelectionMode.Multiple;
+
+    bool isAllowMultiplePayment = true;
+
     PaymentDtoCreate recievePayment = new();
+
     decimal? principleAmount = 0;
+
     decimal? interestAmount = 0;
+
     decimal? collectionfeeAmount = 0;
+
     decimal? totalPaidAmount = 0;
+
     decimal? penaltyAmount = 0;
+
     decimal? totalPaymentAmount = 0.00M;
+
     decimal? penaltyRate = 0;
+
     int selectedIndex = 0;
+
     bool isPaidNow = false;
+
     bool isLoading = false;
+
     bool includePaid = false;
+
     bool? canPaidNow = false;
+
     bool? isRestoreDefault = false;
+
     bool disableIsPaidNow = true;
+
     bool btnDisabled = false;
+
     string receiptNo = string.Empty;
+
     string recieptNumber = "";
+
     int pageIndex = 1;
+
     int pageSize = 25;
+
     string sortField = "LoanId";
+
     string filter = string.Empty;
+
     int selectIndex = 0;
+
     int counts = 0;
+
     private bool _isSelectionLocked = false;
+
     bool _isPaymentTab = false;
+
     bool _isMultiplePaymentTab = false;
+
     int _selectedIndexTab = 0;
+
     private LoanPaymentLineDtoCreate _loanPaymentLine = new();
 
     LoanPaymentDtoCreate _loanPayment = new();
 
     protected override async Task OnInitializedAsync()
     {
-        //btnDisabled = true;
         _userId = (await AuthenticationState).GetUserId();
 
-        await GetLoanWithSchedules(BranchId, LoanId);
-
         await GetSchedules();
-
-        _isSelectionLocked = !isAllowMultiplePayment;
 
         await base.OnInitializedAsync();
     }
@@ -123,7 +148,7 @@ public partial class RecievePayementSchesulesPage
 
         if (!isAllowMultiplePayment && !isPaidNow)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Please select schedule to apply payment.");
+            _toastService.ShowError("Please select schedule to apply payment.");
 
             return;
         }
@@ -141,7 +166,7 @@ public partial class RecievePayementSchesulesPage
 
         if (LoanPaymentLines.Count <= 0)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "There is any schedule selected yet!");
+            _toastService.ShowError("There is any schedule selected yet!");
 
             return;
         }
@@ -203,24 +228,22 @@ public partial class RecievePayementSchesulesPage
 
         if (!isAllowMultiplePayment)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Please select schedule to apply payment.");
+            _toastService.ShowError("Please select schedule to apply payment.");
 
             return;
         }
 
         if (!_selectedSchedules!.Any())
         {
-            NotificationService.Notify(NotificationSeverity.Info, "There no any schedules are selected.");
+            _toastService.ShowWarning("There no any schedules are selected.");
+
             return;
 
         }
 
-        var confirm = await DialogService.Confirm("Do you want to apply this schedules?", "Receive Payment");
+        var confirm = await MsgBox.ConfirmAsync("Do you want to apply this schedules?", "Receive Payment");
 
-        if (confirm == false)
-        {
-            return;
-        }
+        if (confirm == MsgBoxResult.No) return;
 
 
         var loanPayment = new LoanPaymentDtoCreate
@@ -232,31 +255,31 @@ public partial class RecievePayementSchesulesPage
             BranchRefId = BranchId,
             UserRefId = _userId,
             CurrencyRefId = CurrencyId,
-            CustomerName = LoanSchedule!.AltName
+           // CustomerName = LoanSchedule!.AltName
         };
 
-        var parameters = new Dictionary<string, object?>
-        {
-            {"Schedules",_selectedSchedules},
+        //var parameters = new Dictionary<string, object?>
+        //{
+        //    {"Schedules",_selectedSchedules},
 
-            {"CurrencyId" , CurrencyId},
+        //    {"CurrencyId" , CurrencyId},
 
-            {"LoanPayment" , loanPayment},
-        };
+        //    {"LoanPayment" , loanPayment},
+        //};
 
-        var options = new SideDialogOptions
-        {
-            Width = "55vw",
+        //var options = new SideDialogOptions
+        //{
+        //    Width = "55vw",
 
-            CloseDialogOnOverlayClick = true,
+        //    CloseDialogOnOverlayClick = true,
 
-            Position = DialogPosition.Right
-        };
+        //    Position = DialogPosition.Right
+        //};
 
 
-        _selectedIndexTab = 1;
+        //_selectedIndexTab = 1;
 
-        _isMultiplePaymentTab = true;
+        //_isMultiplePaymentTab = true;
 
     }
 
@@ -283,7 +306,8 @@ public partial class RecievePayementSchesulesPage
 
         if (SelectedSchedule is null)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "There is no any schedule is selected.");
+
+            _toastService.ShowError("There is no any schedule is selected.");
 
             return;
         }
@@ -294,7 +318,8 @@ public partial class RecievePayementSchesulesPage
 
         if (SelectedSchedule != firstSchedule)
         {
-            NotificationService.Notify(NotificationSeverity.Warning, "Cannot add new schedule due to previouse schedule not complete paid yet.");
+
+            _toastService.ShowError("Cannot add new schedule due to previouse schedule not complete paid yet.");
 
             SetDefaultValue();
 
@@ -363,7 +388,34 @@ public partial class RecievePayementSchesulesPage
 
         isLoading = true;
 
-        var query = new GetDueScheduleByLoanIdQuery(branchId, loanId, ScheduleStatus.Unpaid);
+        var query = new GetDueScheduleByLoanIdQuery(branchId, loanId, ScheduleStatus.Unpaid, null);
+
+        var rsp = await mediator.Send(query);
+
+        LoanSchedule = null;
+
+        schedules = rsp.Items;
+
+        _selectedSchedules = schedules.Take(1).ToList();
+
+        if (_selectedSchedules.Any() && !isAllowMultiplePayment)
+        {
+            SelectedSchedule = _selectedSchedules.First();
+
+            disableIsPaidNow = false;
+        }
+
+        isLoading = false;
+
+    }
+
+
+    async Task GetSchedules(int? branchId, string? loanId, ScheduleStatus status = ScheduleStatus.Unpaid)
+    {
+
+        isLoading = true;
+
+        var query = new GetDueScheduleByLoanIdQuery(branchId, loanId, status);
 
         var rsp = await mediator.Send(query);
 
@@ -399,9 +451,13 @@ public partial class RecievePayementSchesulesPage
         if (!rsp.IsSuccess())
         {
             LoanSchedule = null;
+
             schedules = [];
+
             _selectedSchedules = [];
+
             isLoading = false;
+
             return;
         }
 
@@ -410,8 +466,11 @@ public partial class RecievePayementSchesulesPage
         if (LoanSchedule is null)
         {
             schedules = [];
+
             _selectedSchedules = [];
+
             isLoading = false;
+
             return;
         }
 
@@ -467,30 +526,7 @@ public partial class RecievePayementSchesulesPage
         }
     }
 
-    async Task SelectedRowEvt(VSchedule schedule)
-    {
-        if (isAllowMultiplePayment)
-        {
-            await UpdateMultipleSelection(schedule);
-        }
-        else
-        {
-            await UpdateSingleSelection(schedule);
-        }
 
-    }
-
-    async Task DeSelectedRowEvt(VSchedule schedule)
-    {
-        if (_selectedSchedules != null && _selectedSchedules.Contains(schedule))
-        {
-            _selectedSchedules.Remove(schedule);
-
-            await gridSchedule.Reload();
-
-            StateHasChanged();
-        }
-    }
 
     void OnRemoveAdded(LoanPaymentLineDtoCreate value)
     {
@@ -512,9 +548,7 @@ public partial class RecievePayementSchesulesPage
             {
                 var scheduleIndex = _selectedSchedules!.IndexOf(changedSchedule);
 
-                _selectedSchedules[scheduleIndex].Selected = false;
-
-                gridSchedule.SelectRow(changedSchedule, false);
+                _selectedSchedules.RemoveAt(scheduleIndex);
 
             }
 
@@ -606,14 +640,8 @@ public partial class RecievePayementSchesulesPage
 
         if (_selectedSchedules!.Count > 1 && _selectedSchedules.First() == schedule)
         {
-            // Block unchecking the first item if more than 2 are selected
-            NotificationService.Notify(new NotificationMessage
-            {
-                Severity = NotificationSeverity.Error,
-                Summary = "Cannot Uncheck",
-                Detail = "Cannot uncheck the first selected item.",
-                Duration = 3000
-            });
+
+            _toastService.ShowError("Cannot uncheck the first selected item.");
 
             return;
         }
@@ -622,20 +650,15 @@ public partial class RecievePayementSchesulesPage
         {
             // Allow unchecking the last item
             _selectedSchedules.Remove(schedule);
-            await gridSchedule.SelectRow(schedule, false);
         }
         else
         {
             // Block unchecking non-last items if more than 2 are selected
             if (_selectedSchedules.Count > 1)// default 2
             {
-                NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Error,
-                    Summary = "Cannot Uncheck",
-                    Detail = "Only the last selected item can be unchecked.",
-                    Duration = 3000
-                });
+
+                _toastService.ShowError("Only the last selected item can be unchecked.");
+
                 return;
             }
             else
@@ -693,343 +716,64 @@ public partial class RecievePayementSchesulesPage
         if (schedule == null)
         {
             _selectedSchedules = [];
+
+            await gridSchedule.Reload();
+
+            return;
         }
 
         var schedulesList = schedules.ToList();
 
         var firstSchedule = schedulesList.First();
 
-
-        // If no rows are selected, add the clicked row
         if (!_selectedSchedules!.Any())
         {
             if (schedule != firstSchedule)
             {
-                // Automatically include the first row
-                //SelectedSchedules!.Add(firstSchedule);
-                NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Error,
-                    Summary = "First Row Selected",
-                    Detail = "Only The first schedule is allow selected.",
-                    Duration = 3000
-                });
+                _toastService.ShowWarning("Only the first schedule is allowed to be selected first.");
+
                 return;
             }
-            else
-            {
-                _selectedSchedules!.Add(schedule);
-                await gridSchedule.SelectRow(schedule);
-            }
 
+            _selectedSchedules!.Add(schedule);
+
+            await gridSchedule.Reload();
+
+            StateHasChanged();
+
+            return;
         }
 
-        int newIndex = schedulesList.IndexOf(schedule!);
+        int newIndex = schedulesList.IndexOf(schedule);
 
         var selectedIndices = _selectedSchedules!.Select(e => schedulesList.IndexOf(e)).ToList();
 
-        // Check if the new selection is contiguous
         int minIndex = selectedIndices.Min();
 
         int maxIndex = selectedIndices.Max();
 
-        bool isContiguous = newIndex == minIndex - 1 || newIndex == maxIndex + 1 || selectedIndices.Contains(newIndex);
-
-        if (isContiguous)
+        // Already selected — skip (deselection not supported to keep contiguous range intact)
+        if (selectedIndices.Contains(newIndex))
         {
-            if (!_selectedSchedules!.Contains(schedule!))
-            {
-                _selectedSchedules.Add(schedule!);
-
-                await gridSchedule.SelectRow(schedule!);
-            }
+            return;
         }
 
+        bool isContiguous = newIndex == minIndex - 1 || newIndex == maxIndex + 1;
+
+        if (!isContiguous)
+        {
+            _toastService.ShowWarning("You can only select schedules in a sequential order without skipping.");
+
+            return;
+        }
+
+        _selectedSchedules?.Add(schedule);
 
         await gridSchedule.Reload();
 
         StateHasChanged();
 
     }
+
+
 }
-// Handle select all checkbox
-//async Task SelectAll(bool? selectAll)
-//{
-//    if (selectAll == true)
-//    {
-//        SelectedSchedules = schedules.ToList();
-//    }
-//    else
-//    {
-//        SelectedSchedules!.Clear();
-//    }
-
-//    await gridSchedule.Reload();
-
-//    StateHasChanged();
-//}
-
-// Clear selection
-//void ClearSelection()
-//{
-//    SelectedSchedules!.Clear();
-//    isSelectionLocked = false; // Unlock selection
-//    StateHasChanged();
-//}
-
-
-
-
-//void SetSelectedSchedule(VSchedule? s)
-//{
-//    if (s is not null)
-//    {
-
-//        SelectedSchedule = s;
-
-//        SelectedSchedule.LoanId = LoanId;
-
-//        SelectedSchedule.Selected = true;
-
-//        disableIsPaidNow = false;
-//    }
-//    else
-//    {
-//        SelectedSchedule = null;
-//    }
-//}
-
-//bool IsPreviousRowSelected(int rowIndex)
-//{
-//    if (rowIndex == 0) return true;
-//    return schedules.ToList()[rowIndex - 1].Selected == true ||
-//        schedules.ToList()[rowIndex - 1].IsPaid == true;
-//}
-
-//selectedIndex = schedules.IndexOf(s);
-
-//if (LoanRepaymentLines.Any(x => x.InstallmentNo == s!.InstallmentNo))
-//{
-//    SetDefaultValue();
-//    SelectedSchedule = s;
-//    return;
-//}
-
-//if (selectedIndex > 0 && !IsPreviousRowSelected(selectedIndex))
-//{
-//    NotificationService.Notify(NotificationSeverity.Error, "Select previous schedule to pay.");
-//    SelectedSchedules = null;
-//    Clear();
-//    StateHasChanged();
-//    return;
-//}
-//if (selectedIndex == 0 || IsPreviousRowSelected(selectedIndex))
-//{
-//    btnDisabled = false;
-//    disableIsPaidNow = false;
-//    schedules[selectedIndex].Selected = true;
-//    SelectedSchedule = s;
-//}
-
-//if (s.IsPaid && selectedIndex != -1)
-//{
-//    btnDisabled = false;
-//    disableIsPaidNow = false;
-//    SelectedSchedule = s;
-//    isPaidNow = false;
-//    Clear();
-//    return;
-//}
-
-
-//await gridSchedule.Reload();
-
-
-//if (arg)
-//{
-//    selectIndex = index;
-//}
-//else
-//{
-//    selectIndex -= 1;
-//}
-
-//if ((index > 0 || schedules[index - 1].Selected == false) &&
-//    schedules[index - 1].InstallmentNo < SelectedSchedules?[index].InstallmentNo)
-//{
-//    NotificationService.Notify(NotificationSeverity.Info, "Privoius Schedule not selected yet!.");
-
-//    return;
-//}
-//else
-//{
-//    s.Selected = true;
-//}
-
-//if (index > SelectedSchedules!.Count)
-//{
-//    arg = false;
-//    s.Selected = false;
-//    NotificationService.Notify(NotificationSeverity.Info, "Privoius Schedule not selected yet!.");
-//    return;
-//}
-
-//if (index > 0 && SelectedSchedules.Count > LoanRepaymentLines!.Count && !s.Selected)
-//{
-
-//    s.Selected = false;
-//    NotificationService.Notify(NotificationSeverity.Info, "Privoius Schedule not in Loan Payment line yet.");
-//    return;
-
-//}
-
-// s.Selected = arg;
-// s.PenaltyAmount = 0.00M;
-//gridSchedule.SelectRow(s, false);
-
-//if (!allowRowSelected && SelectedSchedules!.Any() && !arg && s.Selected == true)
-//{
-//    var selectedScheduleIndex = SelectedSchedules!.IndexOf(s);
-
-//    if (selectedScheduleIndex == SelectedSchedules.Count - 1)
-//    {
-//        s.Selected = arg;
-//        s.PenaltyAmount = 0.00M;
-//        gridSchedule.SelectRow(s, false);
-//    }
-//    else
-//    {
-//        s.Selected = true;
-//        NotificationService.Notify(NotificationSeverity.Info, "Please select last schedule.");
-
-//    }
-//    StateHasChanged();
-//    return;
-//}
-
-//if (!allowRowSelected && !s.Selected && arg)
-//{
-//    s.Selected = arg;
-
-//    gridSchedule.SelectRow(s);
-
-//    SetSelectedSchedule(s);
-
-//    StateHasChanged();
-
-//    return;
-//}
-//if (!allowRowSelected && s.Selected && !arg)
-//{
-//    s.Selected = arg;
-
-//    gridSchedule.SelectRow(s, false);
-
-//    var removeSchedule = LoanRepaymentLines.Where(x => x.InstallmentNo == s.InstallmentNo).FirstOrDefault();
-
-//    if (removeSchedule is not null)
-//    {
-//        OnRemoveAdded(removeSchedule);
-//    }
-
-//    StateHasChanged();
-//    return;
-//}
-
-
-//if (SelectedSchedules.Count > 1 && SelectedSchedules.First() == s)
-//{
-//    // Block unchecking the first item if more than 2 are selected
-//    NotificationService.Notify(new NotificationMessage
-//    {
-//        Severity = NotificationSeverity.Error,
-//        Summary = "Cannot Selected",
-//        Detail = "Allow select only first schedule.",
-//        Duration = 3000
-//    });
-
-//    SelectedSchedule = null;
-//    SelectedSchedules.Clear();
-//    return;
-//}
-
-//if (SelectedSchedules.Last() == s)
-//{
-//    // Allow unchecking the last item
-//    SelectedSchedules.Remove(s);
-//}
-//else
-//{
-//    // Block unchecking non-last items if more than 2 are selected
-//    if (SelectedSchedules.Count > 1)
-//    {
-//        NotificationService.Notify(new NotificationMessage
-//        {
-//            Severity = NotificationSeverity.Error,
-//            Summary = "Cannot Uncheck",
-//            Detail = "Only firest schedule selected is allowed.",
-//            Duration = 3000
-//        });
-
-//        return;
-//    }
-//    else
-//    {
-//        // Allow unchecking if 2 or fewer items
-//        SelectedSchedules.Remove(s);
-
-//        await gridSchedule.Reload();
-
-//        StateHasChanged();
-//    }
-//}
-
-
-//void DeSelectedSchedule()
-//{
-//    if (isAllowMultiplePayment)
-//    {
-
-//    }
-
-//}
-
-//async void OnPaid()
-//{
-//    if (SelectedSchedule is not null && LoanPaymentLines.Any(x => x.InstallmentNo == SelectedSchedule!.InstallmentNo))
-//    {
-//        SetDefaultValue();
-//        return;
-//    }
-//    if (SelectedSchedule is not null && recievePayment is not null)
-//    {
-
-//        var confirm = await DialogService.Confirm("Are you sure want add this payment?", "Confirm");
-
-//        if (confirm == false) return;
-
-//        var line = SelectedSchedule.ToPaymentLine(recievePayment);
-
-//        schedules.ToList()[selectedIndex].Selected = true;
-
-//        LoanPaymentLines.Add(line);
-
-//        await paymentLinesRef.ReLoad();
-
-//        Clear();
-
-//        btnDisabled = true;
-//    }
-//    StateHasChanged();
-//}
-
-//void Reset()
-//{
-//    DeSelectedSchedule();
-//    Clear();
-//    LoanPaymentLines.Clear();
-//    SelectedSchedules = [];
-//    SelectedSchedule = new();
-//    disableIsPaidNow = true;
-
-//}

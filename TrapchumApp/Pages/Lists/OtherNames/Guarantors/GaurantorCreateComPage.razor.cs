@@ -5,7 +5,7 @@ using Applications.Features.Guarantor.Dtos;
 
 namespace TrapchumApp.Pages.Lists.OtherNames.Guarantors
 {
-    public partial class GaurantorCreateComp
+    public partial class GaurantorCreateComPage 
     {
         [Parameter] public EntityGuarantorCreate Model { get; set; } = new();
         [PersistentState]

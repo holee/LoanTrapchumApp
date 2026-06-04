@@ -51,9 +51,7 @@
 
 html,
 body {
-    font-family: kh_siemreap, "Noto Sans Khmer", "Khmer OS Siemreap", Arial, sans-serif !important;
-}
-    background-color: var(--rz-base-200);
+    font-family: kh_siemreap, "Noto Sans Khmer", "Khmer OS Siemreap", Arial, sans-serif;
 }
 
 .rz-data-row {

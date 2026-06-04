@@ -511,7 +511,7 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
 
 
 
-    public async Task<Pager<VSchedule>> GetScheduleLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus state, CancellationToken cancellation = default)
+    public async Task<Pager<VSchedule>> GetScheduleLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus state, DateTime? dueDate = null, CancellationToken cancellation = default)
     {
 
         await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
@@ -521,10 +521,15 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
         baseQueries = state switch
         {
             ScheduleStatus.Paid => baseQueries.Where(x => x.ScheduleStatusId == (int)ScheduleStatus.Paid),
-            ScheduleStatus.Unpaid => baseQueries.Where(x => x.ScheduleStatusId != (int)ScheduleStatus.Paid && x.PaymentDate <= DateTime.Now),
-            ScheduleStatus.All => baseQueries,
+            ScheduleStatus.Unpaid => baseQueries.Where(x => x.ScheduleStatusId != (int)ScheduleStatus.Paid),
+            ScheduleStatus.Partial => baseQueries.Where(x => x.ScheduleStatusId == (int)ScheduleStatus.Partial),
             _ => baseQueries
         };
+
+        if (dueDate.HasValue)
+        {
+            baseQueries = baseQueries.Where(x => x.PaymentDate <= dueDate.Value);
+        }
 
         baseQueries = baseQueries.OrderBy(x => x.InstallmentNo).ThenBy(x => x.PaymentDate);
 
