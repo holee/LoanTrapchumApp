@@ -16,7 +16,7 @@ public interface ICollateralService
     Task<ErrorOr<VCustomerCollaterals>> GetCollateralDetailAsync(string? customerId, bool includeInUsed = true,
         CancellationToken cancellation = default);
 
-    Task<ErrorOr<IEnumerable<VCollateralLines>>> GetCollateralLinesAsync(string? collateralId);
+    Task<ErrorOr<IEnumerable<VCollateralLines>>> GetCollateralLinesAsync(string? collateralId, CancellationToken cancellation = default);
     Task<ErrorOr<VCollateralLines>> GetCollateralLinesAsync(long? id, string? collateralId);
 
     Task<ErrorOr<VCollateralLines>> GetCollateralLineDetailAsync(long? id, string? collateralId,

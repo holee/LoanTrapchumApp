@@ -14,7 +14,7 @@ namespace Applications.Extensions.NumberExtensions
             return value;
         }
 
-        public static T ToNumer<T>(this object input) where T : struct, IConvertible, INumber<T>
+        public static T ToNumber<T>(this object input) where T : struct, IConvertible, INumber<T>
         {
 
             var testValue = input.ToString()?.Length == 0 ? "0" : input.ToString()!;

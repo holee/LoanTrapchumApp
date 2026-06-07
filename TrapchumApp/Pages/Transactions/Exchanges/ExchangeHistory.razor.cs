@@ -2,124 +2,132 @@ using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Transactions;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Pages.Transactions.Exchanges
+namespace TrapchumApp.Pages.Transactions.Exchanges;
+
+public partial class ExchangeHistory
 {
-    public partial class ExchangeHistory
+    private readonly IForiegnCurrencyExchange _exService;
+
+    public ExchangeHistory(IForiegnCurrencyExchange exService)
     {
-        private readonly IForiegnCurrencyExchange _exService;
+        _exService = exService;
+    }
 
-        public ExchangeHistory(IForiegnCurrencyExchange exService)
+    [Parameter, EditorRequired] public int BranchId { get; set; }
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    private string? _userId = string.Empty;
+    private IEnumerable<VttCurrencyExchanges> ExchangeHostories = [];
+    private int counts = 0;
+    private int pageSize = 15;
+    private int pageIndex = 0;
+    private bool isLoading = false;
+    private bool sortDescending = false;
+    private DateTime? transactionDate = null;
+    string sortField = nameof(VttCurrencyExchanges.TransactionDate);
+    private RadzenDataGrid<VttCurrencyExchanges> dataGrid = default!;
+    protected override async Task OnInitializedAsync()
+    {
+
+        _userId = (await AuthenticationState).GetUserId();
+
+        await GetExchangeHistories();
+
+        await base.OnInitializedAsync();
+    }
+    async Task LoadData(LoadDataArgs args)
+    {
+        pageIndex = args.Skip ?? 0;
+
+        (sortField, sortDescending) = args.PageInfo();
+
+        await GetExchangeHistories();
+    }
+
+    async Task GetExchangeHistories(DateTime? traxDate = null)
+    {
+
+        Tracker.Show();
+
+        var param = new QueryParam
         {
-            _exService = exService;
-        }
+            Page = pageIndex,
+            Take = pageSize,
+            SortColumn = sortField,
+            SortDescending = sortDescending
+        };
 
-        [Parameter, EditorRequired] public int BranchId { get; set; }
-        [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-        private string? _userId = string.Empty;
-        private IEnumerable<VttCurrencyExchanges> ExchangeHostories = [];
-        private int counts = 0;
-        private int pageSize = 10;
-        private int pageIndex = 1;
-        private bool isLoading = false;
-        private bool sortDescending = false;
-        private DateTime? transactionDate = DateTime.UtcNow;
-        string sortField = "TransactionDate";
-        private RadzenDataGrid<VttCurrencyExchanges> dataGrid = default!;
-        protected override async Task OnInitializedAsync()
+        var exchangeResp = await _exService.GetCurrenciesExchange(BranchId, transactionDate, param);
+
+        counts = exchangeResp.Count;
+
+        ExchangeHostories = exchangeResp.Items;
+
+        Tracker.Hide();
+
+        StateHasChanged();
+    }
+
+
+    async void PageSizeChange(int page)
+    {
+        pageSize = page;
+
+        pageIndex = 0;
+
+        await GetExchangeHistories(transactionDate);
+    }
+
+    async Task CurrentDateChanged()
+    {
+        await GetExchangeHistories();
+    }
+
+    async Task ShowCurrencyDialogue()
+    {
+
+        var param = new Dictionary<string, object?> { { "BranchId", BranchId }, { "ShowCloseButton", true } };
+
+        var options = new DialogOptions
         {
+            Draggable = true,
+            AutoFocusFirstElement = false,
+            Resizable = false,
+            Width = "50rem"
+        };
 
-            _userId = (await AuthenticationState).GetUserId();
+        var dia = await DialogService.OpenAsync<MoneyExchanges>("Currency Exchange", param, options);
 
-            await GetExchangeHistories();
-
-            await base.OnInitializedAsync();
-        }
-        async Task LoadData(LoadDataArgs args)
+        if (dia is VttCurrencyExchanges result && result is not null)
         {
-            pageIndex = args.Skip ?? 0;
+            await dataGrid.InsertRow(result);
 
-            (sortField, sortDescending) = args.PageInfo();
-
-            await GetExchangeHistories();
+            await dataGrid.Reload();
         }
+    }
 
-        async Task GetExchangeHistories(DateTime? traxDate = null)
+    async Task ShowEditCurrencyDialogue(VttCurrencyExchanges cur)
+    {
+
+        var param = new Dictionary<string, object?> { { "BranchId", BranchId }, { "TransactionId", cur.TransactionsId }, { "ShowCloseButton", true } };
+
+        var options = new DialogOptions
         {
-            isLoading = true;
+            Draggable = true,
+            AutoFocusFirstElement = false,
+            Resizable = false,
+            Width = "50rem"
+        };
 
-            var exchangeResp = await _exService.GetCurrenciesExchange(BranchId, null, new QueryParam());
+        var dia = await DialogService.OpenAsync<MoneyExchangesEdit>("Currency Exchange", param, options);
 
-            counts = exchangeResp.Count;
-
-            ExchangeHostories = exchangeResp.Items;
-
-            isLoading = false;
-
-            StateHasChanged();
-        }
-
-
-        async void PageSizeChange(int page)
+        if (dia is VttCurrencyExchanges result && result is not null)
         {
-            pageSize = page;
+            await dataGrid.UpdateRow(result);
 
-            pageIndex = 0;
-
-            await GetExchangeHistories(transactionDate);
+            await dataGrid.Reload();
         }
-
-        async Task CurrentDateChanged(DateTime tranxDate)
-        {
-            await GetExchangeHistories(tranxDate);
-        }
-
-        async Task ShowCurrencyDialogue()
-        {
-
-            var param = new Dictionary<string, object?> { { "BranchId", BranchId }, { "ShowCloseButton", true } };
-
-            var options = new DialogOptions
-            {
-                Draggable = true,
-                AutoFocusFirstElement = false,
-                Resizable = false,
-                Width = "50rem"
-            };
-
-            var dia = await DialogService.OpenAsync<MoneyExchanges>("Currency Exchange", param, options);
-
-            if (dia is VttCurrencyExchanges result && result is not null)
-            {
-                await dataGrid.InsertRow(result);
-
-                await dataGrid.Reload();
-            }
-        }
-
-        async Task ShowEditCurrencyDialogue(VttCurrencyExchanges cur)
-        {
-
-            var param = new Dictionary<string, object?> { { "BranchId", BranchId }, { "TransactionId", cur.TransactionsId }, { "ShowCloseButton", true } };
-
-            var options = new DialogOptions
-            {
-                Draggable = true,
-                AutoFocusFirstElement = false,
-                Resizable = false,
-                Width = "50rem"
-            };
-
-            var dia = await DialogService.OpenAsync<MoneyExchangesEdit>("Currency Exchange", param, options);
-
-            if(dia is VttCurrencyExchanges result && result is not null)
-            {
-                await dataGrid.UpdateRow(result);
-
-                await dataGrid.Reload();
-            }
-
-        }
-
 
     }
+
+
 }

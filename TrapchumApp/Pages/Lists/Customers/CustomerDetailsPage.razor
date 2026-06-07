@@ -51,7 +51,7 @@ else
                     <LoanHistory CustomerId="@CustomerId" @key="@Guid.NewGuid().ToString("N")" />
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Income & Expense">
-                    <CustomerProfit CustomerId="@CustomerId" />
+                    <CustomerProfit CustomerId="@CustomerId" ShowAction="true" ShowCommand="true" />
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Collaterals">
                     <CollateralsCustomer ShowCommand="true"
@@ -62,7 +62,7 @@ else
                     <CustomerLoanRequest CustomerId="@CustomerId" BranchId="@BranchId" />
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Activities">
-                    <CustomerActivitiesPage CustomerId="@CustomerId" ShowAdd="true" ShowCommand="true" @key="@Guid.NewGuid().ToString("N")" />
+                    <CustomerActivitiesIndexPage CustomerId="@CustomerId" ShowAdd="true" ShowCommand="true" @key="@Guid.NewGuid().ToString("N")" />
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Notes">
                     <CustomerNotes CustomerId="@CustomerId" ShowCommand="true" ShowAdd="true" @key="@Guid.NewGuid().ToString("N")"></CustomerNotes>

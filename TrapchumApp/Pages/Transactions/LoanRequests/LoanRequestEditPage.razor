@@ -1,5 +1,6 @@
 ﻿@page "/App/Loans/{LoanRequestId}/Requests/{BranchId:int}/Branches/{CustomerId}/Edit"
 @using Applications.Features.Collaterals.Dtos
+@using Applications.Exceptions
 @using Applications.Features.Customers.Response
 @using Applications.Features.Guarantor.Dtos
 @using Applications.Features.LoanRequests.Command.AddLoanRequestCollateral
@@ -138,7 +139,7 @@ else
     Popup popup = default!;
     RadzenDataGrid<VCustomerDetails> grid = default!;
 
- 
+
 
     async Task SelectMany(IEnumerable<VGuarantor> gs)
     {
@@ -317,12 +318,16 @@ else
         foreach (var g in cs)
         {
 
-            if (CollateralLines.Any(x => x.CollateralId == g.CollateralId)) continue;
+            if (CollateralLines.Any(x => x.CollateralLineId == g.Id)) continue;
 
             var collateralLink = new CollateralLink
             {
                 CollateralLineRefId = g.Id,
+
                 CollateralRefId = g.CollateralId,
+
+                BranchId = BranchId,
+
                 ModifiedDt = DateTime.Now
             };
 
@@ -345,18 +350,32 @@ else
             CollateralLines.Add(item);
         }
 
-        var rsp = await mediator.Send(new AddLoanRequestCollateralCommand(collaterals));
-
-        if (!rsp.IsError)
+        try
         {
-            NotificationService.Notify(NotificationSeverity.Success, rsp.Value);
+            var rsp = await mediator.Send(new AddLoanRequestCollateralCommand(collaterals));
 
-            await GuarantorRef.GuarantorReload();
+            if (!rsp.IsError)
+            {
+                _toastService.ShowSuccess(rsp.Value);
+
+                await CollateralRef.CollateralReload();
+            }
+            else
+            {
+                _toastService.ShowError(rsp.FirstError.Description);
+            }
         }
-        else
+        catch (MediatorException mEx)
         {
-            NotificationService.Notify(NotificationSeverity.Success, rsp.FirstError.Description);
+            _toastService.ShowError(mEx.GetErrorMessage());
+
         }
+        catch (Exception ex)
+        {
+            _toastService.ShowError(ex.Message);
+        }
+
+       
 
     }
 

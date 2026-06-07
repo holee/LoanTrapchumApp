@@ -118,15 +118,24 @@ public sealed class CollateralRepository : ICollateralService
         return item;
     }
 
-    public async Task<ErrorOr<IEnumerable<VCollateralLines>>> GetCollateralLinesAsync(string? collateralId)
+    public async Task<ErrorOr<IEnumerable<VCollateralLines>>> GetCollateralLinesAsync(string? collateralId, CancellationToken cancellation = default)
     {
-        using var connection = connectionFactory.CreateConnection();
+        //using var connection = connectionFactory.CreateConnection();
 
-        var items = await connection.QueryAsync<VCollateralLines>(
-            "SELECT * FROM VCollateralLines WHERE CollateralId=@CollateralId",
-            new { collateralId });
+        //var items = await connection.QueryAsync<VCollateralLines>(
+        //    "SELECT * FROM VCollateralLines WHERE CollateralId=@CollateralId",
+        //    new { collateralId });
 
-        return items.Any() ? ErrorOrFactory.From(items) : Error.NotFound(CollateralMessages.NotFound);
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+
+        var items = await context.Set<VCollateralLines>()
+                                    .AsNoTracking()
+                                    .Where(x => x.CollateralId == collateralId)
+                                    .ToListAsync(cancellation); 
+
+
+        return items ?? [];
     }
 
     public async Task<ErrorOr<VCustomerCollaterals>> GetCollateralDetailAsync(string? customerId,

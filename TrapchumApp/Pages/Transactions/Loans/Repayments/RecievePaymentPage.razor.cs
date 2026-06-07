@@ -652,7 +652,7 @@ public partial class RecievePaymentPage
             recievePayment.RecievePrincipleAmount = SelectedSchedule?.LeftPrinciple ?? 0.00M;
             return;
         }
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue > SelectedSchedule?.LeftPrinciple)
         {
@@ -678,7 +678,7 @@ public partial class RecievePaymentPage
             return;
         }
 
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue >= 0 && inputValue <= SelectedSchedule?.LeftInterestAmount)
         {
@@ -703,7 +703,7 @@ public partial class RecievePaymentPage
         }
 
 
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue >= 0 && inputValue <= SelectedSchedule?.LeftCollectionFeeAmount)
         {

@@ -52,14 +52,6 @@ namespace TrapchumApp.Pages.Lists.Customers
         async Task GetIncomes(IEnumerable<VCustomerIncomes> args)
         {
 
-            //_incomes = args;
-
-            //_income = _incomes.Sum(x => x.IncomeAmount) ?? 0;
-
-            //_expense = _expenses.Sum(x => x.ExpendAmount) ?? 0;
-
-            //_profits = _income - _expense;
-
             await GetCustomerIncomeAndExpense();
 
             await GetIncomeAndExpense.InvokeAsync((_income, _expense));
@@ -69,13 +61,6 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         async Task GetExpenses(IEnumerable<VCustomerExpenses> args)
         {
-            //_expenses = args;
-
-            //_income = _incomes.Sum(x => x.IncomeAmount) ?? 0;
-
-            //_expense = _expenses.Sum(x => x.ExpendAmount) ?? 0;
-
-            //_profits = _income - _expense;
 
             await GetCustomerIncomeAndExpense();
 

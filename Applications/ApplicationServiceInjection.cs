@@ -2,6 +2,7 @@
 using Applications.Features.AdditionalInformations.Queries.GetOccupationDetailsById;
 using Applications.Features.Collaterals.Queries.GetCollateralSubTypesById;
 using Applications.Features.Collaterals.Queries.GetCollateralTypes;
+using Applications.Features.Dashbaord.Dto;
 using Applications.Features.Employees.Commands.DeleteEmployee;
 using Applications.Features.Holidays.Dtos;
 using Applications.Features.Identity.Command.ChangePassword;
@@ -37,8 +38,10 @@ using Applications.Features.Locations.Queries.GetAllLocations;
 using Applications.Features.Locations.Queries.GetLocationById;
 using Applications.Features.Locations.Queries.GetLocationsAsPaging;
 using Applications.Features.OtherNames.Dto;
+using Applications.Features.Schedules.Dto;
 using Applications.Features.Settings.Queries.GetApprovedUsers;
 using Applications.Features.Settings.Queries.GetLoanCategories;
+using Applications.Features.Settings.Queries.GetSystemSettings;
 using Applications.Features.Settings.Queries.UserLoanSizes.GetLoanSizeByUser;
 using Applications.Features.Vendors.Commands.ChangeVendorStatus;
 using Applications.Features.Vendors.Commands.CreateVendor;
@@ -48,14 +51,12 @@ using Applications.Features.Vendors.Dto.Responses;
 using Applications.Features.Vendors.Queries.GetUpdateVendorById;
 using Applications.Features.Vendors.Queries.GetVendorById;
 using Applications.Features.Vendors.Queries.GetVendorsAsPaging;
-using Applications.Features.Schedules.Dto;
 using Applications.Responses.Auths;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Models.Collaterals;
 using ErrorOr;
-using Applications.Features.Dashbaord.Dto;
 namespace Applications;
 
 public static class ApplicationServiceInjection
@@ -428,7 +429,8 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<UpdateAppSettingCommand, ErrorOr<AppSettingDto>>, UpdateAppSettingCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteAppSettingCommand, ErrorOr<bool>>, DeleteAppSettingCommandHandler>();
         services.AddScoped<IRequestHandler<GetLoanSizeByUserQuery, ErrorOr<VUserLoanSizes>>, GetLoanSizeByUserQueryHandler>();
-        
+        services.AddScoped<IRequestHandler<GetSystemSettingQuery, Pager<Domains.Models.Settings.AppSettings>>, GetSystemSettingQueryHandler>();
+
 
 
         // Settings — UserLoanSizes

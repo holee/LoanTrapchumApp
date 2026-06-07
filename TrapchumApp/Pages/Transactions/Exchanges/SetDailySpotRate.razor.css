@@ -1,3 +1,177 @@
 ﻿::deep .rz-spinner {
     height: var(--input-text-sm);
 }
+
+/* ── Page Header ─────────────────────────────────────── */
+.sdr-page-header {
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, var(--rz-primary) 0%, var(--rz-primary-dark, #1a6ec7) 100%);
+    border-radius: var(--rz-border-radius, 6px);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .15);
+}
+
+.sdr-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .18);
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.sdr-header-icon ::deep .rzi {
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.sdr-page-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+    color: #fff;
+    margin: 0;
+}
+
+.sdr-page-subtitle {
+    font-size: .8rem;
+    opacity: .85;
+    color: #fff;
+}
+
+/* ── Filter Card ─────────────────────────────────────── */
+.sdr-filter-card {
+    border-left: 4px solid var(--rz-primary);
+    border-radius: var(--rz-border-radius, 6px);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, .07);
+}
+
+.sdr-label-icon ::deep .rzi {
+    font-size: 1.1rem;
+    color: var(--rz-primary);
+}
+
+.sdr-field-label {
+    font-size: .85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--rz-text-color);
+}
+
+::deep .sdr-datepicker .rz-inputtext {
+    border-radius: var(--rz-border-radius, 4px);
+    font-size: .875rem;
+}
+
+.sdr-nbc-link {
+    font-size: .8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    text-decoration: none;
+    transition: opacity .2s;
+}
+
+.sdr-nbc-link:hover {
+    opacity: .75;
+    text-decoration: underline;
+}
+
+.sdr-nbc-link ::deep .rzi {
+    font-size: .95rem;
+}
+
+/* ── Table Card ──────────────────────────────────────── */
+.sdr-table-card {
+    border-radius: var(--rz-border-radius, 6px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+    overflow: hidden;
+    padding: 0;
+}
+
+::deep .sdr-table {
+    width: 100%;
+}
+
+::deep .sdr-table .rz-table-thead .rz-table-th {
+    background: var(--rz-base-200, #f3f4f8);
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--rz-text-secondary-color, #666);
+    padding: .65rem 1rem;
+    white-space: nowrap;
+}
+
+.sdr-th-index {
+    width: 2.5rem;
+    text-align: center !important;
+}
+
+.sdr-th-rate {
+    text-align: right !important;
+    min-width: 10rem;
+}
+
+.sdr-td-index {
+    text-align: center;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--rz-text-secondary-color, #888);
+}
+
+::deep .sdr-base-row td {
+    background: var(--rz-base-100, #fafafa) !important;
+    opacity: .75;
+}
+
+.sdr-currency-name {
+    font-weight: 600;
+    font-size: .875rem;
+}
+
+.sdr-currency-code {
+    display: inline-block;
+    padding: .15rem .55rem;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 700;
+    background: var(--rz-primary-lighter, #e8f0fe);
+    color: var(--rz-primary);
+    letter-spacing: .5px;
+}
+
+.sdr-base-badge {
+    font-size: .65rem !important;
+}
+
+::deep .sdr-numeric .rz-inputtext {
+    font-size: .875rem;
+    text-align: right;
+    border-radius: var(--rz-border-radius, 4px);
+}
+
+/* ── Action Bar ──────────────────────────────────────── */
+.sdr-action-bar {
+    border-radius: var(--rz-border-radius, 6px);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, .07);
+    border-top: 2px solid var(--rz-base-300, #e5e7eb);
+}
+
+.sdr-action-hint {
+    font-size: .78rem;
+    color: var(--rz-text-secondary-color, #888);
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+}
+
+.sdr-info-icon ::deep .rzi {
+    font-size: .95rem;
+    color: var(--rz-info, #17a2b8);
+}

@@ -1,26 +1,25 @@
+using Applications.Extensions;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Settings.Dto;
 using Applications.Interfaces.Settings;
+using Applications.Responses;
 using Applications.Responses.Paginations;
 using Domains.Models.Collaterals;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
 using ErrorOr;
 using Infrastructures.DataAccess;
+using Infrastructures.DataAccess.Paging;
 using Infrastructures.Implements.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements;
 
-public sealed class AppSettingService(
-    IDbContextFactory<DataContext> dbContextFactory,
-    ILogger<AppSettingService> logger) : IAppSettingRepository
+public sealed class AppSettingService(IDbContextFactory<DataContext> dbContextFactory, ILogger<AppSettingService> logger) : IAppSettingService
 {
-    // ── AppSettings ────────────────────────────────────────────────────────────
 
-    public async Task<ErrorOr<IEnumerable<AppSettingDto>>> GetAppSettingsAsync(
-        string? filter = null, CancellationToken cancellation = default)
+    public async Task<ErrorOr<IEnumerable<AppSettingDto>>> GetAppSettingsAsync(string? filter = null, CancellationToken cancellation = default)
     {
         try
         {
@@ -50,6 +49,39 @@ public sealed class AppSettingService(
             logger.LogError(ex, ex.Message);
             return Error.Failure(description: ex.Message);
         }
+    }
+
+    public async Task<Pager<AppSettings>> GetSystemSettings(int? id, QueryParam param, CancellationToken cancellation = default)
+    {
+        logger.LogInformation("Retrieving system settings with filter: {Filter}, page: {Page}, take: {Take}", param.Filter, param.Page, param.Take);
+
+        await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var queries = cxt.AppSettings
+                        .WhereIf(id.HasValue && id.Value > 0, x => x.Id == id)
+                        .OrderByDescending(x => x.Code)
+                            .ThenByDescending(x => x.Value)
+                        .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(param.Filter))
+        {
+            string[] filterColums = ["Code", "Value"];
+
+            queries = queries.StartWiths(param.Filter, filterColums);
+
+        }
+
+        var count = await queries.CountAsync(cancellation);
+
+        if (param.Take > 0)
+        {
+            queries = queries.Skip(param.Page).Take(param.Take);
+        }
+
+        var items = await queries.AsNoTracking().ToListAsync(cancellation);
+
+        return PagerExtensions.Create(items, count);
+
     }
 
     public async Task<ErrorOr<AppSettingDto>> GetAppSettingByIdAsync(int id, CancellationToken cancellation = default)

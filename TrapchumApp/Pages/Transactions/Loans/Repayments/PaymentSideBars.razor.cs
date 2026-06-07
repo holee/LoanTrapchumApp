@@ -219,7 +219,7 @@ public partial class PaymentSideBars
 
     void ReceivePaymentChanged(ChangeEventArgs e)
     {
-        decimal amount = e.Value!.ToNumer<decimal>();
+        decimal amount = e.Value!.ToNumber<decimal>();
 
         if (amount <= 0)
         {
@@ -242,7 +242,7 @@ public partial class PaymentSideBars
     void CalculatePenaltyAmount(ChangeEventArgs e)
     {
 
-        var amount = e.Value?.ToNumer<decimal>();
+        var amount = e.Value?.ToNumber<decimal>();
 
         if (amount < 0)
         {

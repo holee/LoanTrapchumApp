@@ -52,9 +52,5 @@ public sealed class VSchedule
     [NotMapped] public bool IsPaid => ScheduleStatusId == 1;
     [NotMapped] public bool IsPartialPaid => ScheduleStatusId == 4;
     [NotMapped] public List<PaymentLineDetailsDto> PaymentLines { get; set; } = [];
-
-    public LoanPaymentLineDtoCreate MapToLoanPaymentLine()
-    {
-        throw new NotImplementedException();
-    }
+    [NotMapped] public int RowIndex { get; set; } = 0;
 }

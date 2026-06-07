@@ -81,57 +81,59 @@
 </style>
 @if (_selectedIndex == 0)
 {
-    @foreach (var grp in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
-    {
-        var currLabel = grp.Key == 2 ? "USD $" : "KHR ៛";
-        <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.35rem;">
-            <RadzenIcon Icon="currency_exchange" Style="font-size:0.9rem;color:var(--rz-primary);" />
-            <span style="font-size:0.78rem;font-weight:700;color:var(--rz-primary);text-transform:uppercase;letter-spacing:0.05em;">@currLabel</span>
-            <hr style="flex:1;margin:0;border-color:var(--rz-border-disabled-color);" />
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:0.85rem;">
-            <div class="summary-card sc-principle">
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                    <span class="s-label">Principle</span>
-                    <RadzenIcon Icon="account_balance_wallet" class="s-icon" />
-                </RadzenStack>
-                <span class="s-value">@grp.Sum(x => x.Principle ?? 0).ToString("N2")</span>
-                <span style="font-size:0.72rem;opacity:0.65;">Total due principle</span>
+    <RadzenFieldset AllowCollapse="true" Collapsed="false" Text="Payment Details">
+        @foreach (var grp in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+        {
+            var currLabel = grp.Key == 2 ? "USD $" : "KHR ៛";
+            <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.35rem;">
+                <RadzenIcon Icon="currency_exchange" Style="font-size:0.9rem;color:var(--rz-primary);" />
+                <span style="font-size:0.78rem;font-weight:700;color:var(--rz-primary);text-transform:uppercase;letter-spacing:0.05em;">@currLabel</span>
+                <hr style="flex:1;margin:0;border-color:var(--rz-border-disabled-color);" />
             </div>
-            <div class="summary-card sc-interest">
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                    <span class="s-label">Interest</span>
-                    <RadzenIcon Icon="percent" class="s-icon" />
-                </RadzenStack>
-                <span class="s-value">@grp.Sum(x => x.Interest ?? 0).ToString("N2")</span>
-                <span style="font-size:0.72rem;opacity:0.65;">Total due interest</span>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:0.85rem;">
+                <div class="summary-card sc-principle">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <span class="s-label">Principle</span>
+                        <RadzenIcon Icon="account_balance_wallet" class="s-icon" />
+                    </RadzenStack>
+                    <span class="s-value">@grp.Sum(x => x.Principle ?? 0).ToString("N2")</span>
+                    <span style="font-size:0.72rem;opacity:0.65;">Total due principle</span>
+                </div>
+                <div class="summary-card sc-interest">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <span class="s-label">Interest</span>
+                        <RadzenIcon Icon="percent" class="s-icon" />
+                    </RadzenStack>
+                    <span class="s-value">@grp.Sum(x => x.Interest ?? 0).ToString("N2")</span>
+                    <span style="font-size:0.72rem;opacity:0.65;">Total due interest</span>
+                </div>
+                <div class="summary-card sc-paid">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <span class="s-label">Paid Principle</span>
+                        <RadzenIcon Icon="check_circle" class="s-icon" />
+                    </RadzenStack>
+                    <span class="s-value">@grp.Sum(x => x.PaidPrinciple ?? 0).ToString("N2")</span>
+                    <span style="font-size:0.72rem;opacity:0.65;">Amount already paid</span>
+                </div>
+                <div class="summary-card sc-penalty">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <span class="s-label">Penalty</span>
+                        <RadzenIcon Icon="warning" class="s-icon" />
+                    </RadzenStack>
+                    <span class="s-value">@grp.Sum(x => x.PenaltyAmount ?? 0).ToString("N2")</span>
+                    <span style="font-size:0.72rem;opacity:0.65;">Late payment charges</span>
+                </div>
+                <div class="summary-card sc-total">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                        <span class="s-label">Total Pay</span>
+                        <RadzenIcon Icon="payments" class="s-icon" />
+                    </RadzenStack>
+                    <span class="s-value">@grp.Sum(x => x.TotalPay ?? 0).ToString("N2")</span>
+                    <span style="font-size:0.72rem;opacity:0.65;">Grand total payable</span>
+                </div>
             </div>
-            <div class="summary-card sc-paid">
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                    <span class="s-label">Paid Principle</span>
-                    <RadzenIcon Icon="check_circle" class="s-icon" />
-                </RadzenStack>
-                <span class="s-value">@grp.Sum(x => x.PaidPrinciple ?? 0).ToString("N2")</span>
-                <span style="font-size:0.72rem;opacity:0.65;">Amount already paid</span>
-            </div>
-            <div class="summary-card sc-penalty">
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                    <span class="s-label">Penalty</span>
-                    <RadzenIcon Icon="warning" class="s-icon" />
-                </RadzenStack>
-                <span class="s-value">@grp.Sum(x => x.PenaltyAmount ?? 0).ToString("N2")</span>
-                <span style="font-size:0.72rem;opacity:0.65;">Late payment charges</span>
-            </div>
-            <div class="summary-card sc-total">
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                    <span class="s-label">Total Pay</span>
-                    <RadzenIcon Icon="payments" class="s-icon" />
-                </RadzenStack>
-                <span class="s-value">@grp.Sum(x => x.TotalPay ?? 0).ToString("N2")</span>
-                <span style="font-size:0.72rem;opacity:0.65;">Grand total payable</span>
-            </div>
-        </div>
-    }
+        }
+    </RadzenFieldset>
 }
 <div style="height:var(--normal-height);overflow:auto;">
     <RadzenTabs RenderMode="TabRenderMode.Client" SelectedIndex="@_selectedIndex" @ref="@refTabs">
@@ -280,12 +282,12 @@
                                         <span style="font-weight:500;">@p.Principle.Format(p.CurrencyId)</span>
                                     </Template>
                                     <FooterTemplate>
-                                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
-                                                        {
-                                                            var sym = g.Key == 2 ? "$" : "៛";
-                                                            <div><strong style="color:#1565c0;">@g.Sum(x => x.Principle ?? 0).ToString("N2") @sym</strong></div>
-                                                        }
-                                                    </FooterTemplate>
+                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                        {
+                                            var sym = g.Key == 2 ? "$" : "៛";
+                                            <div><strong style="color:#1565c0;">@g.Sum(x => x.Principle ?? 0).ToString("N2") @sym</strong></div>
+                                        }
+                                    </FooterTemplate>
                                 </RadzenDataGridColumn>
 
                                 @* Interest *@
@@ -300,12 +302,12 @@
                                         <span style="font-weight:500;">@p.Interest.Format(p.CurrencyId)</span>
                                     </Template>
                                     <FooterTemplate>
-                                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
-                                                        {
-                                                            var sym = g.Key == 2 ? "$" : "៛";
-                                                            <div><strong style="color:#2e7d32;">@g.Sum(x => x.Interest ?? 0).ToString("N2") @sym</strong></div>
-                                                        }
-                                                    </FooterTemplate>
+                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                        {
+                                            var sym = g.Key == 2 ? "$" : "៛";
+                                            <div><strong style="color:#2e7d32;">@g.Sum(x => x.Interest ?? 0).ToString("N2") @sym</strong></div>
+                                        }
+                                    </FooterTemplate>
                                 </RadzenDataGridColumn>
 
                                 @* Paid Principle *@
@@ -330,12 +332,12 @@
                                         </RadzenStack>
                                     </Template>
                                     <FooterTemplate>
-                                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
-                                                        {
-                                                            var sym = g.Key == 2 ? "$" : "៛";
-                                                            <div><strong style="color:#4527a0;">@g.Sum(x => x.PaidPrinciple ?? 0).ToString("N2") @sym</strong></div>
-                                                        }
-                                                    </FooterTemplate>
+                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                        {
+                                            var sym = g.Key == 2 ? "$" : "៛";
+                                            <div><strong style="color:#4527a0;">@g.Sum(x => x.PaidPrinciple ?? 0).ToString("N2") @sym</strong></div>
+                                        }
+                                    </FooterTemplate>
                                 </RadzenDataGridColumn>
 
                                 @* Penalty *@
@@ -357,12 +359,12 @@
                                         }
                                     </Template>
                                     <FooterTemplate>
-                                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
-                                                        {
-                                                            var sym = g.Key == 2 ? "$" : "៛";
-                                                            <div><strong style="color:#c62828;">@g.Sum(x => x.PenaltyAmount ?? 0).ToString("N2") @sym</strong></div>
-                                                        }
-                                                    </FooterTemplate>
+                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                        {
+                                            var sym = g.Key == 2 ? "$" : "៛";
+                                            <div><strong style="color:#c62828;">@g.Sum(x => x.PenaltyAmount ?? 0).ToString("N2") @sym</strong></div>
+                                        }
+                                    </FooterTemplate>
                                 </RadzenDataGridColumn>
 
                                 @* Total Pay *@
@@ -387,12 +389,12 @@
                                         </RadzenStack>
                                     </Template>
                                     <FooterTemplate>
-                                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
-                                                        {
-                                                            var sym = g.Key == 2 ? "$" : "៛";
-                                                            <div><strong style="color:#006064;font-size:0.9rem;">@g.Sum(x => x.TotalPay ?? 0).ToString("N2") @sym</strong></div>
-                                                        }
-                                                    </FooterTemplate>
+                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                        {
+                                            var sym = g.Key == 2 ? "$" : "៛";
+                                            <div><strong style="color:#006064;font-size:0.9rem;">@g.Sum(x => x.TotalPay ?? 0).ToString("N2") @sym</strong></div>
+                                        }
+                                    </FooterTemplate>
                                 </RadzenDataGridColumn>
 
                                 @* Actions *@

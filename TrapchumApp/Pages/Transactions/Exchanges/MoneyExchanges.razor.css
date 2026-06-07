@@ -1,0 +1,87 @@
+/* ─────────────────────────────────────────────────────
+   Money Exchange Card  — scoped styles
+   ───────────────────────────────────────────────────── */
+
+/* ── Shell ── */
+.mx-card {
+    border-radius: 0.625rem;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
+    background: var(--rz-base-background-color, #fff);
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Header ── */
+.mx-card__header {
+    background: linear-gradient(135deg, var(--rz-success) 0%, #1a7a4a 100%);
+    padding: 0.75rem 1.25rem;
+}
+
+.mx-card__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+
+.mx-card__spot {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.90);
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    white-space: nowrap;
+}
+
+/* ── Generic section ── */
+.mx-card__section {
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid var(--rz-base-300, #e5e7eb);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.mx-card__section:last-of-type {
+    border-bottom: none;
+}
+
+.mx-card__section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--rz-text-secondary-color, #6b7280);
+}
+
+/* ── Total highlight ── */
+.mx-card__section--total {
+    background: rgba(25, 135, 84, 0.06);
+}
+
+.mx-card__section--total .mx-card__section-label {
+    color: var(--rz-success, #198754);
+}
+
+/* ── Swap icon column ── */
+.mx-swap-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 0.25rem;
+}
+
+.mx-swap-icon {
+    font-size: 1.5rem;
+    color: var(--rz-success, #198754);
+    opacity: 0.75;
+}
+
+/* ── Footer ── */
+.mx-card__footer {
+    padding: 0.75rem 1.25rem;
+    background: var(--rz-base-100, #f8f9fa);
+    border-top: 1px solid var(--rz-base-300, #e5e7eb);
+}

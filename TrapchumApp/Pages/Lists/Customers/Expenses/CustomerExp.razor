@@ -76,10 +76,9 @@
                 <Template>
                     <RadzenButton Size="ButtonSize.ExtraSmall"
                                   Variant="Variant.Text"
-                                  ButtonStyle="ButtonStyle.Light"
+                                  ButtonStyle="ButtonStyle.Dark"
                                   Click="@((arg) => ShowContextMenu(arg, c))"
-                                  Icon="@IconNames.MoreVert"
-                                  class="action-overflow" />
+                                  Icon="@IconNames.MoreVert" />
                 </Template>
             </RadzenDataGridColumn>
         </Columns>
@@ -169,7 +168,7 @@
         font-size: 0.85rem;
     }
 
-    .action-overflow { opacity: 0.55; transition: opacity 0.15s; }
+    .action-overflow { opacity: 1; transition: opacity 0.15s; }
     .action-overflow:hover { opacity: 1; }
 </style>
 

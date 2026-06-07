@@ -43,7 +43,7 @@
                         AllowRowSelectOnRowClick="@allowRowSelected"
                         IsLoading="isLoading"
                         @ref="gridSchedule"
-                        style="border-radius:var(--rz-border-radius);overflow:hidden;">
+                        style="overflow:hidden;min-height:var(--rz-min-height);height:var(--rz-normal-height);max-height:var(--rz-max-height);">
             <Columns>
                 <RadzenDataGridColumn Width="3rem"
                                       TextAlign="TextAlign.Center"

@@ -297,7 +297,7 @@ public partial class SchedulesPage
         };
 
 
-        //AddMultiplePaymentTab(_selectedSchedules, loanPayment);
+        AddMultiplePaymentTab(_selectedSchedules, loanPayment);
 
         //var options = new SideDialogOptions
         //{
@@ -603,7 +603,7 @@ public partial class SchedulesPage
             recievePayment.RecievePrincipleAmount = SelectedSchedule?.LeftPrinciple ?? 0.00M;
             return;
         }
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue > SelectedSchedule?.LeftPrinciple)
         {
@@ -621,7 +621,7 @@ public partial class SchedulesPage
             return;
         }
 
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue >= 0 && inputValue <= SelectedSchedule?.LeftInterestAmount)
         {
@@ -646,7 +646,7 @@ public partial class SchedulesPage
         }
 
 
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue >= 0 && inputValue <= SelectedSchedule?.LeftCollectionFeeAmount)
         {

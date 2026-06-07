@@ -12,14 +12,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements;
 
-/// <summary>
-/// Legacy implementation of IAppSettingService used by SettingService (ISettingServiceImpl).
-/// New code should use CQRS handlers via IAppSettingRepository instead.
-/// </summary>
-public sealed class LegacyAppSettingService(
-    IDbContextFactory<DataContext> dbContextFactory,
-    IDapperConnectionFactory dapper,
-    ILogger<LegacyAppSettingService> logger) : IAppSettingService
+public sealed class AppSettingRepository(IDbContextFactory<DataContext> dbContextFactory,
+    IDapperConnectionFactory dapper, ILogger<AppSettingRepository> logger) : IAppSettingService
 {
     public async Task<Result<string>> Delete(long? id, CancellationToken cancellation = default)
     {
@@ -123,23 +117,6 @@ public sealed class LegacyAppSettingService(
         {
             logger.LogError(ex, ex.Message);
             return Result.Failure<IEnumerable<AppSettings>>(ErrorResponse.Failure(ex.Message));
-        }
-    }
-
-    public async Task<Result<IEnumerable<T>>> GetSysSettings<T>(string? filterValue = null) where T : class
-    {
-        try
-        {
-            var rsp = await GetSysSettings(filterValue);
-            if (!rsp.IsSuccess)
-                return Result.Failure<IEnumerable<T>>(rsp.Errors);
-            var mapped = rsp.Data!.OfType<T>();
-            return Result.Success(mapped);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, ex.Message);
-            return Result.Failure<IEnumerable<T>>(ErrorResponse.Failure(ex.Message));
         }
     }
 

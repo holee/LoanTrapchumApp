@@ -4,7 +4,7 @@ using ErrorOr;
 
 namespace Applications.Features.Settings.Commands.AppSettings.UpdateAppSetting;
 
-public sealed class UpdateAppSettingCommandHandler(IAppSettingRepository repository)
+public sealed class UpdateAppSettingCommandHandler(IAppSettingService repository)
     : IRequestHandler<UpdateAppSettingCommand, ErrorOr<AppSettingDto>>
 {
     public Task<ErrorOr<AppSettingDto>> Handle(UpdateAppSettingCommand request, CancellationToken cancellationToken)

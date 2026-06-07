@@ -182,8 +182,6 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
             Tracker.Show();
 
-            _status = RequestStatus.Approved;
-
             var param = new QueryParam(pageIndex, pageSize, sortColumn, false, sortDescending, filtertext);
 
             var query = new GetLoanRequestAsPagingQuery(null, BranchId, _status, param);

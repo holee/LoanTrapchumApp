@@ -4,7 +4,7 @@ using Applications.Responses.Paginations;
 
 namespace Applications.Features.Settings.Queries.CollateralSubTypes.GetCollateralSubTypes;
 
-public sealed class GetCollateralSubTypesQueryHandler(IAppSettingRepository repository)
+public sealed class GetCollateralSubTypesQueryHandler(IAppSettingService repository)
     : IRequestHandler<GetCollateralSubTypesQuery, Pager<CollateralSubTypeDto>>
 {
     public Task<Pager<CollateralSubTypeDto>> Handle(GetCollateralSubTypesQuery request, CancellationToken cancellationToken)

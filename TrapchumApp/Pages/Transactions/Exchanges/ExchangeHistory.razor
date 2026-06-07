@@ -1,91 +1,140 @@
 ﻿@using Applications.Features.Currencies.Responses
 <PageTitle>Currency Exchange</PageTitle>
-<GridToolbar ShowSearchBox="false">
-    <LeftChildren>
+
+<div class="exh-page">
+
+    <div class="exh-header">
+        <div class="exh-header-left">
+            <div class="exh-header-icon">
+                <RadzenIcon Icon="@IconNames.CurrencyExchange" />
+            </div>
+            <div class="exh-header-text">
+                <span class="exh-title">Currency Exchange</span>
+                <span class="exh-subtitle">Track and manage foreign currency exchange transactions</span>
+            </div>
+        </div>
         <RadzenButton Size="ButtonSize.Small"
                       Click="ShowCurrencyDialogue"
                       Icon="@IconNames.AddNew"
-                      Text="Exchange" ButtonStyle="@Defaults.AddNew" />
-    </LeftChildren>
-    <RightChildren>
-        <RadzenFormField AllowFloatingLabel="false" class="rz-mb-2">
+                      Text="New Exchange"
+                      ButtonStyle="@Defaults.AddNew"
+                      class="exh-new-btn" />
+    </div>
+
+    <div class="exh-filter-bar">
+        <div class="exh-filter-label">
+            <RadzenIcon Icon="calendar_today" class="exh-filter-icon" />
+            <span>Filter by Date</span>
+        </div>
+        <RadzenFormField AllowFloatingLabel="false" class="exh-date-field">
             <Start>
                 <RadzenIcon Icon="search" />
             </Start>
             <ChildContent>
                 <RadzenDatePicker DateFormat="@Defaults.DefaultDateFormat"
-                                  TValue="DateTime ?"
-                                  CurrentDateChanged="@CurrentDateChanged"
+                                  TValue="DateTime?"
+                                  Change="@CurrentDateChanged"
+                                  @bind-Value:format="MM/dd/yyyy"
                                   @bind-Value="transactionDate" />
             </ChildContent>
         </RadzenFormField>
-    </RightChildren>
-</GridToolbar>
-<RadzenDataGrid Density="Density.Compact"
-                AllowAlternatingRows="true"
-                @ref="@dataGrid"
-                AllowPaging="true"
-                TItem="VttCurrencyExchanges"
-                Count="@counts"
-                PageSize="@pageSize"
-                GridLines="DataGridGridLines.Both"
-                IsLoading="@isLoading"
-                Responsive="true"
-                PageSizeChanged="@PageSizeChange"
-                PageSizeOptions="@StorageConstant.PageSizeOptions"
-                ShowPagingSummary="true"
-                PagerHorizontalAlign="HorizontalAlign.Right"
-                PagerPosition="PagerPosition.Bottom"
-                LoadData="@LoadData"
-                Data="ExchangeHostories">
-    <Columns>
-        <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.TransactionDate)"
-                              Title="Transaction Date"
-                              Context="c">
-            <Template>
-                @c.TransactionDate.DayFirst()
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.TransactionTypeName)"
-                              Title="Type Name" Context="c" />
-        <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.BranchName)"
-                              Title="Branch" Context="c" />
-        <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.ExchangeRate)"
-                              TextAlign="TextAlign.Right"
-                              Title="Exchange Rate" Context="c" />
-        <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.BuyCurrencyName)"
-                              Title="Buy Currency Name" Context="c" />
-        <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.BuyAmount)"
-                              TextAlign="TextAlign.Right"
-                              Title="Buy Amount" Context="c">
-            <Template>
-                @c.BuyAmount.Format(c.BuyCurrencyRefId)
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.SellCurrencyName)"
-                              Title="Sell Currency Name" Context="c" />
-        <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.SellAmount)"
-                              TextAlign="TextAlign.Right"
-                              Title="Sell Amount" Context="c">
-            <Template>
-                @c.SellAmount.Format(c.SellCurrencyRefId)
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.TransactionsId)"
-                              TextAlign="TextAlign.Center"
-                              Title="Actions" Context="c">
-            <Template>
-                <ActionButton ButtonClick="@((arg) => OpenContentMenu(arg, c))" />
-            </Template>
-        </RadzenDataGridColumn>
-    </Columns>
-    <LoadingTemplate>
-        <RadzenStack Gap="0.5rem" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
-            <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Value="100" ShowValue="false" />
-            <RadzenText TagName="TagName.Span">Loading...</RadzenText>
-        </RadzenStack>
-    </LoadingTemplate>
-</RadzenDataGrid>
+    </div>
+
+    <div class="exh-grid-card">
+        <RadzenDataGrid Density="Density.Compact"
+                        AllowAlternatingRows="true"
+                        @ref="@dataGrid"
+                        AllowPaging="true"
+                        TItem="VttCurrencyExchanges"
+                        Count="@counts"
+                        PageSize="@pageSize"
+                        GridLines="DataGridGridLines.Both"
+                        Responsive="true"
+                        PageSizeChanged="@PageSizeChange"
+                        PageSizeOptions="@StorageConstant.PageSizeOptions"
+                        ShowPagingSummary="true"
+                        PagerHorizontalAlign="HorizontalAlign.Right"
+                        PagerPosition="PagerPosition.Bottom"
+                        LoadData="@LoadData"
+                        Data="ExchangeHostories">
+            <Columns>
+                <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.TransactionDate)"
+                                      Title="Date"
+                                      Width="130px"
+                                      Context="c">
+                    <Template>
+                        <div class="exh-date-cell">
+                            <RadzenIcon Icon="calendar_today" class="exh-cell-icon" />
+                            <span>@c.TransactionDate.DayFirst()</span>
+                        </div>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.TransactionTypeName)"
+                                      Title="Type"
+                                      Context="c">
+                    <Template>
+                        <RadzenBadge Text="@c.TransactionTypeName"
+                                     BadgeStyle="BadgeStyle.Info"
+                                     IsPill="true"
+                                     class="exh-type-badge" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.BranchName)"
+                                      Title="Branch"
+                                      Context="c">
+                    <Template>
+                        <div class="exh-branch-cell">
+                            <RadzenIcon Icon="@IconNames.LocationCity" class="exh-cell-icon" />
+                            <span>@c.BranchName</span>
+                        </div>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.ExchangeRate)"
+                                      TextAlign="TextAlign.Right"
+                                      Title="Rate"
+                                      Width="110px"
+                                      Context="c">
+                    <Template>
+                        <span class="exh-rate-chip">@c.ExchangeRate</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.BuyAmount)"
+                                      TextAlign="TextAlign.Right"
+                                      Title="Buy"
+                                      Context="c">
+                    <Template>
+                        <div class="exh-amount-cell exh-buy">
+                            <span class="exh-currency-label">@c.BuyCurrencyName</span>
+                            <span class="exh-amount-value">@c.BuyAmount.Format(c.BuyCurrencyRefId)</span>
+                        </div>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.SellAmount)"
+                                      TextAlign="TextAlign.Right"
+                                      Title="Sell"
+                                      Context="c">
+                    <Template>
+                        <div class="exh-amount-cell exh-sell">
+                            <span class="exh-currency-label">@c.SellCurrencyName</span>
+                            <span class="exh-amount-value">@c.SellAmount.Format(c.SellCurrencyRefId)</span>
+                        </div>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.TransactionsId)"
+                                      TextAlign="TextAlign.Center"
+                                      Title="Actions"
+                                      Width="80px"
+                                      Sortable="false"
+                                      Context="c">
+                    <Template>
+                        <ActionButton ButtonClick="@((arg) => OpenContentMenu(arg, c))" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+
+</div>
 
 @code {
     void OpenContentMenu(MouseEventArgs args, VttCurrencyExchanges cur)
@@ -98,7 +147,6 @@
             <RadzenMenuItem Text="Delete" Icon="@IconNames.Delete"></RadzenMenuItem>
             <RadzenMenuItem Text="View Details" Icon="@IconNames.View"></RadzenMenuItem>
         </RadzenMenu>);
-
     }
 }
 

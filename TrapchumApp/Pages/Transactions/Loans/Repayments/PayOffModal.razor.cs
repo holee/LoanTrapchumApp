@@ -397,7 +397,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         }
         void ReceivePaymentUSDChanged(ChangeEventArgs e)
         {
-            decimal amount = e.Value!.ToNumer<decimal>();
+            decimal amount = e.Value!.ToNumber<decimal>();
 
             if (amount < 0 && TotalPaidAmount <= 0)
             {
@@ -597,7 +597,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         }
         void ReceivePaymentKHRChanged(ChangeEventArgs e)
         {
-            var amount = e.Value!.ToNumer<decimal>();
+            var amount = e.Value!.ToNumber<decimal>();
 
             if (amount < 0)
             {
@@ -725,7 +725,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         }
         void TextUsdAmountChanged(ChangeEventArgs e)
         {
-            var amount = e.Value!.ToNumer<decimal>();
+            var amount = e.Value!.ToNumber<decimal>();
 
             if (amount > 0 && originalExchangeAmountUSD == 0 && originalExchangeAmountKHR == 0)
             {
@@ -830,7 +830,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         void CalculatePenaltyAmount(ChangeEventArgs e)
         {
 
-            var amount = e.Value?.ToNumer<decimal>();
+            var amount = e.Value?.ToNumber<decimal>();
 
             if (amount < 0)
             {

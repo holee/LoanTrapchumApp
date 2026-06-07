@@ -39,6 +39,7 @@
     <Content Remove="Pages\Transactions\Exchanges\ExchangesPopup.razor" />
     <Content Remove="Pages\Transactions\Exchanges\ExchangesSidebar.razor" />
     <Content Remove="Pages\Transactions\RecievePayements\PaymentOffSideBar.razor" />
+    <Content Remove="Pages\Transactions\RecievePayements\RepaymentMultiplePage.razor" />
   </ItemGroup>
 
   <ItemGroup>
@@ -71,6 +72,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Components\Payments\" />
     <Folder Include="wwwroot\assets\docs\" />
     <Folder Include="wwwroot\assets\docs\" />
     <Folder Include="wwwroot\schedules\" />
@@ -191,7 +193,7 @@
     <AdditionalFiles Include="Pages\Transactions\Branches\VaultInRow.razor" />
     <AdditionalFiles Include="Pages\Transactions\Branches\VaultOutModal.razor" />
     <AdditionalFiles Include="Pages\Transactions\Branches\VaultOutRow.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangeCurrency.razor" />
+    <AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangeCurrencyIndexPage.razor" />
     <AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangeHistory.razor" />
     <AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangesPopup.razor" />
     <AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangesSidebar.razor" />
@@ -262,6 +264,7 @@
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\SchedulesPaid.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\WriteOffs\Index.razor" />
     <AdditionalFiles Include="Pages\Transactions\RecievePayements\PaymentOffSideBar.razor" />
+    <AdditionalFiles Include="Pages\Transactions\RecievePayements\RepaymentMultiplePage.razor" />
     <AdditionalFiles Include="Shared\CascadingAppState.razor" />
     <AdditionalFiles Include="Shared\CascadingAuthState.razor" />
     <AdditionalFiles Include="Shared\CascadingCurrency.razor" />

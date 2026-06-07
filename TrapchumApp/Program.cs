@@ -70,7 +70,7 @@ builder.Services.AddSingleton<IProfilePhotoService, ProfilePhotoService>();
 builder.Services.AddSingleton<UserServices>();
 builder.Services.AddSingleton<BranchService>();
 builder.Services.AddSingleton<CurrencyServices>();
-
+builder.Services.AddScoped<AppSettingService>();
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 104857600; // 100 MB

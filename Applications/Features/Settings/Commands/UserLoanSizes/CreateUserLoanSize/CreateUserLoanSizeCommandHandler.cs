@@ -4,7 +4,7 @@ using ErrorOr;
 
 namespace Applications.Features.Settings.Commands.UserLoanSizes.CreateUserLoanSize;
 
-public sealed class CreateUserLoanSizeCommandHandler(IAppSettingRepository repository)
+public sealed class CreateUserLoanSizeCommandHandler(IAppSettingService repository)
     : IRequestHandler<CreateUserLoanSizeCommand, ErrorOr<UserLoanSizeDto>>
 {
     public Task<ErrorOr<UserLoanSizeDto>> Handle(CreateUserLoanSizeCommand request, CancellationToken cancellationToken)

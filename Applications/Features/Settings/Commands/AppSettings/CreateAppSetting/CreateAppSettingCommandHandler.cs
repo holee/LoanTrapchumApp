@@ -4,7 +4,7 @@ using ErrorOr;
 
 namespace Applications.Features.Settings.Commands.AppSettings.CreateAppSetting;
 
-public sealed class CreateAppSettingCommandHandler(IAppSettingRepository repository)
+public sealed class CreateAppSettingCommandHandler(IAppSettingService repository)
     : IRequestHandler<CreateAppSettingCommand, ErrorOr<AppSettingDto>>
 {
     public Task<ErrorOr<AppSettingDto>> Handle(CreateAppSettingCommand request, CancellationToken cancellationToken)

@@ -483,7 +483,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 paymentCreate.RecievePrincipleAmount = SelectedSchedule?.LeftPrinciple ?? 0.00M;
                 return;
             }
-            var inputValue = e.Value?.ToNumer<decimal>();
+            var inputValue = e.Value?.ToNumber<decimal>();
 
             if (inputValue > SelectedSchedule?.LeftPrinciple)
             {
@@ -509,7 +509,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 return;
             }
 
-            var inputValue = e.Value?.ToNumer<decimal>();
+            var inputValue = e.Value?.ToNumber<decimal>();
 
             if (inputValue >= 0 && inputValue <= SelectedSchedule?.LeftInterestAmount)
             {
@@ -534,7 +534,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
             }
 
 
-            var inputValue = e.Value?.ToNumer<decimal>();
+            var inputValue = e.Value?.ToNumber<decimal>();
 
             if (inputValue >= 0 && inputValue <= SelectedSchedule?.LeftCollectionFeeAmount)
             {

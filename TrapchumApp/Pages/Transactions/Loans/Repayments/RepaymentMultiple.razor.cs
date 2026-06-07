@@ -255,7 +255,9 @@ public partial class RepaymentMultiple
     protected override async Task OnInitializedAsync()
     {
         btnDisabled = true;
+
         await GetCustomerPaymentSchedulesByLoanIdAsync(1);
+
         //var branchResponse = await _branchService.GetBranchesAsync(UserId);
         //if (branchResponse.IsSuccess)
         //{
@@ -319,8 +321,11 @@ public partial class RepaymentMultiple
     void PenaltyTextChanged(decimal? value, VSchedule s)
     {
         if (SelectedSchedules!.Count == 0) return;
+
         var selectedIndex = SelectedSchedules!.IndexOf(s);
+
         var preIndex = selectedIndex == 0 ? 0 : selectedIndex - 1;
+
         if (preIndex == 0)
         {
             if (SelectedSchedules[preIndex]!.PenaltyAmount == 0)
@@ -338,16 +343,22 @@ public partial class RepaymentMultiple
         if (SelectedSchedules[preIndex]!.PenaltyAmount == 0)
         {
             value = 0.00M;
+
             for (int i = SelectedSchedules.Count - 1; i > preIndex; i--)
             {
                 SelectedSchedules[i]!.PenaltyAmount = 0.00M;
             }
+
             StateHasChanged();
+
             return;
         }
     }
     void RowRenderChanged(RowRenderEventArgs<VSchedule> e)
     {
+
+        if (e.Data is null) return;
+
         if (e.Data.IsLate)
         {
             e.Attributes.Add("style", "color:red;font-weight:bold;");

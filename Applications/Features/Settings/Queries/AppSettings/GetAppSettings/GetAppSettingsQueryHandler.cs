@@ -4,7 +4,7 @@ using ErrorOr;
 
 namespace Applications.Features.Settings.Queries.AppSettings.GetAppSettings;
 
-public sealed class GetAppSettingsQueryHandler(IAppSettingRepository repository)
+public sealed class GetAppSettingsQueryHandler(IAppSettingService repository)
     : IRequestHandler<GetAppSettingsQuery, ErrorOr<IEnumerable<AppSettingDto>>>
 {
     public Task<ErrorOr<IEnumerable<AppSettingDto>>> Handle(GetAppSettingsQuery request, CancellationToken cancellationToken)

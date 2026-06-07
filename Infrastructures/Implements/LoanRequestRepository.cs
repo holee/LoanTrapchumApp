@@ -520,7 +520,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
 
     public async Task<ErrorOr<string>> AddLoanRequestCollateralAsync(LoanCollateralRequest req, CancellationToken cancellation = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
         logger.LogInformation("Try to create new loan request collateral for LoanRequestId={LoanRequestId}", req.LoanRequestId);
         try
@@ -550,6 +550,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                 else
                 {
                     context.Entry(existingCollateralLine).CurrentValues.SetValues(item);
+
                     existingCollateralLine.ModifiedDt = DateTime.UtcNow; // track update
                 }
             }

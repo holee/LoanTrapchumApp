@@ -24,7 +24,7 @@ namespace Infrastructures.Implements
 
             try
             {
-                context.LoanTransaction.Add(transaction);  
+                context.LoanTransaction.Add(transaction);
 
                 await context.SaveChangesAsync();
 
@@ -78,7 +78,7 @@ namespace Infrastructures.Implements
 
         public async Task<ErrorOr.ErrorOr<VttCurrencyExchanges>> EditExchangeAsync(ForeignExchange transaction, CancellationToken cancellation = default)
         {
-            
+
             await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
             try
@@ -120,22 +120,23 @@ namespace Infrastructures.Implements
         {
             await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
-            var queries = context.Database
-                                .SqlQuery<VttCurrencyExchanges>($"SELECT * FROM VTTExchangeTransactions WHERE branchId={branchId}")
+            var queries = context.Set<VttCurrencyExchanges>()
+                                .Where(x => x.BranchId == branchId)
                                 .OrderByDescending(x => x.TransactionDate)
                                 .AsNoTracking();
 
             if (transactionDate.HasValue)
             {
-                queries = queries.Where(x => x.TransactionDate == transactionDate);
+                var date = transactionDate.Value.Date;
+
+                queries = queries.Where(x => x.TransactionDate.HasValue && x.TransactionDate.Value.Date == date);
+
             }
 
-            if (!string.IsNullOrEmpty(param.FilterColumn))
-            {
-                queries = queries.ApplyOrdering(param);
-            }
+            queries = queries.ApplyOrdering(param);
 
             var totalRecords = await queries.CountAsync(cancellation);
+
             var items = await queries
                                 .Skip(param.Page)
                                 .Take(param.Take)
@@ -153,7 +154,7 @@ namespace Infrastructures.Implements
                                     SellAmount = x.SellAmount,
                                     SellCurrencyRefId = x.SellCurrencyRefId,
                                     ExchangeRate = x.ExchangeRate,
-                                    IsBuy=x.IsBuy,
+                                    IsBuy = x.IsBuy,
                                 })
                                 .ToListAsync(cancellation);
 
