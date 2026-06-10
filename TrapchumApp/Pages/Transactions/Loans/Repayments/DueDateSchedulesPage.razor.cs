@@ -18,6 +18,7 @@ public partial class DueDateSchedulesPage
     [Parameter] public string? CustomerName { get; set; } = string.Empty;
     [Parameter] public int CurrencyId { get; set; }
     [Parameter] public bool ShowOnScheduleOnly { get; set; } = true;
+    [Parameter] public bool ShowUnpaidOnly { get; set; } = true; 
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
     DateTime paymentDate = DateTime.Now;
@@ -192,7 +193,7 @@ public partial class DueDateSchedulesPage
 
     private async Task GetSchedules()
     {
-        if (ShowOnScheduleOnly)
+        if (ShowOnScheduleOnly || ShowUnpaidOnly)
         {
             await GetSchedules(BranchId, LoanId, ScheduleStatus.Unpaid);
         }
@@ -291,14 +292,14 @@ public partial class DueDateSchedulesPage
         if (SelectedSchedule is null)
         {
 
-            _toastService.ShowError("There is no any schedule is selected.","Recieve Payment");
+            _toastService.ShowError("There is no any schedule is selected.", "Recieve Payment");
 
             return;
         }
 
         var schedulesList = schedules.ToList();
 
-        var firstSchedule = schedulesList.First(x=>x.IsPaid == false);
+        var firstSchedule = schedulesList.First(x => x.IsPaid == false);
 
         if (!IsFirstScheduleSelected(firstSchedule))
         {
@@ -424,7 +425,14 @@ public partial class DueDateSchedulesPage
 
         isLoading = true;
 
-        var query = new GetDueScheduleByLoanIdQuery(branchId, loanId, status);
+        DateTime? dueDate = null;
+
+        if (ShowOnScheduleOnly)
+        {
+            dueDate = DateTime.Now;
+        }
+
+        var query = new GetDueScheduleByLoanIdQuery(branchId, loanId, status, dueDate);
 
         var rsp = await mediator.Send(query);
 
@@ -644,7 +652,7 @@ public partial class DueDateSchedulesPage
 
         if (!IsFirstScheduleSelected(schedule))
         {
-            _toastService.ShowError("Cannot add new schedule due to previouse schedule not complete paid yet.","Recieve Payment");
+            _toastService.ShowError("Cannot add new schedule due to previouse schedule not complete paid yet.", "Recieve Payment");
 
             _selectedSchedules!.Clear();
 

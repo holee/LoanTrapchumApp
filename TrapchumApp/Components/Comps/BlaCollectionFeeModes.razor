@@ -1,0 +1,31 @@
+﻿@using System.Linq.Expressions
+
+<RadzenDropDown TValue="int?"
+                Data="StorageConstant.CollectionFeeModes"
+                TextProperty="@nameof(Items.Label)"
+                ValueProperty="@nameof(Items.Value)"
+                FilterAsYouType="false"
+                AllowFiltering="false"
+                class="rz-w-100"
+                SelectedItemChanged="SelectedChangeModeChangedHandler"
+                Placeholder="Collection Fee Mode"
+                ValueExpression="@ValueExpression"
+                ValueChanged="@ValueChanged"
+                Value="@Value" />
+@code {
+
+    [Parameter] public int? Value { get; set; }
+
+    [Parameter] public EventCallback<int?> ValueChanged { get; set; }
+
+    [Parameter] public Expression<Func<int?>>? ValueExpression { get; set; }
+
+    [Parameter] public EventCallback<object?> SelectedChangeModeChanged { get; set; }
+
+    async Task SelectedChangeModeChangedHandler(object? value)
+    {
+        await SelectedChangeModeChanged.InvokeAsync(value);
+    }
+
+
+}

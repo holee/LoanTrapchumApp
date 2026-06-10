@@ -9,7 +9,19 @@
         <RadzenRow RowGap="0.75rem">
             @* ── Amounts ── *@
             @ReadOnlyField("request_quote", "Request Amount", $"{Data?.RequestAmount:N2}")
-            @ReadOnlyField("paid", "Admin Fee", $"{Data?.AdminFeeAmount:N2}")
+            <RadzenColumn Size="6" SizeSM="4">
+                <RadzenStack Orientation="Orientation.Horizontal"
+                             class="rz-mb-3"
+                             AlignItems="AlignItems.Center" Gap="0.5rem">
+                    <RadzenIcon Icon="paid" Style="font-size:1rem;color:var(--rz-success);" />
+                    <RadzenText TextStyle="TextStyle.Overline" class="rz-mb-0 rz-color-base-600">Admin Fee</RadzenText>
+                </RadzenStack>
+                <RadzenNumeric @bind-Value="model!.AdminFeeAmount"
+                               Min="0"
+                               ReadOnly
+                               ShowUpDown="false"
+                               Format="@currencyFormat" />
+            </RadzenColumn>
 
             <RadzenColumn Size="6" SizeSM="4">
                 <RadzenStack Orientation="Orientation.Horizontal"
@@ -76,7 +88,10 @@
         }
 
         var amount = model!.AprovedAmount ?? value.Value;
+
         Data!.AdminFeeAmount = amount * Data.AdminFeeRate / 100;
+
+        model.AdminFeeAmount = Data.AdminFeeAmount;
 
         StateHasChanged();
     }

@@ -236,7 +236,9 @@
         var resource = (request: Request, loanSizes: userServices.UserLoanSize);
 
         _ = bState.WhoCanApproved(resource);
+
         _ = bState.WhoCanRequest(Request);
+
         _ = bState.WhoCanDisbursemnt(Request);
 
         var requestNowUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
@@ -276,7 +278,7 @@
                             Path="@disburseRequestLoanUrl"
                             Icon="@IconNames.Info"
                             Text="Disburse Now"
-                            Disabled="!bState.CanDisbursed"
+                            Disabled="@(!bState.CanDisbursed)"
                             Value="@Request.CustomerId" />
 
             <RadzenMenuItem Icon="@IconNames.Details"
@@ -303,6 +305,8 @@
         var selectedRequest = args.Data as VLoanRequests;
 
         if (selectedRequest is null) return;
+
+        _ = bState.WhoCanDisbursemnt(selectedRequest); ;
 
         List<ContextMenuItem> items = new();
 
@@ -339,18 +343,18 @@
 
         items.Add(new ContextMenuItem()
         {
-            Text = "Disburse Now",
-            Icon = "attach_money",
-            Value = 5,
-            Disabled = (selectedRequest?.StatusId != (int)RequestStatus.Approved || !bState.CanDisbursed)
-        });
-
-        items.Add(new ContextMenuItem()
-        {
             Text = "Checking Now",
             Icon = "rate_review",
             Value = 5,
             Disabled = (selectedRequest?.StatusId != (int)RequestStatus.Rechecking || !bState.CanDisbursed)
+        });
+
+        items.Add(new ContextMenuItem()
+        {
+            Text = "Disburse Now",
+            Icon = "attach_money",
+            Value = 5,
+            Disabled = (!bState.CanDisbursed)
         });
 
         items.Add(new ContextMenuItem()

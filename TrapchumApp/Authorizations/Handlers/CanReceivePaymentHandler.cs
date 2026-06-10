@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace TrapchumApp.Authorizations.Rquirements;
 
-public sealed class CanReceivePaymentHandler : AuthorizationHandler<CanDisburseRequestRequirement>
+public sealed class CanReceivePaymentHandler : AuthorizationHandler<CanReceievePaymentRequirement>
 {
     private static readonly string[] AllowedRoles =
     [
@@ -14,7 +14,7 @@ public sealed class CanReceivePaymentHandler : AuthorizationHandler<CanDisburseR
         AppRoles.Account,
     ];
 
-    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, CanDisburseRequestRequirement requirement)
+    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, CanReceievePaymentRequirement requirement)
     {
         var user = context.User;
 

@@ -1,16 +1,16 @@
 ﻿@using Applications.Extensions.Identity.Authorizations.Extensions
 @using TrapchumApp.Helpers.Extensions
 <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
-    <RadzenPanelMenuItem Text="Loans Disbursement"
-                         Icon="lists"
-                         Path="@($"/App/Loans/Disbursements/{BranchId}/Branches")"
-                         Visible="@_canShowLoan" />
     <RadzenPanelMenuItem Text="Recieve Payments"
                          Icon="schedule"
                          Path="@($"/App/Loans/Schedules/{BranchId}/Branches")"
                          Visible="@_canShowLoan" />
     <RadzenPanelMenuItem Text="Loans Request" Icon="request_quote" Path="@($"/App/Loans/Requests/{BranchId}/Branches")"
                          Visible="@BState.IsAccount" />
+    <RadzenPanelMenuItem Text="Loans Disbursement"
+                         Icon="lists"
+                         Path="@($"/App/Loans/Disbursements/{BranchId}/Branches")"
+                         Visible="@_canShowLoan" />
     <RadzenPanelMenuItem Text="Loan Write Off"
                          Icon="person_off" Path="@($"/App/Loans/Disbursements/{BranchId}/Write-Off")"
                          Visible="@BState.IsAccount" />

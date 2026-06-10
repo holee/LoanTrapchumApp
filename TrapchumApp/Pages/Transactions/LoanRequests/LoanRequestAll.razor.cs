@@ -66,7 +66,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
             _status = RequestStatus.All;
 
-            await bState.CheckedCanDisbursemnt(_user);
+            //await bState.CheckedCanDisbursemnt(_user);
 
             await branchService.GetCurrentBranchNameAsync();
 

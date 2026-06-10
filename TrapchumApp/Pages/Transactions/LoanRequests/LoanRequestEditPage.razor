@@ -105,7 +105,9 @@ else
                     </RadzenStepsItem>
 
                     <RadzenStepsItem Text="អតិថិជន">
-                        <CustomerRequest CustomerId="@CustomerId" ShowAdditionalInfo="true" />
+                        <CustomerRequest CustomerId="@CustomerId"
+                                         GetIncomeOrExpense="@GetUpdateCustomerProfit"
+                                         ShowAdditionalInfo="true" />
                     </RadzenStepsItem>
                     <RadzenStepsItem Text="កំណត់ចំណាំ">
                         <LoanRequestNotes Data="@_loanDescriptions" />

@@ -123,7 +123,7 @@
                                             Paid Principal
                                         </RadzenText>
                                         <RadzenText Style="font-weight:700;font-size:0.95rem;color:var(--rz-success-dark,#1e7e34);margin:0;">
-                                            @LoanSchedule?.PaidPrinciple.Format(LoanSchedule.CurrencyId)
+                                            @LoanSchedule?.PaidPrinciple.AsCurrencyTitle(LoanSchedule.CurrencyId)
                                         </RadzenText>
                                     </div>
                                 </RadzenColumn>
@@ -133,7 +133,7 @@
                                             Paid Interest
                                         </RadzenText>
                                         <RadzenText Style="font-weight:700;font-size:0.95rem;color:var(--rz-info-dark,#1565c0);margin:0;">
-                                            @LoanSchedule?.PaidInterest.Format(LoanSchedule.CurrencyId)
+                                            @LoanSchedule?.PaidInterest.AsCurrencyTitle(LoanSchedule.CurrencyId)
                                         </RadzenText>
                                     </div>
                                 </RadzenColumn>
@@ -143,7 +143,7 @@
                                             Paid Collection Fee
                                         </RadzenText>
                                         <RadzenText Style="font-weight:700;font-size:0.95rem;color:var(--rz-warning-dark,#e65100);margin:0;">
-                                            @LoanSchedule?.PaidCollectionFee.Format(LoanSchedule.CurrencyId)
+                                            @LoanSchedule?.PaidCollectionFee.AsCurrencyTitle(LoanSchedule.CurrencyId)
                                         </RadzenText>
                                     </div>
                                 </RadzenColumn>
@@ -153,7 +153,7 @@
                                             Outstanding
                                         </RadzenText>
                                         <RadzenText Style="font-weight:700;font-size:0.95rem;color:var(--rz-danger-dark,#c62828);margin:0;">
-                                            @LoanSchedule?.OutStanding.Format(LoanSchedule.CurrencyId)
+                                            @LoanSchedule?.OutStanding.AsCurrencyTitle(LoanSchedule.CurrencyId)
                                         </RadzenText>
                                     </div>
                                 </RadzenColumn>

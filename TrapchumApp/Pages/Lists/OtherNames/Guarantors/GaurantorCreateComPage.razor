@@ -46,9 +46,6 @@
                                        class="rz-w-100"
                                        Placeholder="ឈ្មោះជាភាសាខ្មែរ..." />
                     </ChildContent>
-                    <Helper>
-                        <ValidationMessage For="@(() => Model.AltName)" />
-                    </Helper>
                 </RadzenFormField>
             </RadzenColumn>
             <RadzenColumn Size="12" SizeMD="4">
@@ -79,33 +76,20 @@
         @* ── ជួរទី២: នាមខ្លួន / នាមកណ្តាល / នាមត្រកូល / មុខរបរ ── *@
         <RadzenRow AlignItems="AlignItems.End" class="rz-mb-4">
             <RadzenColumn Size="12" SizeMD="3">
-                <RadzenFormField Text="នាមខ្លួនជាឡាតាំង *" AllowFloatingLabel="true" class="rz-w-100">
+                <RadzenFormField Text="នាមត្រកូលជាឡាតាំង *" AllowFloatingLabel="true" class="rz-w-100">
                     <ChildContent>
                         <RadzenTextBox Placeholder="នាមខ្លួនជាឡាតាំង..."
                                        class="rz-w-100"
                                        AutoCompleteType="AutoCompleteType.Off"
                                        @bind-Value="Model.FirstName" />
                     </ChildContent>
-                    <Helper>
-                        <ValidationMessage For="@(() => Model.FirstName)" />
-                    </Helper>
                 </RadzenFormField>
             </RadzenColumn>
             <RadzenColumn Size="12" SizeMD="3">
-                <RadzenFormField Text="នាមកណ្តាលជាឡាតាំង" AllowFloatingLabel="true" class="rz-w-100">
+                <RadzenFormField Text="នាមខ្លួនជាឡាតាំង *" AllowFloatingLabel="true" class="rz-w-100">
                     <ChildContent>
                         <RadzenTextBox class="rz-w-100"
-                                       Placeholder="នាមកណ្តាលជាឡាតាំង..."
-                                       AutoCompleteType="AutoCompleteType.Off"
-                                       @bind-Value="Model.MiddleName" />
-                    </ChildContent>
-                </RadzenFormField>
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="3">
-                <RadzenFormField Text="នាមត្រកូលជាឡាតាំង" AllowFloatingLabel="true" class="rz-w-100">
-                    <ChildContent>
-                        <RadzenTextBox class="rz-w-100"
-                                       Placeholder="នាមត្រកូលជាឡាតាំង..."
+                                       Placeholder="នាមខ្លួនជាឡាតាំង"
                                        AutoCompleteType="AutoCompleteType.Off"
                                        @bind-Value="Model.LastName" />
                     </ChildContent>

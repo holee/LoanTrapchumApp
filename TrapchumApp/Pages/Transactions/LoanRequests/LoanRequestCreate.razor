@@ -82,7 +82,9 @@
                                          ShowDelete="true" />
                 </RadzenStepsItem>
                 <RadzenStepsItem Text="អតិថិជន">
-                    <CustomerRequest CustomerId="@CustomerId" ShowAdditionalInfo="true" @key="@Guid.NewGuid().ToString("N")" />
+                    <CustomerRequest CustomerId="@CustomerId"
+                                     ShowAdditionalInfo="true"
+                                     GetIncomeOrExpense="OnGetIncomeOrExpense" />
                 </RadzenStepsItem>
             </Steps>
         </RadzenSteps>

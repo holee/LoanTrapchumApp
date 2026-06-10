@@ -29,6 +29,10 @@ else if (_request is not null)
                     <RadzenText TextStyle="TextStyle.Body1"><strong>@_request.RequestAmount.Format(_request.CurrencyId)</strong></RadzenText>
                 </RadzenColumn>
                 <RadzenColumn SizeSM="6" SizeMD="2">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-text-caption rz-color-base-600">ចំនួនទឹកប្រាក់អនុម័ត្ន</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1"><strong>@_request.AprovedAmount.Format(_request.CurrencyId)</strong></RadzenText>
+                </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="2">
                     <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រភេទបង់រំលោះ</RadzenText>
                     <RadzenText TextStyle="TextStyle.Body1">@_request.RepaymentMode</RadzenText>
                 </RadzenColumn>
@@ -213,6 +217,12 @@ else if (_request is not null)
                                   Size="@Styles.DefaultSize"
                                   Click="DisbruseLoanRequestNow"
                                   Text="បញ្ចេញប្រាក់" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Info"
+                                  Icon="@IconNames.Undo"
+                                  Size="@Styles.DefaultSize"
+                                  Click="@RecheckedLoanRequest"
+                                  Disabled="@(!AppState.CanDisbursed)"
+                                  Text="ពិនិត្យឡើងវិញ" />
                 }
             </Authorized>
         </AuthorizeView>

@@ -11,13 +11,13 @@ public sealed class LoanPaymentLineDtoCreate
     public string? OfficialReceiptNo { get; set; }
     public int? InstallmentNo { get; set; }
     public int? NumberOfDay { get; set; }
-    public DateTime? PayDate { get; set; }
-    public int? DayArrea { get; set; }
-    public decimal? PaidPrinciple { get; set; }
-    public decimal? PaidInterest { get; set; }
-    public decimal? PaidCollectionFee { get; set; }
-    public decimal? PaidPenaltyAmount { get; set; }
-    public decimal? SubTotal { get; set; }
+    public DateTime? PayDate { get; set; }= DateTime.Now;
+    public int? DayArrea { get; set; } = 0;
+    public decimal? PaidPrinciple { get; set; } = 0;
+    public decimal? PaidInterest { get; set; } = 0;
+    public decimal? PaidCollectionFee { get; set; } = 0;
+    public decimal? PaidPenaltyAmount { get; set; } = 0;
+    public decimal? SubTotal { get; set; } = 0;
 
     [NotMapped]
     public bool? IsEnable { get; set; }

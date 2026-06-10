@@ -127,9 +127,13 @@
 @code {
     async Task UpdateIncomeAndExpense((decimal? income, decimal? expense) args)
     {
-        _income= args.income;
+        _income = args.income ?? 0;
 
-        _expense = args.expense;
+        _expense = args.expense ?? 0;
+
+        decimal? profit = _income - _expense;
+
+        await GetIncomeOrExpense.InvokeAsync(profit);
 
         StateHasChanged();
     }

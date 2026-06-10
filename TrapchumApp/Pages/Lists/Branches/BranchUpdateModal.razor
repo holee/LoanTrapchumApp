@@ -75,7 +75,7 @@
     </RadzenFieldset>
 
     @* ── Address ── *@
-    <RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-3">
+    <RadzenFieldset AllowCollapse="false" Collapsed="false" class="rz-mb-3">
         <HeaderTemplate>
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
                 <RadzenIcon Icon="location_on" Style="color:var(--rz-danger)" />
@@ -85,7 +85,7 @@
         <ChildContent>
             @* Row 1: Country + City *@
             <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
-                <RadzenColumn Size="12" SizeMD="6">
+                <RadzenColumn Size="12" SizeMD="12">
                     <RadzenStack Gap="0.25rem">
                         <RadzenLabel Text="Country" class="branch-form-label" />
                         <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -100,7 +100,7 @@
                                         Name="DropDownFiltering1" />
                     </RadzenStack>
                 </RadzenColumn>
-                <RadzenColumn Size="12" SizeMD="6">
+                @* <RadzenColumn Size="12" SizeMD="6">
                     <RadzenStack Gap="0.25rem">
                         <RadzenLabel Text="City" class="branch-form-label" />
                         <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -136,7 +136,7 @@
                             Press <kbd>Enter</kbd> to add a new city
                         </small>
                     </RadzenStack>
-                </RadzenColumn>
+                </RadzenColumn> *@
             </RadzenRow>
 
             @* Row 2: Province + District *@
@@ -220,14 +220,14 @@
     @* ── Footer Actions ── *@
     <RadzenStack Gap="0.5rem" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" AlignItems="AlignItems.Center">
         <RadzenButton Click="@(() => DialogService!.Close(false))"
-                      Variant="Variant.Outlined"
+                      Variant="Variant.Filled"
                       Text="Cancel"
                       Icon="close"
-                      Size="ButtonSize.Small"
-                      ButtonStyle="ButtonStyle.Secondary" />
+                      Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Danger" />
         <RadzenButton ButtonType="ButtonType.Submit"
                       Text="Save Changes"
-                      Size="ButtonSize.Small"
+                      Size="ButtonSize.ExtraSmall"
                       ButtonStyle="ButtonStyle.Success"
                       Icon="save" />
     </RadzenStack>

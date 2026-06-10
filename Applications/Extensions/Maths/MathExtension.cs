@@ -223,6 +223,20 @@ namespace Applications.Extensions.Maths
             };
         }
 
+        public static MarkupString AsCurrencyTitle(this decimal? d, int? currencyId = 1) 
+        {
+
+            var value = d ?? 00.00M;
+
+            return currencyId switch
+            {
+                1 => (MarkupString)string.Format("{0:##,0.##} {1}", value, "រៀល"),
+                2 => (MarkupString)string.Format("{0:##,0.00} {1}", value, "ដុល្លា"),
+                _ => (MarkupString)string.Format("{0:##,0.##} {1}", value, "រៀល"),
+            };
+        }
+
+
         public static MarkupString Format(this decimal? d, int? currencyId, int decimalPlaces = 2)
         {
             return currencyId switch

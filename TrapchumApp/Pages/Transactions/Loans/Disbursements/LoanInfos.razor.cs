@@ -12,7 +12,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         [Parameter] public VLoanDisbursments? LoanSchedule { get; set; } = new();
         [Parameter] public string? LoanId { get; set; } = string.Empty;
         [Parameter] public int BranchId { get; set; } = 1;
-        [Parameter] public int? Currency { get; set; } = 1;
 
         private bool showLoader = false;
 
@@ -22,13 +21,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             if (string.IsNullOrEmpty(LoanId) || BranchId <= 0)
             {
-                NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Warning,
-                    Summary = "Warning",
-                    Detail = "LoanId and BranchId are required to download the schedule as Excel.",
-                    Duration = 3000
-                });
+
+                _toastService.ShowWarning("LoanId and BranchId are required to download the schedule as Excel.");
 
                 Tracker.Hide();
 
@@ -103,13 +97,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         {
             if (string.IsNullOrEmpty(LoanId) || BranchId <= 0)
             {
-                NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Warning,
-                    Summary = "Warning",
-                    Detail = "LoanId and BranchId are required to download the schedule as PDF.",
-                    Duration = 3000
-                });
+                _toastService.ShowWarning("LoanId and BranchId are required to download the schedule as PDF.");
+
                 return;
             }
 

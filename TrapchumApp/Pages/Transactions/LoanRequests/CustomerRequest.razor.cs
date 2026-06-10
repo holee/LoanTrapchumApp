@@ -9,8 +9,10 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         [Parameter] public string? CustomerId { get; set; }
         [Parameter] public VCustomerDetails? Customer { get; set; } = new();
         [Parameter] public bool ShowAdditionalInfo { get; set; } = false;
+        [Parameter] public EventCallback<decimal?> GetIncomeOrExpense { get; set; }
 
         private decimal? _income = 0;
+
         private decimal? _expense = 0;
         protected override async Task OnInitializedAsync()
         {
@@ -35,6 +37,9 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
                 _expense = Customer.Expenditure ?? 0;
 
+                decimal? profit = _income - _expense;
+
+                await GetIncomeOrExpense.InvokeAsync(profit);
             }
         }
 
