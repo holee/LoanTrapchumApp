@@ -204,9 +204,9 @@ namespace Applications.Extensions.Maths
         {
             return currencyId switch
             {
-                1 => (MarkupString)string.Format("{0:#,##0.00} {1}", d, "&#6107;"),
-                2 => (MarkupString)string.Format("{0:#,##0.00} {1}", d, "&dollar;"),
-                _ => (MarkupString)string.Format("{0:#,##0.00} {1}", d, "&#6107;"),
+                1 => (MarkupString)string.Format("{0:#,##0} {1}", d, "រៀល"),
+                2 => (MarkupString)string.Format("{0:#,##0.00} {1}", d, "ដុល្លា"),
+                _ => (MarkupString)string.Format("{0:#,##0.00} {1}", d, "រៀល"),
             };
         }
 
@@ -217,22 +217,35 @@ namespace Applications.Extensions.Maths
 
             return currencyId switch
             {
-                1 => (MarkupString)string.Format("{0:##,0.##} {1}", value, "&#6107;"),
-                2 => (MarkupString)string.Format("{0:##,0.00} {1}", value, "&dollar;"),
-                _ => (MarkupString)string.Format("{0:##,0.##} {1}", value, "&#6107;"),
+                1 => (MarkupString)string.Format("{0:#,##0} {1}", value, "រៀល"),
+                2 => (MarkupString)string.Format("{0:#,##0.00} {1}", value, "ដុល្លា"),
+                _ => (MarkupString)string.Format("{0:#,##0} {1}", value, "រៀល"),
             };
         }
 
-        public static MarkupString AsCurrencyTitle(this decimal? d, int? currencyId = 1) 
+        public static MarkupString WithSign(this decimal? d, int? currencyId = 1)
         {
 
             var value = d ?? 00.00M;
 
             return currencyId switch
             {
-                1 => (MarkupString)string.Format("{0:##,0.##} {1}", value, "រៀល"),
-                2 => (MarkupString)string.Format("{0:##,0.00} {1}", value, "ដុល្លា"),
-                _ => (MarkupString)string.Format("{0:##,0.##} {1}", value, "រៀល"),
+                1 => (MarkupString)string.Format("{0:#,##0} {1}", value, "រៀល"),
+                2 => (MarkupString)string.Format("{0:#,##0.00} {1}", value, "ដុល្លា"),
+                _ => (MarkupString)string.Format("{0:#,##0} {1}", value, "រៀល"),
+            };
+        }
+
+        public static MarkupString As(this decimal? d, int? currencyId = 1)
+        {
+
+            var value = d ?? 00.00M;
+
+            return currencyId switch
+            {
+                1 => (MarkupString)string.Format("{0:#,##0}", value),
+                2 => (MarkupString)string.Format("{0:#,##0.00}", value),
+                _ => (MarkupString)string.Format("{0:#,##0}", value),
             };
         }
 
@@ -241,9 +254,9 @@ namespace Applications.Extensions.Maths
         {
             return currencyId switch
             {
-                1 => (MarkupString)string.Format("{0:#,##0." + new string('0', decimalPlaces) + "} {1}", d ?? 0, "&#6107;"),
-                2 => (MarkupString)string.Format("{0:#,##0." + new string('0', decimalPlaces) + "} {1}", d ?? 0, "&dollar;"),
-                _ => (MarkupString)string.Format("{0:#,##0." + new string('0', decimalPlaces) + "} {1}", d ?? 0, "&#6107;"),
+                1 => (MarkupString)string.Format("{0:#,##0", d ?? 0, "រៀល"),
+                2 => (MarkupString)string.Format("{0:#,##0." + new string('0', decimalPlaces) + "} {1}", d ?? 0, "ដុល្លា"),
+                _ => (MarkupString)string.Format("{0:#,##0", d ?? 0, "រៀល"),
             };
         }
 
@@ -263,7 +276,7 @@ namespace Applications.Extensions.Maths
         {
             return currencyId switch
             {
-                1 => string.Format(UserCulture(CurrenciesType.Khr), "{0:C}", d),
+                1 => string.Format(UserCulture(CurrenciesType.KHR), "{0:C}", d),
                 2 => string.Format(UserCulture(CurrenciesType.Usd), "{0:C}", d),
                 _ => string.Format(UserCulture(CurrenciesType.Usd), "{0:C}", d),
             };
@@ -278,16 +291,16 @@ namespace Applications.Extensions.Maths
         {
             return currencyId switch
             {
-                1 => string.Format(UserCulture(CurrenciesType.Khr), "{0:C}", d),
+                1 => string.Format(UserCulture(CurrenciesType.KHR), "{0:C}", d),
                 2 => string.Format(UserCulture(CurrenciesType.Usd), "{0:C}", d),
-                _ => string.Format(UserCulture(CurrenciesType.Khr), "{0:C}", d),
+                _ => string.Format(UserCulture(CurrenciesType.KHR), "{0:C}", d),
             };
         }
         private static CultureInfo UserCulture(CurrenciesType type)
         {
             return type switch
             {
-                CurrenciesType.Khr => new CultureInfo("km-KH"),
+                CurrenciesType.KHR => new CultureInfo("km-KH"),
                 CurrenciesType.Usd => new CultureInfo("en-US"),
                 CurrenciesType.Euro => new CultureInfo("en-GB"),
                 CurrenciesType.China => new CultureInfo("zh-CN"),

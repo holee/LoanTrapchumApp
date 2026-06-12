@@ -3,14 +3,8 @@ using Applications.Responses.ViewModels.Addresses;
 
 namespace TrapchumApp.Pages.Lists.Operations.Villages
 {
-    public partial class VillagesIndex
+    public partial class VillagesIndex(IAddressService villageServer, ILogger<VillagesIndex> logger)
     {
-        private readonly IAddressService villageServer;
-
-        public VillagesIndex(IAddressService villageServer)
-        {
-            this.villageServer = villageServer;
-        }
         protected string? searchText = string.Empty;
         protected bool includeInactive = false;
         int pageIndex = 0;
@@ -43,7 +37,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
             }
             catch (Exception ex)
             {
-
+                logger.LogError(ex, "Error loading villages: {Message}", ex.Message);
             }
         }
         async Task LoadData(LoadDataArgs args)

@@ -1,7 +1,7 @@
 ﻿@page "/App/Loans/Requests/{BranchId:int}/Branches/CreateNew"
 @page "/App/Loans/Requests/{BranchId:int}/Branches/CreateNew/{CustomerId}/Customers"
 @using Applications.Features.Collaterals.Dtos
-@attribute [MustHasPermission(Modules.LoanRequest, Actions.Create)]
+@attribute [MustHasPermission(Resources.LoanRequest, Actions.Create)]
 <PageTitle>Create New</PageTitle>
 <EditForm Model="model" @ref="editForm">
     <Blazilla.FluentValidator />
@@ -38,7 +38,8 @@
                                           Add="@AddCoCustomer"
                                           ShowRemove="true">
                         <SearchBoxTemplate>
-                            <CoRequestSearchList OnSelected="OnSelectedCoCustomer"
+                            <CoRequestSearchList BranchId="@BranchId"
+                                                 OnSelected="OnSelectedCoCustomer"
                                                  OnSelecteds="OnSelectedCoCustomers" />
                         </SearchBoxTemplate>
                     </CoRequestCustomerBox>

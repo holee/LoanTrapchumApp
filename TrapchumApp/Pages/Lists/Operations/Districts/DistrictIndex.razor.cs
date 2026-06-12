@@ -38,7 +38,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
                 }
 
             }
-            catch (Exception ex)
+            catch
             {
 
             }
@@ -46,13 +46,16 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
         async Task LoadData(LoadDataArgs args)
         {
             string sortField = "DistrictId";
-            bool sortDescending = false;
-            pageIndex = args.Skip!.Value;
-            if (args.OrderBy.Any())
-            {
-                sortField = args.Sorts.First().Property;
 
-                sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
+            bool sortDescending = false;
+
+            pageIndex = args.Skip!.Value;
+
+            if (args.OrderBy!.Any())
+            {
+                sortField = args!.Sorts!.First().Property!;
+
+                sortDescending = args.Sorts!.First().SortOrder == SortOrder.Descending;
             }
 
             var filterColumns = args.Filters?.FirstOrDefault(f => 

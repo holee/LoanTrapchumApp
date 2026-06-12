@@ -32,7 +32,7 @@ public sealed class CanDisburseRequestHandler : AuthorizationHandler<CanDisburse
 
         }
 
-        var requiredPermission = AppPermission.RuleFor(Modules.LoanRequest, Actions.Disburse);
+        var requiredPermission = AppPermission.RuleFor(Resources.LoanRequest, Actions.Disburse);
 
         if (!user.HasClaim(AppClaim.Permission, requiredPermission))
         {

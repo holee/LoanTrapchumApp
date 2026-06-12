@@ -26,7 +26,7 @@ public sealed class CanReceivePaymentHandler : AuthorizationHandler<CanReceieveP
         if (!hasAllowedRole)
             return Task.CompletedTask;
 
-        var requiredPermission = AppPermission.RuleFor(Modules.Repayments, Actions.ReceivePayment);
+        var requiredPermission = AppPermission.RuleFor(Resources.Repayments, Actions.ReceivePayment);
 
         if (user.HasClaim(AppClaim.Permission, requiredPermission))
         {

@@ -13,12 +13,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         private readonly ISpotRateService spotRateService;
         private IEnumerable<VCurrenciesList>? Currencies = new List<VCurrenciesList>();
         private List<CurrencyDtoCreateSpotRate> model = new List<CurrencyDtoCreateSpotRate>();
-        private int pageIndex = 1;
-        private int pageSize = 10;
-        private bool includeInactive = false;
         private DateTime reqDate = DateTime.Now;
-        private bool isValid = true;
-
         public SetDailySpotRate(ICurrencyService currencyService, ISpotRateService spotRateService)
         {
             this.currencyService = currencyService;

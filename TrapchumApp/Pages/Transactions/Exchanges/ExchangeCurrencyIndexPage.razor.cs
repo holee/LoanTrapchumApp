@@ -27,7 +27,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             if (Currencies.Any())
             {
-                Currency = Currencies.FirstOrDefault(x => x.CurrencyId == (int)CurrenciesType.Khr);
+                Currency = Currencies.FirstOrDefault(x => x.CurrencyId == (int)CurrenciesType.KHR);
             }
             await base.OnInitializedAsync();
         }

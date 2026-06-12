@@ -6,7 +6,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
     {
         [Parameter] public CashManagementDetailDtoCreate Item { get; set; } = new();
         [Parameter] public EventCallback Calculate { get; set; }
-        [Parameter] public int? CurrencyId { get; set; } = (int)CurrenciesType.Khr;
+        [Parameter] public int? CurrencyId { get; set; } = (int)CurrenciesType.KHR;
         [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString("N");
         string sp = "";
 

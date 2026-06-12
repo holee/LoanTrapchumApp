@@ -59,22 +59,23 @@
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="RegisterDate"
                               Context="p"
-                              Title="Date"
+                              Title="ថ្ងៃចុះឈ្មោះ"
+                              Width="7rem"
                               Sortable="true">
             <Template>
-                @p.RegisterDate!.Value.ToShortDateString()
+                @p.RegisterDate.DayFirst()
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
                               Property="AltName"
-                              Title="Name"
+                              Title="ឈ្មោះអតិថិជន"
                               Sortable="true">
             <Template>
                 <TrapchumApp.Pages.Lists.KhmerName AltName="@p.AltName" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
-                              Title="Principle"
+                              Title="ប្រាក់ដើម"
                               Property="Principle"
                               TextAlign="TextAlign.Right"
                               Sortable="true">
@@ -86,19 +87,20 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
-                              Title="Interest"
+                              Title="ការប្រាក់"
                               Property="InterestRate"
                               TextAlign="TextAlign.Right"
+                              Width="5rem"
                               Sortable="true">
             <Template>
                 <RadzenText TextStyle="TextStyle.Body2"
                             Style="font-weight:700; color:var(--rz-warning-darker);">
-                    @p.InterestRate (%) / @p.PeriodName
+                    @p.InterestRate.AsPercent()
                 </RadzenText>
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
-                              Title="Paid Principle"
+                              Title="ប្រាក់ដែលបានទូទាត់"
                               Property="PaidPrinciple"
                               TextAlign="TextAlign.Right"
                               Sortable="true">
@@ -110,7 +112,7 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
-                              Title="OutStanding"
+                              Title="ប្រាក់ដែលនៅសល់"
                               Property="OutStanding"
                               TextAlign="TextAlign.Right"
                               Sortable="true">
@@ -122,7 +124,7 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
-                              Title="Agent"
+                              Title="ភ្នាក់ងារ"
                               Property="AgentName"
                               TextAlign="TextAlign.Start"
                               Sortable="true">
@@ -131,13 +133,13 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
-                              Title="Status"
+                              Title="ស្ថានភាព"
                               Property="LoanStatus"
                               Width="6rem"
                               TextAlign="TextAlign.Center"
                               Sortable="true">
             <Template>
-                @p.LoanStatus
+                <RadzenBadge Text="@p.LoanStatus" BadgeStyle="BadgeStyle.Success" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"

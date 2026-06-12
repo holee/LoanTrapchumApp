@@ -3,7 +3,6 @@ using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
 using Applications.Responses.ViewModels.Loans.Requests;
 using DocumentFormat.OpenXml.Spreadsheet;
-using Domains.Models.Identity;
 using System.Security.Claims;
 using TrapchumApp.Shared;
 
@@ -66,11 +65,11 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
             _status = RequestStatus.All;
 
-            //await bState.CheckedCanDisbursemnt(_user);
-
             await branchService.GetCurrentBranchNameAsync();
 
             await userServices.GetLoanSizeByUserAsync();
+
+            await bState.ManageLoanDisbursement();
 
             if (LoanRequests is null)
             {
@@ -142,7 +141,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                 return;
             }
 
-            if (bState.CanDisbursed)
+            if (bState.ManageDisbursement)
             {
                 await GetLoanRequestForDisbursement();
 

@@ -64,7 +64,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             if (CashVaultBalances is not null && CashVaultBalances.Any())
             {
-                await GetCurrencies((int)CurrenciesType.Khr);
+                await GetCurrencies((int)CurrenciesType.KHR);
 
                 await GetCurrencyCounter(currencyId, BranchId);
             }

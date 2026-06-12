@@ -48,6 +48,7 @@ builder.Services.AddScoped<IAuthorizationHandler, CanApprovedRequestHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, CanDisburseRequestHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, CanRequestHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, CanReceivePaymentHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, ManagerLoanDisbursementHandler>(); 
 builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
 builder.Services.AddScoped<NotificationServices>();
 builder.Services.AddScoped<NotificationHubService>();

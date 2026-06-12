@@ -78,9 +78,6 @@ public partial class RepaymentMultiplePage
     string receiptNo = string.Empty;
 
     int disableIndex = 0;
-
-    int nextIndex = 1;
-
     void GetLoanDetails()
     {
         NavigationManager.NavigateTo($"/Loans/Details/{LoanId}?BranchId={BranchId}&CreditAgentId={CreditAgentId}&CurrencyId={CurrencyId}&UserId={_userId}");

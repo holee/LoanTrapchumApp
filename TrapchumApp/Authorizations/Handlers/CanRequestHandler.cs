@@ -27,7 +27,7 @@ public sealed class CanRequestHandler : AuthorizationHandler<CanRequestRequireme
         if (!hasAllowedRole)
             return Task.CompletedTask;
 
-        var requiredPermission = AppPermission.RuleFor(Modules.LoanRequest, Actions.Request);
+        var requiredPermission = AppPermission.RuleFor(Resources.LoanRequest, Actions.Request);
 
         if (!user.HasClaim(AppClaim.Permission, requiredPermission))
             return Task.CompletedTask;

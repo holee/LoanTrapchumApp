@@ -37,7 +37,7 @@ else
                             </RadzenColumn>
                             <RadzenColumn SizeSM="6" SizeMD="3">
                                 <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រាក់ដើម</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Body1"><strong>@model?.Principle.AsCurrencyTitle(model?.CurrencyRefId)</strong></RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1"><strong>@model?.Principle.WithSign(model?.CurrencyRefId)</strong></RadzenText>
                             </RadzenColumn>
                             <RadzenColumn SizeSM="6" SizeMD="3">
                                 <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ខ្ចីលើកទី</RadzenText>
@@ -286,7 +286,7 @@ else
 
     @* ── Action Toolbar ── *@
     <AppActions>
-        @if (!disburseStatus && RequestStatusId == (int)RequestStatus.Approved)
+        @if (BState.CanDisbursed)
         {
             <RadzenButton Click="@SaveLoanDisbursement"
                           Size="@Styles.DefaultSize"
@@ -297,6 +297,7 @@ else
                           Size="@Styles.DefaultSize"
                           Icon="@IconNames.Done"
                           ButtonStyle="ButtonStyle.Success"
+                          IsBusy="@isWaiting"
                           Text="បញ្ចេញប្រាក់" />
             <RadzenButton Click="SendRechecked"
                           Size="@Styles.DefaultSize"

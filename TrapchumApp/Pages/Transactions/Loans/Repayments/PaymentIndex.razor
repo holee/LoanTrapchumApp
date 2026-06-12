@@ -135,307 +135,305 @@
         }
     </RadzenFieldset>
 }
-<div style="height:var(--normal-height);overflow:auto;">
-    <RadzenTabs RenderMode="TabRenderMode.Client" SelectedIndex="@_selectedIndex" @ref="@refTabs">
-        <Tabs>
-            <RadzenTabsItem Icon="@IconNames.List">
+<RadzenTabs RenderMode="TabRenderMode.Client" SelectedIndex="@_selectedIndex" @ref="@refTabs">
+    <Tabs>
+        <RadzenTabsItem Icon="@IconNames.List">
+            <Template>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem" class="rz-ms-1">
+                    <span>All Schedules</span>
+                    <RadzenBadge BadgeStyle="BadgeStyle.Primary" IsPill="true" Text="@AllScheduleCounts" class="rz-ms-1" />
+                </RadzenStack>
+            </Template>
+            <ChildContent>
+                @* ── Grid Card ───────────────────────────────────────────────────── *@
+                <RadzenCard class="rz-shadow-3 rz-border-radius-3 rz-p-3">
+                    <div class="schedule-header">
+                        <RadzenIcon Icon="table_rows" Style="color:var(--rz-primary);" />
+                        <h5>Payment Schedule List</h5>
+                        <RadzenBadge BadgeStyle="BadgeStyle.Light" IsPill="true" Text="@($"{AllScheduleCounts} records")" />
+                    </div>
+
+                    <GridToolbar SearchChanged="@AllTab_TextSearchChanged">
+                        <LeftChildren>
+                            <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal" Gap="0.5rem" Wrap="FlexWrap.Wrap">
+                                <RadzenFormField Text="Filter By" Variant="Variant.Outlined">
+                                    <RadzenDropDown Data="@Filters.ScheduleFilters"
+                                                    @bind-Value="@_allTab_selectedFilter"
+                                                    ValueProperty="@nameof(ListItem.Id)"
+                                                    TextProperty="@nameof(ListItem.Name)"
+                                                    Change="@AllTab_OnFilterChanged"
+                                                    Style="min-width:160px;"
+                                                    TValue="int" />
+                                </RadzenFormField>
+                                @if (_allTab_selectedFilter == (int)ScheduleFilter.MonthToDate ||
+                                     _allTab_selectedFilter == (int)ScheduleFilter.NextWeek)
+                                {
+                                    <RadzenFormField Text="Start" AllowFloatingLabel="true" Variant="Variant.Outlined">
+                                        <RadzenDatePicker TValue="DateTime?"
+                                                          DateFormat="dd/MM/yyyy"
+                                                          Style="width:9rem;"
+                                                          Change="@AllTab_OnStartDateChanged"
+                                                          @bind-Value="@_allTab_start" />
+                                    </RadzenFormField>
+                                    <RadzenFormField Text="End" AllowFloatingLabel="true" Variant="Variant.Outlined">
+                                        <RadzenDatePicker TValue="DateTime?"
+                                                          DateFormat="dd/MM/yyyy"
+                                                          Style="width:9rem;"
+                                                          @bind-Value="@_allTab_end"
+                                                          Change="@AllTab_OnEndDateChanged" />
+                                    </RadzenFormField>
+                                }
+                            </RadzenStack>
+                        </LeftChildren>
+                    </GridToolbar>
+
+                    <RadzenDataGrid Data="@_allTab_scheduleItems"
+                                    TItem="VSchedule"
+                                    Count="@_allTab_counts"
+                                    PageSize="@_allTab_pageSize"
+                                    Density="Density.Compact"
+                                    GridLines="DataGridGridLines.Horizontal"
+                                    LoadData="@AllTab_LoadData"
+                                    AllowSorting="false"
+                                    RowSelect="AllTab_RowSelected"
+                                    Responsive="true"
+                                    PagerPosition="PagerPosition.Bottom"
+                                    ShowPagingSummary="true"
+                                    PagerHorizontalAlign="HorizontalAlign.Right"
+                                    AllowRowSelectOnRowClick="true"
+                                    PageSizeOptions="@StorageConstant.PageSizeOptions"
+                                    PageSizeChanged="@AllTab_ChangedPageSize"
+                                    RowRender="@AllTab_OnRowRender"
+                                    CellContextMenu="@AllTab_ContextMenuClick"
+                                    CellRender="@AllTab_RowRenderChanged"
+                                    AllowPaging="true"
+                                    class="rz-border-radius-2"
+                                    style="margin-top:0.5rem;">
+                        <Columns>
+                            @* # *@
+                            <RadzenDataGridColumn Context="p" Width="3rem" Title="#" Sortable="false" TextAlign="TextAlign.Center">
+                                <HeaderTemplate>
+                                    <span style="color:var(--rz-text-disabled-color);font-size:0.75rem;">#</span>
+                                </HeaderTemplate>
+                                <Template>
+                                    <span style="color:var(--rz-text-disabled-color);font-size:0.8rem;">@(_allTab_scheduleItems.IndexOf(p) + 1)</span>
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            @* Date *@
+                            <RadzenDataGridColumn Property="Payment" Context="p" Title="Due Date" Width="7rem" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.25rem">
+                                        <RadzenIcon Icon="event" Style="font-size:0.85rem;color:#1565c0;" />
+                                        <span>ថ្ងៃត្រូវបង់</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    <RadzenStack Gap="0.1rem">
+                                        <span style="font-weight:600;font-size:0.82rem;">@p.PaymentDate.DayFirst()</span>
+                                        @if (p.InstallmentNo.HasValue)
+                                        {
+                                            <span style="font-size:0.7rem;color:var(--rz-text-disabled-color);">Install #@p.InstallmentNo</span>
+                                        }
+                                    </RadzenStack>
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            @* Days Arrear *@
+                            <RadzenDataGridColumn Property="DayArrea" Context="p" Title="ចំនួនថ្ងៃជំពាក់" Width="5.5rem" TextAlign="TextAlign.Center" Sortable="true">
+                                <Template>
+                                    @if (p.DayArrea > 0)
+                                    {
+                                        <RadzenBadge BadgeStyle="@(p.DayArrea > 14 ? BadgeStyle.Danger : p.DayArrea > 7 ? BadgeStyle.Warning : BadgeStyle.Info)"
+                                                     IsPill="true" Text="@($"{p.DayArrea}d")" />
+                                    }
+                                    else
+                                    {
+                                        <RadzenBadge BadgeStyle="BadgeStyle.Success" IsPill="true" Text="OK" />
+                                    }
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            @* Client *@
+                            <RadzenDataGridColumn Context="p" Property="AltName" Title="Client" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
+                                        <RadzenIcon Icon="@IconNames.PersonPin" Style="font-size:0.85rem;color:#1565c0;" />
+                                        <span>ឈ្មោះអតិថិជន</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    <RadzenStack Gap="0.1rem">
+                                        <KhmerName AltName="@p.AltName" />
+                                    </RadzenStack>
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            @* Principle *@
+                            <RadzenDataGridColumn Context="p" Title="Principle" Property="Principle" TextAlign="TextAlign.Right" Width="8rem" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
+                                        <RadzenIcon Icon="account_balance_wallet" Style="font-size:0.85rem;color:#1565c0;" />
+                                        <span>ប្រាក់ដើមត្រូវបង់</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    <span style="font-weight:500;">@p.Principle.As(p.CurrencyId)</span>
+                                </Template>
+                                <FooterTemplate>
+                                    @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                    {
+                                        var sym = g.Key == 2 ? "$" : "៛";
+                                        <div><strong style="color:#1565c0;">@g.Sum(x => x.Principle ?? 0).ToString("N2") @sym</strong></div>
+                                    }
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            @* Interest *@
+                            <RadzenDataGridColumn Context="p" Title="Interest" Property="Interest" Width="7rem" TextAlign="TextAlign.Right" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
+                                        <RadzenIcon Icon="percent" Style="font-size:0.85rem;color:#2e7d32;" />
+                                        <span>ការប្រាក់</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    <span style="font-weight:500;">@p.Interest.As(p.CurrencyId)</span>
+                                </Template>
+                                <FooterTemplate>
+                                    @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                    {
+                                        var sym = g.Key == 2 ? "$" : "៛";
+                                        <div><strong style="color:#2e7d32;">@g.Sum(x => x.Interest ?? 0).ToString("N2") @sym</strong></div>
+                                    }
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            @* Paid Principle *@
+                            <RadzenDataGridColumn Context="p" Title="Paid Principle" Property="PaidPrinciple" Width="8rem" TextAlign="TextAlign.Right" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
+                                        <RadzenIcon Icon="check_circle" Style="font-size:0.85rem;color:#4527a0;" />
+                                        <span>ប្រាក់ដើមដែលបានបង់</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        var ratio = (p.Principle ?? 0) > 0 ? (p.PaidPrinciple ?? 0) / (p.Principle ?? 1) * 100 : 0;
+                                    }
+                                    <RadzenStack Gap="0.1rem">
+                                        <span style="font-weight:500;color:#4527a0;">@p.PaidPrinciple.As(p.CurrencyId)</span>
+                                        @if (ratio > 0)
+                                        {
+                                            <RadzenProgressBar Value="@((double)ratio)" Max="100" ShowValue="false"
+                                                               Style="height:4px;" ProgressBarStyle="ProgressBarStyle.Info" />
+                                        }
+                                    </RadzenStack>
+                                </Template>
+                                <FooterTemplate>
+                                    @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                    {
+                                        var sym = g.Key == 2 ? "$" : "៛";
+                                        <div><strong style="color:#4527a0;">@g.Sum(x => x.PaidPrinciple ?? 0).ToString("N2") @sym</strong></div>
+                                    }
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            @* Penalty *@
+                            <RadzenDataGridColumn Context="p" Title="Penalty" Property="PenaltyAmount" Width="7rem" TextAlign="TextAlign.Right" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
+                                        <RadzenIcon Icon="warning" Style="font-size:0.85rem;color:#e65100;" />
+                                        <span>ប្រាក់ពិន័យ</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    @if (p.PenaltyAmount > 0)
+                                    {
+                                        <strong style="color:#c62828;">@p.PenaltyAmount.As(p.CurrencyId)</strong>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:var(--rz-text-disabled-color);">—</span>
+                                    }
+                                </Template>
+                                <FooterTemplate>
+                                    @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                    {
+                                        var sym = g.Key == 2 ? "$" : "៛";
+                                        <div><strong style="color:#c62828;">@g.Sum(x => x.PenaltyAmount ?? 0).ToString("N2") @sym</strong></div>
+                                    }
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            @* Total Pay *@
+                            <RadzenDataGridColumn Context="p" Title="Total Pay" Property="TotalPay" Width="9rem" TextAlign="TextAlign.Right" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
+                                        <RadzenIcon Icon="payments" Style="font-size:0.85rem;color:#006064;" />
+                                        <span>ប្រាក់សរុប</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    <RadzenStack Gap="0.1rem" AlignItems="AlignItems.End">
+                                        <strong style="font-size:0.88rem;color:#006064;">@p.TotalPay.As(p.CurrencyId)</strong>
+                                        @if (p.IsPaid)
+                                        {
+                                            <RadzenBadge BadgeStyle="BadgeStyle.Success" IsPill="true" Text="Paid" Style="font-size:0.65rem;" />
+                                        }
+                                        else if (p.IsPartialPaid)
+                                        {
+                                            <RadzenBadge BadgeStyle="BadgeStyle.Warning" IsPill="true" Text="Partial" Style="font-size:0.65rem;" />
+                                        }
+                                    </RadzenStack>
+                                </Template>
+                                <FooterTemplate>
+                                    @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                    {
+                                        var sym = g.Key == 2 ? "$" : "៛";
+                                        <div><strong style="color:#006064;font-size:0.9rem;">@g.Sum(x => x.TotalPay ?? 0).ToString("N2") @sym</strong></div>
+                                    }
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            @* Actions *@
+                            <RadzenDataGridColumn Context="p" Title="Actions" Width="4rem" TextAlign="TextAlign.Center" Sortable="false">
+                                <Template>
+                                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                                  Icon="more_vert"
+                                                  Variant="Variant.Text"
+                                                  ButtonStyle="ButtonStyle.Secondary"
+                                                  Click="@((args) => AllTabShowContextMenu(args, p))" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                        <EmptyTemplate>
+                            <RadzenStack JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Style="padding:3rem;" Gap="0.5rem">
+                                <RadzenIcon Icon="inbox" Style="font-size:3rem;color:var(--rz-text-disabled-color);" />
+                                <span style="color:var(--rz-text-disabled-color);">No schedules found</span>
+                            </RadzenStack>
+                        </EmptyTemplate>
+                    </RadzenDataGrid>
+                </RadzenCard>
+            </ChildContent>
+        </RadzenTabsItem>
+
+        @foreach (var item in _tabs)
+        {
+            <RadzenTabsItem Icon="@item.Icon" Text="@item.Title" @key="@item.Key">
                 <Template>
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem" class="rz-ms-1">
-                        <span>All Schedules</span>
-                        <RadzenBadge BadgeStyle="BadgeStyle.Primary" IsPill="true" Text="@AllScheduleCounts" class="rz-ms-1" />
-                    </RadzenStack>
+                    <CloseTabButton Title="@item.Title"
+                                    Closed="(() => CloseTab(item.Key))" />
                 </Template>
                 <ChildContent>
-                    @* ── Grid Card ───────────────────────────────────────────────────── *@
-                    <RadzenCard class="rz-shadow-3 rz-border-radius-3 rz-p-3">
-                        <div class="schedule-header">
-                            <RadzenIcon Icon="table_rows" Style="color:var(--rz-primary);" />
-                            <h5>Payment Schedule List</h5>
-                            <RadzenBadge BadgeStyle="BadgeStyle.Light" IsPill="true" Text="@($"{AllScheduleCounts} records")" />
-                        </div>
-
-                        <GridToolbar SearchChanged="@AllTab_TextSearchChanged">
-                            <LeftChildren>
-                                <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal" Gap="0.5rem" Wrap="FlexWrap.Wrap">
-                                    <RadzenFormField Text="Filter By" Variant="Variant.Outlined">
-                                        <RadzenDropDown Data="@Filters.ScheduleFilters"
-                                                        @bind-Value="@_allTab_selectedFilter"
-                                                        ValueProperty="@nameof(ListItem.Id)"
-                                                        TextProperty="@nameof(ListItem.Name)"
-                                                        Change="@AllTab_OnFilterChanged"
-                                                        Style="min-width:160px;"
-                                                        TValue="int" />
-                                    </RadzenFormField>
-                                    @if (_allTab_selectedFilter == (int)ScheduleFilter.MonthToDate ||
-                                         _allTab_selectedFilter == (int)ScheduleFilter.NextWeek)
-                                    {
-                                        <RadzenFormField Text="Start" AllowFloatingLabel="true" Variant="Variant.Outlined">
-                                            <RadzenDatePicker TValue="DateTime?"
-                                                              DateFormat="dd/MM/yyyy"
-                                                              Style="width:9rem;"
-                                                              Change="@AllTab_OnStartDateChanged"
-                                                              @bind-Value="@_allTab_start" />
-                                        </RadzenFormField>
-                                        <RadzenFormField Text="End" AllowFloatingLabel="true" Variant="Variant.Outlined">
-                                            <RadzenDatePicker TValue="DateTime?"
-                                                              DateFormat="dd/MM/yyyy"
-                                                              Style="width:9rem;"
-                                                              @bind-Value="@_allTab_end"
-                                                              Change="@AllTab_OnEndDateChanged" />
-                                        </RadzenFormField>
-                                    }
-                                </RadzenStack>
-                            </LeftChildren>
-                        </GridToolbar>
-
-                        <RadzenDataGrid Data="@_allTab_scheduleItems"
-                                        TItem="VSchedule"
-                                        Count="@_allTab_counts"
-                                        PageSize="@_allTab_pageSize"
-                                        Density="Density.Compact"
-                                        GridLines="DataGridGridLines.Horizontal"
-                                        LoadData="@AllTab_LoadData"
-                                        AllowSorting="false"
-                                        RowSelect="AllTab_RowSelected"
-                                        Responsive="true"
-                                        PagerPosition="PagerPosition.Bottom"
-                                        ShowPagingSummary="true"
-                                        PagerHorizontalAlign="HorizontalAlign.Right"
-                                        AllowRowSelectOnRowClick="true"
-                                        PageSizeOptions="@StorageConstant.PageSizeOptions"
-                                        PageSizeChanged="@AllTab_ChangedPageSize"
-                                        RowRender="@AllTab_OnRowRender"
-                                        CellContextMenu="@AllTab_ContextMenuClick"
-                                        CellRender="@AllTab_RowRenderChanged"
-                                        AllowPaging="true"
-                                        class="rz-border-radius-2"
-                                        style="margin-top:0.5rem;">
-                            <Columns>
-                                @* # *@
-                                <RadzenDataGridColumn Context="p" Width="3rem" Title="#" Sortable="false" TextAlign="TextAlign.Center">
-                                    <HeaderTemplate>
-                                        <span style="color:var(--rz-text-disabled-color);font-size:0.75rem;">#</span>
-                                    </HeaderTemplate>
-                                    <Template>
-                                        <span style="color:var(--rz-text-disabled-color);font-size:0.8rem;">@(_allTab_scheduleItems.IndexOf(p) + 1)</span>
-                                    </Template>
-                                </RadzenDataGridColumn>
-
-                                @* Date *@
-                                <RadzenDataGridColumn Property="Payment" Context="p" Title="Due Date" Width="7rem" Sortable="true">
-                                    <HeaderTemplate>
-                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.25rem">
-                                            <RadzenIcon Icon="event" Style="font-size:0.85rem;color:#1565c0;" />
-                                            <span>Due Date</span>
-                                        </RadzenStack>
-                                    </HeaderTemplate>
-                                    <Template>
-                                        <RadzenStack Gap="0.1rem">
-                                            <span style="font-weight:600;font-size:0.82rem;">@p.PaymentDate.DayFirst()</span>
-                                            @if (p.InstallmentNo.HasValue)
-                                            {
-                                                <span style="font-size:0.7rem;color:var(--rz-text-disabled-color);">Install #@p.InstallmentNo</span>
-                                            }
-                                        </RadzenStack>
-                                    </Template>
-                                </RadzenDataGridColumn>
-
-                                @* Days Arrear *@
-                                <RadzenDataGridColumn Property="DayArrea" Context="p" Title="Arrear" Width="5.5rem" TextAlign="TextAlign.Center" Sortable="true">
-                                    <Template>
-                                        @if (p.DayArrea > 0)
-                                        {
-                                            <RadzenBadge BadgeStyle="@(p.DayArrea > 14 ? BadgeStyle.Danger : p.DayArrea > 7 ? BadgeStyle.Warning : BadgeStyle.Info)"
-                                                         IsPill="true" Text="@($"{p.DayArrea}d")" />
-                                        }
-                                        else
-                                        {
-                                            <RadzenBadge BadgeStyle="BadgeStyle.Success" IsPill="true" Text="OK" />
-                                        }
-                                    </Template>
-                                </RadzenDataGridColumn>
-
-                                @* Client *@
-                                <RadzenDataGridColumn Context="p" Property="Name" Title="Client" Sortable="true">
-                                    <HeaderTemplate>
-                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
-                                            <RadzenIcon Icon="@IconNames.PersonPin" Style="font-size:0.85rem;color:#1565c0;" />
-                                            <span>Name</span>
-                                        </RadzenStack>
-                                    </HeaderTemplate>
-                                    <Template>
-                                        <RadzenStack Gap="0.1rem">
-                                            <KhmerName AltName="@p.AltName" />
-                                        </RadzenStack>
-                                    </Template>
-                                </RadzenDataGridColumn>
-
-                                @* Principle *@
-                                <RadzenDataGridColumn Context="p" Title="Principle" Property="Principle" TextAlign="TextAlign.Right" Width="8rem" Sortable="true">
-                                    <HeaderTemplate>
-                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
-                                            <RadzenIcon Icon="account_balance_wallet" Style="font-size:0.85rem;color:#1565c0;" />
-                                            <span>Principle</span>
-                                        </RadzenStack>
-                                    </HeaderTemplate>
-                                    <Template>
-                                        <span style="font-weight:500;">@p.Principle.Format(p.CurrencyId)</span>
-                                    </Template>
-                                    <FooterTemplate>
-                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
-                                        {
-                                            var sym = g.Key == 2 ? "$" : "៛";
-                                            <div><strong style="color:#1565c0;">@g.Sum(x => x.Principle ?? 0).ToString("N2") @sym</strong></div>
-                                        }
-                                    </FooterTemplate>
-                                </RadzenDataGridColumn>
-
-                                @* Interest *@
-                                <RadzenDataGridColumn Context="p" Title="Interest" Property="Interest" Width="7rem" TextAlign="TextAlign.Right" Sortable="true">
-                                    <HeaderTemplate>
-                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
-                                            <RadzenIcon Icon="percent" Style="font-size:0.85rem;color:#2e7d32;" />
-                                            <span>Interest</span>
-                                        </RadzenStack>
-                                    </HeaderTemplate>
-                                    <Template>
-                                        <span style="font-weight:500;">@p.Interest.Format(p.CurrencyId)</span>
-                                    </Template>
-                                    <FooterTemplate>
-                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
-                                        {
-                                            var sym = g.Key == 2 ? "$" : "៛";
-                                            <div><strong style="color:#2e7d32;">@g.Sum(x => x.Interest ?? 0).ToString("N2") @sym</strong></div>
-                                        }
-                                    </FooterTemplate>
-                                </RadzenDataGridColumn>
-
-                                @* Paid Principle *@
-                                <RadzenDataGridColumn Context="p" Title="Paid Principle" Property="PaidPrinciple" Width="8rem" TextAlign="TextAlign.Right" Sortable="true">
-                                    <HeaderTemplate>
-                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
-                                            <RadzenIcon Icon="check_circle" Style="font-size:0.85rem;color:#4527a0;" />
-                                            <span>Paid Principle</span>
-                                        </RadzenStack>
-                                    </HeaderTemplate>
-                                    <Template>
-                                        @{
-                                            var ratio = (p.Principle ?? 0) > 0 ? (p.PaidPrinciple ?? 0) / (p.Principle ?? 1) * 100 : 0;
-                                        }
-                                        <RadzenStack Gap="0.1rem">
-                                            <span style="font-weight:500;color:#4527a0;">@p.PaidPrinciple.Format(p.CurrencyId)</span>
-                                            @if (ratio > 0)
-                                            {
-                                                <RadzenProgressBar Value="@((double) ratio)" Max="100" ShowValue="false"
-                                                                   Style="height:4px;" ProgressBarStyle="ProgressBarStyle.Info" />
-                                            }
-                                        </RadzenStack>
-                                    </Template>
-                                    <FooterTemplate>
-                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
-                                        {
-                                            var sym = g.Key == 2 ? "$" : "៛";
-                                            <div><strong style="color:#4527a0;">@g.Sum(x => x.PaidPrinciple ?? 0).ToString("N2") @sym</strong></div>
-                                        }
-                                    </FooterTemplate>
-                                </RadzenDataGridColumn>
-
-                                @* Penalty *@
-                                <RadzenDataGridColumn Context="p" Title="Penalty" Property="PenaltyAmount" Width="7rem" TextAlign="TextAlign.Right" Sortable="true">
-                                    <HeaderTemplate>
-                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
-                                            <RadzenIcon Icon="warning" Style="font-size:0.85rem;color:#e65100;" />
-                                            <span>Penalty</span>
-                                        </RadzenStack>
-                                    </HeaderTemplate>
-                                    <Template>
-                                        @if (p.PenaltyAmount > 0)
-                                        {
-                                            <strong style="color:#c62828;">@p.PenaltyAmount.FormatUp(2, p.CurrencyId)</strong>
-                                        }
-                                        else
-                                        {
-                                            <span style="color:var(--rz-text-disabled-color);">—</span>
-                                        }
-                                    </Template>
-                                    <FooterTemplate>
-                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
-                                        {
-                                            var sym = g.Key == 2 ? "$" : "៛";
-                                            <div><strong style="color:#c62828;">@g.Sum(x => x.PenaltyAmount ?? 0).ToString("N2") @sym</strong></div>
-                                        }
-                                    </FooterTemplate>
-                                </RadzenDataGridColumn>
-
-                                @* Total Pay *@
-                                <RadzenDataGridColumn Context="p" Title="Total Pay" Property="TotalPay" Width="9rem" TextAlign="TextAlign.Right" Sortable="true">
-                                    <HeaderTemplate>
-                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
-                                            <RadzenIcon Icon="payments" Style="font-size:0.85rem;color:#006064;" />
-                                            <span>Total Pay</span>
-                                        </RadzenStack>
-                                    </HeaderTemplate>
-                                    <Template>
-                                        <RadzenStack Gap="0.1rem" AlignItems="AlignItems.End">
-                                            <strong style="font-size:0.88rem;color:#006064;">@p.TotalPay.Format(p.CurrencyId)</strong>
-                                            @if (p.IsPaid)
-                                            {
-                                                <RadzenBadge BadgeStyle="BadgeStyle.Success" IsPill="true" Text="Paid" Style="font-size:0.65rem;" />
-                                            }
-                                            else if (p.IsPartialPaid)
-                                            {
-                                                <RadzenBadge BadgeStyle="BadgeStyle.Warning" IsPill="true" Text="Partial" Style="font-size:0.65rem;" />
-                                            }
-                                        </RadzenStack>
-                                    </Template>
-                                    <FooterTemplate>
-                                        @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
-                                        {
-                                            var sym = g.Key == 2 ? "$" : "៛";
-                                            <div><strong style="color:#006064;font-size:0.9rem;">@g.Sum(x => x.TotalPay ?? 0).ToString("N2") @sym</strong></div>
-                                        }
-                                    </FooterTemplate>
-                                </RadzenDataGridColumn>
-
-                                @* Actions *@
-                                <RadzenDataGridColumn Context="p" Title="" Width="3.5rem" TextAlign="TextAlign.Center" Sortable="false">
-                                    <Template>
-                                        <RadzenButton Size="ButtonSize.ExtraSmall"
-                                                      Icon="more_vert"
-                                                      Variant="Variant.Text"
-                                                      ButtonStyle="ButtonStyle.Secondary"
-                                                      Click="@((args) => AllTabShowContextMenu(args, p))" />
-                                    </Template>
-                                </RadzenDataGridColumn>
-                            </Columns>
-                            <EmptyTemplate>
-                                <RadzenStack JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Style="padding:3rem;" Gap="0.5rem">
-                                    <RadzenIcon Icon="inbox" Style="font-size:3rem;color:var(--rz-text-disabled-color);" />
-                                    <span style="color:var(--rz-text-disabled-color);">No schedules found</span>
-                                </RadzenStack>
-                            </EmptyTemplate>
-                        </RadzenDataGrid>
-                    </RadzenCard>
+                    @item.Content
                 </ChildContent>
             </RadzenTabsItem>
 
-            @foreach (var item in _tabs)
-            {
-                <RadzenTabsItem Icon="@item.Icon" Text="@item.Title" @key="@item.Key">
-                    <Template>
-                        <CloseTabButton Title="@item.Title"
-                                        Closed="(() => CloseTab(item.Key))" />
-                    </Template>
-                    <ChildContent>
-                        @item.Content
-                    </ChildContent>
-                </RadzenTabsItem>
+        }
 
-            }
-
-        </Tabs>
-    </RadzenTabs>
-</div>
+    </Tabs>
+</RadzenTabs>
 @code {
 
     // ── AllTab (inlined from ClientAllPayTab) ──────────────────────────────
@@ -679,93 +677,93 @@
     void AllTab_ShowContextMenu(MouseEventArgs args, VSchedule p)
     {
         ContextMenuService.Open(args, ds => @<AllScheduleMenu ShowOnTab="true"
-                                                                  ShowLateScheduleDetails="@AllTab_ShowLateDetails"
-                                                                  RecievePayment="@AllTab_ShowRecievePayment"
-                                                                  Schedule="@p" />);
-        }
+                                                              ShowLateScheduleDetails="@AllTab_ShowLateDetails"
+                                                              RecievePayment="@AllTab_ShowRecievePayment"
+                                                              Schedule="@p" />);
+    }
 
 
 
-    void AllTabShowContextMenu(MouseEventArgs args, VSchedule ? p)
+    void AllTabShowContextMenu(MouseEventArgs args, VSchedule? p)
     {
-            if (p is not null)
-            {
+        if (p is not null)
+        {
 
-                recievePaymentUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
+            recievePaymentUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
 
-                payOffUrl = $"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
-            }
-
-            ContextMenuService.Open(args, ds => @<AuthorizeView>
-                <Authorized>
-                    @if (p is not null)
-                    {
-                        <RadzenMenu Style="font-size:0.8rem;">
-
-                            <RadzenMenuItem Icon="@IconNames.MoneyBag"
-                                            Disabled="@(!p.IsPaid && bState.CanRecievePayment)"
-                                            Path="@recievePaymentUrl"
-                                            Text="Receive Payment" />
-
-                            @if (bState.CanRecievePayment && ShowOnTab)
-                            {
-                                <RadzenMenuItem Icon="@IconNames.MoneyBag"
-                                                Visible="!p.IsPaid"
-                                                Click="() => ShowPaymentOnTab(p)"
-                                                Text="Receive Payment" />
-                            }
-
-
-                            @if (bState.CanPayOff)
-                            {
-                                <RadzenMenuItem Icon="@IconNames.Paid"
-                                                Path="@payOffUrl"
-                                                Text="Pay Off" />
-                            }
-
-
-                            <RadzenMenuItem Icon="@IconNames.Info"
-                                            Click="() => GetCustomerLateSchedules(p)"
-                                            Text="Show Late Schedule Details" />
-                        </RadzenMenu>
-                    }
-                </Authorized>
-            </AuthorizeView>
-    );
+            payOffUrl = $"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
         }
 
-        async Task ShowPaymentOnTab(VSchedule? p)
-        {
-            if (p is
+        ContextMenuService.Open(args, ds => @<AuthorizeView>
+            <Authorized>
+                @if (p is not null)
                 {
-                    BranchId: > 0,
-                    LoanId: not null,
-                    CustomerId: not null
-                })
+                    <RadzenMenu Style="font-size:0.8rem;">
+
+                        <RadzenMenuItem Icon="@IconNames.MoneyBag"
+                                        Disabled="@(!p.IsPaid && bState.CanRecievePayment)"
+                                        Path="@recievePaymentUrl"
+                                        Text="Receive Payment" />
+
+                        @if (bState.CanRecievePayment && ShowOnTab)
+                        {
+                            <RadzenMenuItem Icon="@IconNames.MoneyBag"
+                                            Visible="!p.IsPaid"
+                                            Click="() => ShowPaymentOnTab(p)"
+                                            Text="Receive Payment" />
+                        }
+
+
+                        @if (bState.CanPayOff)
+                        {
+                            <RadzenMenuItem Icon="@IconNames.Paid"
+                                            Path="@payOffUrl"
+                                            Text="Pay Off" />
+                        }
+
+
+                        <RadzenMenuItem Icon="@IconNames.Info"
+                                        Click="() => GetCustomerLateSchedules(p)"
+                                        Text="Show Late Schedule Details" />
+                    </RadzenMenu>
+                }
+            </Authorized>
+        </AuthorizeView>
+);
+    }
+
+    async Task ShowPaymentOnTab(VSchedule? p)
+    {
+        if (p is
             {
-                ShowPaymentSchedule(p);
-            }
-        }
-
-        async Task AllTab_ShowLateDetails(VSchedule p)
+                BranchId: > 0,
+                LoanId: not null,
+                CustomerId: not null
+            })
         {
-            ContextMenuService.Close();
-            LateScheduleDetails(p);
-            StateHasChanged();
-        }
-
-        async Task AllTab_ShowRecievePayment(VSchedule p)
-        {
-            ContextMenuService.Close();
             ShowPaymentSchedule(p);
-            StateHasChanged();
         }
+    }
 
-        void AllTab_ContextMenuClick(DataGridCellMouseEventArgs<VSchedule> args)
-        {
-            if (args?.Data is null) return;
-            var p = args.Data;
-            ContextMenuService.Open(args, new List<ContextMenuItem>
+    async Task AllTab_ShowLateDetails(VSchedule p)
+    {
+        ContextMenuService.Close();
+        LateScheduleDetails(p);
+        StateHasChanged();
+    }
+
+    async Task AllTab_ShowRecievePayment(VSchedule p)
+    {
+        ContextMenuService.Close();
+        ShowPaymentSchedule(p);
+        StateHasChanged();
+    }
+
+    void AllTab_ContextMenuClick(DataGridCellMouseEventArgs<VSchedule> args)
+    {
+        if (args?.Data is null) return;
+        var p = args.Data;
+        ContextMenuService.Open(args, new List<ContextMenuItem>
         {
             new ContextMenuItem { Text = "Receive Payment",      Value = "1", Icon = "payments" },
             new ContextMenuItem { Text = "Collection Payment",   Value = "5", Icon = "payments" },
@@ -786,7 +784,7 @@
             }
         }
     });
-        }
+    }
 
     // ── Tab host state ─────────────────────────────────────────────────────
     private List<CustomTab> _tabs = [];
@@ -1043,8 +1041,8 @@
     void ShowContextMenu(MouseEventArgs args, VSchedule p)
     {
         ContextMenuService.Open(args, ds => @<AllScheduleMenu ShowLateScheduleDetails="@GetCustomerLateSchedules"
-                                                                  Schedule="@p" />);
-        }
+                                                              Schedule="@p" />);
+    }
 
 
    

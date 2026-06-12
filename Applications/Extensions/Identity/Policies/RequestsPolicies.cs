@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Applications.Extensions.Identity.Policies;
 
-public partial class Policies  
+public partial class Policies
 {
     private const string req_prefix = "loanRequests";
     public const string CreateLoanRequest = $"{req_prefix}.{nameof(CreateLoanRequest)}";
@@ -16,20 +16,20 @@ public partial class Policies
     public const string RequestLoanRequest = $"{req_prefix}.{nameof(RequestLoanRequest)}";
     public const string RejectLoanRequest = $"{req_prefix}.{nameof(RejectLoanRequest)}";
 
-    private static string read_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.Read);
-    private static string update_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.Update);
-    private static string create_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.Create);
-    private static string delete_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.Delete);
-    private static string approve_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.ApproveRequest);
-    private static string reject_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.RejectRequest);
-    private static string request_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.Request);
-    private static string disburse_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.Disburse);
-     
-    public static AuthorizationPolicy CanDisburseLoan()  
+    private static string read_loanRequest = AppPermission.RuleFor(Resources.LoanRequest, Actions.Read);
+    private static string update_loanRequest = AppPermission.RuleFor(Resources.LoanRequest, Actions.Update);
+    private static string create_loanRequest = AppPermission.RuleFor(Resources.LoanRequest, Actions.Create);
+    private static string delete_loanRequest = AppPermission.RuleFor(Resources.LoanRequest, Actions.Delete);
+    private static string approve_loanRequest = AppPermission.RuleFor(Resources.LoanRequest, Actions.ApproveRequest);
+    private static string reject_loanRequest = AppPermission.RuleFor(Resources.LoanRequest, Actions.RejectRequest);
+    private static string request_loanRequest = AppPermission.RuleFor(Resources.LoanRequest, Actions.Request);
+    private static string disburse_loanRequest = AppPermission.RuleFor(Resources.LoanRequest, Actions.Disburse);
+
+    public static AuthorizationPolicy CanDisburseLoan()
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Account, AppRoles.SeniorAccount, AppRoles.ChiefAccount)
+                    .RequireRole(AppRoles.Account, AppRoles.Teller, AppRoles.SeniorAccount, AppRoles.ChiefAccount)
                     .RequireClaim(AppClaim.Permission, disburse_loanRequest)
                     .Build();
     }
@@ -44,7 +44,7 @@ public partial class Policies
                     .Build();
     }
 
-    public static AuthorizationPolicy CanRequestLoanRequest() 
+    public static AuthorizationPolicy CanRequestLoanRequest()
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
@@ -68,7 +68,7 @@ public partial class Policies
                     .Build();
     }
 
-    public static AuthorizationPolicy CanDeleteLoanRequest() 
+    public static AuthorizationPolicy CanDeleteLoanRequest()
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()

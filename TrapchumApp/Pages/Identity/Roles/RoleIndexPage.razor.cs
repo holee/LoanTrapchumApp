@@ -26,6 +26,7 @@ namespace TrapchumApp.Pages.Identity.Roles
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
         private bool _canDeleteRole = false;
+
         private string? _currentUserId;
 
         public RoleIndexPage(IMediator mediator)
@@ -35,6 +36,7 @@ namespace TrapchumApp.Pages.Identity.Roles
         void PageSizeChanged(int size)
         {
             pageSize = size;
+
             pageIndex = 0;
         }
 
@@ -51,7 +53,7 @@ namespace TrapchumApp.Pages.Identity.Roles
 
             _currentUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            _canDeleteRole = user.HasClaim(AppClaim.Permission, AppPermission.RuleFor(Modules.Roles, Actions.Delete));
+            _canDeleteRole = user.HasClaim(AppClaim.Permission, AppPermission.RuleFor(Resources.Roles, Actions.Delete));
 
             await GetRoles();
 
@@ -80,6 +82,8 @@ namespace TrapchumApp.Pages.Identity.Roles
 
         protected async Task GetRoles(string? filter = null)
         {
+            Tracker.Show();
+
             var param = new QueryParam(pageIndex, pageSize, sortField, includeInActive, sortDescending, filter: filter);
 
             var result = await _mediator.Send(new GetRolesAsPagingQuery(param));
@@ -88,6 +92,9 @@ namespace TrapchumApp.Pages.Identity.Roles
 
             counts = result.Count;
 
+            Tracker.Hide();
+
+            StateHasChanged();
         }
 
         async Task DeleteRole(string? roleId)

@@ -11,10 +11,10 @@ namespace Applications.Extensions.Identity.Policies
         public const string DeleteLoan = $"{loan_prefix}.{nameof(DeleteLoan)}";
         public const string ReadLoan = $"{loan_prefix}.{nameof(ReadLoan)}";
 
-        private static string read_loan = AppPermission.RuleFor(Modules.Loans, Actions.Read);
-        private static string create_loan = AppPermission.RuleFor(Modules.Loans, Actions.Create);
-        private static string update_loan = AppPermission.RuleFor(Modules.Loans, Actions.Update);
-        private static string delete_loan = AppPermission.RuleFor(Modules.Loans, Actions.Delete);
+        private static string read_loan = AppPermission.RuleFor(Resources.Loans, Actions.Read);
+        private static string create_loan = AppPermission.RuleFor(Resources.Loans, Actions.Create);
+        private static string update_loan = AppPermission.RuleFor(Resources.Loans, Actions.Update);
+        private static string delete_loan = AppPermission.RuleFor(Resources.Loans, Actions.Delete);
         public static AuthorizationPolicy CanReadLoan()
         {
             return new AuthorizationPolicyBuilder()

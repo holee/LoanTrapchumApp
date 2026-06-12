@@ -14,14 +14,14 @@ public partial class Policies
     public const string TranxVaultOut = $"tranx.{nameof(TranxVaultOut)}";
     public const string OpenBranch = $"tranx.{nameof(OpenBranch)}";
     public const string CloseBranch = $"tranx.{nameof(CloseBranch)}";
-    private static string tranx_read = AppPermission.RuleFor(Modules.Transactions, Actions.Read);
-    private static string tranx_update = AppPermission.RuleFor(Modules.Transactions, Actions.Update);
-    private static string tranx_create = AppPermission.RuleFor(Modules.Repayments, Actions.Create);
-    private static string tranx_delete = AppPermission.RuleFor(Modules.Transactions, Actions.Delete);
-    private static string tranx_vualtIn = AppPermission.RuleFor(Modules.Transactions, Actions.VaultIn);
-    private static string tranx_vualtOut = AppPermission.RuleFor(Modules.Transactions, Actions.VaultOut);
-    private static string tranx_closedBranch = AppPermission.RuleFor(Modules.Transactions, Actions.CloseBranch);
-    private static string tranx_openedBranch = AppPermission.RuleFor(Modules.Transactions, Actions.OpenBranch);
+    private static string tranx_read = AppPermission.RuleFor(Resources.Transactions, Actions.Read);
+    private static string tranx_update = AppPermission.RuleFor(Resources.Transactions, Actions.Update);
+    private static string tranx_create = AppPermission.RuleFor(Resources.Repayments, Actions.Create);
+    private static string tranx_delete = AppPermission.RuleFor(Resources.Transactions, Actions.Delete);
+    private static string tranx_vualtIn = AppPermission.RuleFor(Resources.Transactions, Actions.VaultIn);
+    private static string tranx_vualtOut = AppPermission.RuleFor(Resources.Transactions, Actions.VaultOut);
+    private static string tranx_closedBranch = AppPermission.RuleFor(Resources.Transactions, Actions.CloseBranch);
+    private static string tranx_openedBranch = AppPermission.RuleFor(Resources.Transactions, Actions.OpenBranch);
     public static AuthorizationPolicy TranxCanCreate()  
     {
         return new AuthorizationPolicyBuilder()

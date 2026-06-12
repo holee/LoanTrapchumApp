@@ -21,7 +21,6 @@ public partial class UserIndexPages
     protected IEnumerable<VUser>? AllUsers = [];
     protected bool IsLoading = true;
     protected int index = 1;
-    private bool cancelClose = false;
     private string? searchText = "";
     private readonly IUserServiceImpl _authService;
     private readonly IEmployeeService _empService;
@@ -68,9 +67,9 @@ public partial class UserIndexPages
 
             authenticatedUserId = user.GetId();
 
-            canDeleteUser = await _authorizeService.MustHasPermissionAsync(user, Modules.Users, Actions.Delete);
+            canDeleteUser = await _authorizeService.MustHasPermissionAsync(user, Resources.Users, Actions.Delete);
 
-            canUpdateUser = await _authorizeService.MustHasPermissionAsync(user, Modules.Users, Actions.Update);
+            canUpdateUser = await _authorizeService.MustHasPermissionAsync(user, Resources.Users, Actions.Update);
 
             await GetBranches();
 

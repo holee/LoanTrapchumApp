@@ -17,4 +17,6 @@ public interface IAppStateService
     bool IsBranchManager { get; set; }
     bool MaximumAmountApproved { get; set; }
     bool NormalAmountApproved { get; set; }
+    bool ManageDisbursement { get; set; }
+    bool ManageRequest { get; set; }
 }

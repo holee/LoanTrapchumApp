@@ -18,11 +18,10 @@ public sealed class AppStateService : IAppStateService
     public List<NotificationDto> Notifications { get; set; } = [];
     public bool CanRecieveMultiple { get; set; }
     public bool IsSameUser { get; set; }
-    public bool IsBranchManager
-    {
-        get;
-        set;
-    }
+    public bool IsBranchManager { get; set; }
     public bool MaximumAmountApproved { get; set; }
     public bool NormalAmountApproved { get; set; }
+    public bool ManageDisbursement { get; set; }
+    public bool ManageRequest { get; set; } 
+
 }

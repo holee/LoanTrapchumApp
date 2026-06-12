@@ -5,10 +5,10 @@ namespace Applications.Extensions.Identity.Policies;
 
 public static class DepartmentsPolicies
 {
-    private static string read = AppPermission.RuleFor(Modules.Departments, Actions.Read);
-    private static string update = AppPermission.RuleFor(Modules.Departments, Actions.Update);
-    private static string create = AppPermission.RuleFor(Modules.Departments, Actions.Create);
-    private static string delete = AppPermission.RuleFor(Modules.Departments, Actions.Delete);
+    private static string read = AppPermission.RuleFor(Resources.Departments, Actions.Read);
+    private static string update = AppPermission.RuleFor(Resources.Departments, Actions.Update);
+    private static string create = AppPermission.RuleFor(Resources.Departments, Actions.Create);
+    private static string delete = AppPermission.RuleFor(Resources.Departments, Actions.Delete);
     public static AuthorizationPolicy CanCreate()
     {
         return new AuthorizationPolicyBuilder()

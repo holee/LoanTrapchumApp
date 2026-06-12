@@ -8,8 +8,9 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests;
 
 public partial class CoRequestSearchList
 {
-    [Parameter] public EventCallback<VCustomerList> OnSelected { get; set; } 
-    [Parameter] public EventCallback<IEnumerable<VCustomerList>> OnSelecteds { get; set; }  
+    [Parameter] public EventCallback<VCustomerList> OnSelected { get; set; }
+    [Parameter] public EventCallback<IEnumerable<VCustomerList>> OnSelecteds { get; set; }
+    [Parameter] public int? BranchId { get; set; } = 0;
 
     private RadzenTextBox _customerSearchText = default!;
 
@@ -41,7 +42,7 @@ public partial class CoRequestSearchList
     {
         var param = new QueryParam(0, pageSize, nameof(VCustomerList.AltName), false, false, _filterText);
 
-        var command = new GetCustomerAsPagingQuery(null, null, null, param);
+        var command = new GetCustomerAsPagingQuery(BranchId, null, null, param, false);
 
         var result = await mediator.Send(command);
 
@@ -61,7 +62,7 @@ public partial class CoRequestSearchList
 
         await LoadCustomerAsync();
 
-        await _coRequestPopup.ToggleAsync(_customerSearchText.Element); 
+        await _coRequestPopup.ToggleAsync(_customerSearchText.Element);
     }
 
     /// <summary>Fires on every keystroke in the textbox — debounces & searches.</summary>
@@ -131,7 +132,7 @@ public partial class CoRequestSearchList
         }
     }
 
-    private async Task GetSelectedCustomer(VCustomerList? g) 
+    private async Task GetSelectedCustomer(VCustomerList? g)
     {
         if (g is null) return;
 
@@ -152,7 +153,7 @@ public partial class CoRequestSearchList
         await _coRequestPopup.CloseAsync();
     }
 
-        /// <summary>Closes the popup and clears the selected customers.</summary>
+    /// <summary>Closes the popup and clears the selected customers.</summary>
     private async Task ClosePopup()
     {
         _selectedCustomers = [];

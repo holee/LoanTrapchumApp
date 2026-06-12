@@ -93,7 +93,6 @@ public partial class SchedulesPage
     private bool _isSelectionLocked = false;
     bool _isPaymentTab = false;
     bool _isMultiplePaymentTab = false;
-    int _selectedIndexTab = 0;
     private LoanPaymentLineDtoCreate _loanPaymentLine = new();
 
     LoanPaymentDtoCreate _loanPayment = new();
@@ -343,7 +342,6 @@ public partial class SchedulesPage
             {
                 _isPaymentTab = false;
 
-                _selectedIndexTab = 0;
             }
 
             return;
