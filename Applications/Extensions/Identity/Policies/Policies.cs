@@ -7,7 +7,23 @@ namespace Applications.Extensions.Identity.Policies;
 public partial class Policies
 {
     private static string _canExchanged = AppPermission.RuleFor(Resources.Transactions, Actions.ExchangeMoney);
-
+    private const string prefix = "repayments";
+    private static string read = AppPermission.RuleFor(Resources.Repayments, Actions.Read);
+    private static string update = AppPermission.RuleFor(Resources.Repayments, Actions.Update);
+    private static string create = AppPermission.RuleFor(Resources.Repayments, Actions.Create);
+    private static string delete = AppPermission.RuleFor(Resources.Repayments, Actions.Delete);
+    private static string multiple = AppPermission.RuleFor(Resources.Repayments, Actions.MultiplePayment);
+    private static string payoff = AppPermission.RuleFor(Resources.Repayments, Actions.PayOff);
+    private static string recievePayment = AppPermission.RuleFor(Resources.Repayments, Actions.ReceivePayment);
+    private static string writeOff = AppPermission.RuleFor(Resources.Repayments, Actions.WriteOff);
+    public const string Create = $"{prefix}.{nameof(Create)}";
+    public const string Update = $"{prefix}.{nameof(Update)}";
+    public const string Delete = $"{prefix}.{nameof(Delete)}";
+    public const string Read = $"{prefix}.{nameof(Read)}";
+    public const string MultiplePayment = $"{prefix}.{nameof(MultiplePayment)}";
+    public const string PayOff = $"{prefix}.{nameof(PayOff)}";
+    public const string RecievePayment = $"{prefix}:{nameof(RecievePayment)}";
+    public const string WriteOff = $"{prefix}:{nameof(WriteOff)}";
     public const string CanExchanged = $"tranx.{nameof(CanExchanged)}";
     public static AuthorizationPolicy CanExchangeMoney()
     {
@@ -72,23 +88,7 @@ public partial class Policies
 
 
 
-    private const string prefix = "repayments";
-    public const string Create = $"{prefix}.{nameof(Create)}";
-    public const string Update = $"{prefix}.{nameof(Update)}";
-    public const string Delete = $"{prefix}.{nameof(Delete)}";
-    public const string Read = $"{prefix}.{nameof(Read)}";
-    public const string MultiplePayment = $"{prefix}.{nameof(MultiplePayment)}";
-    public const string PayOff = $"{prefix}.{nameof(PayOff)}";
-    public const string RecievePayment = $"{prefix}:{nameof(RecievePayment)}";
-    public const string WriteOff = $"{prefix}:{nameof(WriteOff)}";
-    private static string read = AppPermission.RuleFor(Resources.Repayments, Actions.Read);
-    private static string update = AppPermission.RuleFor(Resources.Repayments, Actions.Update);
-    private static string create = AppPermission.RuleFor(Resources.Repayments, Actions.Create);
-    private static string delete = AppPermission.RuleFor(Resources.Repayments, Actions.Delete);
-    private static string multiple = AppPermission.RuleFor(Resources.Repayments, Actions.MultiplePayment);
-    private static string payoff = AppPermission.RuleFor(Resources.Repayments, Actions.PayOff);
-    private static string recievePayment = AppPermission.RuleFor(Resources.Repayments, Actions.ReceivePayment);
-    private static string writeOff = AppPermission.RuleFor(Resources.Repayments, Actions.WriteOff);
+   
     public static AuthorizationPolicy CanCreate()
     {
         return new AuthorizationPolicyBuilder()
@@ -125,7 +125,7 @@ public partial class Policies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Account)
+                    .RequireRole(AppRoles.Account, AppRoles.ChiefAccount, AppRoles.SeniorAccount, AppRoles.Teller)
                     .RequireClaim(AppClaim.Permission, multiple)
                     .Build();
     }

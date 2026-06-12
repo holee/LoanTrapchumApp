@@ -3,6 +3,7 @@
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
 @using TrapchumApp.Pages.Transactions.Loans.Repayments
 <PageTitle>Collection Repayment</PageTitle>
+@attribute [MustHasPermission(Resources.Repayments, Actions.Read)]
 <style>
     .cp-page {
         display: flex;
