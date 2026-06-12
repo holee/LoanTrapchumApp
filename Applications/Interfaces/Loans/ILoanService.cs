@@ -20,7 +20,7 @@ namespace Applications.Interfaces.Loans
         //Task<Result<string>> ChangedCreditAgent(int? branchId, LoanChangedCaDtoCreate req);
         //Task<Result<string>> ChangedCreditAgents(int? branchId, List<LoanChangedCa> req);
         Task<ErrorOr.ErrorOr<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false);
-       
+
         Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default);
         Task<ErrorOr.ErrorOr<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default);
         Task<VLoanDisbursments?> GetLoanByCreditAgentIdAsync(string? creditAgentId, string? loanId, int? branchId, CancellationToken cancellation = default);
@@ -35,7 +35,7 @@ namespace Applications.Interfaces.Loans
         Task<ErrorOr<string>> CloseLoanDisbursementAsync(int? branchId, string? loanId, string? customerId, CancellationToken cancellation = default);
         Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, DateTime? start = null, DateTime? to = null, QueryParam? param = null, CancellationToken cancellation = default);
         Task<Pager<VSchedule>> GetDueScheduleLoanByIdAsync(string? loanId, int? branchId, CancellationToken cancellation = default);
-        Task<Pager<VSchedule>> GetScheduleLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus state, CancellationToken cancellation = default);
+        Task<Pager<VSchedule>> GetScheduleLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus state, DateTime? dueDate = null, CancellationToken cancellation = default);
         Task<Pager<VLoanCollateral>> GetLoanCollaterals(string? loanId, int? branchId, CancellationToken cancellation = default);
         Task<bool> WidthrawalLoanCollateralsAsync(IEnumerable<WidthrawCollateralDtoCreate> req, CancellationToken cancellation = default);
     }

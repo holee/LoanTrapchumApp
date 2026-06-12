@@ -2,3 +2,45 @@
     overflow: visible;
     z-index: 1000;
 }
+
+/* ── Page Header ── */
+.ci-page-header {
+    display: flex;
+    align-items: center;
+}
+
+.ci-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: var(--rz-primary-lighter);
+    color: var(--rz-primary);
+    font-size: 1.4rem;
+}
+
+.ci-page-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--rz-text-title-color);
+    margin: 0;
+}
+
+.ci-page-subtitle {
+    font-size: 0.78rem;
+    color: var(--rz-text-secondary-color);
+}
+
+/* ── Currency code pill ── */
+.ci-code-badge {
+    display: inline-block;
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    background: var(--rz-base-300);
+    color: var(--rz-text-color);
+}

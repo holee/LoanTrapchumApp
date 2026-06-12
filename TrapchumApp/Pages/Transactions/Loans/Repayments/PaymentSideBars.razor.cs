@@ -9,7 +9,7 @@ using Microsoft.JSInterop;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 
-public partial class PaymentSideBar
+public partial class PaymentSideBars
 {
 
     [Parameter] public int? CurrencyId { get; set; }
@@ -219,7 +219,7 @@ public partial class PaymentSideBar
 
     void ReceivePaymentChanged(ChangeEventArgs e)
     {
-        decimal amount = e.Value!.ToNumer<decimal>();
+        decimal amount = e.Value!.ToNumber<decimal>();
 
         if (amount <= 0)
         {
@@ -242,7 +242,7 @@ public partial class PaymentSideBar
     void CalculatePenaltyAmount(ChangeEventArgs e)
     {
 
-        var amount = e.Value?.ToNumer<decimal>();
+        var amount = e.Value?.ToNumber<decimal>();
 
         if (amount < 0)
         {

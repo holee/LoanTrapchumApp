@@ -21,7 +21,7 @@ public partial class PaymentTab
         _loanPaymentService = loanPaymentService;
     }
 
-    [Parameter] public int CurrencyId { get; set; }
+    [Parameter] public int? CurrencyId { get; set; } = (int)CurrenciesType.KHR;
     [Parameter] public LoanPaymentDtoCreate LoanPaymentCreate { get; set; } = new();
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     [Parameter] public EventCallback CloseTab { get; set; } = default!;
@@ -215,7 +215,7 @@ public partial class PaymentTab
 
     void ReceivePaymentChanged(ChangeEventArgs e)
     {
-        decimal amount = e.Value!.ToNumer<decimal>();
+        decimal amount = e.Value!.ToNumber<decimal>();
 
         if (amount <= 0)
         {
@@ -238,7 +238,7 @@ public partial class PaymentTab
     void CalculatePenaltyAmount(ChangeEventArgs e)
     {
 
-        var amount = e.Value?.ToNumer<decimal>();
+        var amount = e.Value?.ToNumber<decimal>();
 
         if (amount < 0)
         {

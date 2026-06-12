@@ -1,4 +1,4 @@
-﻿@page "/App/Loans/{BranchId:int}/Branches/{LoanId}/Schedules"
+﻿@page "/app/loans/{BranchId:int}/branches/{LoanId}/schedules"
 @using Applications.Features.LoanPayments.Requests
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
 @using TrapchumApp.Pages.Transactions.RecievePayements
@@ -8,7 +8,6 @@
 
     <LoanInfos BranchId="@BranchId"
                LoanId="@LoanId"
-               Currency="@CurrencyId"
                LoanSchedule="@LoanSchedule"
                @key="@(Guid.NewGuid().ToString())">
         <ChildContent>
@@ -34,6 +33,14 @@
                      Component="CheckBox1"
                      class="rz-ms-1"
                      style="font-size:0.85rem;cursor:pointer;" />
+        <RadzenCheckBox TValue="bool"
+                        Name="CheckBox2"
+                        Change="OnShowUnpaidOnlyChanged"
+                        @bind-Value="@isUnpaidOnly" />
+        <RadzenLabel Text="Unpaid Only"
+                     Component="CheckBox2"
+                     class="rz-ms-1"
+                     style="font-size:0.85rem;cursor:pointer;" />
     </RadzenStack>
 
     <RadzenTabs SelectedIndex="@selectedIndex" class="rz-flex-grow-1" style="min-height:0;">
@@ -44,6 +51,7 @@
                                       CurrencyId="@CurrencyId"
                                       @key="@Guid.NewGuid().ToString("N")"
                                       ShowOnScheduleOnly="isAllowShowSchedule"
+                                      ShowUnpaidOnly="isUnpaidOnly"
                                       CustomerName="@LoanSchedule?.AltName"
                                       CreditAgentId="@CreditAgentId" />
             </RadzenTabsItem>
@@ -68,11 +76,17 @@
 
     private bool isAllowShowSchedule = true;
 
+    private bool isUnpaidOnly = true;
+
     void OnShowScheduleChanged(bool args)
     {
         isAllowShowSchedule = args;
     }
 
+    void OnShowUnpaidOnlyChanged(bool args)
+    {
+        isUnpaidOnly = args;
+    }
 
     private void AddScheduleTab()
     {
@@ -95,12 +109,12 @@
             builder.AddAttribute(5, "OnClosed", EventCallback.Factory.Create(this, () =>
             {
                 CloseTab(newKey);
-                
+
             }));
 
             builder.AddAttribute(6, "OnMultiplePayment", EventCallback.Factory.Create(this, () =>
             {
-       
+
             }));
 
             builder.SetKey(newKey);
@@ -132,14 +146,19 @@
         RenderFragment content = builder =>
         {
             builder.OpenComponent(0, typeof(PaymentMultiples));
+
             builder.AddAttribute(1, "Schedules", Schedules);
+
             builder.AddAttribute(2, "LoanPayment", LoanPayment);
+
             builder.AddAttribute(3, "CurrencyId", CurrencyId);
+
             builder.AddAttribute(4, "OnClose", EventCallback.Factory.Create(this, () =>
             {
                 CloseTab(newKey);
             }));
             builder.SetKey(newKey);
+
             builder.CloseComponent();
         };
 
@@ -206,7 +225,7 @@
                                     Disabled="@(SetDisabled(schedule))"
                                     Click="@(()=>PayBySchedules(schedule))"
                                     Text="Payment By Schedule"></RadzenMenuItem>
-                       
+
                 </Authorized>
             </AuthorizeView>
             <RadzenMenuItem Icon="paid"
@@ -312,7 +331,7 @@
                 {
                     _ = ShowScheduleDetails(args.Data);
                 }
-                
+
             }
          );
     }
@@ -344,7 +363,7 @@
         if (p != firstSchedule)
         {
             NotificationService.Notify(NotificationSeverity.Error, "Cannot add new schedule due to previouse schedule not complete paid yet.");
-           
+
             return false;
         }
 

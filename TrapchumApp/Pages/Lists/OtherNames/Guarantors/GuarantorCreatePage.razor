@@ -1,7 +1,8 @@
 <PageTitle>Create New Guarantor</PageTitle>
 <EditForm Model="@model" OnValidSubmit="OnSaveChanges">
     <Blazilla.FluentValidator/>
-    <GaurantorCreateComp Model="model" />
+    <ValidationSummary />
+    <GaurantorCreateComPage Model="model" />
     <RadzenStack Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center"
                  class="rz-my-3"

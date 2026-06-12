@@ -1,0 +1,549 @@
+﻿@page "/app/loans/{LoanId}/collection-repayment-schedules/{BranchId:int}/branches"
+@using TrapchumApp.Components.Buttons
+@using TrapchumApp.Pages.Transactions.Loans.Disbursements
+@using TrapchumApp.Pages.Transactions.Loans.Repayments
+<PageTitle>Collection Repayment</PageTitle>
+<style>
+    .payment-card {
+        background: var(--rz-base-background-color, #fff);
+        border: 1px solid var(--rz-border-color, #e5e7eb);
+        border-radius: 0.75rem;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .payment-card-header {
+        border-bottom: 2px solid var(--rz-primary-lighter, #e0e7ff);
+        padding-bottom: 0.75rem;
+    }
+
+    .payment-field-wrapper {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .payment-field-disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .payment-total-wrapper {
+        display: flex;
+        flex-direction: column;
+        background: var(--rz-success-lighter, #ecfdf5);
+        border: 1px solid var(--rz-success-light, #a7f3d0);
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .schedule-section-card {
+        background: var(--rz-base-background-color, #fff);
+        border: 1px solid var(--rz-border-color, #e5e7eb);
+        border-radius: 0.75rem;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .schedule-section-toolbar {
+        border-bottom: 2px solid var(--rz-primary-lighter, #e0e7ff);
+        padding-bottom: 0.75rem;
+    }
+</style>
+
+<LoanInfos BranchId="@BranchId"
+           LoanId="@LoanId"
+           @key="@(Guid.NewGuid().ToString())">
+    <ChildContent>
+        <RadzenButton Text="Exchange"
+                      Visible="@_isPaymentTab"
+                      Size="ButtonSize.ExtraSmall"
+                      Icon="@IconNames.CurrencyExchange"
+                      Click="@ToggleExchangeChanged"
+                      ButtonStyle="ButtonStyle.Secondary" />
+    </ChildContent>
+</LoanInfos>
+<RadzenFieldset class="rz-m-0 rz-background-color-base-200">
+    <div class="m-0 p-0 rz-background-color-base-200">
+        <div class="schedule-section-card rz-mb-3">
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.SpaceBetween"
+                         AlignItems="AlignItems.Center"
+                         class="schedule-section-toolbar rz-mb-3">
+                <RadzenStack Orientation="Orientation.Horizontal"
+                             AlignItems="AlignItems.Center"
+                             Gap="0.5rem">
+                    <RadzenIcon Icon="calendar_month" style="color:var(--rz-primary);font-size:1.2rem;" />
+                    <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-m-0" style="font-weight:700;">
+                        Repayment Schedule
+                    </RadzenText>
+                </RadzenStack>
+                <RadzenFormField AllowFloatingLabel="false" Text="Date">
+                    <ChildContent>
+                        <RadzenDatePicker @bind-Value="paymentDate" TValue="DateTime" ReadOnly />
+                    </ChildContent>
+                </RadzenFormField>
+            </RadzenStack>
+
+            <RadzenDataGrid TItem="VSchedule"
+                            Data="@schedules"
+                            Responsive
+                            Density="Density.Compact"
+                            SelectionMode="DataGridSelectionMode.Multiple"
+                            GridLines="DataGridGridLines.Horizontal"
+                            @bind-Value="@_selectedSchedules"
+                            AllowRowSelectOnRowClick="false"
+                            RowRender="@OnRowRender"
+                            CellContextMenu="@OnCellContextMenu"
+                            Style="height:20rem;overflow:auto"
+                            @ref="gridSchedule">
+                <Columns>
+                    <RadzenDataGridColumn Width="3.5rem"
+                                          TextAlign="TextAlign.Center"
+                                          OrderIndex="0"
+                                          Sortable="false"
+                                          Context="s"
+                                          Visible="isAllowMultiplePayment"
+                                          Filterable="false">
+                        <Template>
+                            <RadzenCheckBox TabIndex="-1"
+                                            TriState="false"
+                                            Value="@(_selectedSchedules !=null && _selectedSchedules.Contains(s))"
+                                            Change="@(arg=>CheckedChanged(arg,s))"
+                                            InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select item" }})"
+                                            TValue="bool" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="c"
+                                          Width="3.5rem"
+                                          Title="#"
+                                          OrderIndex="1"
+                                          TextAlign="TextAlign.Center"
+                                          Sortable="false">
+                        <Template>
+                            <input type="hidden" @bind="c.LoanId" />
+                            <span class="pl-row-index">@c.InstallmentNo</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Width="11rem"
+                                          Context="c"
+                                          Title="ថ្ងៃត្រូវបង់ប្រាក់"
+                                          Sortable="false">
+                        <Template>
+                            <div style="line-height:1.3;">
+                                <div style="font-weight:600;font-size:0.82rem;">@c.PaymentDate.DayFirst()</div>
+                                <div style="font-size:0.72rem;color:var(--rz-text-secondary-color);">@c.PaymentDate.DayName()</div>
+                            </div>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Width="5.5rem"
+                                          Context="c"
+                                          TextAlign="TextAlign.Center"
+                                          Title="ចំនួនថ្ងៃយឺត"
+                                          Sortable="false">
+                        <Template>
+                            @if (c.DayArrea > 0)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Danger"
+                                             Text="@c.DayArrea?.ToString()"
+                                             style="font-size:0.75rem;" />
+                            }
+                            else
+                            {
+                                <span style="color:var(--rz-text-disabled-color);font-size:0.8rem;">—</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Context="c"
+                                          Title="ប្រាក់ដើមត្រូវបង់"
+                                          Sortable="false">
+                        <Template>
+                            <span style="font-size:0.82rem;">@c.LeftPrinciple.Format(CurrencyId)</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Context="c"
+                                          Title="ការប្រាក់ត្រូវបង់"
+                                          Sortable="false">
+                        <Template>
+                            <span style="font-size:0.82rem;">@c.LeftInterestAmount.Format(CurrencyId)</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Title="ប្រាក់ប្រសិទ្ធិភាពត្រូវបង់"
+                                          Context="c"
+                                          Sortable="false">
+                        <Template>
+                            <span style="font-size:0.82rem;">@c.LeftCollectionFeeAmount.Format(CurrencyId)</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Title="ប្រាក់ពីន័យ"
+                                          Context="c"
+                                          Sortable="false">
+                        <Template>
+                            @if (c.PenaltyAmount > 0)
+                            {
+                                <span style="color:var(--rz-danger);font-size:0.82rem;font-weight:600;">@c.PenaltyAmount.Format(CurrencyId)</span>
+                            }
+                            else
+                            {
+                                <span style="font-size:0.82rem;color:var(--rz-text-disabled-color);">@c.PenaltyAmount.Format(CurrencyId)</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Property="TotalPay"
+                                          Title="សរុបប្រាក់ត្រូវបង់"
+                                          Context="c"
+                                          Sortable="false">
+                        <Template>
+                            <strong style="font-size:0.82rem;color:var(--rz-primary);">@c.LeftAmount.Format(CurrencyId)</strong>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Context="c"
+                                          Property="LoanOutstanding"
+                                          Title="ប្រាក់ដើមនៅសល់"
+                                          Sortable="false">
+                        <Template>
+                            <span style="font-size:0.82rem;">@c.LoanOutstanding.Format(CurrencyId)</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TextAlign="TextAlign.Center"
+                                          Title="ស្ថានភាព"
+                                          Sortable="false"
+                                          Width="7.5rem"
+                                          Context="s">
+                        <Template>
+                            @{
+                                BadgeStyle badgeStyle;
+                                if (s.IsPaid) badgeStyle = BadgeStyle.Success;
+                                else if (s.IsPartialPaid) badgeStyle = BadgeStyle.Warning;
+                                else if (s.IsLate) badgeStyle = BadgeStyle.Danger;
+                                else badgeStyle = BadgeStyle.Info;
+                            }
+                            <RadzenBadge BadgeStyle="@badgeStyle"
+                                         Text="@s.ScheduleStatus"
+                                         style="font-size:0.75rem;" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+
+        <RadzenFieldset Text="តារាងសងប្រាក់">
+            <PaymentScedule SelectedSchedule="@_selectedSchedule" />
+        </RadzenFieldset>
+
+        <div class="payment-card rz-mt-3">
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center"
+                         Gap="0.5rem"
+                         class="payment-card-header rz-mb-3">
+                <RadzenIcon Icon="payments" style="font-size:1.25rem;" />
+                <RadzenStack Orientation="Orientation.Horizontal"
+                             AlignItems="AlignItems.Center"
+                             Gap="0.4rem"
+                             class="rz-mb-1">
+                    <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-m-0" TagName="TagName.Span">
+                        Customer's Payment
+                    </RadzenText>
+                    <RadzenCheckBox TValue="bool"
+                                    Name="PaidNow"
+                                    Disabled="_selectedSchedule==null"
+                                    Change="@CheckPaymentChanged"
+                                    @bind-Value="@isPaidNow" />
+                    <RadzenLabel Text="បង់ប្រាក់ឥឡូវ"
+                                 Component="PaidNow"
+                                 style="font-size:0.8rem;font-weight:600;color:var(--rz-danger);" />
+                </RadzenStack>
+                <RadzenBadge BadgeStyle="@(isPaidNow ? BadgeStyle.Success : BadgeStyle.Secondary)"
+                             Text="@(isPaidNow ? "Active" : "Inactive")"
+                             class="rz-ml-auto" />
+            </RadzenStack>
+
+            <RadzenRow Gap="1rem" AlignItems="AlignItems.End">
+                <RadzenColumn Size="12" SizeMD="3">
+                    <div class="payment-field-wrapper @(isPaidNow ? "" : "payment-field-disabled")">
+                        <RadzenLabel Text="ប្រាក់ដើម" Component="PaidNow" style="font-size:0.8rem;font-weight:600;" />
+                        <RadzenNumeric TextAlign="TextAlign.End"
+                                       TValue="decimal?"
+                                       ShowUpDown="false"
+                                       Style="width:100%"
+                                       Format="#,##0.00"
+                                       onclick="this.querySelector('.rz-numeric-input').select()"
+                                       Disabled="!isPaidNow"
+                                       Min="0"
+                                       Max="@_selectedSchedule?.LeftPrinciple"
+                                       @oninput="PrincipleAmountValueChanged"
+                                       @bind-Value="_loanPaymentLine!.PaidPrinciple" />
+                    </div>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="3">
+                    <div class="payment-field-wrapper @(isPaidNow ? "" : "payment-field-disabled")">
+                        <RadzenText TextStyle="TextStyle.Caption" class="rz-mb-1 rz-display-block" style="font-weight:600;">ការប្រាក់</RadzenText>
+                        <RadzenNumeric TextAlign="TextAlign.End"
+                                       TValue="decimal?"
+                                       Disabled="!isPaidNow"
+                                       Format="#,##0.00"
+                                       Style="width:100%"
+                                       Min="0"
+                                       Max="@_selectedSchedule?.LeftInterestAmount"
+                                       onclick="this.querySelector('.rz-numeric-input').select()"
+                                       ShowUpDown="false"
+                                       @oninput="InterestAmountValueChanged"
+                                       @bind-Value="_loanPaymentLine!.PaidInterest" />
+                    </div>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="3">
+                    <div class="payment-field-wrapper @(isPaidNow ? "" : "payment-field-disabled")">
+                        <RadzenText TextStyle="TextStyle.Caption" class="rz-mb-1 rz-display-block" style="font-weight:600;">ប្រាក់ប្រសិទ្ធិភាព</RadzenText>
+                        <RadzenNumeric TextAlign="TextAlign.End"
+                                       TValue="decimal?"
+                                       Disabled="!isPaidNow"
+                                       Style="width:100%"
+                                       Format="#,##0.00"
+                                       Min="0"
+                                       onclick="this.querySelector('.rz-numeric-input').select()"
+                                       @bind-Value="_loanPaymentLine!.PaidCollectionFee"
+                                       @oninput="CollectionFeeAmountValueChanged"
+                                       Max="@_selectedSchedule?.LeftCollectionFeeAmount"
+                                       ShowUpDown="false" />
+                    </div>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="3">
+                    <div class="payment-field-wrapper @(isPaidNow ? "" : "payment-field-disabled")">
+                        <RadzenText TextStyle="TextStyle.Caption" class="rz-mb-1 rz-display-block" style="font-weight:600;">ប្រាក់ពិន័យ</RadzenText>
+                        <RadzenNumeric TextAlign="TextAlign.End"
+                                       TValue="decimal?"
+                                       Format="#,##0.00"
+                                       Style="width:100%"
+                                       Min="0"
+                                       onclick="this.querySelector('.rz-numeric-input').select()"
+                                       @bind-Value="_loanPaymentLine!.PaidPenaltyAmount"
+                                       Disabled="!isPaidNow"
+                                       Max="@_selectedSchedule?.PenaltyAmount"
+                                       ShowUpDown="false" />
+                    </div>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <AppDivider Class="rz-my-3" />
+
+            <RadzenRow Gap="1rem" AlignItems="AlignItems.End" JustifyContent="JustifyContent.End">
+                <RadzenColumn Size="12" SizeMD="3">
+                    <div class="payment-field-wrapper">
+                        <RadzenText TextStyle="TextStyle.Caption" class="rz-mb-1 rz-display-block" style="font-weight:600;">Receipt No</RadzenText>
+                        <RadzenTextBox @bind-Value="@_loanPaymentLine!.OfficialReceiptNo"
+                                       Style="width:100%" />
+                    </div>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="3">
+                    <div class="payment-total-wrapper">
+                        <RadzenText TextStyle="TextStyle.Caption" class="rz-mb-1 rz-display-block" style="font-weight:700;color:var(--rz-success);">Total Amount</RadzenText>
+                        <RadzenNumeric Value="@_loanPaymentLine?.TotalWithPenalty"
+                                       ShowUpDown="false"
+                                       Format="#,##0.00"
+                                       Style="width:100%;font-weight:700;"
+                                       Disabled />
+                    </div>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         Gap="0.75rem"
+                         class="rz-mt-3"
+                         JustifyContent="JustifyContent.End"
+                         AlignItems="AlignItems.Center">
+                <AddButton Disabled="@btnDisabled" OnClick="@AddPaymentLines" />
+            </RadzenStack>
+        </div>
+
+        <RadzenFieldset Text="ព័ត‌៌មានទូទាត់ប្រាក់" class="rz-mt-2">
+            <PaymentLines @ref="@paymentLinesRef"
+                          Remove="@OnRemoveAdded"
+                          LoanRepaymentLines="LoanPaymentLines" />
+        </RadzenFieldset>
+    </div>
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 class="rz-mt-3"
+                 Gap="1rem"
+                 AlignItems="AlignItems.Center">
+        <AuthorizeView Policy="@Policies.MultiplePayment">
+            <Authorized>
+                <RadzenButton Icon="@IconNames.Paid"
+                              Size="ButtonSize.Small"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Click="ApplyMultipleSchedulePayment"
+                              Visible="isAllowMultiplePayment"
+                              Text="ApplySchedulePayment" />
+            </Authorized>
+        </AuthorizeView>
+        <RadzenButton Icon="save"
+                      Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Success"
+                      Click="@ApplySchedulePayment"
+                      Visible="!isAllowMultiplePayment"
+                      Text="Applied Payment" />
+        <RadzenButton Icon="save"
+                      Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Click="@CloseOpenTab"
+                      Text="Close" />
+    </RadzenStack>
+</RadzenFieldset>
+
+@code {
+
+    private bool SetDisabled(VSchedule schedule)
+    {
+        return (IsAlreadyPaidSchedule(schedule) || !IsFirstScheduleSelected(schedule));
+    }
+
+    private bool IsAlreadyPaidSchedule(VSchedule p)
+    {
+        if (p.IsPaid)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "This schedule is already paid.");
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool IsFirstScheduleSelected(VSchedule p)
+    {
+        var schedulesList = schedules?.ToList();
+
+        var firstSchedule = schedulesList?.First(x => x.IsPaid == false);
+
+        if (p != firstSchedule)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Cannot add new schedule due to previouse schedule not complete paid yet.");
+
+            return false;
+        }
+
+        return true;
+    }
+
+
+    void OnCellContextMenu(DataGridCellMouseEventArgs<VSchedule> args)
+    {
+
+        if (args == null || args.Data == null)
+            return;
+
+        ContextMenuService.Open(args,
+            new List<ContextMenuItem> {
+                new ContextMenuItem()
+                    {
+                      Text = "Recieve Payment",
+                      Value = 1,
+                      Icon = "paid",
+                      Disabled=SetDisabled(args.Data)
+                    },
+                new ContextMenuItem(){
+                    Text = "Show Details",
+                    Value = 2,
+                    Icon = "details"
+                },
+            },
+            (e) =>
+            {
+                ContextMenuService.Close();
+
+                var selected = (int)e?.Value!;
+
+                if (selected == 1)
+                {
+                    _ = PayBySchedules(args.Data);
+                }
+                else if (selected == 2)
+                {
+                    _ = ShowScheduleDetails(args.Data);
+                }
+
+            }
+         );
+    }
+
+    async Task ShowScheduleDetails(VSchedule? p)
+    {
+        if (p is null) return;
+
+        var param = new Dictionary<string, object?>
+            {
+                {"LoanId",p.LoanId },
+                {"CurrencyId",p.CurrencyId },
+                {"BranchId",p.BranchId },
+                {"ScheduleId",p.LoanScheduleId },
+            };
+        var options = new SideDialogOptions
+        {
+            Position = DialogPosition.Right,
+            ShowMask = true,
+            CloseDialogOnOverlayClick = true,
+            Width = "60vw"
+        };
+        await DialogService.OpenSideAsync<ScheduleDetailsPage>($"Schedule-{p.LoanScheduleId}", parameters: param!, options);
+
+
+    }
+
+
+    async Task PayBySchedules(VSchedule? p)
+    {
+
+        if (p is null) return;
+
+        var options = new SideDialogOptions
+        {
+            Position = DialogPosition.Right,
+
+            ShowMask = true,
+
+            CloseDialogOnOverlayClick = false,
+
+            ShowClose = false,
+
+            Width = "35rem"
+        };
+
+        var param = new Dictionary<string, object?>
+            {
+                {"LoanId",p.LoanId },
+                {"CurrencyId",p.CurrencyId },
+                {"BranchId",p.BranchId },
+                {"LoanScheduleId",p.LoanScheduleId },
+            };
+
+        await DialogService.OpenSideAsync<RecievePaymentSidebar>($"Schedule-{p.LoanScheduleId}", parameters: param!, options);
+
+    }
+
+
+    void OnRowRender(RowRenderEventArgs<VSchedule> arg)
+    {
+        if (arg.Data is null) return;
+
+        if (_selectedSchedules is null) return;
+
+        if (_selectedSchedules.Contains(arg.Data))
+        {
+            arg.Attributes["style"] = "background-color:var(--rz-primary-lighter, #e0e7ff);font-weight:600;";
+        }
+        else
+        {
+            arg.Attributes.Remove("style");
+        }
+
+        arg.Data.RowIndex = arg.Index + 1;
+
+    }
+
+}

@@ -291,7 +291,7 @@ public partial class PaymentMultiples
         if (!_schedules.Any())
         {
 
-            NotificationService.Notify(NotificationSeverity.Error, "There is no any schedule to pay.");
+            _toastService.ShowError("There is no any schedule to pay.");
 
             return;
         }
@@ -311,7 +311,7 @@ public partial class PaymentMultiples
             {"CurrencyId",CurrencyId }
         };
 
-        DialogService.OpenAsync<PaymentSideBar>($"{LoanPayment.CustomerName}",parameters,options);
+        DialogService.OpenAsync<PaymentSideBars>($"{LoanPayment.CustomerName}",parameters,options);
 
     }
 }

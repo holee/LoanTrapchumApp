@@ -46,14 +46,14 @@ public partial class JournalEntryCreate(
         {
             JLe.JournalType = JournalTypes.PV.ToString();
             JLe.JournalDate = DateTime.Now;
-            JLe.CurrencyRefId = (int)CurrenciesType.Khr;
+            JLe.CurrencyRefId = (int)CurrenciesType.KHR;
 
             InitializeLines();
 
             await LoadRelatedData();
-            await GetLedgerByCurrency((int)CurrenciesType.Khr);
+            await GetLedgerByCurrency((int)CurrenciesType.KHR);
 
-            _selectedCurrencyId = (int)CurrenciesType.Khr;
+            _selectedCurrencyId = (int)CurrenciesType.KHR;
 
             await GetNameLists(null);
             await base.OnInitializedAsync();
@@ -444,7 +444,7 @@ public partial class JournalEntryCreate(
         {
             JournalType = JournalTypes.PV.ToString(),
             JournalDate = DateTime.Now,
-            CurrencyRefId = _selectedCurrencyId ?? (int)CurrenciesType.Khr
+            CurrencyRefId = _selectedCurrencyId ?? (int)CurrenciesType.KHR
         };
         JournalLines.Clear();
         InitializeLines();

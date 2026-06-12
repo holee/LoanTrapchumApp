@@ -6,9 +6,9 @@ namespace Applications.Extensions.Identity.Authorizations.Extensions;
 public static class AuthorizationServiceExtension
 {
 
-    public static async Task<bool> MustHasPermissionAsync(this IAuthorizationService service, ClaimsPrincipal user, string module, string action)
+    public static async Task<bool> MustHasPermissionAsync(this IAuthorizationService service, ClaimsPrincipal user, string resource, string action)
     {
-        return (await service.AuthorizeAsync(user, null, AppPermission.RuleFor(module, action))).Succeeded;
+        return (await service.AuthorizeAsync(user, null, AppPermission.RuleFor(resource, action))).Succeeded;
     }
 
     public static async Task<bool> MustHasPermissionAsync(this IAuthorizationService service, ClaimsPrincipal user, string policyName)

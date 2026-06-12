@@ -14,6 +14,7 @@ using Applications.Services.Lists;
 using Domains.Enumerations;
 using Domains.Models.Identity;
 using TrapchumApp.Pages.Lists.Customers;
+using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
 
@@ -24,6 +25,8 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
     private int selectedTabIndex;
 
     private bool IsLoading;
+
+    private bool isWaiting = false;
 
     private bool disburseStatus;
 
@@ -51,7 +54,7 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
     [Parameter] public string? LoanRequestId { get; set; } = string.Empty;
     [Parameter, SupplyParameterFromQuery] public string? CustomerId { get; set; } = string.Empty;
     [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-
+    [CascadingParameter] private CascadingAppState BState { get; set; } = default!;
     protected override async Task OnInitializedAsync()
     {
         try
@@ -74,10 +77,13 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
                 model.Holidays = holidays.ToList();
             }
+
+            await BState.WhoCanDisbursemnt(req);
+
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+            _toastService.ShowError($"An error occurred while loading the loan request due to {ex.Message}");
         }
 
         await base.OnInitializedAsync();
@@ -106,7 +112,9 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
     private async Task GetHolidays(DateTimeOffset? date, int? installment = 12)
     {
         var yearAdded = (installment / 12) + 1;
+
         var selectedYear = date!.Value.DateTime;
+
         holidays = await holidayService.GetActiveHolidays(selectedYear, yearAdded);
     }
 
@@ -115,47 +123,59 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
         model.ScheduleMode = arg switch
         {
             1 => AdjustmentOption.Before,
+
             2 => AdjustmentOption.After,
+
             _ => AdjustmentOption.Skip
         };
     }
 
     private void OnStartDateChanged(DateTime? args)
     {
+        if (args is null) return;
+
         int addedDays = model.InstallmentTypeId switch
         {
             (int)InstallmentOption.Weekly => 7,
+
             (int)InstallmentOption.BiWeekly => 14,
+
             (int)InstallmentOption.Monthly => 28,
+
             _ => 1,
         };
 
-        if (args.HasValue)
+        if (addedDays > 0)
         {
-            model.FirstPaymentDate = args.Value.AddDays(addedDays);
+            model.FirstPaymentDate = model.StartDate!.Value.AddDays(addedDays);    //args.Value.AddDays(addedDays);
         }
+
+        StateHasChanged();
     }
 
     private void PrepareModelDefaults()
     {
         model.BankRefId = 11;
-        model.TermTypeId = 11;
-        model.BranchId = BranchId;
-        model.UserRefId = _userId;
-        model.PenaltyRate = penaltyRate;
-        model.LoanStatusRefId = (int)LoanStatuses.Active;
-        model.LoanSubTypeRefId = (int)LoanSubTypeOption.Standard;
-        model.LoanProductRefId = (int)ProductTypeOption.Mortgage;
-    }
 
-    private async Task<bool> ConfirmActionAsync(string message)
-    {
-        var confirmed = await DialogService.Confirm(message, "Confirm");
-        return confirmed == true;
+        model.TermTypeId = 11;
+
+        model.BranchId = BranchId;
+
+        model.UserRefId = _userId;
+
+        model.PenaltyRate = penaltyRate;
+
+        model.LoanStatusRefId = (int)LoanStatuses.Active;
+
+        model.LoanSubTypeRefId = (int)LoanSubTypeOption.Standard;
+
+        model.LoanProductRefId = (int)ProductTypeOption.Mortgage;
     }
 
     private async Task HandleFormSubmit()
     {
+
+        isWaiting = true;
 
         var confirmed = await MsgBox.ConfirmAsync("Do you want to disburse this loan request?", "Confirm");
 
@@ -163,6 +183,9 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
         if (confirmed == MsgBoxResult.No)
         {
             _toastService.ShowError("Loan disburse was cancelled.");
+
+
+            isWaiting = false;
 
             return;
         }
@@ -190,23 +213,34 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
                 _toastService.ShowError(rsp.GetMessage());
 
+
+                isWaiting = false;
+
                 return;
             }
 
-            disburseStatus = rsp.Value.Success;
+            _toastService.ShowSuccess(rsp.Value.Message);
+
+            isWaiting = false;
+
+            string loanUrl = $"/App/Loan/{rsp.Value.LoanId}/Branches/{BranchId}/Currencies/{model.CurrencyRefId}";
+
+            NavigationManager.NavigateTo(loanUrl);
 
             StateHasChanged();
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+            _toastService.ShowError($"An error occurred while disbursing the loan request due to {ex.Message}");
+
+            isWaiting = false;
         }
     }
 
     private async Task SaveLoanDisbursement()
     {
 
-        var confirm=await MsgBox.ConfirmAsync("Do you want to save this loan request?", "Confirm");
+        var confirm = await MsgBox.ConfirmAsync("Do you want to save this loan request?", "Confirm");
 
         if (confirm == MsgBoxResult.No) return;
 
@@ -237,7 +271,7 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
             StateHasChanged();
         }
-        catch(MediatorException ex)
+        catch (MediatorException ex)
         {
             _toastService.ShowError($"An error occurred while saving the loan request due to {ex.Message}");
         }

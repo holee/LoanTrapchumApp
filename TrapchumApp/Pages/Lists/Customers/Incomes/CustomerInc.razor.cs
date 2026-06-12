@@ -15,6 +15,7 @@ namespace TrapchumApp.Pages.Lists.Customers.Incomes
         [Parameter] public bool ShowAction { get; set; } = true;
         [Parameter] public IEnumerable<VCustomerIncomes> Items { get; set; } = [];
         [Parameter] public EventCallback<IEnumerable<VCustomerIncomes>> GetIncomes { get; set; }
+
         bool isLoading = false;
         protected override async Task OnInitializedAsync()
         {
@@ -69,7 +70,11 @@ namespace TrapchumApp.Pages.Lists.Customers.Incomes
                 return;
             }
 
+
             await GetCustomerIncomes(CustomerId);
+
+            await GetIncomes.InvokeAsync(Items);
+
         }
 
 
@@ -112,7 +117,8 @@ namespace TrapchumApp.Pages.Lists.Customers.Incomes
 
             if (CustomerId.IsNullOrEmpty())
             {
-                NotificationService.Notify(NotificationSeverity.Info, "Please select cusotmer..");
+                _toastService.ShowError("Please select cusotmer..", "Error");
+
                 return;
             }
 
@@ -121,6 +127,7 @@ namespace TrapchumApp.Pages.Lists.Customers.Incomes
                 Width = "50vw",
                 Resizable = false,
                 Draggable = true,
+                AutoFocusFirstElement = false
             };
 
             var param = new Dictionary<string, object?>

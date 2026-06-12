@@ -59,22 +59,23 @@
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="RegisterDate"
                               Context="p"
-                              Title="Date"
+                              Title="ថ្ងៃចុះឈ្មោះ"
+                              Width="7rem"
                               Sortable="true">
             <Template>
-                @p.RegisterDate!.Value.ToShortDateString()
+                @p.RegisterDate.DayFirst()
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
                               Property="AltName"
-                              Title="Name"
+                              Title="ឈ្មោះអតិថិជន"
                               Sortable="true">
             <Template>
                 <TrapchumApp.Pages.Lists.KhmerName AltName="@p.AltName" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
-                              Title="Principle"
+                              Title="ប្រាក់ដើម"
                               Property="Principle"
                               TextAlign="TextAlign.Right"
                               Sortable="true">
@@ -86,19 +87,20 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
-                              Title="Interest"
+                              Title="ការប្រាក់"
                               Property="InterestRate"
                               TextAlign="TextAlign.Right"
+                              Width="5rem"
                               Sortable="true">
             <Template>
                 <RadzenText TextStyle="TextStyle.Body2"
                             Style="font-weight:700; color:var(--rz-warning-darker);">
-                    @p.InterestRate (%) / @p.PeriodName
+                    @p.InterestRate.AsPercent()
                 </RadzenText>
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
-                              Title="Paid Principle"
+                              Title="ប្រាក់ដែលបានទូទាត់"
                               Property="PaidPrinciple"
                               TextAlign="TextAlign.Right"
                               Sortable="true">
@@ -110,7 +112,7 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
-                              Title="OutStanding"
+                              Title="ប្រាក់ដែលនៅសល់"
                               Property="OutStanding"
                               TextAlign="TextAlign.Right"
                               Sortable="true">
@@ -122,7 +124,7 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
-                              Title="Agent"
+                              Title="ភ្នាក់ងារ"
                               Property="AgentName"
                               TextAlign="TextAlign.Start"
                               Sortable="true">
@@ -131,13 +133,13 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
-                              Title="Status"
+                              Title="ស្ថានភាព"
                               Property="LoanStatus"
                               Width="6rem"
                               TextAlign="TextAlign.Center"
                               Sortable="true">
             <Template>
-                @p.LoanStatus
+                <RadzenBadge Text="@p.LoanStatus" BadgeStyle="BadgeStyle.Success" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
@@ -261,6 +263,8 @@
 
         var multiplePaymentUrl = $"/App/Loans/Repayment/{p.LoanId}/Multiple?BranchId={p.BranchId}&CurrencyId={p.CurrencyId}";
 
+        var multiUrl = $"/app/loans/{p.LoanId}/collection-repayment-schedules/{p.BranchId}/Branches?creditAgentId={p.CreditAgentRefId}&currencyId={p.CurrencyId}";
+
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
             <RadzenMenuItem Icon="money"
                             Path="@_getPaymentSchedulesUrl"
@@ -283,9 +287,9 @@
                             Visible="@bState.IsManager"
                             Text="Change Credit Agent"></RadzenMenuItem>
             <RadzenMenuItem Icon="change_circle"
-                            Path="@multiplePaymentUrl"
+                            Path="@multiUrl"
                             Visible="@bState.CanRecieveMultiple"
-                            Text="Multiple Payment"></RadzenMenuItem>
+                            Text="Collection Payment"></RadzenMenuItem>
             <RadzenMenuItem Icon="info"
                             Path="@_getLoanDetailsUrl"
                             Text="Schedule Details"></RadzenMenuItem>
@@ -327,6 +331,7 @@
             new ContextMenuItem { Text = "Recieve Payment", Value="1",Icon="money_bag",Disabled=!bState.CanRecievePayment},
             new ContextMenuItem { Text = "Schedule Detials", Value="2",Icon="info"},
             new ContextMenuItem { Text = "Pay Off", Value="7",Icon="money",Disabled=!bState.CanPayOff},
+            new ContextMenuItem { Text = "Collection Payment", Value="9",Icon="money",Disabled=!bState.CanRecieveMultiple},
             new ContextMenuItem { Text = "Change Credit Agent", Value="5",Icon="find_replace",Disabled=!bState.IsManager},
             new ContextMenuItem { Text = "Pre Paid", Value="6",Icon="money",Disabled=!bState.CanRecievePayment},
             new ContextMenuItem { Text = "Widthraw Collaterals", Value="8",Icon="remove"},

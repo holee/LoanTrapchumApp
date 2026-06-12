@@ -1,6 +1,4 @@
-﻿using Applications.Responses;
-using Applications.Responses.Paginations;
-using Domains.Models.Collaterals;
+﻿using Domains.Models.Collaterals;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
 
@@ -15,7 +13,6 @@ public interface IAppSettingService
     Task<Result<AppSettings>> GetSysSettingByCode(int? id);
     Task<Result<IEnumerable<AppSettings>>> GetSysSettings(string? filter=null);
     Task<Result<string>> DeActivateUserLoanSizeAsync(long? id,string? userRefId,CancellationToken cancellation = default);
-    Task<Result<IEnumerable<T>>> GetSysSettings<T>(string? filterValue = null) where T : class;
     Task<Result<string>> CreateUserLoanSizeAsync(UserLoanSize model, CancellationToken cancellation = default);
     Task<Pager<VUserLoanSizes>> GetUserLoanSizes(string? userRefId, QueryParam q, CancellationToken cancellation = default);
     Task<Result<VUserLoanSizes>> GetLoanSizeByUserId(string? userRefId, CancellationToken cancellation = default);

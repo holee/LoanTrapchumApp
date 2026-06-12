@@ -1,90 +1,224 @@
 ﻿@page "/App/Currencies"
+@using Applications.Features.Currencies.Responses
 <PageTitle>Currency List</PageTitle>
-<RadzenCard class="card rz-background-color-base-100">
-    <RadzenTabs>
+
+@* ── Page Header ── *@
+<div class="ci-page-header rz-mb-4">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.75rem">
+        <div class="ci-header-icon">
+            <RadzenIcon Icon="attach_money" />
+        </div>
+        <div>
+            <h4 class="ci-page-title rz-mb-0">Currencies</h4>
+            <span class="ci-page-subtitle">Manage currency definitions and exchange rates.</span>
+        </div>
+    </RadzenStack>
+</div>
+
+<RadzenCard class="rz-background-color-base-200" Variant="Variant.Outlined">
+    <RadzenTabs RenderMode="TabRenderMode.Server">
         <Tabs>
+
+            @* ────────────────── Currencies List tab ────────────────── *@
             <RadzenTabsItem Text="Currencies List" Icon="attach_money">
-                <RadzenDataGrid Responsive
-                                GridLines="DataGridGridLines.Horizontal"
+
+                <GridToolbar SearchChanged="@OnSearchChanged">
+                    <LeftChildren>
+                        <AuthorizeView>
+                            <Authorized>
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
+                                              ButtonStyle="ButtonStyle.Primary"
+                                              Text="New Currency"
+                                              Icon="@IconNames.Add"
+                                              Click="@ShowCurrencyDialogue" />
+                            </Authorized>
+                        </AuthorizeView>
+                    </LeftChildren>
+                    <RightChildren>
+                        <RadzenStack Orientation="Orientation.Horizontal"
+                                     AlignItems="AlignItems.Center"
+                                     Gap="0.4rem">
+                            <RadzenCheckBox TValue="bool"
+                                            @bind-Value="includeInactive"
+                                            Change="OnIncludeInactiveChanged"
+                                            Name="chkInactive" />
+                            <RadzenLabel Text="Include Inactive" Component="chkInactive"
+                                         Style="font-size:0.8rem; vertical-align:middle;" />
+                        </RadzenStack>
+                    </RightChildren>
+                </GridToolbar>
+
+                <RadzenDataGrid Responsive="true"
+                                GridLines="DataGridGridLines.Both"
                                 AllowAlternatingRows="true"
                                 Density="Density.Compact"
-                                AllowSorting="false"
-                                Data="Currencies">
+                                AllowSorting="true"
+                                AllowFiltering="false"
+                                AllowPaging="true"
+                                ShowPagingSummary="true"
+                                Count="@count"
+                                PageSize="@pageSize"
+                                PagerPosition="PagerPosition.Bottom"
+                                PagerHorizontalAlign="HorizontalAlign.Right"
+                                IsLoading="@isLoading"
+                                LoadData="@OnLoadData"
+                                Data="@Currencies"
+                                TItem="VCurrenciesList">
+                    <LoadingTemplate>
+                        <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate"
+                                                   ProgressBarStyle="ProgressBarStyle.Primary"
+                                                   Value="100"
+                                                   ShowValue="false" />
+                    </LoadingTemplate>
                     <Columns>
-                        <RadzenDataGridColumn Title="#" Context="item">
+                        <RadzenDataGridColumn Width="3.5rem"
+                                              Title="#"
+                                              TextAlign="TextAlign.Center"
+                                              Filterable="false"
+                                              Sortable="false"
+                                              Context="item">
                             <Template>
                                 @(Currencies?.IndexOf(item) + 1)
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Title="Currency Name" Context="item">
+
+                        <RadzenDataGridColumn Title="Currency Name"
+                                              Property="@nameof(VCurrenciesList.CurrencyName)"
+                                              Context="item">
                             <Template>
-                                @item.CurrencyName
+                                <RadzenStack Orientation="Orientation.Horizontal"
+                                             AlignItems="AlignItems.Center"
+                                             Gap="0.4rem">
+                                    <span>@item.CurrencyName</span>
+                                    @if (item.IsBaseCurrency)
+                                    {
+                                        <RadzenBadge Text="Base"
+                                                     BadgeStyle="BadgeStyle.Info"
+                                                     Shade="Shade.Lighter"
+                                                     IsPill="true" />
+                                    }
+                                </RadzenStack>
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Title="Currency Code" Context="item">
+
+                        <RadzenDataGridColumn Width="7rem"
+                                              Title="Code"
+                                              Property="@nameof(VCurrenciesList.CurrencyCode)"
+                                              Context="item">
                             <Template>
-                                @item.CurrencyCode
+                                <span class="ci-code-badge">@item.CurrencyCode</span>
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Title="Spot Rate" Context="item" TextAlign="TextAlign.Right">
-                            <Template>
-                                @item.SpotRate
-                            </Template>
-                        </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Title="Buying Rate" Context="item" TextAlign="TextAlign.Right">
-                            <Template>
-                                @item.BuyingRate
-                            </Template>
-                        </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Property="SellingRate"
-                                              Title="Selling Rate"
+
+                        <RadzenDataGridColumn Width="8rem"
+                                              Title="Spot Rate"
+                                              Property="@nameof(VCurrenciesList.SpotRate)"
                                               TextAlign="TextAlign.Right"
+                                              Filterable="false"
                                               Context="item">
                             <Template>
-                                @item.SellingRate
+                                @item.SpotRate?.ToString("N4")
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Title="Base Currency"
-                                              Property="IsBaseCurrency"
-                                              TextAlign="TextAlign.Center"
+
+                        <RadzenDataGridColumn Width="8rem"
+                                              Title="Buying Rate"
+                                              Property="@nameof(VCurrenciesList.BuyingRate)"
+                                              TextAlign="TextAlign.Right"
+                                              Filterable="false"
                                               Context="item">
                             <Template>
-                                <RadzenCheckBox @bind-Value="item.IsBaseCurrency" />
+                                @item.BuyingRate?.ToString("N4")
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Property="IsActive"
+
+                        <RadzenDataGridColumn Width="8rem"
+                                              Title="Selling Rate"
+                                              Property="@nameof(VCurrenciesList.SellingRate)"
+                                              TextAlign="TextAlign.Right"
+                                              Filterable="false"
+                                              Context="item">
+                            <Template>
+                                @item.SellingRate?.ToString("N4")
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Width="6rem"
                                               Title="Status"
+                                              Property="@nameof(VCurrenciesList.IsActive)"
                                               TextAlign="TextAlign.Center"
+                                              Filterable="false"
+                                              Sortable="false"
                                               Context="item">
                             <Template>
-                                <RadzenCheckBox @bind-Value="item.IsActive" />
+                                <RadzenBadge Text="@(item.IsActive ? "Active" : "Inactive")"
+                                             BadgeStyle="@(item.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                             Shade="Shade.Light"
+                                             IsPill="true" />
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Title="Actions" Context="item">
+
+                        <RadzenDataGridColumn Width="4rem"
+                                              Title="Actions"
+                                              Filterable="false"
+                                              Sortable="false"
+                                              TextAlign="TextAlign.Center"
+                                              Context="item">
                             <Template>
                                 <RadzenButton Size="ButtonSize.ExtraSmall"
                                               Icon="more_vert"
                                               Variant="Variant.Text"
-                                              Click="@((args)=>ShowContextMenuWithContent(args,item.CurrencyId))" />
+                                              Click="@((args) => ShowContextMenuWithContent(args, item.CurrencyId))" />
                             </Template>
                         </RadzenDataGridColumn>
                     </Columns>
                 </RadzenDataGrid>
             </RadzenTabsItem>
-            <RadzenTabsItem Text="Set spot rate" Icon="@IconNames.CurrencyExchange">
+
+            @* ────────────────── Set Spot Rate tab ────────────────── *@
+            <RadzenTabsItem Text="Set Spot Rate" Icon="@IconNames.CurrencyExchange">
                 <TrapchumApp.Pages.Transactions.Exchanges.SetDailySpotRate />
             </RadzenTabsItem>
+
         </Tabs>
     </RadzenTabs>
 </RadzenCard>
+
 @code {
+    async Task OnLoadData(LoadDataArgs args)
+    {
+        pageIndex = args.Skip.HasValue ? args.Skip.Value / pageSize : 0;
+        await GetCurrecies();
+    }
+
+    async Task OnSearchChanged(string value)
+    {
+        filter = value;
+        pageIndex = 0;
+        await GetCurrecies();
+    }
+
+    async Task OnIncludeInactiveChanged(bool value)
+    {
+        includeInactive = value;
+        pageIndex = 0;
+        await GetCurrecies();
+    }
+
     void ShowContextMenuWithContent(MouseEventArgs args, int? id)
     {
-        ContextMenuService.Open(args, ds =>
-    @<RadzenMenu Style="font-size:0.8rem;">
-        <RadzenMenuItem Click="(()=>ShowCurrencyDetials(id))" Icon="info" Text="Details" Value="@id"></RadzenMenuItem>
-        <RadzenMenuItem Click="(()=>SpotRateCurrency(id))" Icon="info" Text="Set Spot Rate" Value="@id"></RadzenMenuItem>
-    </RadzenMenu>
-    );
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem { Text = "Details",      Icon = "info",              Value = "1" },
+            new ContextMenuItem { Text = "Set Spot Rate", Icon = "currency_exchange", Value = "2" },
+        }, e =>
+        {
+            ContextMenuService.Close();
+            switch (e.Value?.ToString())
+            {
+                case "1": ShowCurrencyDetials(id); break;
+                case "2": SpotRateCurrency(id);    break;
+            }
+        });
     }
 }

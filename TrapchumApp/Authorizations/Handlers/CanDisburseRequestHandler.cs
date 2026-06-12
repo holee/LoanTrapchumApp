@@ -13,7 +13,7 @@ public sealed class CanDisburseRequestHandler : AuthorizationHandler<CanDisburse
         AppRoles.Teller,
         AppRoles.SeniorAccount,
         AppRoles.ChiefAccount,
-        AppRoles.Account,
+        AppRoles.Account
     ];
 
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, CanDisburseRequestRequirement requirement,
@@ -27,15 +27,22 @@ public sealed class CanDisburseRequestHandler : AuthorizationHandler<CanDisburse
         bool hasAllowedRole = AllowedRoles.Any(user.IsInRole);
 
         if (!hasAllowedRole)
+        {
             return Task.CompletedTask;
 
-        var requiredPermission = AppPermission.RuleFor(Modules.LoanRequest, Actions.Disburse);
+        }
+
+        var requiredPermission = AppPermission.RuleFor(Resources.LoanRequest, Actions.Disburse);
 
         if (!user.HasClaim(AppClaim.Permission, requiredPermission))
+        {
             return Task.CompletedTask;
+        }
 
         if (resource.StatusId == (int)LoanRequestStatus.Approved)
+        {
             context.Succeed(requirement);
+        }
 
         return Task.CompletedTask;
     }

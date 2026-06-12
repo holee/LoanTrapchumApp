@@ -4,7 +4,7 @@
 @using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging
 @using TrapchumApp.Components.Indicatros
 <PageTitle>Loan Request</PageTitle>
-@attribute [MustHasPermission(Modules.LoanRequest, Actions.Read)]
+@attribute [MustHasPermission(Resources.LoanRequest, Actions.Read)]
 <RadzenStack Gap="1rem">
     @if (_isPageLoading)
     {

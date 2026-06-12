@@ -17,7 +17,7 @@ public partial class LoanDetails
     [CascadingParameter] public CascadingAppState BState { get; set; } = default!;
     [Parameter] public int BranchId { get; set; }
     [Parameter] public string? LoanId { get; set; }
-    [Parameter] public int CurrencyId { get; set; }
+    [Parameter] public int? CurrencyId { get; set; }
 
     private string? _creditAgentId = string.Empty;
 
@@ -82,9 +82,12 @@ public partial class LoanDetails
         _selectedTabIndex = 0;
     }
 
-    async Task PayBySchedules(VSchedule p)
+    async Task PayBySchedules(VSchedule? p)
     {
         ContextMenuService.Close();
+
+        if(p is null)
+            return;
 
         if (!IsFirstScheduleSelected(p))
             return;
@@ -111,9 +114,9 @@ public partial class LoanDetails
             return;
         }
 
-        var loanPaymentLine = p!.MapToLoanPaymentLine();
+        var loanPaymentLine = p.MapToLoanPaymentLine();
 
-        var create = loanRepaymentLines.ToPaymentCreate(CurrencyId);
+        var create = loanRepaymentLines.ToPaymentCreate(p.CurrencyId); 
 
         var options = new SideDialogOptions
         {
@@ -154,7 +157,7 @@ public partial class LoanDetails
 
             var message = $"Recieve Payment from {loanSchedule!.AltName}";
 
-            bool? confirm = await DialogService.OpenSideAsync<PaymentSideBar>(message, parameters!, options);
+            bool? confirm = await DialogService.OpenSideAsync<PaymentSideBars>(message, parameters!, options);
 
             if (confirm is not null && confirm == true)
             {

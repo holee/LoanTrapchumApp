@@ -30,8 +30,6 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
         private DateTime reqDate = DateTime.UtcNow;
 
-        private bool isValid = true;
-
         protected override async Task OnInitializedAsync()
         {
 

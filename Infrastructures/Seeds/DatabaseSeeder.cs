@@ -196,7 +196,7 @@ namespace Infrastructures.Seeds
             foreach (var per in permissions)
             {
                 if (exsitingPersmissions.Any(x =>
-                        x.Module == per.Module &&
+                        x.Module == per.Resource &&
                         x.Action == per.Action &&
                         x.Group == per.Group))
                 {
@@ -209,7 +209,7 @@ namespace Infrastructures.Seeds
                     Group = per.Group,
                     IsBasic = per.IsBasic,
                     Action = per.Action,
-                    Module = per.Module,
+                    Module = per.Resource,
                 });
 
             }
@@ -254,7 +254,7 @@ namespace Infrastructures.Seeds
                     await _context.RoleClaims.AddAsync(new ApplicationRoleClaim
                     {
                         RoleId = role.Id,
-                        Module = permission.Module,
+                        Module = permission.Resource,
                         ClaimType = AppClaim.Permission,
                         ClaimValue = permission.For,
                         Description = permission.Description,

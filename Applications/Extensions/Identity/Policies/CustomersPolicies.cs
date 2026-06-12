@@ -11,10 +11,10 @@ public partial class Policies
     public const string UpdateCustomer = $"{cust_prefix}.{nameof(UpdateCustomer)}";
     public const string DeleteCustomer = $"{cust_prefix}.{nameof(DeleteCustomer)}";
 
-    private static string read_customer = AppPermission.RuleFor(Modules.Customers, Actions.Read);
-    private static string update_customer = AppPermission.RuleFor(Modules.Customers, Actions.Update);
-    private static string create_customer = AppPermission.RuleFor(Modules.Customers, Actions.Create);
-    private static string delete_customer = AppPermission.RuleFor(Modules.Customers, Actions.Delete);
+    private static string read_customer = AppPermission.RuleFor(Resources.Customers, Actions.Read);
+    private static string update_customer = AppPermission.RuleFor(Resources.Customers, Actions.Update);
+    private static string create_customer = AppPermission.RuleFor(Resources.Customers, Actions.Create);
+    private static string delete_customer = AppPermission.RuleFor(Resources.Customers, Actions.Delete);
     public static AuthorizationPolicy CanCreateCustomer()
     {
         return new AuthorizationPolicyBuilder()

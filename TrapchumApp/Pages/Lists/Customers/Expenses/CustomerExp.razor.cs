@@ -75,6 +75,7 @@ namespace TrapchumApp.Pages.Lists.Customers.Expenses
 
             await GetCustomerExpense(CustomerId);
 
+            await GetExpenses.InvokeAsync(Items);
         }
 
 
@@ -130,6 +131,7 @@ namespace TrapchumApp.Pages.Lists.Customers.Expenses
                 Width = "50vw",
                 Resizable = false,
                 Draggable = true,
+                AutoFocusFirstElement=false
             };
             var parameters = new Dictionary<string, object?>
             {

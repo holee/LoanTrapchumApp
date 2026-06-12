@@ -3,17 +3,16 @@ using Applications.Interfaces.Currencies;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {
-    public partial class ExchangeCurrency
+    public partial class ExchangeCurrencyIndexPage
     {
         private readonly ICurrencyService _currencyService;
 
-        public ExchangeCurrency(ICurrencyService currencyService)
+        public ExchangeCurrencyIndexPage(ICurrencyService currencyService)
         {
             _currencyService = currencyService;
         }
 
-        [CascadingParameter]
-        Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+        [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
 
@@ -28,7 +27,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             if (Currencies.Any())
             {
-                Currency = Currencies.FirstOrDefault(x => x.CurrencyId == (int)CurrenciesType.Khr);
+                Currency = Currencies.FirstOrDefault(x => x.CurrencyId == (int)CurrenciesType.KHR);
             }
             await base.OnInitializedAsync();
         }

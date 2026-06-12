@@ -249,6 +249,32 @@ namespace TrapchumApp.Pages
         private double[] Chart1Values => revenue1.Select(d => d.Revenue).ToArray();
         private double[] Chart2Values => revenue2.Select(d => d.Revenue).ToArray();
 
+        // ── MyTable demo data ────────────────────────────────────────────
+        public record LoanDemoRow(
+            string CustomerName,
+            string LoanNumber,
+            double Amount,
+            DateOnly DueDate,
+            bool IsOverdue,
+            string OfficerName);
+
+        private HashSet<LoanDemoRow> _demoSelected = [];
+
+        private readonly List<LoanDemoRow> _demoRows =
+        [
+            new("Sok Dara",       "LN-2025-001", 2500.00, new DateOnly(2025, 6, 15), false, "Chan Sophea"),
+            new("Lim Chanthy",    "LN-2025-002", 1800.50, new DateOnly(2025, 5, 20), true,  "Pich Bopha"),
+            new("Mao Sreymom",    "LN-2025-003", 4200.00, new DateOnly(2025, 7, 1),  false, "Chan Sophea"),
+            new("Vong Ratanak",   "LN-2025-004",  950.75, new DateOnly(2025, 4, 30), true,  "Keo Sambo"),
+            new("Heng Piseth",    "LN-2025-005", 3100.00, new DateOnly(2025, 8, 10), false, "Pich Bopha"),
+            new("Noun Kimhong",   "LN-2025-006", 5000.00, new DateOnly(2025, 6, 5),  false, "Chan Sophea"),
+            new("Chhay Sovanna",  "LN-2025-007", 2200.25, new DateOnly(2025, 3, 18), true,  "Keo Sambo"),
+            new("Ros Channary",   "LN-2025-008", 1600.00, new DateOnly(2025, 7, 22), false, "Pich Bopha"),
+            new("Tep Borei",      "LN-2025-009", 3800.00, new DateOnly(2025, 5, 11), true,  "Chan Sophea"),
+            new("Srey Neath",     "LN-2025-010",  720.00, new DateOnly(2025, 9, 1),  false, "Keo Sambo"),
+            new("Kim Leang",      "LN-2025-011", 4500.00, new DateOnly(2025, 6, 28), false, "Pich Bopha"),
+            new("Prak Dalis",     "LN-2025-012", 1100.50, new DateOnly(2025, 4, 14), true,  "Chan Sophea"),
+        ];
 
     }
 }

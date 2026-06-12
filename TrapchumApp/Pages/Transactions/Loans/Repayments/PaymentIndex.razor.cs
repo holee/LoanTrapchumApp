@@ -148,7 +148,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 Draggable = true,
                 Resizable = false
             };
-            var parameters = new Dictionary<string, object>
+            var parameters = new Dictionary<string, object?>
             {
                 { "LoanPayment", payment },
                 { "CurrencyId", payment.CurrencyId!.Value },

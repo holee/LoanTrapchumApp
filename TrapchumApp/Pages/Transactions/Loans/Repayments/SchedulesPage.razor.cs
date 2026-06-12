@@ -93,7 +93,6 @@ public partial class SchedulesPage
     private bool _isSelectionLocked = false;
     bool _isPaymentTab = false;
     bool _isMultiplePaymentTab = false;
-    int _selectedIndexTab = 0;
     private LoanPaymentLineDtoCreate _loanPaymentLine = new();
 
     LoanPaymentDtoCreate _loanPayment = new();
@@ -236,7 +235,7 @@ public partial class SchedulesPage
 
         var message = $"Recieve Payment from {LoanSchedule!.AltName}";
 
-        bool? confirm = await DialogService.OpenSideAsync<PaymentSideBar>(message, parameters!, options);
+        bool? confirm = await DialogService.OpenSideAsync<PaymentSideBars>(message, parameters!, options);
 
         if (confirm is not null && confirm == true)
         {
@@ -297,7 +296,7 @@ public partial class SchedulesPage
         };
 
 
-        //AddMultiplePaymentTab(_selectedSchedules, loanPayment);
+        AddMultiplePaymentTab(_selectedSchedules, loanPayment);
 
         //var options = new SideDialogOptions
         //{
@@ -343,7 +342,6 @@ public partial class SchedulesPage
             {
                 _isPaymentTab = false;
 
-                _selectedIndexTab = 0;
             }
 
             return;
@@ -603,7 +601,7 @@ public partial class SchedulesPage
             recievePayment.RecievePrincipleAmount = SelectedSchedule?.LeftPrinciple ?? 0.00M;
             return;
         }
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue > SelectedSchedule?.LeftPrinciple)
         {
@@ -621,7 +619,7 @@ public partial class SchedulesPage
             return;
         }
 
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue >= 0 && inputValue <= SelectedSchedule?.LeftInterestAmount)
         {
@@ -646,7 +644,7 @@ public partial class SchedulesPage
         }
 
 
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue >= 0 && inputValue <= SelectedSchedule?.LeftCollectionFeeAmount)
         {

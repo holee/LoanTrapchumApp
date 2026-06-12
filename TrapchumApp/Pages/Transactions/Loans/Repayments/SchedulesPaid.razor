@@ -21,7 +21,7 @@
                 @p.InstallmentNo
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Payment Date"
+        <RadzenDataGridColumn Title="ថ្ងៃបង់ប្រាក់"
                               Width="8rem"
                               Property="PaymentDate"
                               Context="p">
@@ -29,31 +29,31 @@
                 @p.PaymentDate.DayFirst()
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Principle"
+        <RadzenDataGridColumn Title="ប្រាក់ដើម"
                               Width="8rem"
                               Property="Principal"
                               Context="p">
             <Template>
-                @p.Principle.Format(CurrencyId)
+                @p.Principle.As(CurrencyId)
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Interest"
+        <RadzenDataGridColumn Title="ការប្រាក់"
                               Width="8rem"
                               Property="Interest"
                               Context="p">
             <Template>
-                @p.Interest.Format(CurrencyId)
+                @p.Interest.As(CurrencyId)
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Collection Fee"
+        <RadzenDataGridColumn Title="ប្រាក់ប្រសិទ្ធភាព"
                               Width="8rem"
                               Property="CollectionFee"
                               Context="p">
             <Template>
-                @p.CollectionFee.Format(CurrencyId)
+                @p.CollectionFee.As(CurrencyId)
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Penalty"
+        <RadzenDataGridColumn Title="ប្រាក់ពិន័យ"
                               Width="8rem"
                               Property="PenaltyAmount"
                               Context="p">
@@ -61,18 +61,18 @@
                 @if (p.PenaltyAmount > 0)
                 {
                     <strong class="text-danger">
-                        @p.PenaltyAmount.Format(CurrencyId)
+                        @p.PenaltyAmount.As(CurrencyId)
                     </strong>
                 }
                 else
                 {
-                    @p.PenaltyAmount.Format(CurrencyId)
+                    @p.PenaltyAmount.As(CurrencyId)
                 }
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Total"
                               Width="8rem"
-                              Property="TotalPay"
+                              Property="ទឹកប្រាក់បង់សរុប"
                               Context="p">
             <Template>
                 @p.TotalPay

@@ -1,9 +1,8 @@
 ﻿@using TrapchumApp.Pages.Transactions.Loans.Disbursements
 @using TrapchumApp.Pages.Transactions.Loans.Repayments
-<PageTitle>Loan Repayment</PageTitle>
+<PageTitle>Collection Repayment</PageTitle>
 <LoanInfos BranchId="@BranchId"
            LoanId="@LoanId"
-           Currency="@CurrencyId"
            @key="@(Guid.NewGuid().ToString())">
     <ChildContent>
         <RadzenButton Text="Exchange"
@@ -30,14 +29,13 @@
                         Data="@schedules"
                         Responsive
                         Density="Density.Compact"
-                        SelectionMode="@gridSelectionMode"
+                        SelectionMode="DataGridSelectionMode.Multiple"
                         GridLines="DataGridGridLines.Both"
                         @bind-Value="@_selectedSchedules"
                         RowSelect="SelectedRowEvt"
                         RowDeselect="DeSelectedRowEvt"
                         AllowRowSelectOnRowClick="@allowRowSelected"
                         CellContextMenu="@OnCellContextMenu"
-                        IsLoading="isLoading"
                         @ref="gridSchedule">
             <Columns>
                 <RadzenDataGridColumn Width="3.5rem"

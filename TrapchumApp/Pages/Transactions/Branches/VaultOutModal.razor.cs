@@ -43,8 +43,6 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         private decimal? total = 0;
 
-        private string? messageAlert;
-
         private bool visible = false;
         private IEnumerable<CurrencyDto>? CurrencyList { get; set; }
         private CurrencyDto? Currency { get; set; } = new CurrencyDto();

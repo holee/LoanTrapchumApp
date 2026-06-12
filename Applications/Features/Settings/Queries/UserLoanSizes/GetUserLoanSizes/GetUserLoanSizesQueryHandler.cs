@@ -3,7 +3,7 @@ using Applications.Responses.Paginations;
 
 namespace Applications.Features.Settings.Queries.UserLoanSizes.GetUserLoanSizes;
 
-public sealed class GetUserLoanSizesQueryHandler(IAppSettingRepository repository)
+public sealed class GetUserLoanSizesQueryHandler(IAppSettingService repository)
     : IRequestHandler<GetUserLoanSizesQuery, Pager<VUserLoanSizes>>
 {
     public Task<Pager<VUserLoanSizes>> Handle(GetUserLoanSizesQuery request, CancellationToken cancellationToken)

@@ -2,6 +2,7 @@
               Text="@Text"
               Click="@HandleClick"
               ButtonStyle="ButtonStyle.Primary"
+              Disabled="@Disabled"
               Icon="@Icon"></RadzenButton>
 @code {
     [Parameter]
@@ -10,6 +11,8 @@
     public EventCallback OnClick { get; set; }
     [Parameter]
     public string Icon { get; set; } = "add";
+    [Parameter]
+    public bool Disabled { get; set; } = false;
 
     private void HandleClick()
     {

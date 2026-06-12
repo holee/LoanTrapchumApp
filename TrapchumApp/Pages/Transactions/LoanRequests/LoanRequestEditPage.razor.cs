@@ -435,16 +435,23 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger) : 
             return;
         }
 
-        var confirm = await DialogService.Confirm("Do you want to save this loan request.", "Loan Request");
+        var confirm=await MsgBox.ConfirmAsync("Do you want to save this loan request?", "Save Loan Request");
 
-        if (confirm == false)
+        if (confirm == MsgBoxResult.No)
         {
-            NotificationService.Notify(NotificationSeverity.Info, "Loan request was cancel.");
+            _toastService.ShowInfo("Loan request was cancel.");
 
             return;
         }
 
         await HandleLoanRequest(RequestStatus.New);
+    }
+
+    private decimal? _customerProfit = 0;
+
+    void GetUpdateCustomerProfit(decimal? profit)
+    {
+        _customerProfit = profit;
     }
 
     protected async Task HandleCreateRequest()
@@ -454,11 +461,37 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger) : 
             return;
         }
 
-        var confirm = await DialogService.Confirm("Do you want to save this loan request.", "Loan Request");
 
-        if (confirm == false)
+        if (Guarantors.Count() == 0)
         {
-            NotificationService.Notify(NotificationSeverity.Info, "Loan request was cancel.");
+            _toastService.ShowWarning("Please add at least one guarantor.");
+
+            return;
+        }
+
+
+        if (CollateralLines.Count() == 0)
+        {
+            _toastService.ShowWarning("Please add at least one collateral.");
+
+            return;
+        }
+
+        if(_customerProfit <= 0)
+        {
+            _toastService.ShowError("Customer profit must be greater than zero.");
+
+            return;
+        }
+
+
+
+        var confirm = await MsgBox.ConfirmAsync("Do you want to submit this loan request?", "Submit Loan Request");
+
+        if (confirm == MsgBoxResult.No)
+        {
+
+            _toastService.ShowInfo("Loan request was cancel.");
 
             return;
         }

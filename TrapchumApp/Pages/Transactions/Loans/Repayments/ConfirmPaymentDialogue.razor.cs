@@ -399,7 +399,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         void CalculatePenaltyAmount(ChangeEventArgs e)
         {
-            var amount = e.Value!.ToNumer<decimal>();
+            var amount = e.Value!.ToNumber<decimal>();
 
             if (amount < 0)
             {

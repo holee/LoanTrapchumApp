@@ -542,12 +542,7 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
     private IQueryable<VCustomerList> BuildCustomerQueriesAsync(DataContext cxt, int? branchId, string? userId, bool activeLoanOnly = false, CancellationToken cancellation = default)
     {
-        //if (branchId > 0 || !string.IsNullOrEmpty(userId))
-        //{
         return GetCustomersByBranchOrUserAsync(cxt, branchId, userId, activeLoanOnly, cancellation);
-        //}
-
-        //return GetCustomersWithoutActiveLoan(cxt, activeLoanOnly);
     }
 
     private IQueryable<VCustomerList> GetCustomersByBranchOrUserAsync(DataContext cxt, int? branchId, string? userId, bool activeLoanOnly = false, CancellationToken cancellation = default)

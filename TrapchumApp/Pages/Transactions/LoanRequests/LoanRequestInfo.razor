@@ -128,12 +128,9 @@
             <RadzenColumn SizeSM="6" SizeMD="3">
                 <RadzenFormField Text="រប្យេបគិតថ្លៃ" class="rz-w-100">
                     <ChildContent>
-                        <RadzenDropDown Data="StorageConstant.CollectionFeeModes"
-                                        class="rz-w-100"
-                                        TextProperty="@nameof(Items.Label)"
-                                        SelectedItemChanged="SelectedChargeModeChanged"
-                                        ValueProperty="@nameof(Items.Value)"
-                                        @bind-Value="Model.CollectionFeeModeId" />
+                        <BlaCollectionFeeModes SelectedChangeModeChanged="SelectedChargeModeChanged"
+                                               @bind-Value="Model.CollectionFeeModeId" />
+                        
                     </ChildContent>
                     <End><span>/ខែ</span></End>
                 </RadzenFormField>

@@ -1,6 +1,6 @@
 ﻿namespace Applications.Constants.Authorizations;
 
-public static class Modules
+public static class Resources
 {
     /// <summary>
     /// Dashboard

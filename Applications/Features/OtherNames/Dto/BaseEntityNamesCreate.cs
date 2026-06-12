@@ -1,4 +1,6 @@
-﻿namespace Applications.Features.OtherNames.Dto;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Applications.Features.OtherNames.Dto;
 
 public abstract class BaseEntityNamesCreate
 {
@@ -15,9 +17,13 @@ public abstract class BaseEntityNamesCreate
     public string? Salutation { get; set; }
     public string? Gender { get; set; }
     public string? JobTitle { get; set; }
+
+    [Required(ErrorMessage ="Please fill the Phone")]
     public string? Phone { get; set; }
     public string? AltPhone { get; set; }
     public string? EmailAddress { get; set; }
+
+    [Required(ErrorMessage = "Please fill the IdCard")]
     public string? IdCard { get; set; }
     public string? CompanyName { get; set; }
     public string? CompanyAddress { get; set; }

@@ -1,11 +1,12 @@
 ﻿@inject CurrencyServices currencyService
+@inject AppSettingService appSettingService
 <RadzenStack Gap="1rem" Orientation="Orientation.Vertical"
              JustifyContent="JustifyContent.SpaceBetween"
              Style="width:100%;">
     <RadzenStack>
         <EditForm Model="_mx" @ref="form">
             <ValidationSummary />
-            <FluentValidationValidator DisableAssemblyScanning="true" />
+            <FluentValidator />
             <input type="hidden" value="@_mx.SpotRate" />
             <RadzenRow AlignItems="AlignItems.Center" class="@Styles.Mb2">
                 <RadzenColumn Size="6">

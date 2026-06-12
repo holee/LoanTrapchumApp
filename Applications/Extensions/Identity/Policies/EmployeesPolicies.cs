@@ -10,10 +10,10 @@ public partial class Policies
     public const string ReadEmployee = $"{emp_prefix}.{nameof(ReadEmployee)}";
     public const string UpdateEmployee = $"{emp_prefix}.{nameof(UpdateEmployee)}";
     public const string DeleteEmployee = $"{emp_prefix}.{nameof(DeleteEmployee)}";
-    private static string read_employee = AppPermission.RuleFor(Modules.Employees, Actions.Read);
-    private static string update_employee = AppPermission.RuleFor(Modules.Employees, Actions.Update);
-    private static string create_employee = AppPermission.RuleFor(Modules.Employees, Actions.Create);
-    private static string delete_employee = AppPermission.RuleFor(Modules.Employees, Actions.Delete);
+    private static string read_employee = AppPermission.RuleFor(Resources.Employees, Actions.Read);
+    private static string update_employee = AppPermission.RuleFor(Resources.Employees, Actions.Update);
+    private static string create_employee = AppPermission.RuleFor(Resources.Employees, Actions.Create);
+    private static string delete_employee = AppPermission.RuleFor(Resources.Employees, Actions.Delete);
     public static AuthorizationPolicy CanCreateEmployee()
     {
         return new AuthorizationPolicyBuilder()

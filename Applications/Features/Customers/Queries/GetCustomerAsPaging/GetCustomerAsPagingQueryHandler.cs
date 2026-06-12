@@ -14,6 +14,6 @@ public sealed class GetCustomerAsPagingQueryHandler : IRequestHandler<GetCustome
     }
     public async Task<Pager<VCustomerList>> Handle(GetCustomerAsPagingQuery request, CancellationToken cancellationToken)
     {
-        return await _customerService.GetCustomersAsync(request.BranchId, request.UserId, request.CustomerId, request.Query,false, cancellationToken);
+        return await _customerService.GetCustomersAsync(request.BranchId, request.UserId, request.CustomerId, request.Query,request.IsLoanActive, cancellationToken);
     }
 }

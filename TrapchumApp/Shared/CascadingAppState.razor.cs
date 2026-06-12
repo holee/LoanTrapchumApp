@@ -44,6 +44,39 @@ namespace TrapchumApp.Shared
 
         private bool _maximumAmountApproved;
 
+        private bool _manageDisbursement;
+
+        private bool _manageRequest;
+
+        public bool ManageRequest
+        {
+            get
+            {
+                return _manageRequest;
+            }
+            set
+            {
+                _manageRequest = value;
+                StateHasChanged();
+            }
+        }
+
+
+        public bool ManageDisbursement
+        {
+            get
+            {
+                return _manageDisbursement;
+            }
+            set
+            {
+                _manageDisbursement = value;
+
+                StateHasChanged();
+            }
+        }
+
+
         public bool NormalAmountApproved
         {
             get => _normalAmountApproved;
@@ -403,6 +436,37 @@ namespace TrapchumApp.Shared
 
         }
 
+        internal async Task ManageLoanDisbursement()
+        {
+            var user = (await AuthenticationState).User;
+
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+
+                _manageDisbursement = await _authorizeService.MustHasPermissionAsync(user, Policies.Disburse);
+
+                return;
+            }
+
+        }
+
+        internal async Task ManageLoanRequest()
+        {
+            var user = (await AuthenticationState).User;
+
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+
+                var result = await _authorizeService.AuthorizeAsync(user, Policies.RequestLoanRequest);
+
+                _canDisbursed = result.Succeeded;
+
+                return;
+            }
+
+        }
+
+
         internal async Task WhoCanDisbursemnt(VLoanRequests? resource)
         {
             if (resource is null)
@@ -556,7 +620,7 @@ namespace TrapchumApp.Shared
 
             if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _canRequest = (await _authorizeService.AuthorizeAsync(user, resource, new CanRequestRequirement())).Succeeded; 
+                _canRequest = (await _authorizeService.AuthorizeAsync(user, resource, new CanRequestRequirement())).Succeeded;
             }
 
         }

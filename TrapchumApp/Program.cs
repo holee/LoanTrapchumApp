@@ -50,6 +50,7 @@ builder.Services.AddScoped<IAuthorizationHandler, CanApprovedRequestHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, CanDisburseRequestHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, CanRequestHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, CanReceivePaymentHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, ManagerLoanDisbursementHandler>(); 
 builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
 builder.Services.AddScoped<NotificationServices>();
 builder.Services.AddScoped<NotificationHubService>();
@@ -72,7 +73,7 @@ builder.Services.AddSingleton<IProfilePhotoService, ProfilePhotoService>();
 builder.Services.AddSingleton<UserServices>();
 builder.Services.AddSingleton<BranchService>();
 builder.Services.AddSingleton<CurrencyServices>();
-
+builder.Services.AddScoped<AppSettingService>();
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 104857600; // 100 MB

@@ -4,7 +4,7 @@ using ErrorOr;
 
 namespace Applications.Features.Settings.Queries.UserLoanSizes.GetUserLoanSizeById;
 
-public sealed class GetUserLoanSizeByIdQueryHandler(IAppSettingRepository repository)
+public sealed class GetUserLoanSizeByIdQueryHandler(IAppSettingService repository)
     : IRequestHandler<GetUserLoanSizeByIdQuery, ErrorOr<UserLoanSizeDto>>
 {
     public Task<ErrorOr<UserLoanSizeDto>> Handle(GetUserLoanSizeByIdQuery request, CancellationToken cancellationToken)

@@ -224,7 +224,7 @@ public partial class PaymentOffSideBar
     {
         if (LoanRepayment is null || OriginalLoanPayment is null) return;
 
-        decimal amount = e.Value!.ToNumer<decimal>();
+        decimal amount = e.Value!.ToNumber<decimal>();
 
         if (amount <= 0)
         {
@@ -245,7 +245,7 @@ public partial class PaymentOffSideBar
     {
         if (LoanRepayment is null || OriginalLoanPayment is null) return;
 
-        var amount = e.Value?.ToNumer<decimal>();
+        var amount = e.Value?.ToNumber<decimal>();
 
         if (amount < 0)
         {

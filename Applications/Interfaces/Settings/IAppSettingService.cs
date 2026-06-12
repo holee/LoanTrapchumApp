@@ -1,8 +1,9 @@
+using Domains.Models.Settings;
 using ErrorOr;
 
 namespace Applications.Interfaces.Settings;
 
-public interface IAppSettingRepository
+public interface IAppSettingService
 {
     // AppSettings
     Task<ErrorOr<IEnumerable<AppSettingDto>>> GetAppSettingsAsync(string? filter = null, CancellationToken cancellation = default);
@@ -22,4 +23,5 @@ public interface IAppSettingRepository
     // CollateralSubType
     Task<Pager<CollateralSubTypeDto>> GetCollateralSubTypesAsync(QueryParam param, CancellationToken cancellation = default);
     Task<ErrorOr<VUserLoanSizes>> GetUserLoanSizeByUserAsync(string? userId, CancellationToken cancellation = default);
+    Task<Pager<AppSettings>> GetSystemSettings(int? id, QueryParam param, CancellationToken cancellation = default);
 }

@@ -2,7 +2,7 @@
 
 public enum CurrenciesType
 {
-    Khr = 1,
+    KHR = 1,
     Usd = 2,
     China = 3,
     Vietname = 4,

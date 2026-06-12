@@ -10,6 +10,7 @@ using Domains.Enumerations;
 using Domains.Models;
 using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
+using Infrastructures.Implements.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
@@ -135,6 +136,7 @@ namespace Infrastructures.Implements
 
             // 🔹 Resolve date range
             var start = startDate ?? DateTimeOffset.Now;
+
             var end = endDate ?? start.AddDays(28);
 
             var baseQueries = db.VSchedules
@@ -144,9 +146,11 @@ namespace Infrastructures.Implements
             if (!string.IsNullOrEmpty(Param.Filter))
             {
 
+                string[] filterColumns = [nameof(VSchedule.AltName),nameof(VSchedule.FullName)];
+
                 var filter = $"{Param.Filter.Trim()}%";
 
-                baseQueries = baseQueries.Where(x => EF.Functions.Like(x.AltName, filter));
+                baseQueries = baseQueries.StartWiths(filter, filterColumns);   //.Where(x => EF.Functions.Like(x.AltName, filter));
             }
 
             if (!string.IsNullOrEmpty(Param.SortColumn))

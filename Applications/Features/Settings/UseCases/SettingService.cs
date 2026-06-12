@@ -98,12 +98,6 @@ public sealed class SettingService(IAppSettingService sSeting) : ISettingService
         return await sSeting.GetSysSettings(filterValue);
     }
 
-    public async Task<Result<IEnumerable<T>>> GetSysSettings<T>(string? filterValue = null)
-    where T : class
-    {
-        return await sSeting.GetSysSettings<T>(filterValue);
-    }
-
     public async Task<Result<string>> Save(AppSettings entity)
     {
         return await sSeting.Save(entity);

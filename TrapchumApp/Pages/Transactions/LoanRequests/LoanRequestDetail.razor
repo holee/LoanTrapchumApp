@@ -1,7 +1,7 @@
 ﻿@page "/App/Loans/{LoanRequestId}/Requests/{BranchId:int}/Branches/{CustomerId}/Details"
 @using TrapchumApp.Components.Indicatros
 @using TrapchumApp.Pages.Lists.Customers
-@attribute [MustHasPermission(Modules.LoanRequest, Actions.Read)]
+@attribute [MustHasPermission(Resources.LoanRequest, Actions.Read)]
 @attribute [StreamRendering]
 <PageTitle>ព័ត៌មានលម្អិត</PageTitle>
 
@@ -12,88 +12,127 @@
 }
 else if (_request is not null)
 {
-    <RadzenFieldset AllowCollapse="true" Collapsed="false">
-        <HeaderTemplate>
-            <RadzenStack Gap="0.5rem" AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
-                <RadzenIcon Icon="@IconNames.Info" />
-                <strong>សំណើរកម្ចី</strong>
-                <RadzenBadge BadgeStyle="@StatusBadgeStyle"
-                             Text="@_request.Status"
-                             IsPill="true" />
-            </RadzenStack>
-        </HeaderTemplate>
-        <ChildContent>
-            <RadzenRow Gap="0.5rem" class="rz-py-2">
-                <RadzenColumn SizeSM="6" SizeMD="2">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-text-caption rz-color-base-600">ចំនួនទឹកប្រាក់ស្នើរសុំ</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1"><strong>@_request.RequestAmount.Format(_request.CurrencyId)</strong></RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="2">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រភេទបង់រំលោះ</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@_request.RepaymentMode</RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="2">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">រយៈពេលខ្ចីប្រាក់</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@_request.Installments @_request.InstallmentType</RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="2">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ខ្ចីលើកទី</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@_request.Circle</RadzenText>
-                </RadzenColumn>
-            </RadzenRow>
-            <RadzenRow Gap="0.5rem" class="rz-py-2">
-                <RadzenColumn SizeSM="6" SizeMD="2">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អត្រាការប្រាក់</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@(_request.InterestRate.AsPercent())</RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="2">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អត្រាប្រាក់ប្រសិទ្ធិភាព</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@(_request.CollectionFeeRate.AsPercent())</RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="2">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អត្រាសេវារដ្ឋបាល</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@(_request.AdminFeeRate.AsPercent())</RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="2">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រាក់សេវារដ្ឋបាល</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@(_request.AdminFeeAmount.ToFormattedNumber(2))</RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="2">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រាក់ប្រសិទ្ធិភាព</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">
-                        @{
-                            decimal? amount = (_request.CollectionFeeRate / 100) * _request.AprovedAmount;
-                        }
-                        @amount.ToFormattedNumber(2)
-                    </RadzenText>
-                </RadzenColumn>
-            </RadzenRow>
-            <RadzenRow Gap="0.5rem" class="rz-py-2">
-                <RadzenColumn SizeSM="6" SizeMD="2">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ថ្ងៃខ្ចីប្រាក់</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@_request.RequestDate.DayFirst()</RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="2">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ថ្ងៃបង់ប្រាក់លើកដំបូង</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@_request.FirstPaymentDate.DayFirst()</RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="2">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">មន្ត្រីស្នើរសុំ</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@_request.Summiter</RadzenText>
-                </RadzenColumn>
-                <RadzenColumn SizeSM="6" SizeMD="3">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អ្នកអនុម័ត្ត</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@_request.AprovedBy</RadzenText>
-                </RadzenColumn>
-            </RadzenRow>
-            <RadzenRow Gap="0.5rem" class="rz-py-2">
-                <RadzenColumn SizeSM="6" SizeMD="2">
-                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រភេទកម្ចី</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body1">@_request.LoanCategoryName</RadzenText>
-                </RadzenColumn>
-            </RadzenRow>
-        </ChildContent>
-    </RadzenFieldset>
+	@* ── Hero Banner ── *@
+	<div style="background:linear-gradient(135deg,var(--rz-primary) 0%,var(--rz-primary-dark,#1a56a0) 100%);
+		border-radius:0.875rem;padding:1rem 1.5rem;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.15);">
+		<RadzenStack Orientation="Orientation.Horizontal"
+					 AlignItems="AlignItems.Center"
+					 JustifyContent="JustifyContent.SpaceBetween"
+					 Wrap="FlexWrap.Wrap"
+					 Gap="0.75rem">
+			@* Left – identity *@
+			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.875rem">
+				<div style="background:rgba(255,255,255,.18);border-radius:0.625rem;width:3rem;height:3rem;
+					display:flex;align-items:center;justify-content:center;">
+					<RadzenIcon Icon="request_quote" Style="font-size:1.6rem;color:#fff;" />
+				</div>
+				<RadzenStack Gap="0.1rem">
+					<RadzenText TagName="TagName.H1"
+								Style="font-size:1.15rem;font-weight:700;color:#fff;margin:0;line-height:1.25;">
+						@(_request.AltName ?? _request.FullName ?? "Loan Request")
+					</RadzenText>
+					<RadzenText Style="font-size:0.78rem;color:rgba(255,255,255,.8);margin:0;">
+						Request&nbsp;<strong>@_request.LoanRequestId</strong>
+						&nbsp;·&nbsp;@(_request.CurrencyName)
+						&nbsp;·&nbsp;@(_request.LoanCategoryName)
+					</RadzenText>
+				</RadzenStack>
+			</RadzenStack>
+			@* Right – status + back *@
+			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.75rem">
+				<span style="background:rgba(255,255,255,.22);border-radius:2rem;
+					padding:0.2rem 0.85rem;font-size:0.78rem;font-weight:600;color:#fff;white-space:nowrap;">
+					@(_request.Status ?? "—")
+				</span>
+				<RadzenLink Path="@_navService.PreviousUrl"
+							Style="display:inline-flex;align-items:center;gap:0.25rem;
+					font-size:0.82rem;color:rgba(255,255,255,.9);text-decoration:none;
+					background:rgba(255,255,255,.18);border-radius:2rem;padding:0.3rem 0.9rem;">
+					<RadzenIcon Icon="arrow_back" Style="font-size:0.95rem;" />
+					Back
+				</RadzenLink>
+			</RadzenStack>
+		</RadzenStack>
+
+		@* ── KPI strip ── *@
+		<RadzenStack Orientation="Orientation.Horizontal"
+					 Wrap="FlexWrap.Wrap"
+					 Gap="0"
+					 Style="margin-top:1rem;border-top:1px solid rgba(255,255,255,.25);padding-top:0.875rem;">
+			<div style="flex:1;min-width:8rem;padding:0 1rem 0 0;border-right:1px solid rgba(255,255,255,.2);">
+				<RadzenText Style="font-size:0.7rem;color:rgba(255,255,255,.7);margin:0;text-transform:uppercase;letter-spacing:.05em;">ចំនួនស្នើរ</RadzenText>
+				<RadzenText Style="font-size:1rem;font-weight:700;color:#fff;margin:0;">@_request.RequestAmount.Format(_request.CurrencyId)</RadzenText>
+			</div>
+			<div style="flex:1;min-width:8rem;padding:0 1rem;border-right:1px solid rgba(255,255,255,.2);">
+				<RadzenText Style="font-size:0.7rem;color:rgba(255,255,255,.7);margin:0;text-transform:uppercase;letter-spacing:.05em;">ចំនួនអនុម័ត្ន</RadzenText>
+				<RadzenText Style="font-size:1rem;font-weight:700;color:#fff;margin:0;">@_request.AprovedAmount.Format(_request.CurrencyId)</RadzenText>
+			</div>
+			<div style="flex:1;min-width:8rem;padding:0 1rem;border-right:1px solid rgba(255,255,255,.2);">
+				<RadzenText Style="font-size:0.7rem;color:rgba(255,255,255,.7);margin:0;text-transform:uppercase;letter-spacing:.05em;">អត្រាការប្រាក់</RadzenText>
+				<RadzenText Style="font-size:1rem;font-weight:700;color:#fff;margin:0;">@(_request.InterestRate.AsPercent())</RadzenText>
+			</div>
+			<div style="flex:1;min-width:8rem;padding:0 1rem;border-right:1px solid rgba(255,255,255,.2);">
+				<RadzenText Style="font-size:0.7rem;color:rgba(255,255,255,.7);margin:0;text-transform:uppercase;letter-spacing:.05em;">រយៈពេល</RadzenText>
+				<RadzenText Style="font-size:1rem;font-weight:700;color:#fff;margin:0;">@_request.Installments @_request.InstallmentType</RadzenText>
+			</div>
+			<div style="flex:1;min-width:8rem;padding:0 1rem;">
+				<RadzenText Style="font-size:0.7rem;color:rgba(255,255,255,.7);margin:0;text-transform:uppercase;letter-spacing:.05em;">ខ្ចីលើកទី</RadzenText>
+				<RadzenText Style="font-size:1rem;font-weight:700;color:#fff;margin:0;">@_request.Circle</RadzenText>
+			</div>
+		</RadzenStack>
+	</div>
+
+	@* ── Secondary info ── *@
+	<RadzenCard Variant="Variant.Outlined"
+				Style="border-radius:0.875rem;padding:1rem 1.5rem;box-shadow:0 1px 6px rgba(0,0,0,.07);"
+				class="rz-mt-2">
+		@{
+			decimal? collectionFeeAmount = (_request.CollectionFeeRate / 100) * _request.AprovedAmount;
+		}
+		<RadzenRow Gap="1rem">
+			<RadzenColumn SizeSM="6" SizeMD="3">
+				<RadzenText Style="font-size:0.7rem;color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.05em;margin:0;">ប្រភេទបង់រំលោះ</RadzenText>
+				<RadzenText Style="font-weight:600;margin:0;">@_request.RepaymentMode</RadzenText>
+			</RadzenColumn>
+			<RadzenColumn SizeSM="6" SizeMD="3">
+				<RadzenText Style="font-size:0.7rem;color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.05em;margin:0;">អត្រាប្រាក់ប្រសិទ្ធិភាព</RadzenText>
+				<RadzenText Style="font-weight:600;margin:0;">@(_request.CollectionFeeRate.AsPercent())</RadzenText>
+			</RadzenColumn>
+			<RadzenColumn SizeSM="6" SizeMD="3">
+				<RadzenText Style="font-size:0.7rem;color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.05em;margin:0;">អត្រាសេវារដ្ឋបាល</RadzenText>
+				<RadzenText Style="font-weight:600;margin:0;">@(_request.AdminFeeRate.AsPercent())</RadzenText>
+			</RadzenColumn>
+			<RadzenColumn SizeSM="6" SizeMD="3">
+				<RadzenText Style="font-size:0.7rem;color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.05em;margin:0;">ប្រាក់សេវារដ្ឋបាល</RadzenText>
+				<RadzenText Style="font-weight:600;margin:0;">@(_request.AdminFeeAmount.ToFormattedNumber(2))</RadzenText>
+			</RadzenColumn>
+			<RadzenColumn SizeSM="6" SizeMD="3">
+				<RadzenText Style="font-size:0.7rem;color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.05em;margin:0;">ប្រាក់ប្រសិទ្ធិភាព</RadzenText>
+				<RadzenText Style="font-weight:600;margin:0;">@collectionFeeAmount.ToFormattedNumber(2)</RadzenText>
+			</RadzenColumn>
+			<RadzenColumn SizeSM="6" SizeMD="3">
+				<RadzenText Style="font-size:0.7rem;color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.05em;margin:0;">ថ្ងៃខ្ចីប្រាក់</RadzenText>
+				<RadzenText Style="font-weight:600;margin:0;">@_request.RequestDate.DayFirst()</RadzenText>
+			</RadzenColumn>
+			<RadzenColumn SizeSM="6" SizeMD="3">
+				<RadzenText Style="font-size:0.7rem;color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.05em;margin:0;">ថ្ងៃបង់ប្រាក់លើកដំបូង</RadzenText>
+				<RadzenText Style="font-weight:600;margin:0;">@_request.FirstPaymentDate.DayFirst()</RadzenText>
+			</RadzenColumn>
+			<RadzenColumn SizeSM="6" SizeMD="3">
+				<RadzenText Style="font-size:0.7rem;color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.05em;margin:0;">មន្ត្រីស្នើរសុំ</RadzenText>
+				<RadzenText Style="font-weight:600;margin:0;">@_request.Summiter</RadzenText>
+			</RadzenColumn>
+			<RadzenColumn SizeSM="6" SizeMD="3">
+				<RadzenText Style="font-size:0.7rem;color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.05em;margin:0;">អ្នកអនុម័ត្ត</RadzenText>
+				<RadzenText Style="font-weight:600;margin:0;">@_request.AprovedBy</RadzenText>
+			</RadzenColumn>
+			<RadzenColumn SizeSM="6" SizeMD="3">
+				<RadzenText Style="font-size:0.7rem;color:var(--rz-text-secondary-color);text-transform:uppercase;letter-spacing:.05em;margin:0;">ប្រភេទកម្ចី</RadzenText>
+				<RadzenText Style="font-weight:600;margin:0;">@_request.LoanCategoryName</RadzenText>
+			</RadzenColumn>
+		</RadzenRow>
+	</RadzenCard>
+
 
     <RadzenCard class="rz-mt-2">
         <RadzenTabs RenderMode="TabRenderMode.Client">
@@ -213,6 +252,12 @@ else if (_request is not null)
                                   Size="@Styles.DefaultSize"
                                   Click="DisbruseLoanRequestNow"
                                   Text="បញ្ចេញប្រាក់" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Info"
+                                  Icon="@IconNames.Undo"
+                                  Size="@Styles.DefaultSize"
+                                  Click="@RecheckedLoanRequest"
+                                  Disabled="@(!AppState.CanDisbursed)"
+                                  Text="ពិនិត្យឡើងវិញ" />
                 }
             </Authorized>
         </AuthorizeView>

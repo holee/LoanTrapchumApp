@@ -113,7 +113,7 @@
                 </Template>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.TotalDay))"
-                                  Title="Days"
+                                  Title="ចំនួនថ្ងៃ"
                                   Width="3rem"
                                   Context="c"
                                   TextAlign="TextAlign.Center"
@@ -126,70 +126,70 @@
                 </FooterTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.Principle))"
-                                  Title="Principal"
+                                  Title="ប្រាក់ដើម"
                                   TextAlign="TextAlign.Right"
                                   Width="6rem"
                                   Context="c"
                                   Sortable="false">
                 <Template>
-                    @c.Principle.Format(_currencyId)
+                    @c.Principle.As(_currencyId)
                 </Template>
                 <FooterTemplate>
                     <strong>
-                        @(LoanSchedule!.Schedules.Sum(x => x.Principle).Format(_currencyId))
+                        @(LoanSchedule!.Schedules.Sum(x => x.Principle).As(_currencyId))
                     </strong>
                 </FooterTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.Interest))"
-                                  Title="Interest"
+                                  Title="ការប្រាក់"
                                   TextAlign="TextAlign.Right"
                                   Width="6rem"
                                   Sortable="false">
                 <Template>
-                    @context.Interest.Format(_currencyId)
+                    @context.Interest.As(_currencyId)
                 </Template>
                 <FooterTemplate>
                     <strong>
-                        @(LoanSchedule!.Schedules.Sum(x => x.Interest).Format(_currencyId))
+                        @(LoanSchedule!.Schedules.Sum(x => x.Interest).As(_currencyId))
                     </strong>
                 </FooterTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.CollectionFee))"
-                                  Title="Collection Fee"
+                                  Title="ប្រាក់ប្រសិទ្ធភាព"
                                   Width="6rem"
                                   TextAlign="TextAlign.Right"
                                   Sortable="false">
                 <Template>
-                    @context.CollectionFee.Format(_currencyId)
+                    @context.CollectionFee.As(_currencyId)
                 </Template>
                 <FooterTemplate>
                     <strong>
-                        @(LoanSchedule!.Schedules.Sum(x => x.CollectionFee).Format(_currencyId))
+                        @(LoanSchedule!.Schedules.Sum(x => x.CollectionFee).As(_currencyId))
                     </strong>
                 </FooterTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.TotalPay))"
-                                  Title="Amount"
+                                  Title="ចំនួនទឹកប្រាក់"
                                   TextAlign="TextAlign.Right"
                                   Width="6rem"
                                   Context="c"
                                   Sortable="false">
                 <Template>
-                    @c.TotalPay.Format(_currencyId)
+                    @c.TotalPay.As(_currencyId)
                 </Template>
                 <FooterTemplate>
                     <strong>
-                        @(LoanSchedule!.Schedules.Sum(x => x.TotalPay).Format(_currencyId))
+                        @(LoanSchedule!.Schedules.Sum(x => x.TotalPay).As(_currencyId))
                     </strong>
                 </FooterTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.LoanOutstanding))"
-                                  Title="OutStanding"
+                                  Title="ចំនួនទឹកប្រាក់ចុងគ្រា"
                                   Width="7rem"
                                   TextAlign="TextAlign.Right"
                                   Sortable="false">
                 <Template>
-                    @context.LoanOutstanding.Format(_currencyId)
+                    @context.LoanOutstanding.As(_currencyId)
                 </Template>
             </RadzenDataGridColumn>
         </Columns>

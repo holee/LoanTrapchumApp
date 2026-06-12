@@ -18,6 +18,7 @@ public partial class DueDateSchedulesPage
     [Parameter] public string? CustomerName { get; set; } = string.Empty;
     [Parameter] public int CurrencyId { get; set; }
     [Parameter] public bool ShowOnScheduleOnly { get; set; } = true;
+    [Parameter] public bool ShowUnpaidOnly { get; set; } = true; 
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
     DateTime paymentDate = DateTime.Now;
@@ -41,21 +42,37 @@ public partial class DueDateSchedulesPage
     IEnumerable<VLoanRepaymentLine> VLoanRepaymentLines = [];
 
     VLoanDisbursments? vLoan = new();
+
     private string? _userId = string.Empty;
+
     IList<VSchedule>? _selectedSchedules = null;
+
     DataGridSelectionMode gridSelectionMode = DataGridSelectionMode.Single;
+
     bool isAllowMultiplePayment = false;
+
     bool allowRowSelected = true;
+
     PaymentDtoCreate recievePayment = new();
+
     decimal? principleAmount = 0;
+
     decimal? interestAmount = 0;
+
     decimal? collectionfeeAmount = 0;
+
     decimal? totalPaidAmount = 0;
+
     decimal? penaltyAmount = 0;
+
     decimal? totalPaymentAmount = 0.00M;
+
     decimal? penaltyRate = 0;
+
     int selectedIndex = 0;
+
     bool isPaidNow = false;
+
     bool isLoading = false;
     bool includePaid = false;
     bool? canPaidNow = false;
@@ -152,7 +169,7 @@ public partial class DueDateSchedulesPage
 
         var message = $"Recieve Payment from {CustomerName}";
 
-        bool? confirm = await DialogService.OpenSideAsync<PaymentSideBar>(message, parameters!, options);
+        bool? confirm = await DialogService.OpenSideAsync<PaymentSideBars>(message, parameters!, options);
 
         if (confirm is not null && confirm == true)
         {
@@ -176,7 +193,7 @@ public partial class DueDateSchedulesPage
 
     private async Task GetSchedules()
     {
-        if (ShowOnScheduleOnly)
+        if (ShowOnScheduleOnly || ShowUnpaidOnly)
         {
             await GetSchedules(BranchId, LoanId, ScheduleStatus.Unpaid);
         }
@@ -275,14 +292,14 @@ public partial class DueDateSchedulesPage
         if (SelectedSchedule is null)
         {
 
-            _toastService.ShowError("There is no any schedule is selected.","Recieve Payment");
+            _toastService.ShowError("There is no any schedule is selected.", "Recieve Payment");
 
             return;
         }
 
         var schedulesList = schedules.ToList();
 
-        var firstSchedule = schedulesList.First(x=>x.IsPaid == false);
+        var firstSchedule = schedulesList.First(x => x.IsPaid == false);
 
         if (!IsFirstScheduleSelected(firstSchedule))
         {
@@ -408,7 +425,14 @@ public partial class DueDateSchedulesPage
 
         isLoading = true;
 
-        var query = new GetDueScheduleByLoanIdQuery(branchId, loanId, status);
+        DateTime? dueDate = null;
+
+        if (ShowOnScheduleOnly)
+        {
+            dueDate = DateTime.Now;
+        }
+
+        var query = new GetDueScheduleByLoanIdQuery(branchId, loanId, status, dueDate);
 
         var rsp = await mediator.Send(query);
 
@@ -521,7 +545,7 @@ public partial class DueDateSchedulesPage
 
             return;
         }
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue > SelectedSchedule?.LeftPrinciple)
         {
@@ -542,7 +566,7 @@ public partial class DueDateSchedulesPage
             return;
         }
 
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue >= 0 && inputValue <= SelectedSchedule?.LeftInterestAmount)
         {
@@ -567,7 +591,7 @@ public partial class DueDateSchedulesPage
         }
 
 
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue >= 0 && inputValue <= SelectedSchedule?.LeftCollectionFeeAmount)
         {
@@ -628,7 +652,7 @@ public partial class DueDateSchedulesPage
 
         if (!IsFirstScheduleSelected(schedule))
         {
-            _toastService.ShowError("Cannot add new schedule due to previouse schedule not complete paid yet.","Recieve Payment");
+            _toastService.ShowError("Cannot add new schedule due to previouse schedule not complete paid yet.", "Recieve Payment");
 
             _selectedSchedules!.Clear();
 

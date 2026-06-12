@@ -216,7 +216,7 @@
             Resizable = false
         };
 
-        await DialogService.OpenAsync<CustomerCreateQuick>("Quick Add", options: options);
+        await DialogService.OpenAsync<CustomerCreateQuickPage>("Quick Add", options: options);
     }
 
     private int selectedValue = 0;

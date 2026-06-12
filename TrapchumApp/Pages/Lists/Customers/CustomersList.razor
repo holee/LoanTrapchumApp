@@ -1,6 +1,6 @@
 ﻿@using Applications.Features.Customers.Response
 @using TrapchumApp.Helpers.Options
-@attribute [MustHasPermission(Modules.Customers, Actions.Read)]
+@attribute [MustHasPermission(Resources.Customers, Actions.Read)]
 <input type="hidden" @bind="@filterText" />
 <GridToolbar SearchChanged="SearchCustomer"
              CommandText="Add Customer"

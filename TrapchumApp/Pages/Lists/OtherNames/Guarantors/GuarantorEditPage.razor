@@ -9,7 +9,7 @@ else
     <EditForm Model="model" OnValidSubmit="OnSaveChanges">
         <input type="hidden" @bind="model.Id" />
         <Blazilla.FluentValidator />
-        <GaurantorCreateComp Model="@model" />
+        <GaurantorCreateComPage Model="@model" />
         <RadzenStack Orientation="Orientation.Horizontal"
                      AlignItems="AlignItems.Center"
                      class="rz-my-2"

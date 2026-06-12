@@ -85,8 +85,8 @@ public static class InfrastructureServiceInjection
         services.AddSingleton<ICurrentUserService, CurrentUserReposity>();
         services.AddSingleton<ICurrentUserServices, CurrentUserRepository>();
         services.AddScoped<IAuditReadService, AuditReadService>();
-        services.AddScoped<IAppSettingRepository, AppSettingService>();
-        services.AddScoped<IAppSettingService, LegacyAppSettingService>();
+        services.AddScoped<Applications.Interfaces.Settings.IAppSettingService, AppSettingService>();
+        services.AddScoped<Applications.Interfaces.setting.IAppSettingService, AppSettingRepository>();
         services.AddScoped<ILoanSettingService, LoanSettingRepository>();
         services.AddScoped<IForiegnCurrencyExchange, ForiegnCurrencyExchange>();
         services.AddScoped<IJournalService, JournalRepository>();

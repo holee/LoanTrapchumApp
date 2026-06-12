@@ -1,0 +1,332 @@
+/* ═══════════════════════════════════════════════════════════════════
+   MyTable – Modern Design  ·  indigo accent · slate neutrals
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Design tokens ──────────────────────────────────────────────── */
+.my-tbl {
+    --mt-accent:        #6366f1;        /* indigo-500              */
+    --mt-accent-light:  #eef2ff;        /* indigo-50               */
+    --mt-accent-mid:    #c7d2fe;        /* indigo-200              */
+    --mt-accent-hover:  #4f46e5;        /* indigo-600              */
+
+    --mt-surface:       #ffffff;
+    --mt-surface-head:  #f8fafc;        /* slate-50                */
+    --mt-surface-alt:   #f9fafb;        /* gray-50 (stripe)        */
+
+    --mt-border:        #e2e8f0;        /* slate-200               */
+    --mt-border-head:   #cbd5e1;        /* slate-300               */
+
+    --mt-text-primary:  #0f172a;        /* slate-900               */
+    --mt-text-secondary:#64748b;        /* slate-500               */
+    --mt-text-muted:    #94a3b8;        /* slate-400               */
+
+    --mt-row-hover:     #f5f3ff;        /* violet-50               */
+    --mt-row-selected:  #eef2ff;        /* indigo-50               */
+    --mt-row-sel-hover: #e0e7ff;        /* indigo-100              */
+
+    --mt-radius:        10px;
+    --mt-radius-sm:     6px;
+    --mt-shadow:        0 1px 3px rgba(15,23,42,.07), 0 4px 16px rgba(15,23,42,.06);
+
+    --mt-font:          "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --mt-font-size:     13px;
+    --mt-transition:    120ms ease;
+
+    box-sizing: border-box;
+    width: 100%;
+    font-family: var(--mt-font);
+    font-size: var(--mt-font-size);
+    color: var(--mt-text-primary);
+    background: var(--mt-surface);
+    border-radius: var(--mt-radius);
+    border: 1px solid var(--mt-border);
+    box-shadow: var(--mt-shadow);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────────── */
+.my-tbl__toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: 10px 14px;
+    background: var(--mt-surface-head);
+    border-bottom: 1px solid var(--mt-border);
+}
+
+.my-tbl__toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+.my-tbl__toolbar-right {
+    display: flex;
+    align-items: center;
+}
+
+/* ── Search field with icon ───────────────────────────────────────── */
+.my-tbl__search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.my-tbl__search-icon {
+    position: absolute;
+    left: 10px;
+    width: 15px;
+    height: 15px;
+    color: var(--mt-text-muted);
+    pointer-events: none;
+    flex-shrink: 0;
+    transition: color var(--mt-transition);
+}
+
+.my-tbl__search {
+    padding: 6px 10px 6px 32px;
+    border: 1.5px solid var(--mt-border);
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-family: var(--mt-font);
+    color: var(--mt-text-primary);
+    background: var(--mt-surface);
+    outline: none;
+    min-width: 200px;
+    transition: border-color var(--mt-transition), box-shadow var(--mt-transition);
+}
+
+.my-tbl__search:focus {
+    border-color: var(--mt-accent);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+}
+
+.my-tbl__search:focus + .my-tbl__search-icon,
+.my-tbl__search-wrap:focus-within .my-tbl__search-icon {
+    color: var(--mt-accent);
+}
+
+/* ── Selection bar ────────────────────────────────────────────────── */
+.my-tbl__sel-bar {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+    padding: 7px 14px;
+    background: var(--mt-accent-light);
+    border-bottom: 1px solid var(--mt-accent-mid);
+    font-size: 12.5px;
+    color: var(--mt-accent-hover);
+    font-weight: 500;
+    animation: mt-slide-down .14s ease;
+}
+
+@keyframes mt-slide-down {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0);    }
+}
+
+.my-tbl__sel-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--mt-accent);
+    flex-shrink: 0;
+}
+
+.my-tbl__sel-text {
+    flex: 1;
+}
+
+.my-tbl__sel-text strong {
+    font-weight: 700;
+}
+
+.my-tbl__sel-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: 1.5px solid var(--mt-accent-mid);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11.5px;
+    font-family: var(--mt-font);
+    font-weight: 500;
+    color: var(--mt-accent-hover);
+    cursor: pointer;
+    transition: background var(--mt-transition), border-color var(--mt-transition);
+    white-space: nowrap;
+}
+
+.my-tbl__sel-clear:hover {
+    background: var(--mt-accent-mid);
+    border-color: transparent;
+}
+
+/* ── Scroll wrapper ───────────────────────────────────────────────── */
+.my-tbl__scroll-wrap {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--mt-border) transparent;
+}
+
+.my-tbl__scroll-wrap::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+.my-tbl__scroll-wrap::-webkit-scrollbar-thumb {
+    background: var(--mt-border);
+    border-radius: 3px;
+}
+
+/* ── Table element ────────────────────────────────────────────────── */
+.my-tbl__table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+/* ── Header ───────────────────────────────────────────────────────── */
+.my-tbl__th {
+    padding: 9px 12px;
+    background: var(--mt-surface-head);
+    font-weight: 600;
+    font-family: 'Kh Battambang';
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--mt-text-secondary);
+    border-bottom: 2px solid var(--mt-border-head);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    vertical-align: middle;
+}
+
+.my-tbl__th::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,.45), transparent);
+    pointer-events: none;
+}
+
+.my-tbl__th-text {
+    position: relative;
+    z-index: 1;
+}
+
+.my-tbl__th--check {
+    width: 40px;
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* ── Cells ────────────────────────────────────────────────────────── */
+.my-tbl__td {
+    padding: 7px 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--mt-border);
+    transition: background var(--mt-transition);
+    line-height: 1.45;
+}
+
+.my-tbl__td--check {
+    width: 40px;
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* ── Bordered modifier ────────────────────────────────────────────── */
+.my-tbl--bordered .my-tbl__th,
+.my-tbl--bordered .my-tbl__td {
+    border: 1px solid var(--mt-border);
+}
+
+.my-tbl--bordered .my-tbl__th {
+    border-bottom-width: 2px;
+    border-bottom-color: var(--mt-border-head);
+}
+
+/* ── Compact modifier ─────────────────────────────────────────────── */
+.my-tbl--compact .my-tbl__th,
+.my-tbl--compact .my-tbl__td {
+    padding: 4px 10px;
+}
+
+/* ── Rows ─────────────────────────────────────────────────────────── */
+.my-tbl__row {
+    cursor: pointer;
+    transition: background var(--mt-transition);
+}
+
+.my-tbl__row:last-child .my-tbl__td {
+    border-bottom: none;
+}
+
+.my-tbl__row:hover {
+    background: var(--mt-row-hover);
+}
+
+/* ── Striped modifier ─────────────────────────────────────────────── */
+.my-tbl--striped .my-tbl__row:nth-child(even) {
+    background: var(--mt-surface-alt);
+}
+
+.my-tbl--striped .my-tbl__row:nth-child(even):hover {
+    background: var(--mt-row-hover);
+}
+
+/* ── Selected row ─────────────────────────────────────────────────── */
+.my-tbl__row--selected {
+    background: var(--mt-row-selected) !important;
+}
+
+.my-tbl__row--selected .my-tbl__td {
+    border-bottom-color: var(--mt-accent-mid);
+}
+
+.my-tbl__row--selected:hover {
+    background: var(--mt-row-sel-hover) !important;
+}
+
+/* ── Checkbox ─────────────────────────────────────────────────────── */
+.my-tbl__checkbox {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: var(--mt-accent);
+    border-radius: 4px;
+    vertical-align: middle;
+}
+
+/* ── Empty state ──────────────────────────────────────────────────── */
+.my-tbl__empty {
+    padding: 40px 24px;
+    text-align: center;
+}
+
+.my-tbl__empty-inner {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--mt-text-muted);
+    font-style: normal;
+    font-size: 13px;
+}
+
+.my-tbl__empty-icon {
+    width: 40px;
+    height: 40px;
+    opacity: .45;
+}

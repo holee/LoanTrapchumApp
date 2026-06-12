@@ -1,7 +1,7 @@
 ﻿@page "/App/Account/Roles"
 @using Applications.Features.Identity.Roles.Responses
 <PageTitle>Roles</PageTitle>
-@attribute [MustHasPermission(Modules.Roles, Actions.Read)]
+@attribute [MustHasPermission(Resources.Roles, Actions.Read)]
 <RadzenTabs RenderMode="TabRenderMode.Server">
     <Tabs>
         <RadzenTabsItem Text="Roles" Icon="list">

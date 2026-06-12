@@ -230,7 +230,7 @@ public partial class RecievePaymentPage
 
         var message = $"Recieve Payment from {LoanSchedule!.AltName}";
 
-        bool? confirm = await DialogService.OpenAsync<PaymentSideBar>(message, parameters, options);
+        bool? confirm = await DialogService.OpenAsync<PaymentSideBars>(message, parameters, options);
 
         if (confirm is not null && confirm == true)
         {
@@ -652,7 +652,7 @@ public partial class RecievePaymentPage
             recievePayment.RecievePrincipleAmount = SelectedSchedule?.LeftPrinciple ?? 0.00M;
             return;
         }
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue > SelectedSchedule?.LeftPrinciple)
         {
@@ -678,7 +678,7 @@ public partial class RecievePaymentPage
             return;
         }
 
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue >= 0 && inputValue <= SelectedSchedule?.LeftInterestAmount)
         {
@@ -703,7 +703,7 @@ public partial class RecievePaymentPage
         }
 
 
-        var inputValue = e.Value?.ToNumer<decimal>();
+        var inputValue = e.Value?.ToNumber<decimal>();
 
         if (inputValue >= 0 && inputValue <= SelectedSchedule?.LeftCollectionFeeAmount)
         {

@@ -34,7 +34,7 @@ public sealed class LoanCalculatorBuiler
         Holidays = holidays;
     }
 
-    public int? CurrencyId { get; set; } = (int)CurrenciesType.Khr;
+    public int? CurrencyId { get; set; } = (int)CurrenciesType.KHR;
 
     public int? PayEvery { get; set; } = 1;
 
@@ -57,7 +57,7 @@ public sealed class LoanCalculatorBuiler
     public static LoanCalculatorBuiler Create(LoanCalculatorBuiler req)
     {
         return new LoanCalculatorBuiler(
-            req.CurrencyId ?? (int)CurrenciesType.Khr,
+            req.CurrencyId ?? (int)CurrenciesType.KHR,
             req.PayEvery ?? 1,
             req.RepaymentModeId ?? (int)RepaymentOption.Declined,
             req.CollectionFeeModeId ?? (int)CollectionFeeOption.IRR,

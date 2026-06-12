@@ -14,8 +14,6 @@ public interface ISettingServiceImpl
     Task<Result<string>> Save(AppSettings entity);
     Task<Result<string>> Update(AppSettings entity);
 
-    Task<Result<IEnumerable<T>>> GetSysSettings<T>(string? filterValue = null)
-        where T : class;
     Task<Result<VUserLoanSizes>> GetLoanSizeByUserId(string? userRefId, CancellationToken cancellation = default);
     Task<Pager<VUserLoanSizes>> GetUserLoanSizes(string? userRefId, QueryParam q, CancellationToken cancellation = default);
     Task<Result<UserLoanSizeDtoCreate>> GetEditLoanSizeByUserId(long? id, string? userId, CancellationToken cancellation = default);

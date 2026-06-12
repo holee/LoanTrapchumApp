@@ -20,21 +20,34 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public bool ShowCloseButton { get; set; } = false;
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
         ForeignExchangeDtoCreate fcx = new ForeignExchangeDtoCreate();
+
         ExchangeDtoCreate mx = new();
+
         EditForm form = default!;
+
         IEnumerable<Items> buyCurrencies = [new Items(2, "US Dollar")];
+
         IEnumerable<Items> sellCurrencies = [new Items(1, "Khmer Riels")];
+
         IEnumerable<AppSettings> settings = [];
+
         VCurrenciesList Currency = new();
+
         bool isBuy = true;
+
         bool isBusy = false;
+
         private readonly ICurrencyService cuService;
+
         private readonly IAppSettingService settingService;
+
         private string? _userId = string.Empty;
         public MoneyExchanges(ICurrencyService currencyService, IAppSettingService settingsServiceImpl)
         {
             cuService = currencyService;
+
             settingService = settingsServiceImpl;
         }
 
@@ -60,7 +73,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             mx.IsBuy = true;
 
-            var rsp = await mediator.Send(new GetCurrencyDetailsByIdQuery(1));
+            var rsp = await mediator.Send(new GetCurrencyDetailsByIdQuery((int)CurrencyEnum.KHR));
 
             if (rsp.IsSuccess())
             {
@@ -144,7 +157,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
                 mx.TotalAmount = 0;
 
-                NotificationService.Notify(NotificationSeverity.Warning, "Invalid input amount");
+                _toastService.ShowInfo("Amount must be greater than 0", "Validation Error");
 
                 return;
             }
@@ -178,8 +191,11 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             if (rate <= 0)
             {
                 mx.ExchangeRate = 0;
+
                 mx.TotalAmount = 0;
-                NotificationService.Notify(NotificationSeverity.Warning, "Invalid input Exchange Rate.");
+
+                _toastService.ShowInfo("Exchange Rate must be greater than 0", "Validation Error");
+
                 return;
             }
 
@@ -208,7 +224,9 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             if (total <= 0)
             {
                 mx.TotalAmount = 0;
-                NotificationService.Notify(NotificationSeverity.Warning, "Invalid input Total Amount.");
+
+                _toastService.ShowInfo("Total Amount must be greater than 0", "Validation Error");
+
                 return;
             }
 
@@ -246,21 +264,30 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             if (mx.Amount <= 0)
             {
-                NotificationService.Notify(NotificationSeverity.Info, "Exchange Amount is not valid");
+
+                _toastService.ShowInfo("Amount must be greater than 0", "Validation Error");
+
                 isBusy = false;
+
                 return;
             }
 
             if (mx.TotalAmount <= 0)
             {
-                NotificationService.Notify(NotificationSeverity.Info, "Total Amount must be greater than 0");
+                
+                _toastService.ShowInfo("Total Amount must be greater than 0", "Validation Error");
+
                 isBusy = false;
+               
                 return;
             }
             if (mx.TotalAmount < mx.Amount)
             {
-                NotificationService.Notify(NotificationSeverity.Info, "Total Amount must be greater than Amount");
+
+                _toastService.ShowInfo("Total Amount must be greater than Amount", "Validation Error");
+
                 isBusy = false;
+               
                 return;
             }
 
@@ -278,6 +305,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             fcx.BankRefId = 11;
             fcx.SpotRate = mx.SpotRate;
             fcx.Remark = mx.Description;
+
             if (isBuy)
             {
                 fcx.BuyAmount = mx.Amount;
@@ -335,7 +363,8 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             if (!result.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Error, result.GetMessage());
+
+                _toastService.ShowError(result.GetMessage(), "Failed to create exchange");
 
                 isBusy = false;
 
@@ -350,7 +379,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             isBusy = false;
 
-            NotificationService.Notify(NotificationSeverity.Success, "Exchange created successfully.");
+            _toastService.ShowSuccess("Money exchange created successfully.", "Success");
 
             DialogService.Close(result.Value);
 

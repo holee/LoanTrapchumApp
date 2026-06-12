@@ -233,17 +233,12 @@ public partial class LoanRequestInfo(ILogger<LoanRequestCreate> logger)
 
             Model.AdminFeeAmount = (principle * (Model.AdminFeeRate / 100)).RoundUp(2);
 
-           // await GetApprovedUser(BranchId, (int)CurrenciesType.Usd, principle);
-
         }
         else
         {
             Model.CurrencyRefId = 1;
 
             Model.AdminFeeAmount = (principle * (Model.AdminFeeRate / 100)).RoundUp(-2);
-
-            //await GetApprovedUser(BranchId, (int)CurrenciesType.Khr, principle);
-
         }
 
         StateHasChanged();

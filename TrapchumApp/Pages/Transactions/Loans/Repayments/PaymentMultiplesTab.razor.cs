@@ -8,7 +8,7 @@ public partial class PaymentMultiplesTab
 {
     [Parameter, EditorRequired] public IEnumerable<VSchedule> Schedules { get; set; } = [];
     [Parameter, EditorRequired] public LoanPaymentDtoCreate? LoanPayment { set; get; } = new();
-    [Parameter, EditorRequired] public int? CurrencyId { get; set; } = (int)CurrenciesType.Khr;
+    [Parameter, EditorRequired] public int? CurrencyId { get; set; } = (int)CurrenciesType.KHR;
     [Parameter] public EventCallback ClosedTab { get; set; } = default!;
     [Parameter] public EventCallback<LoanPaymentDtoCreate> CreatePayment { get; set; } = default!;
 
@@ -325,7 +325,7 @@ public partial class PaymentMultiplesTab
             {"CurrencyId",CurrencyId }
         };
 
-        DialogService.OpenAsync<PaymentSideBar>($"{LoanPayment.CustomerName}", parameters, options);
+        DialogService.OpenAsync<PaymentSideBars>($"{LoanPayment.CustomerName}", parameters, options);
 
     }
 

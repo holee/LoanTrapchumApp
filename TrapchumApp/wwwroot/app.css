@@ -1,6 +1,6 @@
 :root {
-    --min-height: 25rem;
-    --normal-height: 40rem;
+    --min-height: 15rem;
+    --normal-height: 25rem;
     --max-height: 55rem;
     --rz-numeric-input-padding-block: 0.25rem;
     --rz-tabs-padding: 0.45rem !important;
@@ -51,9 +51,7 @@
 
 html,
 body {
-    font-family: kh_siemreap, "Noto Sans Khmer", "Khmer OS Siemreap", Arial, sans-serif !important;
-}
-    background-color: var(--rz-base-200);
+    font-family: kh_siemreap, "Noto Sans Khmer", "Khmer OS Siemreap", Arial, sans-serif;
 }
 
 .rz-data-row {

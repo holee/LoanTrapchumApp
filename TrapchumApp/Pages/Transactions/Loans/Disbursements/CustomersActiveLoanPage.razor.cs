@@ -21,12 +21,19 @@ public partial class CustomersActiveLoanPage
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     [CascadingParameter] CascadingAppState BState { get; set; } = default!;
     [Parameter] public int? BranchId { get; set; }
+
     protected int totalCstomers;
+
     private int selectedIndex = 0;
+
     private string? customerId = string.Empty;
+
     private bool isLoading = false;
+
     private CustomerResponse? Customer;
+
     private List<VCustomerList>? VCustomers = [];
+
     private bool includeInactive = false;
 
     private string filterText = string.Empty;
@@ -37,7 +44,7 @@ public partial class CustomersActiveLoanPage
 
     private int pageIndex = 0;
 
-    private string sortField = nameof(VCustomerList.ModifiedDT);
+    private string sortField = nameof(VCustomerList.FirstName);
 
     private bool sortDescending = true;
 
@@ -104,7 +111,7 @@ public partial class CustomersActiveLoanPage
         {
             Resizable = false,
             Draggable = true,
-        }, parameters: new Dictionary<string, object>
+        }, parameters: new Dictionary<string, object?>
         {
             { "CustomerId", customerId! }
         });
@@ -117,7 +124,7 @@ public partial class CustomersActiveLoanPage
         {
             Resizable = false,
             Draggable = true,
-        }, parameters: new Dictionary<string, object>
+        }, parameters: new Dictionary<string, object?>
         {
             { "CustomerId", customerId! }
         });
@@ -128,61 +135,10 @@ public partial class CustomersActiveLoanPage
     {
         ContextMenuService.Close();
 
-        // Details(customerId);
+        string ? uri = $"/App/Customers/{customerId}/Details";
+
+        NavigationManager.NavigateTo(uri);
     }
-
-    private async Task AddEdit(string? customerId)
-    {
-        ContextMenuService.Close();
-
-        //AddEditTab(customerId);
-    }
-
-    private async void AddDelete(string? customerId)
-    {
-        var confirmOption = new ConfirmOptions
-        {
-            OkButtonText = "Yes",
-            CancelButtonText = "No"
-        };
-
-        var confirm = await DialogService.Confirm("do you want to delete this customer?", "Delete", options: confirmOption);
-
-        if (confirm == false) return;
-
-        var command = new DeleteCustomerCommand(customerId);
-
-
-        var rsp = await mediator.Send(command);  //_customerService.DeleteCustomerAsync(customerId);
-
-        if (rsp.Status == DeleteStatus.Success)
-        {
-            NotificationService.Notify(NotificationSeverity.Success, rsp.Message);
-
-            await LoadCustomerPageList(BranchId, null, filterText);
-
-            return;
-        }
-
-        if (rsp.Status == DeleteStatus.InUse)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, rsp.Message);
-
-            var confirmDelete = await DialogService.Confirm("This customer has active loan, do you want to inactivate this customer?", "Inactivate", options: confirmOption);
-
-            if (confirmDelete == false) return;
-
-            var commnandInactivate = new DeactivateCustomerCommand(customerId);
-
-            var rspInactivate = await mediator.Send(commnandInactivate);
-
-            if (rspInactivate.IsSuccess()) return;
-
-            NotificationService.Notify(NotificationSeverity.Error, rspInactivate.GetMessage());
-        }
-
-    }
-
 
 
     //void Details(string? id)
@@ -294,59 +250,7 @@ public partial class CustomersActiveLoanPage
 
     //}
 
-    //void AddCustomerTab()
-    //{
-    //    var newTabId = Guid.NewGuid().ToString("N");
-
-    //    RenderFragment childContent = builer =>
-    //    {
-    //        builer.OpenComponent(0, typeof(CustomerNewCreate));
-    //        builer.AddAttribute(1, "CustomerModel", new EntityCustomerCreate());
-    //        builer.AddAttribute(2, "Closed", EventCallback.Factory.Create(this, (int x) =>
-    //         {
-    //             CloseTab(newTabId);
-    //         }));
-    //        builer.AddAttribute(3, "UpdateState", EventCallback.Factory.Create(this, async (VCustomerList x) =>
-    //        {
-    //            _lastRowId = x.CustomerId;
-
-    //            await _gridCustomer.Reload();
-
-    //        }));
-    //        builer.SetKey(newTabId);
-    //        builer.CloseComponent();
-    //    };
-
-    //    var newTab = new CustomerTab
-    //    {
-    //        TabId = newTabId,
-    //        Title = "New Customer",
-    //        CustomerAction = CustomerAction.Create,
-    //        ChildContent = childContent,
-    //    };
-
-    //    _tabs.Add(newTab);
-
-    //    selectedIndex = _tabs.Count;
-    //}
-
-    //private void CloseTab(string? id)
-    //{
-    //    var tab = _tabs.FirstOrDefault(t => t.TabId == id);
-
-    //    if (tab != null)
-    //    {
-    //        var idx = _tabs.IndexOf(tab);
-
-    //        _tabs.Remove(tab);
-
-    //        selectedIndex = Math.Max(0, idx);
-    //    }
-
-    //}
-
-
-
+   
     void OnRowRender(RowRenderEventArgs<VCustomerList> args)
     {
         if (args.Data!.IsLoanActive)
@@ -389,7 +293,7 @@ public partial class CustomersActiveLoanPage
     {
         try
         {
-            isLoading = true;
+            Tracker.Show();
 
             var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
 
@@ -401,13 +305,13 @@ public partial class CustomersActiveLoanPage
 
             counts = rsp.Count;
 
-            isLoading = false;
+            Tracker.Hide();
 
             StateHasChanged();
         }
         catch
         {
-            isLoading = false;
+            Tracker.Hide();
         }
     }
 

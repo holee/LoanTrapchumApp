@@ -20,7 +20,8 @@ public sealed class CanApprovedRequestHandler : AuthorizationHandler<CanApproved
         AppRoles.Dbm,
     ];
 
-    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, CanApprovedRequestRequirement requirement,
+    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, 
+         CanApprovedRequestRequirement requirement,
         (VLoanRequests Request, VUserLoanSizes UserLoanSize) resource)
     {
         var user = context.User;
@@ -34,7 +35,7 @@ public sealed class CanApprovedRequestHandler : AuthorizationHandler<CanApproved
         if (!hasAllowedRole)
             return Task.CompletedTask;
 
-        var requiredPermission = AppPermission.RuleFor(Modules.LoanRequest, Actions.ApproveRequest);
+        var requiredPermission = AppPermission.RuleFor(Resources.LoanRequest, Actions.ApproveRequest);
 
         if (!user.HasClaim(AppClaim.Permission, requiredPermission))
             return Task.CompletedTask;
@@ -55,7 +56,9 @@ public sealed class CanApprovedRequestHandler : AuthorizationHandler<CanApproved
             : amount >= (loanSize.MinKhrLoanSize ?? 0m) && amount <= (loanSize.MaxKhrLoanSize ?? 0m);
 
         if (isWithinLimit && request.StatusId == (int)RequestStatus.Requested)
+        {
             context.Succeed(requirement);
+        }
 
         return Task.CompletedTask;
     }

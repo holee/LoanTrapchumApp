@@ -78,7 +78,20 @@
                         <span style="font-weight:500;">@c.CustomerName</span>
                     </Template>
                 </RadzenDataGridColumn>
-
+                <RadzenDataGridColumn Title="លេខទូរស័ព្ទ"
+                                      Property="@(nameof(CoPawnCustomerDto.CustomerPhone))"
+                                      Width="8rem"
+                                      Context="c">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="phone" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span>លេខទូរស័ព្ទ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template>
+                        <span style="font-family:monospace;font-size:0.85rem;">@c.CustomerPhone</span>
+                    </Template>
+                </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="លេខទូរស័ព្ទ"
                                       Property="@(nameof(CoPawnCustomerDto.CustomerPhone))"
                                       Width="8rem"

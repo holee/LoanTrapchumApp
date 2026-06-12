@@ -1,0 +1,61 @@
+/* ── Page wrapper ── */
+.ex-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 0.5rem 0 2rem;
+}
+
+/* ── Header bar ── */
+.ex-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.4rem;
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.ex-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Gradient icon circle */
+.ex-icon-wrap {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--rz-primary) 0%, var(--rz-secondary, #3a0647) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.ex-header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.ex-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #16213e;
+    letter-spacing: -0.01em;
+}
+
+.ex-subtitle {
+    font-size: 0.8rem;
+    color: #8a93a2;
+}
+
+/* ── Content card ── */
+.ex-body {
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+}

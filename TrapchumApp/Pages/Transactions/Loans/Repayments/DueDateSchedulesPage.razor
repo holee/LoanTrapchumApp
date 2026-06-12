@@ -34,7 +34,7 @@
                         Data="@schedules"
                         Responsive
                         Density="Density.Compact"
-                        SelectionMode="@gridSelectionMode"
+                        SelectionMode="DataGridSelectionMode.Single"
                         GridLines="DataGridGridLines.Horizontal"
                         @bind-Value="@_selectedSchedules"
                         RowSelect="SelectedRowEvt"
@@ -43,7 +43,7 @@
                         AllowRowSelectOnRowClick="@allowRowSelected"
                         IsLoading="isLoading"
                         @ref="gridSchedule"
-                        style="border-radius:var(--rz-border-radius);overflow:hidden;">
+                        style="overflow:hidden;min-height:var(--rz-min-height);height:var(--rz-normal-height);max-height:var(--rz-max-height);">
             <Columns>
                 <RadzenDataGridColumn Width="3rem"
                                       TextAlign="TextAlign.Center"
@@ -70,9 +70,8 @@
                                       Sortable="false">
                     <Template>
                         <input type="hidden" @bind="c.LoanId" />
-                        <RadzenBadge 
-                                BadgeStyle="BadgeStyle.Danger" 
-                                Text="@c.InstallmentNo.ToString()" />
+                        <RadzenBadge BadgeStyle="BadgeStyle.Danger"
+                                     Text="@c.InstallmentNo.ToString()" />
                     </Template>
                 </RadzenDataGridColumn>
 
@@ -114,7 +113,7 @@
                                       Title="ប្រាក់ដើម"
                                       Sortable="false">
                     <Template>
-                        <span style="font-variant-numeric:tabular-nums;">@c.LeftPrinciple.Format(c.CurrencyId)</span>
+                        <span style="font-variant-numeric:tabular-nums;">@c.LeftPrinciple</span>
                     </Template>
                 </RadzenDataGridColumn>
 
@@ -123,7 +122,7 @@
                                       Title="ការប្រាក់"
                                       Sortable="false">
                     <Template>
-                        <span style="font-variant-numeric:tabular-nums;">@c.LeftInterestAmount.Format(c.CurrencyId)</span>
+                        <span style="font-variant-numeric:tabular-nums;">@c.LeftInterestAmount</span>
                     </Template>
                 </RadzenDataGridColumn>
 
@@ -132,7 +131,7 @@
                                       Context="c"
                                       Sortable="false">
                     <Template>
-                        <span style="font-variant-numeric:tabular-nums;">@c.LeftCollectionFeeAmount.Format(c.CurrencyId)</span>
+                        <span style="font-variant-numeric:tabular-nums;">@c.LeftCollectionFeeAmount</span>
                     </Template>
                 </RadzenDataGridColumn>
 
@@ -143,7 +142,7 @@
                     <Template>
                         @if (c.PenaltyAmount > 0)
                         {
-                            <span style="font-variant-numeric:tabular-nums;color:var(--rz-danger);">@c.PenaltyAmount.Format(c.CurrencyId)</span>
+                            <span style="font-variant-numeric:tabular-nums;color:var(--rz-danger);">@c.PenaltyAmount</span>
                         }
                         else
                         {
@@ -158,7 +157,7 @@
                                       Context="c"
                                       Sortable="false">
                     <Template>
-                        <strong style="font-variant-numeric:tabular-nums;">@c.LeftAmount.Format(c.CurrencyId)</strong>
+                        <strong style="font-variant-numeric:tabular-nums;">@c.LeftAmount</strong>
                     </Template>
                 </RadzenDataGridColumn>
 
@@ -168,7 +167,7 @@
                                       Title="ដើមនៅសល់"
                                       Sortable="false">
                     <Template>
-                        <span style="font-variant-numeric:tabular-nums;">@c.LoanOutstanding.Format(c.CurrencyId)</span>
+                        <span style="font-variant-numeric:tabular-nums;">@c.LoanOutstanding</span>
                     </Template>
                 </RadzenDataGridColumn>
 
@@ -393,6 +392,13 @@
                     {
                       Text = "Recieve Payment",
                       Value = 1,
+                      Icon = "paid",
+                      Disabled=SetDisabled(args.Data)
+                    },
+                new ContextMenuItem()
+                    {
+                      Text = "Collection Payment",
+                      Value = 3,
                       Icon = "paid",
                       Disabled=SetDisabled(args.Data)
                     },

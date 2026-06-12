@@ -14,6 +14,7 @@ using Applications.Features.Identity.Roles.Responses;
 using Applications.Features.Identity.Users;
 using Applications.Commons.ExceptionHandlers;
 using ErrorOr;
+using Infrastructures.Implements.Extensions;
 namespace Infrastructures.Implements;
 
 public sealed class RoleRepository(
@@ -318,10 +319,19 @@ public sealed class RoleRepository(
     public async Task<Pager<RoleDto>> GetRolesAsync(QueryParam param, CancellationToken cancellation = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
         var queries = context.Roles.Where(x => x.IsActive);
 
         if (!string.IsNullOrEmpty(param.Filter))
-            queries = queries.Where(x => EF.Functions.Like(x.Name!, $"%{param.Filter}%"));
+        {
+            var filter = param.Filter.Trim();
+
+            string[] columns = [nameof(ApplicationRole.Name), nameof(ApplicationRole.Description)];
+
+            queries = queries.StartWiths(filter, columns);
+
+        }
+
 
         var counts = await queries.CountAsync(cancellation);
 

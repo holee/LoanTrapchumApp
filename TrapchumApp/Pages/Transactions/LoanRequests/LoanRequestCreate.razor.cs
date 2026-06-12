@@ -443,13 +443,17 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         {
             var param = new Dictionary<string, object?>
             {
-                { "CollateralId", model.CustomerRefId }
+                { "CollateralId", model.CustomerRefId },
+
+                {"PageType", PageType.Dialog }
             };
 
             var options = new DialogOptions
             {
                 Width = "100vw",
+
                 Height = "100vh",
+
                 AutoFocusFirstElement = false
             };
 
@@ -487,12 +491,40 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             await HandleLoanRequest(RequestStatus.New);
         }
 
+        decimal? _customerProfit = 0;
+        void OnGetIncomeOrExpense(decimal? profit)
+        {
+            _customerProfit = profit;
+        }
+
         protected async Task HandleCreateRequest()
         {
             if (editForm.EditContext?.Validate() == false)
             {
                 return;
             }
+
+            if (requestCollateralLines.Count() == 0)
+            {
+                _toastService.ShowWarning("Please add at least one collateral to proceed.");
+
+                return;
+            }
+
+            if (Guarantors.Count() == 0)
+            {
+                _toastService.ShowWarning("Please add at least one guarantor to proceed.");
+
+                return;
+            }
+
+            if (_customerProfit <= 0)
+            {
+                _toastService.ShowError("Customer's profits must be greater than zero to proceed with the loan request.");
+
+                return;
+            }
+
 
             if (await MsgBox.ConfirmAsync("Do you want to save this loan request?") == MsgBoxResult.No) return;
 
