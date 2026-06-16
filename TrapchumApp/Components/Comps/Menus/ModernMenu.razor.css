@@ -1,0 +1,766 @@
+/* =============================================
+   ModernMenu – Material Design–inspired styles
+   =============================================
+   Class naming mirrors MudBlazor so usage feels
+   identical. All child styles use ::deep so they
+   work across Blazor's CSS-isolation boundary.
+   ============================================= */
+
+/* ─────── Container ─────── */
+.mud-menu {
+    position: relative;
+    display: inline-flex;
+    vertical-align: middle;
+}
+
+/* ─────── Activator wrapper ─────── */
+::deep .mud-menu-activator {
+    display: inline-flex;
+}
+
+/* ─────────────────────────────────
+   Standard Button (MudButton-like)
+   ───────────────────────────────── */
+::deep .mud-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.02857em;
+    text-transform: uppercase;
+    cursor: pointer;
+    outline: none;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: background-color 250ms cubic-bezier(0.4,0,0.2,1), box-shadow 250ms cubic-bezier(0.4,0,0.2,1), border-color 250ms cubic-bezier(0.4,0,0.2,1);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+    ::deep .mud-btn:disabled {
+        opacity: 0.38;
+        cursor: default;
+        pointer-events: none;
+    }
+
+/* ── Sizes ── */
+::deep .mud-btn-small {
+    padding: 4px 10px;
+    font-size: 0.8125rem;
+}
+
+::deep .mud-btn-medium {
+    padding: 6px 16px;
+    font-size: 0.875rem;
+}
+
+::deep .mud-btn-large {
+    padding: 8px 22px;
+    font-size: 0.9375rem;
+}
+
+/* ── Button icons ── */
+::deep .mud-btn-icon {
+    font-size: 1.15rem;
+    line-height: 1;
+}
+
+    ::deep .mud-btn-icon.start {
+        margin-right: 4px;
+    }
+
+    ::deep .mud-btn-icon.end {
+        margin-left: 4px;
+        font-size: 0.95rem;
+        transition: transform 0.25s ease;
+    }
+
+        ::deep .mud-btn-icon.end.mud-rotate {
+            transform: rotate(180deg);
+        }
+
+/* ── No elevation ── */
+::deep .mud-btn-no-elevation {
+    box-shadow: none !important;
+}
+
+/* ─── Color variables ─── */
+:root {
+    --mud-color-primary: #594AE2;
+    --mud-color-primary-hover: #4B3BC8;
+    --mud-color-primary-text: #ffffff;
+    --mud-color-secondary: #FF4081;
+    --mud-color-secondary-hover: #E0356F;
+    --mud-color-secondary-text: #ffffff;
+    --mud-color-success: #00C853;
+    --mud-color-success-hover: #00A844;
+    --mud-color-success-text: #ffffff;
+    --mud-color-warning: #FF9800;
+    --mud-color-warning-hover: #E08600;
+    --mud-color-warning-text: #ffffff;
+    --mud-color-error: #F44336;
+    --mud-color-error-hover: #D32F2F;
+    --mud-color-error-text: #ffffff;
+    --mud-color-info: #2196F3;
+    --mud-color-info-hover: #1A7FD5;
+    --mud-color-info-text: #ffffff;
+    --mud-color-dark: #424242;
+    --mud-color-dark-hover: #303030;
+    --mud-color-dark-text: #ffffff;
+    --mud-color-default: rgba(0,0,0,0.08);
+    --mud-color-default-text: rgba(0,0,0,0.87);
+}
+
+/* ─── TEXT variant ─── */
+::deep .mud-btn-text {
+    background: transparent;
+    box-shadow: none;
+}
+
+    ::deep .mud-btn-text.mud-btn-default {
+        color: var(--mud-color-default-text);
+    }
+
+    ::deep .mud-btn-text.mud-btn-primary {
+        color: var(--mud-color-primary);
+    }
+
+    ::deep .mud-btn-text.mud-btn-secondary {
+        color: var(--mud-color-secondary);
+    }
+
+    ::deep .mud-btn-text.mud-btn-success {
+        color: var(--mud-color-success);
+    }
+
+    ::deep .mud-btn-text.mud-btn-warning {
+        color: var(--mud-color-warning);
+    }
+
+    ::deep .mud-btn-text.mud-btn-error {
+        color: var(--mud-color-error);
+    }
+
+    ::deep .mud-btn-text.mud-btn-info {
+        color: var(--mud-color-info);
+    }
+
+    ::deep .mud-btn-text.mud-btn-dark {
+        color: var(--mud-color-dark);
+    }
+
+    ::deep .mud-btn-text.mud-btn-inherit {
+        color: inherit;
+    }
+
+    ::deep .mud-btn-text:hover:not(:disabled) {
+        background: rgba(0,0,0,0.04);
+    }
+
+    ::deep .mud-btn-text.mud-btn-primary:hover:not(:disabled) {
+        background: rgba(89,74,226,0.08);
+    }
+
+    ::deep .mud-btn-text.mud-btn-secondary:hover:not(:disabled) {
+        background: rgba(255,64,129,0.08);
+    }
+
+    ::deep .mud-btn-text.mud-btn-success:hover:not(:disabled) {
+        background: rgba(0,200,83,0.08);
+    }
+
+    ::deep .mud-btn-text.mud-btn-warning:hover:not(:disabled) {
+        background: rgba(255,152,0,0.08);
+    }
+
+    ::deep .mud-btn-text.mud-btn-error:hover:not(:disabled) {
+        background: rgba(244,67,54,0.08);
+    }
+
+    ::deep .mud-btn-text.mud-btn-info:hover:not(:disabled) {
+        background: rgba(33,150,243,0.08);
+    }
+
+    ::deep .mud-btn-text.mud-btn-dark:hover:not(:disabled) {
+        background: rgba(66,66,66,0.08);
+    }
+
+/* ─── FILLED variant ─── */
+::deep .mud-btn-filled.mud-btn-default {
+    background: var(--mud-color-default);
+    color: var(--mud-color-default-text);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+::deep .mud-btn-filled.mud-btn-primary {
+    background: var(--mud-color-primary);
+    color: var(--mud-color-primary-text);
+    box-shadow: 0 2px 4px rgba(89,74,226,0.3);
+}
+
+::deep .mud-btn-filled.mud-btn-secondary {
+    background: var(--mud-color-secondary);
+    color: var(--mud-color-secondary-text);
+    box-shadow: 0 2px 4px rgba(255,64,129,0.3);
+}
+
+::deep .mud-btn-filled.mud-btn-success {
+    background: var(--mud-color-success);
+    color: var(--mud-color-success-text);
+    box-shadow: 0 2px 4px rgba(0,200,83,0.3);
+}
+
+::deep .mud-btn-filled.mud-btn-warning {
+    background: var(--mud-color-warning);
+    color: var(--mud-color-warning-text);
+    box-shadow: 0 2px 4px rgba(255,152,0,0.3);
+}
+
+::deep .mud-btn-filled.mud-btn-error {
+    background: var(--mud-color-error);
+    color: var(--mud-color-error-text);
+    box-shadow: 0 2px 4px rgba(244,67,54,0.3);
+}
+
+::deep .mud-btn-filled.mud-btn-info {
+    background: var(--mud-color-info);
+    color: var(--mud-color-info-text);
+    box-shadow: 0 2px 4px rgba(33,150,243,0.3);
+}
+
+::deep .mud-btn-filled.mud-btn-dark {
+    background: var(--mud-color-dark);
+    color: var(--mud-color-dark-text);
+    box-shadow: 0 2px 4px rgba(66,66,66,0.3);
+}
+
+::deep .mud-btn-filled.mud-btn-primary:hover:not(:disabled) {
+    background: var(--mud-color-primary-hover);
+}
+
+::deep .mud-btn-filled.mud-btn-secondary:hover:not(:disabled) {
+    background: var(--mud-color-secondary-hover);
+}
+
+::deep .mud-btn-filled.mud-btn-success:hover:not(:disabled) {
+    background: var(--mud-color-success-hover);
+}
+
+::deep .mud-btn-filled.mud-btn-warning:hover:not(:disabled) {
+    background: var(--mud-color-warning-hover);
+}
+
+::deep .mud-btn-filled.mud-btn-error:hover:not(:disabled) {
+    background: var(--mud-color-error-hover);
+}
+
+::deep .mud-btn-filled.mud-btn-info:hover:not(:disabled) {
+    background: var(--mud-color-info-hover);
+}
+
+::deep .mud-btn-filled.mud-btn-dark:hover:not(:disabled) {
+    background: var(--mud-color-dark-hover);
+}
+
+::deep .mud-btn-filled.mud-btn-default:hover:not(:disabled) {
+    background: rgba(0,0,0,0.12);
+}
+
+/* ─── OUTLINED variant ─── */
+::deep .mud-btn-outlined {
+    background: transparent;
+    box-shadow: none;
+    border: 1px solid rgba(0,0,0,0.23);
+}
+
+    ::deep .mud-btn-outlined.mud-btn-default {
+        color: var(--mud-color-default-text);
+        border-color: rgba(0,0,0,0.23);
+    }
+
+    ::deep .mud-btn-outlined.mud-btn-primary {
+        color: var(--mud-color-primary);
+        border-color: var(--mud-color-primary);
+    }
+
+    ::deep .mud-btn-outlined.mud-btn-secondary {
+        color: var(--mud-color-secondary);
+        border-color: var(--mud-color-secondary);
+    }
+
+    ::deep .mud-btn-outlined.mud-btn-success {
+        color: var(--mud-color-success);
+        border-color: var(--mud-color-success);
+    }
+
+    ::deep .mud-btn-outlined.mud-btn-warning {
+        color: var(--mud-color-warning);
+        border-color: var(--mud-color-warning);
+    }
+
+    ::deep .mud-btn-outlined.mud-btn-error {
+        color: var(--mud-color-error);
+        border-color: var(--mud-color-error);
+    }
+
+    ::deep .mud-btn-outlined.mud-btn-info {
+        color: var(--mud-color-info);
+        border-color: var(--mud-color-info);
+    }
+
+    ::deep .mud-btn-outlined.mud-btn-dark {
+        color: var(--mud-color-dark);
+        border-color: var(--mud-color-dark);
+    }
+
+    ::deep .mud-btn-outlined:hover:not(:disabled) {
+        background: rgba(0,0,0,0.04);
+    }
+
+    ::deep .mud-btn-outlined.mud-btn-primary:hover:not(:disabled) {
+        background: rgba(89,74,226,0.06);
+    }
+
+    ::deep .mud-btn-outlined.mud-btn-secondary:hover:not(:disabled) {
+        background: rgba(255,64,129,0.06);
+    }
+
+/* ─────────────────────────────────
+   Icon-Only Button (MudIconButton-like)
+   ───────────────────────────────── */
+::deep .mud-icon-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: rgba(0,0,0,0.54);
+    font-size: 1.25rem;
+    cursor: pointer;
+    outline: none;
+    overflow: hidden;
+    transition: background-color 150ms cubic-bezier(0.4,0,0.2,1), color 150ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+    ::deep .mud-icon-btn:hover:not(:disabled) {
+        background: rgba(0,0,0,0.04);
+    }
+
+    ::deep .mud-icon-btn:active:not(:disabled) {
+        background: rgba(0,0,0,0.12);
+    }
+
+    ::deep .mud-icon-btn:disabled {
+        opacity: 0.38;
+        cursor: default;
+        pointer-events: none;
+    }
+
+/* Icon btn sizes */
+::deep .mud-icon-btn-small {
+    width: 32px;
+    height: 32px;
+    font-size: 1.1rem;
+}
+
+::deep .mud-icon-btn-medium {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+}
+
+::deep .mud-icon-btn-large {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+}
+
+/* Icon btn colors */
+::deep .mud-icon-btn-primary {
+    color: var(--mud-color-primary);
+}
+
+::deep .mud-icon-btn-secondary {
+    color: var(--mud-color-secondary);
+}
+
+::deep .mud-icon-btn-success {
+    color: var(--mud-color-success);
+}
+
+::deep .mud-icon-btn-warning {
+    color: var(--mud-color-warning);
+}
+
+::deep .mud-icon-btn-error {
+    color: var(--mud-color-error);
+}
+
+::deep .mud-icon-btn-info {
+    color: var(--mud-color-info);
+}
+
+::deep .mud-icon-btn-dark {
+    color: var(--mud-color-dark);
+}
+
+::deep .mud-icon-btn-inherit {
+    color: inherit;
+}
+
+::deep .mud-icon-btn-primary:hover:not(:disabled) {
+    background: rgba(89,74,226,0.08);
+}
+
+::deep .mud-icon-btn-secondary:hover:not(:disabled) {
+    background: rgba(255,64,129,0.08);
+}
+
+::deep .mud-icon-btn-success:hover:not(:disabled) {
+    background: rgba(0,200,83,0.08);
+}
+
+::deep .mud-icon-btn-warning:hover:not(:disabled) {
+    background: rgba(255,152,0,0.08);
+}
+
+::deep .mud-icon-btn-error:hover:not(:disabled) {
+    background: rgba(244,67,54,0.08);
+}
+
+::deep .mud-icon-btn-info:hover:not(:disabled) {
+    background: rgba(33,150,243,0.08);
+}
+
+::deep .mud-icon-btn-dark:hover:not(:disabled) {
+    background: rgba(66,66,66,0.08);
+}
+
+/* ─────────────────────────────────
+   Ripple
+   ───────────────────────────────── */
+::deep .mud-ripple {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+    ::deep .mud-ripple::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 200%;
+        height: 200%;
+        background: rgba(255,255,255,0.3);
+        border-radius: 50%;
+        transform: translate(-50%,-50%) scale(0);
+        opacity: 0;
+        transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+    }
+
+::deep .mud-btn-text .mud-ripple::after,
+::deep .mud-btn-outlined .mud-ripple::after,
+::deep .mud-icon-btn .mud-ripple::after {
+    background: rgba(0,0,0,0.12);
+}
+
+::deep .mud-btn:active .mud-ripple::after,
+::deep .mud-icon-btn:active .mud-ripple::after {
+    transform: translate(-50%,-50%) scale(1);
+    opacity: 1;
+    transition: 0s;
+}
+
+/* ─────────────────────────────────
+   Overlay
+   ───────────────────────────────── */
+::deep .mud-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1299;
+    background: transparent;
+}
+
+/* ─────────────────────────────────
+   Popover
+   ───────────────────────────────── */
+::deep .mud-popover {
+    position: absolute;
+    z-index: 1300;
+    min-width: 180px;
+    animation: mudMenuIn 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Positions */
+::deep .mud-popover-bottomleft {
+    top: calc(100% + 4px);
+    left: 0;
+}
+
+::deep .mud-popover-bottomcenter {
+    top: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+::deep .mud-popover-bottomright {
+    top: calc(100% + 4px);
+    right: 0;
+}
+
+::deep .mud-popover-topleft {
+    bottom: calc(100% + 4px);
+    left: 0;
+}
+
+::deep .mud-popover-topcenter {
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+::deep .mud-popover-topright {
+    bottom: calc(100% + 4px);
+    right: 0;
+}
+
+::deep .mud-popover-lefttop {
+    top: 0;
+    right: calc(100% + 4px);
+}
+
+::deep .mud-popover-leftcenter {
+    top: 50%;
+    right: calc(100% + 4px);
+    transform: translateY(-50%);
+}
+
+::deep .mud-popover-leftbottom {
+    bottom: 0;
+    right: calc(100% + 4px);
+}
+
+::deep .mud-popover-righttop {
+    top: 0;
+    left: calc(100% + 4px);
+}
+
+::deep .mud-popover-rightcenter {
+    top: 50%;
+    left: calc(100% + 4px);
+    transform: translateY(-50%);
+}
+
+::deep .mud-popover-rightbottom {
+    bottom: 0;
+    left: calc(100% + 4px);
+}
+
+/* ─────────────────────────────────
+   Menu List (paper)
+   ───────────────────────────────── */
+::deep .mud-menu-list {
+    background: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12);
+    padding: 8px 0;
+    display: flex;
+    flex-direction: column;
+    max-height: var(--mud-menu-maxheight, none);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+}
+
+    /* Scrollbar */
+    ::deep .mud-menu-list::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    ::deep .mud-menu-list::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::deep .mud-menu-list::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+
+        ::deep .mud-menu-list::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+
+/* ─────────────────────────────────
+   Menu Item
+   ───────────────────────────────── */
+::deep .mud-menu-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 8px 16px;
+    background: transparent;
+    color: rgba(0,0,0,0.87);
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    text-decoration: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    text-align: left;
+    white-space: nowrap;
+    line-height: 1.5;
+    transition: background-color 150ms cubic-bezier(0.4,0,0.2,1);
+    -webkit-tap-highlight-color: transparent;
+}
+
+    ::deep .mud-menu-item:hover:not(.mud-item-disabled) {
+        background: rgba(0,0,0,0.04);
+    }
+
+    ::deep .mud-menu-item:active:not(.mud-item-disabled) {
+        background: rgba(0,0,0,0.08);
+    }
+
+    /* Item icon */
+    ::deep .mud-menu-item .mud-item-icon {
+        font-size: 1.25rem;
+        margin-right: 16px;
+        color: rgba(0,0,0,0.54);
+        flex-shrink: 0;
+        line-height: 1;
+        transition: color 150ms ease;
+    }
+
+    ::deep .mud-menu-item:hover:not(.mud-item-disabled) .mud-item-icon {
+        color: rgba(0,0,0,0.87);
+    }
+
+/* Item text */
+::deep .mud-item-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Disabled */
+::deep .mud-item-disabled {
+    opacity: 0.38;
+    cursor: default;
+    pointer-events: none;
+}
+
+/* ─── Dense mode ─── */
+::deep .mud-dense .mud-menu-item {
+    padding: 4px 16px;
+    font-size: 0.8125rem;
+}
+
+    ::deep .mud-dense .mud-menu-item .mud-item-icon {
+        font-size: 1.1rem;
+        margin-right: 12px;
+    }
+
+/* ─────────────────────────────────
+   Menu Divider
+   ───────────────────────────────── */
+::deep .mud-menu-divider {
+    height: 0;
+    border: none;
+    border-top: 1px solid rgba(0,0,0,0.12);
+    margin: 4px 0;
+}
+
+/* ─────────────────────────────────
+   Menu Label (section header)
+   ───────────────────────────────── */
+::deep .mud-menu-label {
+    padding: 8px 16px 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(0,0,0,0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.08333em;
+    cursor: default;
+    user-select: none;
+}
+
+/* ─────────────────────────────────
+   Dark Mode
+   ───────────────────────────────── */
+::deep .mud-menu-list.mud-dark {
+    background: #2d2d2d;
+    color: rgba(255,255,255,0.87);
+    box-shadow: 0px 5px 5px -3px rgba(0,0,0,0.4), 0px 8px 10px 1px rgba(0,0,0,0.3), 0px 3px 14px 2px rgba(0,0,0,0.25);
+}
+
+::deep .mud-dark .mud-menu-item {
+    color: rgba(255,255,255,0.87);
+}
+
+    ::deep .mud-dark .mud-menu-item:hover:not(.mud-item-disabled) {
+        background: rgba(255,255,255,0.08);
+    }
+
+    ::deep .mud-dark .mud-menu-item:active:not(.mud-item-disabled) {
+        background: rgba(255,255,255,0.16);
+    }
+
+    ::deep .mud-dark .mud-menu-item .mud-item-icon {
+        color: rgba(255,255,255,0.56);
+    }
+
+    ::deep .mud-dark .mud-menu-item:hover:not(.mud-item-disabled) .mud-item-icon {
+        color: rgba(255,255,255,0.87);
+    }
+
+::deep .mud-dark .mud-item-disabled {
+    opacity: 0.38;
+}
+
+::deep .mud-dark .mud-menu-divider {
+    border-top-color: rgba(255,255,255,0.12);
+}
+
+::deep .mud-dark .mud-menu-label {
+    color: rgba(255,255,255,0.5);
+}
+
+/* Dark mode scrollbar */
+::deep .mud-dark.mud-menu-list::-webkit-scrollbar-thumb {
+    background: #555;
+}
+
+    ::deep .mud-dark.mud-menu-list::-webkit-scrollbar-thumb:hover {
+        background: #777;
+    }
+
+/* ─── Animation ─── */
+@keyframes mudMenuIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}

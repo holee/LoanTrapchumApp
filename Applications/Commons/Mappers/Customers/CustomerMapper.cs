@@ -137,13 +137,13 @@ public static class CustomerMapper
                 SpousePassport = dto.SpousePassport,
                 SpousePhoneNo = dto.SpousePhoneNo,
                 SpouseIdCard = dto.SpouseIdCard,
-                EmergencyContact = new EmergencyContact
+                EmergencyContact = dto.EmergencyContact != null ? new EmergencyContact
                 {
                     ContactName = dto.EmergencyContact?.ContactName,
                     ContactNumber = dto.EmergencyContact?.ContactNumber,
                     Description = dto.EmergencyContact?.Description,
                     Relationship = dto.EmergencyContact?.Relationship,
-                }
+                } : null
             },
 
         };
@@ -213,14 +213,14 @@ public static class CustomerMapper
                 SpousePassport = dto.SpousePassport,
                 SpousePhoneNo = dto.SpousePhoneNo,
                 SpouseIdCard = dto.SpouseIdCard,
-                EmergencyContact = new EmergencyContact
+                EmergencyContact = dto.EmergencyContact != null ? new EmergencyContact
                 {
                     ContactId = dto.Id,
-                    ContactName = dto.EmergencyContact?.ContactName,
-                    ContactNumber = dto.EmergencyContact?.ContactNumber,
-                    Description = dto.EmergencyContact?.Description,
-                    Relationship = dto.EmergencyContact?.Relationship,
-                }
+                    ContactName = dto.EmergencyContact?.ContactName ?? string.Empty,
+                    ContactNumber = dto.EmergencyContact?.ContactNumber ?? string.Empty,
+                    Description = dto.EmergencyContact?.Description ?? string.Empty,
+                    Relationship = dto.EmergencyContact?.Relationship ?? string.Empty,
+                } : null
             }
         };
 

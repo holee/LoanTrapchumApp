@@ -74,14 +74,14 @@ namespace TrapchumApp.Pages.Lists.Customers
         {
             filterText = searchText ?? string.Empty;
 
-            await LoadCustomerPageList(null, null, filterText);
+            await FilterCustomers(selectedValue);
         }
 
         private async Task OnChanged(bool arg)
         {
             includeInactive = arg;
 
-            await LoadCustomerPageList(0, null, filterText);
+            await FilterCustomers(selectedValue);
         }
 
         protected async Task AddCollateral(string? customerId)
@@ -157,7 +157,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             if (rsp.Status == DeleteStatus.Success)
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Message);
+                _toastService.ShowSuccess(rsp.Message, "Delete Success");
 
                 await LoadCustomerPageList(null, null, filterText);
 
@@ -166,13 +166,16 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             if (rsp.Status == DeleteStatus.NotFound)
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.Message);
+                _toastService.ShowError(rsp.Message, "Delete Failed");
+
                 return;
             }
 
             if (rsp.Status == DeleteStatus.InUse)
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.Message);
+
+                _toastService.ShowError(rsp.Message, "Delete Failed");
+
                 return;
             }
 
@@ -360,17 +363,17 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             if (args.Data!.IsLoanActive)
             {
-                args.Attributes.Add("style", "font-weight:bold;color:red;background-color:yellow;");
+                args.Attributes["style"] = "font-weight:bold;color:red;background-color:yellow;";
             }
 
             if (searchMatching)
             {
-                args.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
+                args.Attributes["class"] = "rz-state-highlight rz-data-row recently-edited";
             }
 
             if (args.Data!.ModifiedDT.IsRecently())
             {
-                args.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
+                args.Attributes["class"] = "rz-state-highlight rz-data-row recently-edited";
             }
 
 
@@ -380,7 +383,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         {
             if (e.Data!.CustomerId == _lastRowId)
             {
-                e.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
+                e.Attributes["class"] = "rz-state-highlight rz-data-row recently-edited";
             }
         }
 
@@ -469,10 +472,10 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             filterText = filterColumn ?? string.Empty;
 
-            await FIlterCustomers(selectedValue);
+            await FilterCustomers(selectedValue);
         }
 
-        private async Task FIlterCustomers(int? value)
+        private async Task FilterCustomers(int? value)
         {
             if (value == (int)CustomerFilter.All)
             {
@@ -499,7 +502,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             {
                 var id = ((ListItem)e).Id;
 
-                await FIlterCustomers(id);
+                await FilterCustomers(id);
             }
         }
 

@@ -1,0 +1,432 @@
+﻿@page "/app/loans/{LoanId}/batch-repayment/{BranchId:int}/branches"
+@using TrapchumApp.Components.Buttons
+@using TrapchumApp.Pages.Transactions.Loans.Disbursements
+@using TrapchumApp.Pages.Transactions.Loans.Repayments
+<PageTitle>Batch Repayment</PageTitle>
+@attribute [MustHasPermission(Resources.Repayments, Actions.Read)]
+<style>
+    .cp-page {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 0.5rem 0;
+    }
+
+    .cp-summary-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+    }
+
+    .cp-stat-card {
+        position: relative;
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.07);
+        border-radius: 12px;
+        padding: 0.9rem 1.1rem 0.75rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        overflow: hidden;
+        transition: box-shadow 0.18s, transform 0.18s;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+        .cp-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .cp-stat-card:hover {
+            box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+            transform: translateY(-1px);
+        }
+
+    .cp-stat-card--principle::before {
+        background: linear-gradient(90deg, #3b82f6, #93c5fd);
+    }
+
+    .cp-stat-card--interest::before {
+        background: linear-gradient(90deg, #f59e0b, #fcd34d);
+    }
+
+    .cp-stat-card--fee::before {
+        background: linear-gradient(90deg, #10b981, #6ee7b7);
+    }
+
+    .cp-stat-card--total::before {
+        background: linear-gradient(90deg, #8b5cf6, #c4b5fd);
+    }
+
+    .cp-stat-label {
+        font-size: 0.685rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .cp-stat-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        flex-shrink: 0;
+    }
+
+    .cp-stat-icon--principle {
+        background: #eff6ff;
+        color: #3b82f6;
+    }
+
+    .cp-stat-icon--interest {
+        background: #fffbeb;
+        color: #d97706;
+    }
+
+    .cp-stat-icon--fee {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .cp-stat-icon--total {
+        background: #f5f3ff;
+        color: #7c3aed;
+    }
+
+    .cp-stat-value {
+        font-size: 1.2rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+        text-align: right;
+    }
+
+    .cp-stat-value--principle {
+        color: #2563eb;
+    }
+
+    .cp-stat-value--interest {
+        color: #b45309;
+    }
+
+    .cp-stat-value--fee {
+        color: #047857;
+    }
+
+    .cp-stat-value--total {
+        color: #6d28d9;
+    }
+
+    .cp-section-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.07);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    }
+
+    .cp-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.85rem 1.25rem;
+        background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+        border-bottom: 1px solid rgba(99,102,241,0.12);
+    }
+
+    .cp-section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #374151;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .cp-section-title-icon {
+        width: 26px;
+        height: 26px;
+        background: linear-gradient(135deg, #6366f1, #818cf8);
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 0.85rem;
+    }
+
+    .cp-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        background: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #bfdbfe;
+        border-radius: 20px;
+        padding: 0.2rem 0.65rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .cp-table-body {
+        padding: 0.75rem;
+    }
+
+    .db-page {
+        height: 100%;
+        overflow: auto;
+    }
+
+    .cp-payment-footer {
+        border-top: 1px solid rgba(99,102,241,0.12);
+        border-radius: 0 0 14px 14px;
+        overflow: hidden;
+    }
+
+    .cp-apply-row {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        padding: 0.5rem 1.25rem;
+        background: linear-gradient(135deg, #eef2ff 0%, #e8edff 100%);
+        border-bottom: 1px solid rgba(99,102,241,0.1);
+    }
+
+    .cp-apply-label {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #4f46e5;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .cp-apply-label-icon {
+        width: 22px;
+        height: 22px;
+        background: linear-gradient(135deg, #6366f1, #818cf8);
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    .cp-apply-input .rz-inputnumber {
+        width: 160px;
+        border: 2px solid #6366f1 !important;
+        border-radius: 8px !important;
+        font-size: 1rem !important;
+        font-weight: 800 !important;
+        color: #4338ca !important;
+        background: #fff !important;
+    }
+
+        .cp-apply-input .rz-inputnumber:focus-within {
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.22) !important;
+            border-color: #4f46e5 !important;
+        }
+
+    .cp-action-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.6rem;
+        padding: 0.75rem 1.25rem;
+        background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+    }
+</style>
+<LoanInfos BranchId="@BranchId"
+           LoanId="@LoanId"
+           @key="@(Guid.NewGuid().ToString())">
+    <ChildContent>
+        <RadzenButton Text="Exchange"
+                      Visible="@_isPaymentTab"
+                      Size="ButtonSize.ExtraSmall"
+                      Icon="@IconNames.CurrencyExchange"
+                      Click="@ToggleExchangeChanged"
+                      ButtonStyle="ButtonStyle.Secondary" />
+    </ChildContent>
+</LoanInfos>
+
+<div class="cp-page rz-px-2">
+    <div class="cp-summary-strip">
+        <div class="cp-stat-card cp-stat-card--principle">
+            <span class="cp-stat-label">
+                <span class="cp-stat-icon cp-stat-icon--principle">&#x1F4B0;</span>
+                ប្រាក់ដើម
+            </span>
+            <span class="cp-stat-value cp-stat-value--principle">
+                @_demoSelected?.Sum(x => x.LeftPrinciple).ToFormattedNumber()
+            </span>
+        </div>
+        <div class="cp-stat-card cp-stat-card--interest">
+            <span class="cp-stat-label">
+                <span class="cp-stat-icon cp-stat-icon--interest">&#x25B2;</span>
+                ការប្រាក់
+            </span>
+            <span class="cp-stat-value cp-stat-value--interest">
+                @_demoSelected?.Sum(x => x.LeftInterestAmount).ToFormattedNumber()
+            </span>
+        </div>
+        <div class="cp-stat-card cp-stat-card--fee">
+            <span class="cp-stat-label">
+                <span class="cp-stat-icon cp-stat-icon--fee">&#x2713;</span>
+                ប្រាក់ប្រសិទ្ធិភាព
+            </span>
+            <span class="cp-stat-value cp-stat-value--fee">
+                @_demoSelected?.Sum(x => x.LeftCollectionFeeAmount).ToFormattedNumber()
+            </span>
+        </div>
+        <div class="cp-stat-card cp-stat-card--total">
+            <span class="cp-stat-label">
+                <span class="cp-stat-icon cp-stat-icon--total">&#x3A3;</span>
+                ប្រាក់សរុប
+            </span>
+            <span class="cp-stat-value cp-stat-value--total">
+                @_demoSelected?.Sum(x => x.TotalPay).ToFormattedNumber()
+            </span>
+        </div>
+    </div>
+
+    <div class="cp-section-card">
+        <div class="cp-section-header">
+            <span class="cp-section-title">
+                <span class="cp-section-title-icon">&#x1F4C5;</span>
+                តារាងពេលបង់ប្រាក់
+            </span>
+            @if (_demoSelected?.Count > 0)
+            {
+                <span class="cp-badge">&#10003;&nbsp;@(_demoSelected.Count) ជ្រើស</span>
+            }
+        </div>
+        <div class="cp-table-body">
+            <div class="db-page">
+                <MyTable TItem="VSchedule"
+                         Data="@schedules"
+                         SelectedItems="_demoSelected"
+                         ShowSearch="false"
+                         SelectedItemsChanged="@OnSelectedItemsChanged"
+                         SearchPlaceholder="Search loans...">
+                    <Columns>
+                        <MyTableColumn TItem="VSchedule" Title="#" Width="2rem">
+                            <Template Context="row">@row.InstallmentNo</Template>
+                        </MyTableColumn>
+                        <MyTableColumn TItem="VSchedule" Title="ថ្ងៃទូទាត់" Width="100px">
+                            <Template Context="row">@row.PaymentDate.DayFirst()</Template>
+                        </MyTableColumn>
+                        <MyTableColumn TItem="VSchedule" Title="ប្រាក់ដើមត្រូវបង់" Width="130px" TextAlign="@TableTextAlign.Right">
+                            <Template Context="row">@row.LeftPrinciple.ToFormattedNumber()</Template>
+                        </MyTableColumn>
+                        <MyTableColumn TItem="VSchedule" Title="ការប្រាក់ត្រូវបង់" Width="110px" TextAlign="@TableTextAlign.Right">
+                            <Template Context="row">@row.LeftInterestAmount.ToFormattedNumber()</Template>
+                        </MyTableColumn>
+                        <MyTableColumn TItem="VSchedule" Title="ប្រាក់ប្រសិទ្ធភាព" Width="110px" TextAlign="@TableTextAlign.Right">
+                            <Template Context="row">@row.LeftCollectionFeeAmount.ToFormattedNumber()</Template>
+                        </MyTableColumn>
+                        <MyTableColumn TItem="VSchedule" Title="ប្រាក់ពិន័យ" Width="110px" TextAlign="@TableTextAlign.Right">
+                            <Template Context="row">@row.PenaltyAmount.ToFormattedNumber()</Template>
+                        </MyTableColumn>
+                        <MyTableColumn TItem="VSchedule" Title="ប្រាក់បង់សរុប" Width="110px" TextAlign="@TableTextAlign.Right">
+                            <Template Context="row">@row.TotalPay.ToFormattedNumber()</Template>
+                        </MyTableColumn>
+                        <MyTableColumn TItem="VSchedule" Title="ស្ថានភាព" Width="4rem" TextAlign="@TableTextAlign.Center">
+                            <Template Context="row">@row.ScheduleStatus</Template>
+                        </MyTableColumn>
+                    </Columns>
+                </MyTable>
+            </div>
+        </div>
+        <div class="cp-payment-footer">
+            <div class="cp-apply-row">
+                <span class="cp-apply-label">
+                    <span class="cp-apply-label-icon">
+                        <i class="rzi">payments</i>
+                    </span>
+                    ប្រាក់បង់
+                </span>
+                <span class="cp-apply-input">
+                    <RadzenNumeric @bind-Value="@_applyAmount"
+                                   Min="0"
+                                   ShowUpDown="false"
+                                   TextAlign="TextAlign.Right" />
+                </span>
+            </div>
+            <div class="cp-action-footer">
+                <AuthorizeView Policy="@Policies.MultiplePayment">
+                    <Authorized>
+                        <RadzenButton Icon="@IconNames.Paid"
+                                      Size="ButtonSize.ExtraSmall"
+                                      ButtonStyle="ButtonStyle.Success"
+                                      Click="ApplyMultipleSchedulePayment"
+                                      Visible="isAllowMultiplePayment"
+                                      Text="Apply Payment" />
+                    </Authorized>
+                </AuthorizeView>
+                <RadzenButton Icon="close"
+                              Size="ButtonSize.ExtraSmall"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Click="@CloseOpenTab"
+                              Text="Cancel" />
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@code {
+
+    private decimal? _applyAmount = 0;
+
+    private HashSet<VSchedule> _demoSelected = [];
+
+    void OnSelectedItemsChanged(HashSet<VSchedule> schedules)
+    {
+        _demoSelected = schedules.ToHashSet();
+
+        if (schedules.Count > 0)
+        {
+            _loanPaymentLine = new Applications.Features.LoanPayments.Requests.LoanPaymentLineDtoCreate
+            {
+                PaidPrinciple = _demoSelected.Sum(s => s.LeftPrinciple),
+                PaidInterest = _demoSelected.Sum(s => s.LeftInterestAmount),
+                PaidCollectionFee = _demoSelected.Sum(s => s.LeftCollectionFeeAmount),
+                PaidPenaltyAmount = _demoSelected.Sum(s => s.PenaltyAmount),
+                SubTotal = _demoSelected.Sum(s => s.TotalPay),
+            };
+
+            _applyAmount = _loanPaymentLine.SubTotal;
+        }
+        else
+        {
+            _loanPaymentLine = new Applications.Features.LoanPayments.Requests.LoanPaymentLineDtoCreate();
+
+            _applyAmount = 0;
+        }
+
+        StateHasChanged();
+    }
+
+}
+
+

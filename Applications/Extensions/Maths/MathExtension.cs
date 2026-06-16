@@ -254,9 +254,9 @@ namespace Applications.Extensions.Maths
         {
             return currencyId switch
             {
-                1 => (MarkupString)string.Format("{0:#,##0", d ?? 0, "រៀល"),
+                1 => (MarkupString)string.Format("{0:#,##0}", d ?? 0, "រៀល"),
                 2 => (MarkupString)string.Format("{0:#,##0." + new string('0', decimalPlaces) + "} {1}", d ?? 0, "ដុល្លា"),
-                _ => (MarkupString)string.Format("{0:#,##0", d ?? 0, "រៀល"),
+                _ => (MarkupString)string.Format("{0:#,##0}", d ?? 0, "រៀល"),
             };
         }
 

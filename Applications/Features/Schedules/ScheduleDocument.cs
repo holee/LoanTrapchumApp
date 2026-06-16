@@ -1,6 +1,5 @@
 ﻿using Applications.Extensions.DateTimes;
 using Applications.Extensions.Maths;
-using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.ViewModels.Reports;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -30,6 +29,8 @@ public sealed class ScheduleDocument : IDocument
     {
         container.Page(page =>
         {
+            //page.DefaultTextStyle(x => x.FontSize(10).FontFamily(ScheduleHelpers.FONT));
+
             page.Size(PageSizes.A4);
 
             page.Margin(10);
@@ -131,12 +132,12 @@ public sealed class ScheduleDocument : IDocument
     private void AddTableHeaderCell(TableCellDescriptor header)
     {
         header.Cell().Element(HeaderCellStyle).Text("#").AlignCenter();
-        header.Cell().Element(HeaderCellStyle).Text("Payment Date").SemiBold().AlignCenter();
-        header.Cell().Element(HeaderCellStyle).Text("Days").SemiBold().AlignCenter();
-        header.Cell().Element(HeaderCellStyle).AlignRight().Text("Principle").SemiBold();
-        header.Cell().Element(HeaderCellStyle).AlignRight().Text("Interest").SemiBold();
-        header.Cell().Element(HeaderCellStyle).AlignRight().Text("Total").SemiBold();
-        header.Cell().Element(HeaderCellStyle).AlignRight().Text("Outstanding").SemiBold();
+        header.Cell().Element(HeaderCellStyle).Text("ថ្អៃបង់ប្រាក់").SemiBold().AlignCenter();
+        header.Cell().Element(HeaderCellStyle).Text("ចំនួនថ្ងៃ").SemiBold().AlignCenter();
+        header.Cell().Element(HeaderCellStyle).AlignRight().Text("ប្រាក់ដើមត្រូវបង់").SemiBold();
+        header.Cell().Element(HeaderCellStyle).AlignRight().Text("ការប្រាក់").SemiBold();
+        header.Cell().Element(HeaderCellStyle).AlignRight().Text("ប្រាក់បង់សរុប").SemiBold();
+        header.Cell().Element(HeaderCellStyle).AlignRight().Text("ប្រាក់ដើមនៅសាល់").SemiBold();
     }
 
     private void InsertTableRow(TableDescriptor table, VSchedule item)
@@ -144,10 +145,10 @@ public sealed class ScheduleDocument : IDocument
         table.Cell().Element(CellStyle).Text($"{item.InstallmentNo}").AlignCenter();
         table.Cell().Element(CellStyle).Text($"{item.PaymentDate.DayFirst()}").AlignCenter();
         table.Cell().Element(CellStyle).Text($"{item.TotalDay}").AlignCenter();
-        table.Cell().Element(CellStyle).Text($"{item.Principle.Formats(Value.CurrencyId)}").AlignRight();
-        table.Cell().Element(CellStyle).Text($"{item.TotalFee.Formats(Value.CurrencyId)}").AlignRight();
-        table.Cell().Element(CellStyle).Text($"{item.TotalPay.Formats(Value.CurrencyId)}").SemiBold().AlignRight();
-        table.Cell().Element(CellStyle).Text($"{item.LoanOutstanding.Formats(Value.CurrencyId)}").AlignRight();
+        table.Cell().Element(CellStyle).Text($"{item.Principle.As(Value.CurrencyId)}").AlignRight();
+        table.Cell().Element(CellStyle).Text($"{item.Interest.As(Value.CurrencyId)}").AlignRight();
+        table.Cell().Element(CellStyle).Text($"{item.TotalPay.As(Value.CurrencyId)}").SemiBold().AlignRight();
+        table.Cell().Element(CellStyle).Text($"{item.LoanOutstanding.As(Value.CurrencyId)}").AlignRight();
     }
 
     private void ComposeHeader(IContainer header)
@@ -197,15 +198,15 @@ public sealed class ScheduleDocument : IDocument
         {
             CreateColumn(col, ScheduleHelpers.NAME, $"{Value.AltName}", font, 10);
             CreateColumn(col, ScheduleHelpers.PERIOD, $"{Value.PeriodName}", font, 10);
-            CreateColumn(col, ScheduleHelpers.RATE, $"{Value.PaidInterest.Formats(Value.CurrencyId)}", font, 10);
-            CreateColumn(col, ScheduleHelpers.PRINCIPLE, $"{Value.Principle.Formats(Value.CurrencyId)}", font, 10);
+            CreateColumn(col, ScheduleHelpers.RATE, $"{Value.InterestRate.AsPercent()}", font, 10);
+            CreateColumn(col, ScheduleHelpers.PRINCIPLE, $"{Value.Principle.As(Value.CurrencyId)}", font, 10);
             CreateColumn(col, ScheduleHelpers.BRANCH, $"{Value.BranchName}", font, 10);
         });
         row.RelativeItem().PaddingTop(10).Column(col =>
         {
             CreateColumn(col, ScheduleHelpers.LAST_DUE_DATE, $"{Value.LastPaymentDate.DayFirst()}", font);
             CreateColumn(col, ScheduleHelpers.ADDRESS, $"{Value.Address}", font);
-            CreateColumn(col, ScheduleHelpers.AGENT, $"{Value.AgentName}", font);
+            CreateColumn(col, ScheduleHelpers.AGENT, $"{Value.CreditAgentKhmer}", font);
             CreateColumn(col, ScheduleHelpers.PHONE, $"{Value.AgentPhone}", font);
             CreateColumn(col, "", "", font);
         });
@@ -217,11 +218,11 @@ public sealed class ScheduleDocument : IDocument
         {
             row.ConstantItem(30, Unit.Millimetre).Column(c =>
             {
-                c.Item().Text(label).FontFamily(font);
+                c.Item().Text(label).FontSize(10).FontFamily(font);
             });
             row.ConstantItem(2, Unit.Millimetre).Column(c =>
             {
-                c.Item().Text(":").FontFamily(font);
+                c.Item().Text(":").FontSize(10).FontFamily(font);
             });
             row.RelativeItem()
                     .ScaleToFit()
@@ -230,7 +231,7 @@ public sealed class ScheduleDocument : IDocument
                 c.Item()
                     .ScaleToFit()
                     .Text($"{value}")
-                    .FontFamily(font);
+                    .FontSize(10).FontFamily(font);
             });
         });
 

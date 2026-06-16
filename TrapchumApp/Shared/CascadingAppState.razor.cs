@@ -57,6 +57,7 @@ namespace TrapchumApp.Shared
             set
             {
                 _manageRequest = value;
+
                 StateHasChanged();
             }
         }
@@ -459,7 +460,7 @@ namespace TrapchumApp.Shared
 
                 var result = await _authorizeService.AuthorizeAsync(user, Policies.RequestLoanRequest);
 
-                _canDisbursed = result.Succeeded;
+                _manageRequest = result.Succeeded;
 
                 return;
             }

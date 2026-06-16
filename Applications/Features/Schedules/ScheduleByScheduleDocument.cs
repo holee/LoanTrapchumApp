@@ -14,6 +14,7 @@ public sealed class ScheduleByScheduleDocument(LoanResponse item) : IDocument
     {
         document.Page(page =>
         {
+            page.DefaultTextStyle(x => x.FontSize(14).FontFamily(ScheduleHelpers.FONT));
             page.Size(PageSizes.A4);
 
             page.Margin(0.5f, Unit.Millimetre);
@@ -122,10 +123,10 @@ public sealed class ScheduleByScheduleDocument(LoanResponse item) : IDocument
                             .Text("Due Date")
                             .SemiBold()
                             .AlignCenter();
-                header.Cell().Element(SetHeaderCellStyle).AlignRight().Text("Principle").SemiBold();
-                header.Cell().Element(SetHeaderCellStyle).AlignRight().Text("Interest").SemiBold();
-                header.Cell().Element(SetHeaderCellStyle).AlignRight().Text("Total").SemiBold();
-                header.Cell().Element(SetHeaderCellStyle).AlignRight().Text("Outstanding").SemiBold();
+                header.Cell().Element(SetHeaderCellStyle).AlignRight().Text("ប្រាក់ដើមត្រូវបង់").SemiBold();
+                header.Cell().Element(SetHeaderCellStyle).AlignRight().Text("ការប្រាក់").SemiBold();
+                header.Cell().Element(SetHeaderCellStyle).AlignRight().Text("ប្រាក់បង់សរុប").SemiBold();
+                header.Cell().Element(SetHeaderCellStyle).AlignRight().Text("ប្រាក់ដើមគ្រា").SemiBold();
             });
 
             foreach (var item in Item!.Schedules ?? [])
@@ -133,10 +134,10 @@ public sealed class ScheduleByScheduleDocument(LoanResponse item) : IDocument
                 table.Cell().Element(SetCellStyle).Text($"{item.InstallmentNo}").AlignCenter();
                 table.Cell().Element(SetCellStyle).Text($"{item.PaymentDate.DayFirst()}").AlignCenter();
                 table.Cell().Element(SetCellStyle).Text($"{item.TotalDay}").AlignCenter();
-                table.Cell().Element(SetCellStyle).Text($"{item.Principle.Formats(item.CurrencyId)}").AlignRight();
-                table.Cell().Element(SetCellStyle).Text($"{item.TotalFee.Formats(item.CurrencyId)}").AlignRight();
-                table.Cell().Element(SetCellStyle).Text($"{item.TotalPay.Formats(item.CurrencyId)}").AlignRight();
-                table.Cell().Element(SetCellStyle).Text($"{item.LoanOutstanding.Formats(item.CurrencyId)}").AlignRight();
+                table.Cell().Element(SetCellStyle).Text($"{item.Principle.As(item.CurrencyId)}").AlignRight();
+                table.Cell().Element(SetCellStyle).Text($"{item.TotalFee.As(item.CurrencyId)}").AlignRight();
+                table.Cell().Element(SetCellStyle).Text($"{item.TotalPay.As(item.CurrencyId)}").AlignRight();
+                table.Cell().Element(SetCellStyle).Text($"{item.LoanOutstanding.As(item.CurrencyId)}").AlignRight();
             }
         });
     }

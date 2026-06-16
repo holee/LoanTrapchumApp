@@ -1,4 +1,5 @@
 ﻿@using Applications.Features.Loans.Dtos.Responses
+@using TrapchumApp.Components.Comps.Menus
 <PageTitle>All Loans</PageTitle>
 <GridToolbar SearchChanged="@TextLoanSearchChanged">
     <LeftChildren>
@@ -39,7 +40,6 @@
                 PagerPosition="PagerPosition.Bottom"
                 ShowPagingSummary="true"
                 PagerHorizontalAlign="HorizontalAlign.Right"
-                IsLoading="@isLoading"
                 AllowRowSelectOnRowClick="true"
                 PageSizeChanged="@ChangedPageSize"
                 RowSelect="@OnRowSelected"
@@ -148,20 +148,13 @@
                               TextAlign="TextAlign.Center"
                               Sortable="true">
             <Template>
-
                 <RadzenButton Size="ButtonSize.ExtraSmall"
                               Icon="more_vert"
                               Variant="Variant.Text"
                               Click="@((args)=>ShowContextMenuWithContent(args,p))" />
-
             </Template>
         </RadzenDataGridColumn>
     </Columns>
-    <LoadingTemplate>
-        <RadzenProgressBarCircular Visible="isProgess" ShowValue="false"
-                                   ProgressBarStyle="ProgressBarStyle.Danger"
-                                   Mode="ProgressBarMode.Determinate"></RadzenProgressBarCircular>
-    </LoadingTemplate>
 </RadzenDataGrid>
 
 @code {

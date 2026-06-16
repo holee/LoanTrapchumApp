@@ -3,6 +3,7 @@
 @using TrapchumApp.Components.Indicatros
 @using TrapchumApp.Pages.Transactions.LoanRequests
 <PageTitle>បង្កើតការបញ្ចេញប្រាក់កម្ចី</PageTitle>
+@inject Applications.Calculations.CalculatorSceduleService _calSceduleService
 @attribute [StreamRendering]
 @if (IsLoading)
 {
@@ -249,7 +250,6 @@ else
                     </RadzenRow>
                 </EditForm>
             </RadzenTabsItem>
-
             <RadzenTabsItem Text="អ្នកធានានិងទ្រព្យបញ្ចាំ" Icon="@IconNames.Inventory">
                 <LoanRequestCollaterals CustomerId="CustomerRequestId"
                                         Collaterals="@req.Collaterals?.ToList()"
@@ -257,7 +257,6 @@ else
                 <LoanRequestGaurantor Guarantors="@req.Guarantors" ShowAdd="false" />
                 <LoanRequestDocument Documents="@req.Documents.ToList()" ShowUpload="false" />
             </RadzenTabsItem>
-
             <RadzenTabsItem Text="កំណត់សម្គាល់" Icon="@IconNames.Comment">
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="12">
@@ -269,7 +268,6 @@ else
                 </RadzenRow>
                 <LoanRequestNotes Data="@req.Descriptions" />
             </RadzenTabsItem>
-
             @foreach (var tab in _tabs)
             {
                 <RadzenTabsItem Text="@tab.Title" Icon="@tab.Icon" @key="@tab.Key">
@@ -305,6 +303,12 @@ else
                           ButtonStyle="ButtonStyle.Secondary"
                           Text="ពិនិត្យឡើងវិញ" />
         }
+
+        <RadzenButton Icon="@IconNames.Preview"
+                      Click="@PrintPreview"
+                      Size="@Styles.DefaultSize"
+                      Text="បោះពុម្ភសាកល្បង" />
+
         <RadzenLink Icon="@IconNames.ArrowCircleLeft"
                     IconColor="@Colors.Danger"
                     Path="@_navService.PreviousUrl"

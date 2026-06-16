@@ -51,7 +51,9 @@ public sealed class VCustomerDetails
     public int? LoanCounts { get; set; } = 0;
     public int? LoanRequestCounts { get; set; } = 0;
     public int? BranchId { get; set; } = 0;
-    public string? CreatedBy { get; set; } = string.Empty;   
+    public string? BranchName { get; set; }=string.Empty;
+    public string? CreatedBy { get; set; } = string.Empty;
+    public string? CreatedByUserName { get; set; } = string.Empty;
     public override string ToString()
     {
         return $"{ProInKhmer} {DisInKhmer} {ComInKhmer} {VilInKhmer}";

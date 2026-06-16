@@ -25,7 +25,7 @@ public sealed class Customer
     public bool? IsLoanActive { get; set; } = false;
     public Collateral? Collateral { get; set; }
     public EntityNames? EntityNames { get; set; }
-    public EmergencyContact? EmergencyContact { get; set; } = new();
+    public EmergencyContact? EmergencyContact { get; set; }
     public ICollection<CustomerExpense> CustomerExpenses { get; set; } = [];
     public ICollection<CustomerIncome> CustomerIncomes { get; set; } = [];
     public ICollection<LoanRequest> LoanRequests { get; set; } = [];

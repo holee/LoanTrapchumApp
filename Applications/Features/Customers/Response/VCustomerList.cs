@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Domains.Enumerations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Features.Customers.Response;
 
@@ -49,10 +50,13 @@ public sealed class VCustomerList
     public DateTimeOffset? ModifiedDT { get; set; }
     public int? LoanCounts { get; set; } = 0;
     public int? LoanRequestCounts { get; set; } = 0;
+    public string? BranchName { get; set; } = string.Empty;
+    public string? CreatedByUserName { get; set; }= string.Empty;
     public override string ToString()
     {
         return $"{ProInKhmer} {DisInKhmer} {ComInKhmer} {VilInKhmer}";
     }
+
     [NotMapped] public int RowIndex { get; set; } = 0;
 
 }

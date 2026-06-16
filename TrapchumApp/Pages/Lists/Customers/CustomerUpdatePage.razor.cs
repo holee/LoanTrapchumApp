@@ -1,4 +1,5 @@
-﻿using Applications.Features.AdditionalInformations.Dto;
+﻿using Applications.Exceptions;
+using Applications.Features.AdditionalInformations.Dto;
 using Applications.Features.Customers.Commands.EditCustomer;
 using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Queries.GetUpdateCustomerById;
@@ -89,16 +90,24 @@ public partial class CustomerUpdatePage
 
                 await CloseTab();
 
-                NotificationService.Notify(NotificationSeverity.Success, "Customer was edited successfully!");
+                _toastService.ShowSuccess("Customer was edited successfully!");
+
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+                _toastService.ShowError(rsp.GetMessage());
+
             }
         }
+        catch (MediatorException ex)
+        {
+            _toastService.ShowError(ex.InnerException!.Message);
+        }
+
         catch (Exception ex)
         {
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+            _toastService.ShowError(ex.InnerException!.Message);
+
         }
         finally
         {

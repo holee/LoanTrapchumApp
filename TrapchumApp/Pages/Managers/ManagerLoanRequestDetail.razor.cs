@@ -59,9 +59,15 @@ public partial class ManagerLoanRequestDetail
 
         aprovedUserId = user.GetId();
 
-        await AppState.GetAuthenticatedUser(user);
+
+        await userServices.GetLoanSizeByUserAsync();
+
 
         await LoadDataAsync();
+
+
+        await AppState.WhoCanApproved((data, userServices.UserLoanSize));
+
 
         await base.OnInitializedAsync();
     }
@@ -271,6 +277,17 @@ public partial class ManagerLoanRequestDetail
 
     async Task ApproveLoanRequest()
     {
+        if(data is null) return;
+    
+        if (data.IsSubmitted==false)
+        {
+            _toastService.ShowInfo("This request has not been submitted yet.");
+
+            return;
+        }
+
+
+
         var options = new DialogOptions
         {
         };

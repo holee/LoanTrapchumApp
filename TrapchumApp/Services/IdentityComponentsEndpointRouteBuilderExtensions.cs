@@ -93,10 +93,6 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             string loanId, int branchId) =>
         {
 
-            //var pdf = new ScheduleDocument();
-
-            //var stream = new MemoryStream(pdf.GeneratePdf());
-
 
             var rsp = await printer.DownLoadScheduleAsPdf(branchId, loanId);
 
@@ -114,8 +110,6 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             [FromServices] IWebHostEnvironment env, string loanId, int branchId) =>
         {
 
-            //var rsp = await pdf.DownLoadScheduleAsPdf(branchId, loanId);
-
             var command = new GetLoanByIdQuery(loanId, branchId, Applications.Enumerations.ScheduleStatus.All, true);
 
             var rsp = await mediator.Send(command);
@@ -132,21 +126,10 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             return TypedResults.File(stream, contentType: "application/pdf", null, enableRangeProcessing: true);
 
 
-
-            //if (!rsp.IsSuccess)
-            //{
-            //    return Results.Problem("Failed to generate PDF or no data returned.", statusCode: StatusCodes.Status500InternalServerError);
-            //}
-
-            //return TypedResults.File(rsp.Data!, contentType: "application/pdf", null, enableRangeProcessing: true);
-
-
         });
 
-        reportGroup.MapGet("/schedules/pdf/{loanId}/{branchId:int}/{scheduleId:int}",
-            async ([FromServices] SchedulePrintService pdf,
-            [FromServices] IWebHostEnvironment env,
-            IMediator mediator,
+        reportGroup.MapGet("/schedules/pdf/{loanId}/{branchId:int}/{scheduleId:int}", async ([FromServices] SchedulePrintService pdf,
+            [FromServices] IWebHostEnvironment env, IMediator mediator,
             string loanId, int branchId, int scheduleId) =>
         {
 
@@ -158,7 +141,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             {
                 return Results.NotFound();
             }
-            
+
             int installmentNumber = 1;
 
             rsp.Value.Schedules.ForEach(x =>
@@ -228,65 +211,3 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
 
 
-
-//reportGroup.MapGet("/Schedules/{loanId}/{customerId}/{branchId:int}", async ([FromServices] ILoanScheduleServiceImpl _schedulesService,
-//                                        string? loanId, string? customerId, int? branchId) =>
-//{
-
-//    var rsp = await _schedulesService.GetLoanSchedulesAsync(branchId, loanId, customerId);
-
-//    var loanWithScedules = new LoanScheduleVm();
-
-//    if (rsp.IsSuccess)
-//    {
-//        loanWithScedules = rsp.Data;
-//    }
-
-//    var doc = new SchedulePdfService(loanWithScedules!);
-
-//    var stream = doc.GeneratePdf();
-
-//    return TypedResults.File(stream, contentType: "application/pdf");
-
-//});
-//reportGroup.MapGet("/Schedules/Pdf/{loanId}/{customerId}/{branchId:int}", async ([FromServices] IWebHostEnvironment env,
-//                                            [FromServices] ILoanScheduleServiceImpl _schedulesService,
-//                                            string ? loanId, string? customerId, int? branchId) =>
-//{
-
-
-//        var scheduleResponse = await _schedulesService.GetLoanSchedulesAsync(branchId,loanId, customerId);
-
-
-//        var loanWithSchedules = scheduleResponse.Data;
-
-//        var html = await RazorTemplateEngine.RenderAsync("Views/Schedule.cshtml", loanWithSchedules);
-
-//        var playwright = await Playwright.UpsertAsync();
-
-//        var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-//        {
-//            Headless = true,
-//        });
-
-//        var path = Path.Combine(env.WebRootPath, "Files/Pdfs");
-
-//        var page = await browser.NewPageAsync();
-
-//        await page.SetContentAsync(html);
-
-//        var filePath = Path.Combine(path, "schedule.pdf");
-
-//        await page.PdfAsync(new PagePdfOptions
-//        {
-//            Format = "A4",
-//            Path = filePath,
-//        });
-
-//        await page.CloseAsync();
-
-//        var stream = new FileStream(filePath, FileMode.Open);
-
-//        return TypedResults.File(stream, contentType: "application/pdf");
-
-//});

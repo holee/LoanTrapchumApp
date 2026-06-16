@@ -1,0 +1,199 @@
+@namespace TrapchumApp.Components.Comps.Menus
+
+<div class="mud-menu @(_isOpen ? "mud-menu-open" : "") @Class"
+     style="@Style"
+     @onmouseenter="OnMouseEnter"
+     @onmouseleave="OnMouseLeave"
+     @oncontextmenu="OnRightClick"
+     @oncontextmenu:preventDefault="@(ActivationEvent == MenuActivationEvent.RightClick)">
+
+    @* ─── Activator ─── *@
+    <div class="mud-menu-activator" @onclick="OnActivatorClick">
+        @if (ActivatorContent != null)
+        {
+            @ActivatorContent
+        }
+        else if (!string.IsNullOrEmpty(Icon))
+        {
+            @* Icon-only button (like MudIconButton) — triggered when Icon is set *@
+            <button type="button"
+                    class="mud-icon-btn mud-icon-btn-@Size.ToString().ToLower() @GetIconBtnColorClass() @ButtonClass"
+                    disabled="@Disabled"
+                    aria-label="@AriaLabel"
+                    title="@AriaLabel">
+                <RadzenIcon Icon="@Icon" />
+                @if (!DisableRipple)
+                {
+                    <span class="mud-ripple"></span>
+                }
+            </button>
+        }
+        else
+        {
+            @* Standard button (like MudButton) — triggered when Label is set *@
+            <button type="button"
+                    class="mud-btn mud-btn-@Variant.ToString().ToLower() mud-btn-@Color.ToString().ToLower() mud-btn-@Size.ToString().ToLower() @(DisableElevation ? "mud-btn-no-elevation" : "") @ButtonClass"
+                    disabled="@Disabled">
+                @if (!string.IsNullOrEmpty(StartIcon))
+                {
+                    <i class="@StartIcon mud-btn-icon start" aria-hidden="true"></i>
+                }
+                @if (!string.IsNullOrEmpty(Label))
+                {
+                    <span class="mud-btn-label">@Label</span>
+                }
+                <i class="@ResolvedEndIcon mud-btn-icon end @(_isOpen ? "mud-rotate" : "")" aria-hidden="true"></i>
+                @if (!DisableRipple)
+                {
+                    <span class="mud-ripple"></span>
+                }
+            </button>
+        }
+    </div>
+
+    @* ─── Dropdown popover ─── *@
+    @if (_isOpen)
+    {
+        <div class="mud-overlay" @onclick="Close" @onclick:stopPropagation="true"></div>
+        <div class="mud-popover @GetPositionClass() @PopoverClass"
+             style="@GetPopoverInlineStyle()">
+            <div class="mud-menu-list @(Dense ? "mud-dense" : "") @(Dark ? "mud-dark" : "") @ListClass" role="menu">
+                @ChildContent
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    // ─── Content ───
+    [Parameter] public RenderFragment? ActivatorContent { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    // ─── Trigger button ───
+    /// <summary>
+    /// The icon for icon-only mode (renders a circular MudIconButton-style trigger).
+    /// When set, Label / StartIcon / EndIcon are ignored.
+    /// Usage: Icon="la la-ellipsis-v"
+    /// </summary>
+    [Parameter] public string? Icon { get; set; }
+
+    /// <summary>The text label for the standard button trigger.</summary>
+    [Parameter] public string? Label { get; set; }
+
+    /// <summary>Icon shown before the label in the standard button.</summary>
+    [Parameter] public string? StartIcon { get; set; }
+
+    /// <summary>
+    /// Icon shown after the label in the standard button.
+    /// Defaults to a dropdown chevron (la la-angle-down) if not set.
+    /// </summary>
+    [Parameter] public string? EndIcon { get; set; }
+
+    /// <summary>Accessibility label for the icon-only button.</summary>
+    [Parameter] public string? AriaLabel { get; set; }
+
+    // ─── Appearance ───
+    [Parameter] public MenuVariant Variant { get; set; } = MenuVariant.Text;
+    [Parameter] public MenuColor Color { get; set; } = MenuColor.Default;
+    [Parameter] public MenuSize Size { get; set; } = MenuSize.Medium;
+    [Parameter] public bool DisableElevation { get; set; }
+    [Parameter] public bool DisableRipple { get; set; }
+
+    // ─── Behavior ───
+    [Parameter] public MenuActivationEvent ActivationEvent { get; set; } = MenuActivationEvent.LeftClick;
+    [Parameter] public MenuPosition Position { get; set; } = MenuPosition.BottomLeft;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Dense { get; set; }
+    [Parameter] public bool Dark { get; set; }
+    [Parameter] public bool FullWidth { get; set; }
+    [Parameter] public string? MaxHeight { get; set; }
+
+    // ─── Styling ───
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+    [Parameter] public string? ButtonClass { get; set; }
+    [Parameter] public string? PopoverClass { get; set; }
+    [Parameter] public string? ListClass { get; set; }
+
+    // ─── Events ───
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+
+    private bool _isOpen;
+
+    /// <summary>Resolves the end icon: uses explicit EndIcon if set, otherwise defaults to chevron.</summary>
+    private string ResolvedEndIcon => EndIcon ?? "la la-angle-down";
+
+    // ─── Public API ───
+    public async Task Open()
+    {
+        if (Disabled || _isOpen) return;
+        _isOpen = true;
+        await IsOpenChanged.InvokeAsync(true);
+        StateHasChanged();
+    }
+
+    public async Task Close()
+    {
+        if (!_isOpen) return;
+        _isOpen = false;
+        await IsOpenChanged.InvokeAsync(false);
+        StateHasChanged();
+    }
+
+    public async Task Toggle()
+    {
+        if (_isOpen) await Close();
+        else await Open();
+    }
+
+    // ─── Internal ───
+    private async Task OnActivatorClick()
+    {
+        if (Disabled || ActivationEvent == MenuActivationEvent.RightClick) return;
+        if (ActivationEvent == MenuActivationEvent.LeftClick) await Toggle();
+    }
+
+    private async Task OnRightClick(Microsoft.AspNetCore.Components.Web.MouseEventArgs _)
+    {
+        if (Disabled || ActivationEvent != MenuActivationEvent.RightClick) return;
+        await Toggle();
+    }
+
+    private async Task OnMouseEnter()
+    {
+        if (Disabled || ActivationEvent != MenuActivationEvent.MouseOver) return;
+        await Open();
+    }
+
+    private async Task OnMouseLeave()
+    {
+        if (Disabled || ActivationEvent != MenuActivationEvent.MouseOver) return;
+        await Close();
+    }
+
+    private string GetPositionClass() => $"mud-popover-{Position.ToString().ToLower()}";
+
+    private string GetIconBtnColorClass() => Color switch
+    {
+        MenuColor.Primary => "mud-icon-btn-primary",
+        MenuColor.Secondary => "mud-icon-btn-secondary",
+        MenuColor.Success => "mud-icon-btn-success",
+        MenuColor.Warning => "mud-icon-btn-warning",
+        MenuColor.Error => "mud-icon-btn-error",
+        MenuColor.Info => "mud-icon-btn-info",
+        MenuColor.Dark => "mud-icon-btn-dark",
+        MenuColor.Inherit => "mud-icon-btn-inherit",
+        _ => ""
+    };
+
+    private string GetPopoverInlineStyle()
+    {
+        var styles = new List<string>();
+        if (!string.IsNullOrEmpty(MaxHeight))
+            styles.Add($"--mud-menu-maxheight: {MaxHeight}");
+        if (FullWidth)
+            styles.Add("width: 100%");
+        return string.Join("; ", styles);
+    }
+}
+

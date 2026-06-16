@@ -2,7 +2,7 @@
 <EditForm Model="CustomerModel" @ref="@editForm">
     <Blazilla.FluentValidator />
     <ValidationSummary />
-    <CreateCustomerInfo Model="@CustomerModel" @key="Guid.NewGuid().ToString()" />
+    <CreateCustomerInfo Model="@CustomerModel" />
     <RadzenStack Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center"
                  Gap="1rem"

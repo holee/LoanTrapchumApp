@@ -1,4 +1,5 @@
 using Applications.Calculations;
+using Applications.Commons.Extensions;
 using Applications.Exceptions;
 using Applications.Extensions;
 using Applications.Features.Customers.Response;
@@ -134,6 +135,8 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
     {
         if (args is null) return;
 
+        model.RegisterDate = args.Value;
+
         int addedDays = model.InstallmentTypeId switch
         {
             (int)InstallmentOption.Weekly => 7,
@@ -172,6 +175,16 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
         model.LoanProductRefId = (int)ProductTypeOption.Mortgage;
     }
 
+    private void PrintPreview()
+    {
+
+        var test = _calSceduleService.Calculate(model).MapToLoanSchedules();
+
+        ShowPreviewTab(test, model.CurrencyRefId);
+
+        StateHasChanged();
+    }
+
     private async Task HandleFormSubmit()
     {
 
@@ -184,7 +197,6 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
         {
             _toastService.ShowError("Loan disburse was cancelled.");
 
-
             isWaiting = false;
 
             return;
@@ -192,7 +204,9 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
         PrepareModelDefaults();
 
-        var scheduleDto = model.GenerateSchedules();
+        var scheduleDto = _calSceduleService.Calculate(model).MapToLoanSchedules();
+
+        //model.GenerateSchedules();
 
         model.LastPaymentDate = scheduleDto!.LastOrDefault()!.PaymentDate;
 
@@ -246,7 +260,7 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
         var mod = new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo, RequestStatus.Approved);
 
-        mod.Remark = this.model.Remark;
+        mod.Remark = model.Remark;
 
         var command = new SaveLoanRequestsCommand(mod);
 
@@ -329,8 +343,11 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
         RenderFragment content = builder =>
         {
             builder.OpenComponent(0, typeof(CustomerInfo));
+
             builder.AddAttribute(1, "Customer", _customer);
+
             builder.SetKey(tabId);
+
             builder.CloseComponent();
         };
 
@@ -342,25 +359,33 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
     private void ShowPreviewTab(IEnumerable<LoanScheduleDtoCreate> schedules, int? currencyId = 1)
     {
         var tabId = "preview_" + (_customer.CustomerId ?? Guid.NewGuid().ToString("N"));
+
         var exists = _tabs.FindIndex(t => t.Key == tabId);
 
         if (exists != -1)
         {
             selectedTabIndex = exists + FixedTabCount;
+
             StateHasChanged();
+
             return;
         }
 
         RenderFragment content = builder =>
         {
-            builder.OpenComponent(0, typeof(LoanSchedules));
+            builder.OpenComponent(0, typeof(TabPreviewSchedules));
+
             builder.AddAttribute(1, "CurrencyId", currencyId);
+
             builder.AddAttribute(2, "Schedules", schedules);
+
             builder.SetKey(tabId);
+
             builder.CloseComponent();
         };
 
         _tabs.Add(new CustomTab(tabId, "Schedules", TabActions.Details, content));
+
         selectedTabIndex = _tabs.Count + FixedTabCount - 1;
     }
 

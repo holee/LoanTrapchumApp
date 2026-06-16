@@ -285,7 +285,7 @@ public sealed class HolidayRepository(IDbContextFactory<DataContext> contextFact
 
 
     }
-    public async Task<IEnumerable<HolidayDto>> GetActiveHolidays(DateTime? selectedDate, int? selectedYear = 0)
+    public async Task<IEnumerable<HolidayDto>> GetActiveHolidays(DateTime? selectedDate, int? selectedYear = 1)
     {
         try
         {

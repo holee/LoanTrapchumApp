@@ -11,7 +11,7 @@ public static class LoanRequestExtension
         {
             LoanRequestId = req.LoanRequestId,
             CustomerRefId = req.CustomerId,
-            RequestUserRefId=req.UserRequestId,
+            RequestUserRefId = req.UserRequestId,
             LoanRequestStatusRefId = req.StatusId,
             BranchRefId = req.BranchId,
             LoanCategoryRefId = req.LoanCategoryRefId,
@@ -43,7 +43,7 @@ public static class LoanRequestExtension
             Remark = req.Remark,
             Memo = req.Memo,
             FullName = req.AltName,
-            LoanPurpose= req.LoanPurpose,
+            LoanPurpose = req.LoanPurpose,
         };
     }
 
@@ -53,7 +53,7 @@ public static class LoanRequestExtension
         {
             LoanRequestId = req.LoanRequestId,
             CustomerRefId = req.CustomerId,
-            CustomerName = req.FullName,
+            CustomerName = req.AltName,
             BranchId = req.BranchId,
             LoanCategoryRefId = req.LoanCategoryRefId,
             LoanCategoryName = req.LoanCategoryName,
@@ -85,7 +85,7 @@ public static class LoanRequestExtension
             AdminFeeAmount = req.AdminFeeAmount,
             Remark = req.Remark,
             BranchName = req.BranchName,
-            AprovedUserId=req.AprovedUserId,
+            AprovedUserId = req.AprovedUserId,
             ApprovedBy = req.AprovedBy,
         };
     }

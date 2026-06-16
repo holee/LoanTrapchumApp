@@ -34,7 +34,6 @@
                                 AllowFiltering="true"
                                 AllowSorting="true"
                                 PageSize="@pageSize"
-                                @key="@counts"
                                 PagerPosition="PagerPosition.Bottom"
                                 ShowPagingSummary="true"
                                 AllowPaging="true"
@@ -69,7 +68,7 @@
                         <RadzenDataGridColumn Title="#"
                                               Width="4rem"
                                               Context="c"
-                                              Property="@nameof(VCustomerDetails.CustomerId)"
+                                              Property="@nameof(VCustomerList.CustomerId)"
                                               TextAlign="TextAlign.Center"
                                               Pickable="false"
                                               Filterable="false"
@@ -78,7 +77,7 @@
                                 @c.RowIndex
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Property="@nameof(VCustomerDetails.AltName)"
+                        <RadzenDataGridColumn Property="@nameof(VCustomerList.AltName)"
                                               Context="c"
                                               Width="8rem"
                                               Title="Name">
@@ -88,7 +87,7 @@
                                 </NavLink>
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Property="@nameof(VCustomerDetails.FullName)"
+                        <RadzenDataGridColumn Property="@nameof(VCustomerList.FullName)"
                                               Context="c"
                                               Width="8rem"
                                               Visible="false"
@@ -97,7 +96,7 @@
                                 @c.FullName
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Title="@nameof(VCustomerDetails.Phone)"
+                        <RadzenDataGridColumn Title="@nameof(VCustomerList.Phone)"
                                               Context="c"
                                               Width="8rem"
                                               Property="Phone"
@@ -109,7 +108,8 @@
                         <RadzenDataGridColumn Title="Email"
                                               Context="c"
                                               Width="10rem"
-                                              Property="@nameof(VCustomerDetails.EmailAddress)"
+                                              Property="@nameof(VCustomerList.EmailAddress)"
+                                              Visible="false"
                                               Sortable="false" />
                         <RadzenDataGridColumn Context="c"
                                               Sortable="false"
@@ -122,12 +122,30 @@
                                              VilInKhmer="@c.VilInKhmer" />
                             </Template>
                         </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="សាខា"
+                                              Context="c"
+                                              Width="8rem"
+                                              Property="@nameof(VCustomerList.BranchName)"
+                                              Sortable="true">
+                            <Template>
+                                @(c?.BranchName ?? "-")
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="មន្ត្រីឥណ្ឌទាន"
+                                              Context="c"
+                                              Width="8rem"
+                                              Property="@nameof(VCustomerList.CreatedByUserName)"
+                                              Sortable="true">
+                            <Template>
+                                @(c?.CreatedByUserName ?? "-")
+                            </Template>
+                        </RadzenDataGridColumn>
                         <RadzenDataGridColumn Context="c"
                                               Width="8rem"
                                               TextAlign="TextAlign.Center"
                                               Sortable="false"
                                               Filterable="false"
-                                              Property="@nameof(VCustomerDetails.IsLoanActive)"
+                                              Property="@nameof(VCustomerList.IsLoanActive)"
                                               Title="Loan Active">
                             <Template>
                                 <RadzenBadge Text="@(c.IsLoanActive ? "Active" : "None")"
@@ -141,7 +159,7 @@
                                               TextAlign="TextAlign.Center"
                                               Sortable="false"
                                               Filterable="false"
-                                              Property="@nameof(VCustomerDetails.IsActive)"
+                                              Property="@nameof(VCustomerList.IsActive)"
                                               Title="Is Active">
                             <Template>
                                 <RadzenBadge Text="@(c.IsActive ? "Active" : "Inactive")"
@@ -153,13 +171,13 @@
                         <RadzenDataGridColumn Title="FirstName"
                                               Context="c"
                                               Width="10rem"
-                                              Property="@nameof(VCustomerDetails.FirstName)"
+                                              Property="@nameof(VCustomerList.FirstName)"
                                               Visible="false"
                                               Sortable="false" />
                         <RadzenDataGridColumn Title="LastName"
                                               Context="c"
                                               Width="10rem"
-                                              Property="@nameof(VCustomerDetails.LastName)"
+                                              Property="@nameof(VCustomerList.LastName)"
                                               Visible="false"
                                               Sortable="false" />
                         <RadzenDataGridColumn Context="c"
@@ -260,7 +278,7 @@
 
         pageIndex = 0; // Reset to first page when page size changes
 
-        await FIlterCustomers(selectedValue);
+        await FilterCustomers(selectedValue);
     }
 
     private void ShowContextMenu(DataGridCellMouseEventArgs<VCustomerList> args)

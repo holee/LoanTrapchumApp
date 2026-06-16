@@ -61,23 +61,16 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
             _ = userServices.GetLoanSizeByUserAsync();
 
-            //await AppState.GetAuthenticatedUser(user);
 
             await LoadDataAsync();
 
-            _ = AppState.WhoCanApproved((_request, userServices.UserLoanSize));
+            await AppState.WhoCanApproved((_request, userServices.UserLoanSize));
 
-            _ = AppState.WhoCanRequest(_request);
+            await AppState.WhoCanRequest(_request);
 
-            _ = AppState.WhoCanDisbursemnt(_request);
+            await AppState.WhoCanDisbursemnt(_request);
 
-
-            if (_request is not null)
-            {
-                await AppState.CheckedNormalApproved(user, _request);
-
-                await AppState.CheckedMaximumApproved(user, _request);
-            }
+            await branchService.GetCurrentBranchNameAsync();
 
             await base.OnInitializedAsync();
         }
@@ -96,18 +89,6 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             }
         }
 
-        private async Task<bool> ConfirmActionAsync(string message, string title = "Loan Request")
-        {
-            var confirm = await DialogService.Confirm(message, title);
-
-            if (confirm == false)
-            {
-                NotificationService.Notify(NotificationSeverity.Info, "Request was cancelled.");
-                return false;
-            }
-
-            return true;
-        }
 
         async Task CreateLoanRequest()
         {
@@ -129,6 +110,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             if (memo.IsNotNullOrEmpty())
             {
                 var description = new LoanDescriptionsDtoCreate(memo, aprovedUserId, LoanRequestId);
+
                 model.LoanDescriptions.Add(description);
             }
 
@@ -298,9 +280,17 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
         async Task ApproveLoanRequest()
         {
-            var options = new DialogOptions
+            if (_request is null) return;
+
+            if (branchService.IsHeadOffice == true && _request.IsSubmitted == false)
             {
-            };
+                _toastService.ShowError("This request has not been submitted yet.");
+
+                return;
+            }
+
+            var options = new DialogOptions { };
+
             var param = new Dictionary<string, object?>
             {
                 { "LoanRequestId", LoanRequestId },

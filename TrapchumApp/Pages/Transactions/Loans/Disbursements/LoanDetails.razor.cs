@@ -53,7 +53,7 @@ public partial class LoanDetails
 
         if (args.Data.IsPaid)
         {
-            args.Attributes.Add("style", "background-color:var(--rz-danger-lighter)");
+            args.Attributes["style"] = "background-color:var(--rz-danger-lighter)";
         }
 
     }
@@ -86,7 +86,7 @@ public partial class LoanDetails
     {
         ContextMenuService.Close();
 
-        if(p is null)
+        if (p is null)
             return;
 
         if (!IsFirstScheduleSelected(p))
@@ -116,7 +116,7 @@ public partial class LoanDetails
 
         var loanPaymentLine = p.MapToLoanPaymentLine();
 
-        var create = loanRepaymentLines.ToPaymentCreate(p.CurrencyId); 
+        var create = loanRepaymentLines.ToPaymentCreate(p.CurrencyId);
 
         var options = new SideDialogOptions
         {

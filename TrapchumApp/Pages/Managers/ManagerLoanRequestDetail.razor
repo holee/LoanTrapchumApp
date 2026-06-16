@@ -162,6 +162,7 @@ else if (data is not null)
                                   Icon="@IconNames.RequestQuote"
                                   Size="@Styles.DefaultSize"
                                   Click="ApproveLoanRequest"
+                                  Disabled="!AppState.CanApproved"
                                   Text="អនុម័ត" />
                     <RadzenButton ButtonStyle="ButtonStyle.Secondary"
                                   Icon="@IconNames.Block"

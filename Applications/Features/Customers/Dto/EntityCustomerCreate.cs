@@ -19,6 +19,5 @@ public sealed class EntityCustomerCreate : BaseEntityNamesCreate
     public string? SpouseOccupation { get; set; }
     public string? Photo { get; set; } = "/assets/profiles/profile.png";
     public string? SpouseGender { get; set; } = string.Empty;
-
-    public EmergencyContactDtoCreate EmergencyContact { get; set; } = new();
+    public EmergencyContactDtoCreate? EmergencyContact { get; set; } = new();
 }

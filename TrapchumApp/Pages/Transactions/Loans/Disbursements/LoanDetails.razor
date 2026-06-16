@@ -1,4 +1,4 @@
-﻿@page "/App/Loan/{LoanId}/Branches/{BranchId:int}/Currencies/{CurrencyId:int?}"
+@page "/App/Loan/{LoanId}/Branches/{BranchId:int}/Currencies/{CurrencyId:int?}"
 @using TrapchumApp.Pages.Transactions.Loans.Repayments
 <PageTitle>Loan-Details</PageTitle>
 
@@ -64,6 +64,14 @@
                 <RadzenText Style="font-size:0.7rem;color:rgba(255,255,255,.7);margin:0;text-transform:uppercase;letter-spacing:.05em;">Interest Rate</RadzenText>
                 <RadzenText Style="font-size:1rem;font-weight:700;color:#fff;margin:0;">@(loanSchedule?.InterestRate.AsPercent())</RadzenText>
             </div>
+             <div style="flex:1;min-width:8rem;padding:0 1rem;border-right:1px solid rgba(255,255,255,.2);">
+                <RadzenText Style="font-size:0.7rem;color:rgba(255,255,255,.7);margin:0;text-transform:uppercase;letter-spacing:.05em;">Effective Rate</RadzenText>
+                <RadzenText Style="font-size:1rem;font-weight:700;color:#fff;margin:0;">@(loanSchedule?.CollectionFeeRate.AsPercent())</RadzenText>
+            </div>
+            <div style="flex:1;min-width:8rem;padding:0 1rem;border-right:1px solid rgba(255,255,255,.2);">
+                <RadzenText Style="font-size:0.7rem;color:rgba(255,255,255,.7);margin:0;text-transform:uppercase;letter-spacing:.05em;">Admin Rate</RadzenText>
+                <RadzenText Style="font-size:1rem;font-weight:700;color:#fff;margin:0;">@(loanSchedule?.AdminFeeRate.AsPercent())</RadzenText>
+            </div>
             <div style="flex:1;min-width:8rem;padding:0 1rem;border-right:1px solid rgba(255,255,255,.2);">
                 <RadzenText Style="font-size:0.7rem;color:rgba(255,255,255,.7);margin:0;text-transform:uppercase;letter-spacing:.05em;">Period</RadzenText>
                 <RadzenText Style="font-size:1rem;font-weight:700;color:#fff;margin:0;">@(loanSchedule?.Period?.ToString() ?? "—") mo</RadzenText>
@@ -80,7 +88,6 @@
                 Style="border-radius:0.875rem;overflow:hidden;padding:0;box-shadow:0 1px 6px rgba(0,0,0,.07);">
         <RadzenTabs Change="SelectedTabChanged" RenderMode="TabRenderMode.Server" @bind-SelectedIndex="@_selectedTabIndex">
             <Tabs>
-
                 @* Schedule *@
                 <RadzenTabsItem Text="Schedule" Icon="calendar_month">
                     <RadzenStack Orientation="Orientation.Horizontal"
@@ -98,8 +105,8 @@
                         <RadzenDataGrid Data="@Schedules"
                                         Density="Density.Compact"
                                         Responsive
-                                        AllowAlternatingRows="true"
-                                        GridLines="DataGridGridLines.Both"
+                                        AllowAlternatingRows="false"
+                                        GridLines="DataGridGridLines.None"
                                         SelectionMode="DataGridSelectionMode.Single"
                                         @bind-Value="SelectedSchedules"
                                         ColumnWidth="15rem"
@@ -107,7 +114,7 @@
                                         CellContextMenu="@OnCellContextMenu"
                                         RowDoubleClick="@OnRowDoubleClick"
                                         RowRender="@OnRowRender"
-                                        Style="min-height:var(--min-height);height:var(--normal-height);max-height:var(--max-height);overflow:auto;border-radius:0.5rem;"
+                                        Style="min-height:var(--min-height);height:var(--normal-height);max-height:var(--max-height);overflow:auto;"
                                         TItem="VSchedule">
                             <Columns>
                                 <RadzenDataGridColumn Property="@(nameof(VSchedule.InstallmentNo))"
@@ -118,7 +125,7 @@
                                     <Template>@context.PaymentDate.DayFirst()</Template>
                                 </RadzenDataGridColumn>
                                 <RadzenDataGridColumn Property="@(nameof(VSchedule.TotalDay))"
-                                                      Title="ចំនួនថ្ងៃ" Width="3rem" Context="c"
+                                                      Title="ចំនួនថ្ងៃ" Width="4rem" Context="c"
                                                       TextAlign="TextAlign.Center" Sortable="false">
                                     <Template>@c.TotalDay</Template>
                                     <FooterTemplate><strong>@(loanSchedule!.Schedules.Sum(x => x.TotalDay))</strong></FooterTemplate>
@@ -136,7 +143,7 @@
                                     <FooterTemplate><strong>@(loanSchedule!.Schedules.Sum(x => x.Interest).As(CurrencyId))</strong></FooterTemplate>
                                 </RadzenDataGridColumn>
                                 <RadzenDataGridColumn Property="@(nameof(VSchedule.CollectionFee))"
-                                                      Title="ប្រាក់ប្រសិទ្ធីភាព" Width="6rem"
+                                                      Title="ប្រាក់ប្រសិទ្ធភាព" Width="6rem"
                                                       TextAlign="TextAlign.Right" Sortable="false">
                                     <Template>@context.CollectionFee.As(CurrencyId)</Template>
                                     <FooterTemplate><strong>@(loanSchedule!.Schedules.Sum(x => x.CollectionFee).As(CurrencyId))</strong></FooterTemplate>

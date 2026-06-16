@@ -1,0 +1,94 @@
+@using System.Linq
+@using Applications.Features.Loans.Dtos.Requests
+@using TrapchumApp.Components.Buttons
+@using TrapchumApp.Components.Comps.Menus
+<div class="schedule-table-container">
+    <div class="schedule-panel">
+        <div class="schedule-panel-header">
+            <h5 class="schedule-title">Loan Repayment Schedule</h5>
+            <div class="schedule-summary">
+                <span class="schedule-chip">Installments: <strong>@ScheduleRows.Count</strong></span>
+                <span class="schedule-chip">Total Pay: <strong>@TotalPay.As(CurrencyId)</strong></span>
+            </div>
+        </div>
+        <div class="schedule-table-wrapper" style="@($"max-height: {Height};overflow-y: auto;")">
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th class="text-center">N<sup><u>o</u></sup></th>
+                        <th>ថ្ងៃបង់ប្រាក់</th>
+                        <th class="text-center">ចំនួនថ្ងៃ</th>
+                        <th class="text-right">ប្រាក់ដើមត្រូវបង់</th>
+                        <th class="text-right">ការប្រាក់ត្រូវបង់</th>
+                        <th class="text-right">ប្រាក់ប្រសិទ្ធិភាព</th>
+                        <th class="text-right">ប្រាក់បង់សរុប</th>
+                        <th class="text-right">ប្រាកដើមនៅសល់</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ScheduleRows.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="8" class="schedule-empty">No repayment schedule available.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var c in ScheduleRows)
+                        {
+                            <tr class="@(IsMilestoneRow(c.InstallmentNo) ? "schedule-row schedule-row-milestone" : "schedule-row")">
+                                <td class="text-center"><span class="schedule-number">@c.InstallmentNo</span></td>
+                                <td>
+                                    <div class="schedule-date-cell">
+                                        <i class="la la-calendar"></i>
+                                        <span>@c.PaymentDate.DayFirst()</span>
+                                    </div>
+                                </td>
+                                <td class="text-center"><span class="schedule-days-badge">@c.TotalDay</span></td>
+                                <td class="text-right">@c.Principal.As(CurrencyId)</td>
+                                <td class="text-right">@c.Interest.As(CurrencyId)</td>
+                                <td class="text-right">@c.CollectionFee.As(CurrencyId)</td>
+                                <td class="text-right schedule-total"><strong>@c.TotalPay.As(CurrencyId)</strong></td>
+                                <td class="text-right">@c.LoanOutstanding.As(CurrencyId)</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" class="text-right">Total</td>
+                        <td class="text-center"><strong>@TotalDays</strong></td>
+                        <td class="text-right"><strong>@TotalPrincipal.As(CurrencyId)</strong></td>
+                        <td class="text-right"><strong>@TotalInterest.As(CurrencyId)</strong></td>
+                        <td class="text-right"><strong>@TotalCollectionFee.As(CurrencyId)</strong></td>
+                        <td class="text-right"><strong>@TotalPay.As(CurrencyId)</strong></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public IEnumerable<LoanScheduleDtoCreate> Schedules { get; set; } = [];
+    [Parameter] public int? CurrencyId { get; set; } = 1;
+    [Parameter] public string? Height { get; set; } = "35rem";
+    private IReadOnlyList<LoanScheduleDtoCreate> ScheduleRows => Schedules.Where(x => x.InstallmentNo > 0).ToList();
+    private int? TotalDays => ScheduleRows.Sum(p => p.TotalDay);
+    private decimal? TotalPrincipal => ScheduleRows.Sum(p => p.Principal);
+    private decimal? TotalInterest => ScheduleRows.Sum(p => p.Interest);
+    private decimal? TotalCollectionFee => ScheduleRows.Sum(p => p.CollectionFee);
+    private decimal? TotalPay => ScheduleRows.Sum(p => p.TotalPay);
+    private static bool IsMilestoneRow(int? installmentNo) => installmentNo is > 0 && installmentNo % 5 == 0;
+
+    private void PrintAction()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void ExportAction()
+    {
+        throw new NotImplementedException();
+    }
+}

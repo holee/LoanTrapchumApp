@@ -1,0 +1,20 @@
+@typeparam TItem
+@code {
+    [CascadingParameter] public ModernTable<TItem> Table { get; set; } = default!;
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Property { get; set; }
+    [Parameter] public RenderFragment<TItem>? Template { get; set; }
+    [Parameter] public bool Sortable { get; set; }
+    [Parameter] public string? Width { get; set; }
+    [Parameter] public string TextAlign { get; set; } = "left";
+
+    protected override void OnInitialized()
+    {
+        Table?.AddColumn(this);
+    }
+
+    public void Dispose()
+    {
+        Table?.RemoveColumn(this);
+    }
+}

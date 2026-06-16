@@ -1,4 +1,5 @@
 using Applications;
+using Applications.Calculations;
 using Applications.Commons.Authorizations;
 using Domains.Models.Identity;
 using Infrastructures;
@@ -22,6 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 QuestPDF.Settings.License = LicenseType.Community;
+QuestPDF.Settings.UseEnvironmentFonts = false;
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddRadzenComponents();
 builder.Services.AddAuthorization();
@@ -52,6 +54,7 @@ builder.Services.AddScoped<IAuthorizationHandler, ManagerLoanDisbursementHandler
 builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
 builder.Services.AddScoped<NotificationServices>();
 builder.Services.AddScoped<NotificationHubService>();
+builder.Services.AddScoped<CalculatorSceduleService>();
 builder.Services.AddToastService(options =>
 {
     options.Position = ToastPosition.TopRight;
@@ -89,6 +92,9 @@ builder.Services.Configure<CircuitOptions>(options =>
 
 var app = builder.Build();
 
+
+FontRegistration.RegisterFonts(app.Environment);
+
 await app.SeedSystemData();
 
 
@@ -113,6 +119,8 @@ app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.MapControllers();
 
 await app.MapAdditionalIdentityEndpoints();
+
+//await app.MapScheduleEndpoints(); 
 
 app.MapUploadFileEndpoints();
 

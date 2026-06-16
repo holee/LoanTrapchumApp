@@ -1,18 +1,11 @@
 ﻿@page "/Customers/{CustomerId}/Update"
+@using TrapchumApp.Components.Indicatros
 <PageTitle>Edit Customer</PageTitle>
 @attribute [StreamRendering]
 
 @if (IsLoading)
 {
-    <RadzenStack AlignItems="AlignItems.Center"
-                 JustifyContent="JustifyContent.Center"
-                 Style="min-height:20rem;">
-        <RadzenProgressBarCircular ShowValue="false"
-                                   Mode="ProgressBarMode.Indeterminate"
-                                   Size="ProgressBarCircularSize.Medium" />
-        <RadzenText TextStyle="TextStyle.Body2"
-                    class="rz-color-base-600">Loading customer...</RadzenText>
-    </RadzenStack>
+    <Loading Text="កំពុងទាញយកព័ត៌មាន..." />
 }
 else
 {

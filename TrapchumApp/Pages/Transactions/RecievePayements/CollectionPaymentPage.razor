@@ -2,7 +2,7 @@
 @using TrapchumApp.Components.Buttons
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
 @using TrapchumApp.Pages.Transactions.Loans.Repayments
-<PageTitle>Collection Repayment</PageTitle>
+<PageTitle>Collection Repayment..</PageTitle>
 <style>
     .payment-card {
         background: var(--rz-base-background-color, #fff);
@@ -158,7 +158,7 @@
                                           Title="ប្រាក់ដើមត្រូវបង់"
                                           Sortable="false">
                         <Template>
-                            <span style="font-size:0.82rem;">@c.LeftPrinciple.Format(CurrencyId)</span>
+                            <span style="font-size:0.82rem;">@c.LeftPrinciple.As(CurrencyId)</span>
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -166,7 +166,7 @@
                                           Title="ការប្រាក់ត្រូវបង់"
                                           Sortable="false">
                         <Template>
-                            <span style="font-size:0.82rem;">@c.LeftInterestAmount.Format(CurrencyId)</span>
+                            <span style="font-size:0.82rem;">@c.LeftInterestAmount.As(CurrencyId)</span>
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -174,7 +174,7 @@
                                           Context="c"
                                           Sortable="false">
                         <Template>
-                            <span style="font-size:0.82rem;">@c.LeftCollectionFeeAmount.Format(CurrencyId)</span>
+                            <span style="font-size:0.82rem;">@c.LeftCollectionFeeAmount.As(CurrencyId)</span>
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -184,11 +184,11 @@
                         <Template>
                             @if (c.PenaltyAmount > 0)
                             {
-                                <span style="color:var(--rz-danger);font-size:0.82rem;font-weight:600;">@c.PenaltyAmount.Format(CurrencyId)</span>
+                                <span style="color:var(--rz-danger);font-size:0.82rem;font-weight:600;">@c.PenaltyAmount.As(CurrencyId)</span>
                             }
                             else
                             {
-                                <span style="font-size:0.82rem;color:var(--rz-text-disabled-color);">@c.PenaltyAmount.Format(CurrencyId)</span>
+                                <span style="font-size:0.82rem;color:var(--rz-text-disabled-color);">@c.PenaltyAmount.As(CurrencyId)</span>
                             }
                         </Template>
                     </RadzenDataGridColumn>
@@ -198,7 +198,7 @@
                                           Context="c"
                                           Sortable="false">
                         <Template>
-                            <strong style="font-size:0.82rem;color:var(--rz-primary);">@c.LeftAmount.Format(CurrencyId)</strong>
+                            <strong style="font-size:0.82rem;color:var(--rz-primary);">@c.LeftAmount.As(CurrencyId)</strong>
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -207,7 +207,7 @@
                                           Title="ប្រាក់ដើមនៅសល់"
                                           Sortable="false">
                         <Template>
-                            <span style="font-size:0.82rem;">@c.LoanOutstanding.Format(CurrencyId)</span>
+                            <span style="font-size:0.82rem;">@c.LoanOutstanding.As(CurrencyId)</span>
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn TextAlign="TextAlign.Center"

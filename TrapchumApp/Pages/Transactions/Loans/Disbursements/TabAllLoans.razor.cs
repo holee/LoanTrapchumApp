@@ -5,7 +5,7 @@ using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
 
-public partial class AllLoansTab
+public partial class TabAllLoans
 {
     [Parameter] public int BranchId { get; set; } = 0;
     [Parameter] public string? UserId { get; set; }

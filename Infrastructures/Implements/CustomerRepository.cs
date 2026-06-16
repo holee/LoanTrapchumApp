@@ -9,6 +9,7 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
+using Domains.Models;
 using Domains.Models.Lists;
 using Domains.Shared.Enums;
 using ErrorOr;
@@ -267,17 +268,17 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
             if (await IsCustomerRegisterByPhone(model.Id, model.Phone, cancellation))
             {
-                return ErrorOr.Error.Conflict(description: $"Customer With Name:{model.AltName} is already register.");
+                return Error.Conflict(description: $"Customer With Name:{model.AltName} is already register.");
             }
 
             if (await IsCustomerRegisterIdCard(model.Id, model.IdCard, cancellation))
             {
-                return ErrorOr.Error.Conflict(description: $"Customer With Name:{model.AltName} is already register.");
+                return Error.Conflict(description: $"Customer With Name:{model.AltName} is already register.");
             }
 
             if (await IsCustomerRegisterByPassport(model.Id, model.PassportId, cancellation))
             {
-                return ErrorOr.Error.Conflict(description: $"Customer With Name:{model.AltName} is already register.");
+                return Error.Conflict(description: $"Customer With Name:{model.AltName} is already register.");
             }
 
             await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
@@ -289,6 +290,46 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
             cxt.EntityNames.Update(model);
 
+           
+
+            var entry = cxt.Entry(model);
+
+            entry.Property(x => x.CreatedBy).IsModified = false;
+
+            entry.Property(x => x.CreatedDt).IsModified = false;
+
+            if (model.Customer is not null)
+            {
+                var customerEntry = cxt.Entry(model.Customer);
+
+                customerEntry.Property(x => x.IsLoanActive).IsModified = false;
+
+            }
+
+            if (model.Customer?.EmergencyContact != null)
+            {
+                var ec = model.Customer.EmergencyContact;
+
+                if (string.IsNullOrEmpty(ec.ContactId) && string.IsNullOrEmpty(ec.ContactName))
+                {
+                    cxt.Entry(ec).State = EntityState.Detached; // ignore it entirely
+                }
+                else
+                {
+                    // Check if it actually exists in DB
+                    bool ecExists = await cxt.Set<EmergencyContact>()
+                        .AsNoTracking()
+                        .AnyAsync(e => e.ContactId == ec.ContactId, cancellation);
+
+                    cxt.Entry(ec).State = ecExists
+                        ? EntityState.Modified
+                        : EntityState.Added;
+                }
+            }
+            else
+            {
+                model.Customer!.EmergencyContact = null; // ensure it's null to avoid issues
+            }
 
             await cxt.SaveChangesAsync(cancellation);
 
@@ -299,12 +340,12 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
                 return updatedCustomer.Value;
             }
 
-            return ErrorOr.Error.NotFound("Not Found", "Updated customer not found.");
+            return Error.NotFound("Not Found", "Updated customer not found.");
 
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            return ErrorOr.Error.Failure($"{ex.InnerException!.Message}");
+            return Error.Failure($"{ex.InnerException!.Message}");
         }
     }
 
@@ -396,8 +437,6 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
         return customerKey;
     }
 
-
-
     private IQueryable<VCustomerList> ApplyOrdering(IQueryable<VCustomerList> query, QueryParam param)
     {
         if (!string.IsNullOrWhiteSpace(param.SortColumn))
@@ -461,7 +500,6 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
     }
 
-
     private IQueryable<VCustomerList> ApplyFiltering(IQueryable<VCustomerList> queries, QueryParam param)
     {
         var filter = param.Filter?.Trim();
@@ -493,7 +531,6 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
     }
 
-
     private static Expression<Func<VCustomerDetails, VCustomerList>> ProjectToCustomerList()
     {
         return x => new VCustomerList
@@ -514,29 +551,8 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
             DisInKhmer = x.DisInKhmer,
             ProInKhmer = x.ProInKhmer,
             ModifiedDT = x.ModifiedDT,
-        };
-    }
-
-    private static Expression<Func<VCustomerList, VCustomerList>> ProjectTo()
-    {
-        return x => new VCustomerList
-        {
-            CustomerId = x.CustomerId,
-            CustomerKey = x.CustomerKey,
-            FirstName = x.FirstName,
-            LastName = x.LastName,
-            FullName = x.FullName,
-            AltName = x.AltName,
-            Phone = x.Phone,
-            EmailAddress = x.EmailAddress,
-            IsLoanActive = x.IsLoanActive,
-            IsActive = x.IsActive,
-            City = x.City,
-            VilInKhmer = x.VilInKhmer,
-            ComInKhmer = x.ComInKhmer,
-            DisInKhmer = x.DisInKhmer,
-            ProInKhmer = x.ProInKhmer,
-            ModifiedDT = x.ModifiedDT,
+            BranchName = x.BranchName,
+            CreatedByUserName = x.CreatedByUserName
         };
     }
 
@@ -554,15 +570,6 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
                                 .Select(ProjectToCustomerList())
                                 .AsQueryable();
     }
-
-    private IQueryable<VCustomerList> GetCustomersWithoutActiveLoan(DataContext cxt, bool isInlcudeActiveLoan = false)
-    {
-        return cxt.Set<VCustomerDetails>()
-                    .WhereIf(isInlcudeActiveLoan, x => x.IsLoanActive == true)
-                    .Select(ProjectToCustomerList())
-                    .AsQueryable();
-    }
-
 
     private async Task<ErrorOr<VCustomerList>> GetCustomerListByIdAsync(string? customerId, CancellationToken cancellationToken = default)
     {
