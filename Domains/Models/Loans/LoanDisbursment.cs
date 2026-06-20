@@ -89,6 +89,3 @@ public sealed class LoanDisbursment : BaseEntity
     public ICollection<LoanSchedule>? LoanSchedules { get; set; } = [];
 
 }
-
-//public Customer? Customer { get; set; }
-//public LoanCreditAgent? LoanCreditAgent { get; set; }

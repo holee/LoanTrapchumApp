@@ -1,5 +1,4 @@
 using Applications.Extensions;
-using Blazored.FluentValidation;
 using Domains.Models.Collaterals;
 using Radzen.Blazor;
 using Applications.Services.Lists;
@@ -56,8 +55,6 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         {
             DialogService.Close(true);
         }
-
-        private FluentValidationValidator? _fluentValidationValidator;
 
         private EditContext editContext = default!;
 

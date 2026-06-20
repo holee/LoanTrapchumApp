@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
-using QuestPDF.Infrastructure;
 using TrapchumApp;
 using TrapchumApp.Authorizations.Handlers;
 using TrapchumApp.Authorizations.Rquirements;
@@ -19,13 +18,13 @@ using TrapchumApp.Components.Modals.SweetAlerts;
 using TrapchumApp.Components.Toasts;
 using TrapchumApp.Hubs;
 using TrapchumApp.Services;
+
 var builder = WebApplication.CreateBuilder(args);
-
-
-QuestPDF.Settings.License = LicenseType.Community;
-QuestPDF.Settings.UseEnvironmentFonts = false;
+QuestPdfSetup.RegisterFonts();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddRadzenComponents();
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorTemplating();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddCascadingAuthenticationState();
@@ -50,11 +49,13 @@ builder.Services.AddScoped<IAuthorizationHandler, CanApprovedRequestHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, CanDisburseRequestHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, CanRequestHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, CanReceivePaymentHandler>();
-builder.Services.AddScoped<IAuthorizationHandler, ManagerLoanDisbursementHandler>(); 
+builder.Services.AddScoped<IAuthorizationHandler, ManagerLoanDisbursementHandler>();
 builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
 builder.Services.AddScoped<NotificationServices>();
 builder.Services.AddScoped<NotificationHubService>();
 builder.Services.AddScoped<CalculatorSceduleService>();
+builder.Services.AddHostedService<BrowserSetupService>();
+builder.Services.AddScoped<PdfServices>();
 builder.Services.AddToastService(options =>
 {
     options.Position = ToastPosition.TopRight;
@@ -92,9 +93,6 @@ builder.Services.Configure<CircuitOptions>(options =>
 
 var app = builder.Build();
 
-
-FontRegistration.RegisterFonts(app.Environment);
-
 await app.SeedSystemData();
 
 
@@ -105,38 +103,29 @@ if (app.Environment.IsDevelopment())
 else
 {
 
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseDeveloperExceptionPage(); // temporary for troubleshooting
+
+    //app.UseExceptionHandler("/Error", createScopeForErrors: true);
 
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+
 app.UseAntiforgery();
+
 app.UseStaticFiles();
+
 app.MapStaticAssets();
+
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.MapControllers();
 
 await app.MapAdditionalIdentityEndpoints();
 
-//await app.MapScheduleEndpoints(); 
-
 app.MapUploadFileEndpoints();
 
 app.MapHub<AppNotificationHub>("/hubs/notifications");
 
-
 app.Run();
-
-
-
-//// Inject IAuthorizationService
-//var result = await AuthorizationService.AuthorizeAsync(
-//    user, loanRequest, new IsCanApprovedNormalAmountRequirement());
-//// or for large amounts:
-//var result = await AuthorizationService.AuthorizeAsync(
-//    user, loanRequest, new IsCanApprovedMaximumAmountRequirement());
-
-//var resource = (loanRequest, userLoanSize);
-//await _authService.AuthorizeAsync(user, resource, new CanApprovedRequestRequirement());

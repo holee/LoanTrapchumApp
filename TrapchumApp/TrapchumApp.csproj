@@ -1,287 +1,273 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-	<TargetFramework>net10.0</TargetFramework>
-	<Nullable>enable</Nullable>
-	<ImplicitUsings>enable</ImplicitUsings>
-	<UserSecretsId>aspnet-TrapchumApp-8e8b7bb5-61c2-4b8f-9b61-141a0a471e07</UserSecretsId>
-	<BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>aspnet-TrapchumApp-8e8b7bb5-61c2-4b8f-9b61-141a0a471e07</UserSecretsId>
+		<BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Helpers\Filters\**" />
-    <Compile Remove="Views\**" />
-    <Compile Remove="wwwroot\documents\**" />
-    <Compile Remove="wwwroot\uploads\**" />
-    <Content Remove="Helpers\Filters\**" />
-    <Content Remove="Views\**" />
-    <Content Remove="wwwroot\documents\**" />
-    <Content Remove="wwwroot\uploads\**" />
-    <EmbeddedResource Remove="Helpers\Filters\**" />
-    <EmbeddedResource Remove="Views\**" />
-    <EmbeddedResource Remove="wwwroot\documents\**" />
-    <EmbeddedResource Remove="wwwroot\uploads\**" />
-    <None Remove="Helpers\Filters\**" />
-    <None Remove="Views\**" />
-    <None Remove="wwwroot\documents\**" />
-    <None Remove="wwwroot\uploads\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Helpers\Filters\**" />
+		<Compile Remove="wwwroot\documents\**" />
+		<Compile Remove="wwwroot\uploads\**" />
+		<Content Remove="Helpers\Filters\**" />
+		<Content Remove="wwwroot\documents\**" />
+		<Content Remove="wwwroot\uploads\**" />
+		<EmbeddedResource Remove="Helpers\Filters\**" />
+		<EmbeddedResource Remove="wwwroot\documents\**" />
+		<EmbeddedResource Remove="wwwroot\uploads\**" />
+		<None Remove="Helpers\Filters\**" />
+		<None Remove="wwwroot\documents\**" />
+		<None Remove="wwwroot\uploads\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="Pages\Lists\Bases\AddressBaseCreate.razor" />
-    <Content Remove="Pages\Lists\OtherNames\GaurantorCreate.razor" />
-    <Content Remove="Pages\Managers\AllLoansDisbursementTab.razor" />
-    <Content Remove="Pages\Managers\LoanRequestAllTab.razor" />
-    <Content Remove="Pages\Managers\ManagerIndexLoanPage.razor" />
-    <Content Remove="Pages\Managers\ManagerLoanRequestDetail.razor" />
-    <Content Remove="Pages\Managers\ManagerLoanRequestEdit.razor" />
-    <Content Remove="Pages\Managers\ManagerRequestIndexPage.razor" />
-    <Content Remove="Pages\Transactions\Exchanges\ExchangesPopup.razor" />
-    <Content Remove="Pages\Transactions\Exchanges\ExchangesSidebar.razor" />
-    <Content Remove="Pages\Transactions\RecievePayements\PaymentOffSideBar.razor" />
-    <Content Remove="Pages\Transactions\RecievePayements\RepaymentMultiplePage.razor" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Remove="Pages\Lists\Bases\AddressBaseCreate.razor" />
+		<Content Remove="Pages\Lists\OtherNames\GaurantorCreate.razor" />
+		<Content Remove="Pages\Managers\AllLoansDisbursementTab.razor" />
+		<Content Remove="Pages\Managers\LoanRequestAllTab.razor" />
+		<Content Remove="Pages\Managers\ManagerIndexLoanPage.razor" />
+		<Content Remove="Pages\Managers\ManagerLoanRequestDetail.razor" />
+		<Content Remove="Pages\Managers\ManagerLoanRequestEdit.razor" />
+		<Content Remove="Pages\Managers\ManagerRequestIndexPage.razor" />
+		<Content Remove="Pages\Transactions\Exchanges\ExchangesPopup.razor" />
+		<Content Remove="Pages\Transactions\Exchanges\ExchangesSidebar.razor" />
+		<Content Remove="Pages\Transactions\RecievePayements\PaymentOffSideBar.razor" />
+		<Content Remove="Pages\Transactions\RecievePayements\RepaymentMultiplePage.razor" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Blazilla" Version="2.4.0" />
+		<PackageReference Include="BlazorExpress.ChartJS" Version="1.2.3" />
+		<PackageReference Include="ClosedXML" Version="0.105.0" />
+		<PackageReference Include="FluentValidation" Version="12.1.1" />
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+		<PackageReference Include="Handlebars.Net" Version="2.1.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.9">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="PuppeteerSharp" Version="25.1.2" />
+		<PackageReference Include="Radzen.Blazor" Version="10.4.9" />
+		<PackageReference Include="Razor.Templating.Core" Version="3.1.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Remove="screenshot.pdf" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Applications\Applications.csproj" />
+		<ProjectReference Include="..\Infrastructures\Infrastructures.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Blazilla" Version="2.4.0" />
-    <PackageReference Include="Blazored.FluentValidation" Version="2.2.0" />
-    <PackageReference Include="BlazorExpress.ChartJS" Version="1.2.3" />
-    <PackageReference Include="ClosedXML" Version="0.105.0" />
-    <PackageReference Include="FluentValidation" Version="12.1.1" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.9" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.9" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.9">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Playwright" Version="1.60.0" />
-    <PackageReference Include="Radzen.Blazor" Version="10.4.9" />
-    <PackageReference Include="Razor.Templating.Core" Version="3.1.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Components\Payments\" />
+		<Folder Include="wwwroot\assets\docs\" />
+		<Folder Include="wwwroot\assets\docs\" />
+		<Folder Include="wwwroot\schedules\" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Applications\Applications.csproj" />
-    <ProjectReference Include="..\Infrastructures\Infrastructures.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Components\Payments\" />
-    <Folder Include="wwwroot\assets\docs\" />
-    <Folder Include="wwwroot\assets\docs\" />
-    <Folder Include="wwwroot\schedules\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="Pages\Currencies\CurrenciesIndex.razor" />
-    <AdditionalFiles Include="Pages\Currencies\CurrencyDetials.razor" />
-    <AdditionalFiles Include="Pages\Currencies\CurrencyModalCreate.razor" />
-    <AdditionalFiles Include="Pages\Currencies\CurrenyTableRow.razor" />
-    <AdditionalFiles Include="Pages\Currencies\ExchangeModalCurrency.razor" />
-    <AdditionalFiles Include="Pages\Currencies\NoteCreate.razor" />
-    <AdditionalFiles Include="Pages\Currencies\NoteList.razor" />
-    <AdditionalFiles Include="Pages\Currencies\NoteListModal.razor" />
-    <AdditionalFiles Include="Pages\Currencies\NoteModalCreate.razor" />
-    <AdditionalFiles Include="Pages\Error.razor" />
-    <AdditionalFiles Include="Pages\Home.razor" />
-    <AdditionalFiles Include="Pages\Identity\Authentications\AccessDenied.razor" />
-    <AdditionalFiles Include="Pages\Identity\Authentications\Login.razor" />
-    <AdditionalFiles Include="Pages\Identity\Authentications\RedirectToLogin.razor" />
-    <AdditionalFiles Include="Pages\Identity\Authentications\Register.razor" />
-    <AdditionalFiles Include="Pages\Identity\Authentications\StatusMessage.razor" />
-    <AdditionalFiles Include="Pages\Identity\Shared\_Imports.razor" />
-    <AdditionalFiles Include="Pages\Identity\ManageUserLoanSize.razor" />
-    <AdditionalFiles Include="Pages\Identity\Permissions.razor" />
-    <AdditionalFiles Include="Pages\Identity\Roles\RoleIndexPage.razor" />
-    <AdditionalFiles Include="Pages\Identity\Roles\ManageRolePermission.razor" />
-    <AdditionalFiles Include="Pages\Identity\Roles\RoleCreate.razor" />
-    <AdditionalFiles Include="Pages\Identity\SetUserLoanSize.razor" />
-    <AdditionalFiles Include="Pages\Identity\SetUserLoanSizeEdit.razor" />
-    <AdditionalFiles Include="Pages\Identity\Shared\EmptyLayout.razor" />
-    <AdditionalFiles Include="Pages\Identity\Users\CreateNewUser.razor" />
-    <AdditionalFiles Include="Pages\Identity\Users\CreditAgentUserCreate.razor" />
-    <AdditionalFiles Include="Pages\Identity\Users\UserIndexPages.razor" />
-    <AdditionalFiles Include="Pages\Identity\Users\ManageUserPermission.razor" />
-    <AdditionalFiles Include="Pages\Identity\Users\ManageUserProfile.razor" />
-    <AdditionalFiles Include="Pages\Identity\Users\MangeUserRoles.razor" />
-    <AdditionalFiles Include="Pages\Identity\Users\UserChangePassword.razor" />
-    <AdditionalFiles Include="Pages\Identity\Users\UserCreateModal.razor" />
-    <AdditionalFiles Include="Pages\Identity\Users\UserManagement.razor" />
-    <AdditionalFiles Include="Pages\Lists\AddressCreate.razor" />
-    <AdditionalFiles Include="Pages\Lists\Branches\BranchCreateModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\Branches\BranchDetailModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\Branches\BranchList.razor" />
-    <AdditionalFiles Include="Pages\Lists\Branches\BranchUpdateModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralLoanRequest.razor" />
-    <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralModalAdd.razor" />
-    <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralsCustomer.razor" />
-    <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralsPerson.razor" />
-    <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralsProperties.razor" />
-    <AdditionalFiles Include="Pages\Lists\CreditAgents\AgentIndex.razor" />
-    <AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentDialog.razor" />
-    <AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentSwitch.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\Activties\CustomerActivitiesAdd.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerAddress.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerCreate.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerDetailsPage.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\Expenses\CustomerExp.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\Incomes\CustomerInc.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerLoanRequest.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\Incomes\CustomerModalIncome.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\Notes\CustomerNoteAdd.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\Notes\CustomerNotes.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomersIndex.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomersList.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerUpdatePage.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\GuarantorModalCreate.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\LoanHistory.razor" />
-    <AdditionalFiles Include="Pages\Lists\Departments\DepartmentDetailModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\Departments\DepartmentModalCreate.razor" />
-    <AdditionalFiles Include="Pages\Lists\Departments\DepartmentModalUpdate.razor" />
-    <AdditionalFiles Include="Pages\Lists\Departments\DepartmentIndexPage.razor" />
-    <AdditionalFiles Include="Pages\Lists\Employees\EmployeeCreatePage.razor" />
-    <AdditionalFiles Include="Pages\Lists\Employees\EmployeeComp.razor" />
-    <AdditionalFiles Include="Pages\Lists\Employees\EmployeeDetails.razor" />
-    <AdditionalFiles Include="Pages\Lists\Employees\EmployeeEditPage.razor" />
-    <AdditionalFiles Include="Pages\Lists\Employees\EmployeesIndex.razor" />
-    <AdditionalFiles Include="Pages\Lists\GenderDrowDown.razor" />
-    <AdditionalFiles Include="Pages\Lists\Holidays\CreateHolidayModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\Holidays\CreateMultipleModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\Holidays\DeleteModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\Holidays\HolidayList.razor" />
-    <AdditionalFiles Include="Pages\Lists\Holidays\ImportHoliday.razor" />
-    <AdditionalFiles Include="Pages\Lists\Holidays\UpdateHolidayModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\MarritalDropDown.razor" />
-    <AdditionalFiles Include="Pages\Lists\NationalityDropDown.razor" />
-    <AdditionalFiles Include="Pages\Lists\OccupationDropDown.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\AllGuarantors.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\ConvertToCustomer.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\ConvertToEmployee.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\ConvertToVendor.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GaurantorCreateComPage.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorAddModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorDetails.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorEditPage.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorsPage.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorsList.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\NamesPageIndex.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\List.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\NameCreateInfo.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\NameCreateModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\NameDetailModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\NameEditModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\Vendors\CreateComp.razor" />
-    <AdditionalFiles Include="Pages\Lists\Vendors\VendorIndexPage.razor" />
-    <AdditionalFiles Include="Pages\Lists\Vendors\VendorCreatePage.razor" />
-    <AdditionalFiles Include="Pages\Lists\Vendors\VendorDetailPage.razor" />
-    <AdditionalFiles Include="Pages\Lists\Vendors\VendorEditPage.razor" />
-    <AdditionalFiles Include="Pages\Managers\AllLoansDisbursementTab.razor" />
-    <AdditionalFiles Include="Pages\Managers\LoanRequestAllTab.razor" />
-    <AdditionalFiles Include="Pages\Managers\ManagerLoanRequestDetail.razor" />
-    <AdditionalFiles Include="Pages\Managers\ManagerIndexLoanPage.razor" />
-    <AdditionalFiles Include="Pages\Managers\ManagerRequestIndexPage.razor" />
-    <AdditionalFiles Include="Pages\Settings\IndexSetting.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Branches\CashVaultModalActions.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Branches\OpenBranch.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Branches\VaultInModal.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Branches\VaultInRow.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Branches\VaultOutModal.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Branches\VaultOutRow.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangeCurrencyIndexPage.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangeHistory.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangesPopup.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangesSidebar.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Exchanges\MoneyExchanges.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Exchanges\SetDailySpotRate.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Exchanges\SetDailySpotRateModal.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Exchanges\SpotRate.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Exchanges\SpotRateRow.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Journals\JournalDetails.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Journals\JournalEntryCreate.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Journals\JournalEntryRowCreate.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Journals\JournalIndexPage.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Ledgers\CreateLedgerModal.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Ledgers\EditLedgerModal.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Ledgers\LedgerIndexPage.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\TabAllLoans.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\CustomersActiveLoanPage.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\IndexLoanPage.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanChangedCreditAgent.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanChangedCreditAgents.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanCreatePage.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanInfos.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanSchedules.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\PaidSchedules.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\PaymentLineModal.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LCDetailModal.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LoanCategoryModalCreate.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LoanCategoryModalEdit.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LoanCategoryIndex.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductPage.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductModalCreate.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductModalEdit.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LPModalDetail.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\CollateralSearchList.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\ConfirmModal.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\CustomerRequest.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\FileUploadDialogue.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\GuarantorSearchList.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestIndexPage.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanCollateralLine.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestAll.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestCollaterals.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestCreate.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestCustomer.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestDetail.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestDocument.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestEditPage.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestGaurantor.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestInfo.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestNotes.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ClientDuePayTab.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ClientLateSchedules.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ConfirmPaymentDialogue.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\CustomerLoanInformation.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\LateScheduleDetail.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\LoanPaymentHistory.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanDetails.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentIndex.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentLines.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentSideBars.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentMultiples.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentScedule.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PayOffModal.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PayOffs.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\RecievePaymentPage.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\RepaymentMultiple.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ScheduleNotPaid.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\SchedulesPaid.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\WriteOffs\Index.razor" />
-    <AdditionalFiles Include="Pages\Transactions\RecievePayements\PaymentOffSideBar.razor" />
-    <AdditionalFiles Include="Pages\Transactions\RecievePayements\RepaymentMultiplePage.razor" />
-    <AdditionalFiles Include="Shared\CascadingAppState.razor" />
-    <AdditionalFiles Include="Shared\CascadingAuthState.razor" />
-    <AdditionalFiles Include="Shared\CascadingCurrency.razor" />
-    <AdditionalFiles Include="Shared\MessageStatus.razor" />
-    <AdditionalFiles Include="Shared\RedirectToAccessDenied.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Fonts\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-	<Target Name="QuestPDF_DoNotIncludeLatoFont_AfterBuild" AfterTargets="Build">
-		<RemoveDir Directories="$(OutDir)/LatoFont" />
-	</Target>
-
-	<Target Name="QuestPDF_DoNotIncludeLatoFont_AfterPublish" AfterTargets="Publish">
-		<RemoveDir Directories="$(PublishDir)/LatoFont" />
-	</Target>
+	<ItemGroup>
+		<AdditionalFiles Include="Pages\Currencies\CurrenciesIndex.razor" />
+		<AdditionalFiles Include="Pages\Currencies\CurrencyDetials.razor" />
+		<AdditionalFiles Include="Pages\Currencies\CurrencyModalCreate.razor" />
+		<AdditionalFiles Include="Pages\Currencies\CurrenyTableRow.razor" />
+		<AdditionalFiles Include="Pages\Currencies\ExchangeModalCurrency.razor" />
+		<AdditionalFiles Include="Pages\Currencies\NoteCreate.razor" />
+		<AdditionalFiles Include="Pages\Currencies\NoteList.razor" />
+		<AdditionalFiles Include="Pages\Currencies\NoteListModal.razor" />
+		<AdditionalFiles Include="Pages\Currencies\NoteModalCreate.razor" />
+		<AdditionalFiles Include="Pages\Error.razor" />
+		<AdditionalFiles Include="Pages\Home.razor" />
+		<AdditionalFiles Include="Pages\Identity\Authentications\AccessDenied.razor" />
+		<AdditionalFiles Include="Pages\Identity\Authentications\Login.razor" />
+		<AdditionalFiles Include="Pages\Identity\Authentications\RedirectToLogin.razor" />
+		<AdditionalFiles Include="Pages\Identity\Authentications\Register.razor" />
+		<AdditionalFiles Include="Pages\Identity\Authentications\StatusMessage.razor" />
+		<AdditionalFiles Include="Pages\Identity\Shared\_Imports.razor" />
+		<AdditionalFiles Include="Pages\Identity\ManageUserLoanSize.razor" />
+		<AdditionalFiles Include="Pages\Identity\Permissions.razor" />
+		<AdditionalFiles Include="Pages\Identity\Roles\RoleIndexPage.razor" />
+		<AdditionalFiles Include="Pages\Identity\Roles\ManageRolePermission.razor" />
+		<AdditionalFiles Include="Pages\Identity\Roles\RoleCreate.razor" />
+		<AdditionalFiles Include="Pages\Identity\SetUserLoanSize.razor" />
+		<AdditionalFiles Include="Pages\Identity\SetUserLoanSizeEdit.razor" />
+		<AdditionalFiles Include="Pages\Identity\Shared\EmptyLayout.razor" />
+		<AdditionalFiles Include="Pages\Identity\Users\CreateNewUser.razor" />
+		<AdditionalFiles Include="Pages\Identity\Users\CreditAgentUserCreate.razor" />
+		<AdditionalFiles Include="Pages\Identity\Users\UserIndexPages.razor" />
+		<AdditionalFiles Include="Pages\Identity\Users\ManageUserPermission.razor" />
+		<AdditionalFiles Include="Pages\Identity\Users\ManageUserProfile.razor" />
+		<AdditionalFiles Include="Pages\Identity\Users\MangeUserRoles.razor" />
+		<AdditionalFiles Include="Pages\Identity\Users\UserChangePassword.razor" />
+		<AdditionalFiles Include="Pages\Identity\Users\UserCreateModal.razor" />
+		<AdditionalFiles Include="Pages\Identity\Users\UserManagement.razor" />
+		<AdditionalFiles Include="Pages\Lists\AddressCreate.razor" />
+		<AdditionalFiles Include="Pages\Lists\Branches\BranchCreateModal.razor" />
+		<AdditionalFiles Include="Pages\Lists\Branches\BranchDetailModal.razor" />
+		<AdditionalFiles Include="Pages\Lists\Branches\BranchList.razor" />
+		<AdditionalFiles Include="Pages\Lists\Branches\BranchUpdateModal.razor" />
+		<AdditionalFiles Include="Pages\Lists\Collaterals\CollateralLoanRequest.razor" />
+		<AdditionalFiles Include="Pages\Lists\Collaterals\CollateralModalAdd.razor" />
+		<AdditionalFiles Include="Pages\Lists\Collaterals\CollateralsCustomer.razor" />
+		<AdditionalFiles Include="Pages\Lists\Collaterals\CollateralsPerson.razor" />
+		<AdditionalFiles Include="Pages\Lists\Collaterals\CollateralsProperties.razor" />
+		<AdditionalFiles Include="Pages\Lists\CreditAgents\AgentIndex.razor" />
+		<AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentDialog.razor" />
+		<AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentSwitch.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\Activties\CustomerActivitiesAdd.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\CustomerAddress.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\CustomerCreate.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\CustomerDetailsPage.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\Expenses\CustomerExp.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\Incomes\CustomerInc.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\CustomerLoanRequest.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\Incomes\CustomerModalIncome.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\Notes\CustomerNoteAdd.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\Notes\CustomerNotes.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\CustomersIndex.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\CustomersList.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\CustomerUpdatePage.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\GuarantorModalCreate.razor" />
+		<AdditionalFiles Include="Pages\Lists\Customers\LoanHistory.razor" />
+		<AdditionalFiles Include="Pages\Lists\Departments\DepartmentDetailModal.razor" />
+		<AdditionalFiles Include="Pages\Lists\Departments\DepartmentModalCreate.razor" />
+		<AdditionalFiles Include="Pages\Lists\Departments\DepartmentModalUpdate.razor" />
+		<AdditionalFiles Include="Pages\Lists\Departments\DepartmentIndexPage.razor" />
+		<AdditionalFiles Include="Pages\Lists\Employees\EmployeeCreatePage.razor" />
+		<AdditionalFiles Include="Pages\Lists\Employees\EmployeeComp.razor" />
+		<AdditionalFiles Include="Pages\Lists\Employees\EmployeeDetails.razor" />
+		<AdditionalFiles Include="Pages\Lists\Employees\EmployeeEditPage.razor" />
+		<AdditionalFiles Include="Pages\Lists\Employees\EmployeesIndex.razor" />
+		<AdditionalFiles Include="Pages\Lists\GenderDrowDown.razor" />
+		<AdditionalFiles Include="Pages\Lists\Holidays\CreateHolidayModal.razor" />
+		<AdditionalFiles Include="Pages\Lists\Holidays\CreateMultipleModal.razor" />
+		<AdditionalFiles Include="Pages\Lists\Holidays\DeleteModal.razor" />
+		<AdditionalFiles Include="Pages\Lists\Holidays\HolidayList.razor" />
+		<AdditionalFiles Include="Pages\Lists\Holidays\ImportHoliday.razor" />
+		<AdditionalFiles Include="Pages\Lists\Holidays\UpdateHolidayModal.razor" />
+		<AdditionalFiles Include="Pages\Lists\MarritalDropDown.razor" />
+		<AdditionalFiles Include="Pages\Lists\NationalityDropDown.razor" />
+		<AdditionalFiles Include="Pages\Lists\OccupationDropDown.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\AllGuarantors.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\ConvertToCustomer.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\ConvertToEmployee.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\ConvertToVendor.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GaurantorCreateComPage.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorAddModal.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorDetails.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorEditPage.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorsPage.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorsList.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\NamesPageIndex.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\List.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\NameCreateInfo.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\NameCreateModal.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\NameDetailModal.razor" />
+		<AdditionalFiles Include="Pages\Lists\OtherNames\NameEditModal.razor" />
+		<AdditionalFiles Include="Pages\Lists\Vendors\CreateComp.razor" />
+		<AdditionalFiles Include="Pages\Lists\Vendors\VendorIndexPage.razor" />
+		<AdditionalFiles Include="Pages\Lists\Vendors\VendorCreatePage.razor" />
+		<AdditionalFiles Include="Pages\Lists\Vendors\VendorDetailPage.razor" />
+		<AdditionalFiles Include="Pages\Lists\Vendors\VendorEditPage.razor" />
+		<AdditionalFiles Include="Pages\Managers\AllLoansDisbursementTab.razor" />
+		<AdditionalFiles Include="Pages\Managers\LoanRequestAllTab.razor" />
+		<AdditionalFiles Include="Pages\Managers\ManagerLoanRequestDetail.razor" />
+		<AdditionalFiles Include="Pages\Managers\ManagerIndexLoanPage.razor" />
+		<AdditionalFiles Include="Pages\Managers\ManagerRequestIndexPage.razor" />
+		<AdditionalFiles Include="Pages\Settings\IndexSetting.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Branches\CashVaultModalActions.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Branches\OpenBranch.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Branches\VaultInModal.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Branches\VaultInRow.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Branches\VaultOutModal.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Branches\VaultOutRow.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangeCurrencyIndexPage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangeHistory.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangesPopup.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangesSidebar.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Exchanges\MoneyExchanges.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Exchanges\SetDailySpotRate.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Exchanges\SetDailySpotRateModal.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Exchanges\SpotRate.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Exchanges\SpotRateRow.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Journals\JournalDetails.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Journals\JournalEntryCreate.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Journals\JournalEntryRowCreate.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Journals\JournalIndexPage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Ledgers\CreateLedgerModal.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Ledgers\EditLedgerModal.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Ledgers\LedgerIndexPage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\TabAllLoans.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\CustomersActiveLoanPage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\IndexLoanPage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanChangedCreditAgent.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanChangedCreditAgents.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanCreatePage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanInfos.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanSchedules.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\PaidSchedules.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\PaymentLineModal.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LCDetailModal.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LoanCategoryModalCreate.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LoanCategoryModalEdit.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LoanCategoryIndex.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductPage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductModalCreate.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductModalEdit.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LPModalDetail.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\CollateralSearchList.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\ConfirmModal.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\CustomerRequest.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\FileUploadDialogue.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\GuarantorSearchList.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestIndexPage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanCollateralLine.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestAll.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestCollaterals.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestCreate.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestCustomer.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestDetail.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestDocument.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestEditPage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestGaurantor.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestInfo.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestNotes.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ClientDuePayTab.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ClientLateSchedules.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ConfirmPaymentDialogue.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\CustomerLoanInformation.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\LateScheduleDetail.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\LoanPaymentHistory.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanDetails.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentIndex.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentLines.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentSideBars.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentMultiples.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentScedule.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PayOffModal.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PayOffs.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\RecievePaymentPage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\RepaymentMultiple.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ScheduleNotPaid.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\SchedulesPaid.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\WriteOffs\Index.razor" />
+		<AdditionalFiles Include="Pages\Transactions\RecievePayements\PaymentOffSideBar.razor" />
+		<AdditionalFiles Include="Pages\Transactions\RecievePayements\RepaymentMultiplePage.razor" />
+		<AdditionalFiles Include="Shared\CascadingAppState.razor" />
+		<AdditionalFiles Include="Shared\CascadingAuthState.razor" />
+		<AdditionalFiles Include="Shared\CascadingCurrency.razor" />
+		<AdditionalFiles Include="Shared\MessageStatus.razor" />
+		<AdditionalFiles Include="Shared\RedirectToAccessDenied.razor" />
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Include="Resources\Fonts\KhmerOSmuol.ttf">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\Fonts\KhmerOSsiemreap.ttf">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	</ItemGroup>
 </Project>

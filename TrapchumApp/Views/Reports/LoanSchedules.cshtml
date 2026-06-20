@@ -1,0 +1,424 @@
+@using Applications.Extensions.DateTimes
+@using Applications.Extensions.Maths
+@using Applications.Features.Loans.Dtos.Responses
+@using Applications.Features.Reports.Dtos
+@model RptScheduleDetails
+@{
+    Layout = null;
+    var report = Model ?? new RptScheduleDetails();
+    var schedules = report.Schedules?.OrderBy(x => x.InstallmentNo).ToList() ?? [];
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Loan Schedule - @report.ContractNumber</title>
+    <style>
+            @@font-face {
+                font-family: 'KhmerOSsys';
+                src: url('data:application/font-woff;base64,@Html.Raw(Model?.FontModel?.FontBaseSiemReap64 ?? "")') format('woff');
+                font-display: block;
+            }
+
+            @@font-face {
+                font-family: 'Khmer Os Muol';
+                src: url('data:font/ttf;base64,@Html.Raw(Model?.FontModel?.FontBaseKhmerMuol64 ?? "")') format('truetype');
+                font-display: block;
+            }
+
+            :root {
+                --primary: #1e293b;
+                --primary-light: #334155;
+                --accent: #2563eb;
+                --border: #e2e8f0;
+                --border-dark: #cbd5e1;
+                --text-color: #000;
+                --radius: 6px;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body {
+                margin: 0;
+                padding: 0;
+                color: var(--text-color);
+                background: #fff;
+                font-family: KhmerOSsys;
+                font-size: 12px;
+                line-height: 1.5;
+            }
+
+            table td, table th {
+                font-family: KhmerOSsys;
+            }
+
+            /* ── Report Shell ── */
+            .report-shell {
+                width: 210mm;
+                min-height: 297mm;
+                margin: 2rem auto;
+                background: #fff;
+                padding: 20mm;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+
+            /* ── Header Section ── */
+            .report-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                margin-bottom: 0.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 2.5px solid var(--primary);
+                position: relative;
+            }
+
+            .report-header::after {
+                content: '';
+                position: absolute;
+                bottom: -4px;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: var(--border-dark);
+            }
+
+            .header-logo {
+                flex: 0 0 auto;
+            }
+
+            .header-logo img {
+                height: 70px;
+                object-fit: contain;
+            }
+
+            .header-center {
+                flex: 1;
+                text-align: center;
+                padding: 0 1rem;
+            }
+
+            .header-center h2 {
+                margin: 0;
+                font-size: 1.2rem;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                font-family: 'Khmer Os Muol';
+                color: var(--primary);
+            }
+
+            .header-center h3 {
+                margin: 0.3rem 0;
+                font-size: 1rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: #475569;
+            }
+
+            .header-center .report-title {
+                margin: 1rem 0 0 0;
+                font-size: 1.4rem;
+                font-weight: 700;
+                color: var(--accent);
+            }
+
+            .header-right {
+                flex: 0 0 120px;
+            }
+
+            /* ── Info Table ── */
+            .info-table {
+                width: 100%;
+                margin-bottom: 1.5rem;
+                border: none;
+                font-size: 0.95rem;
+            }
+
+            .info-table td {
+                border: none;
+                padding: 0 0 6px 0;
+                vertical-align: top;
+            }
+
+            .info-table .lbl {
+                font-weight: 600;
+                white-space: nowrap;
+            }
+
+            /* ── Schedule Table ── */
+            .schedule-table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+                margin-bottom: 2rem;
+                font-size: 0.95rem;
+                border: 1px solid var(--border-dark);
+                border-radius: var(--radius);
+                overflow: hidden;
+            }
+
+            .schedule-table thead tr {
+                background: var(--primary);
+            }
+
+            .schedule-table th {
+                padding: 0.55rem 0.4rem;
+                font-weight: 600;
+                text-align: center;
+                color: #ffffff;
+                border: none;
+                border-right: 1px solid var(--primary-light);
+            }
+
+            .schedule-table th:last-child {
+                border-right: none;
+            }
+
+            .schedule-table td {
+                padding: 0.45rem 0.4rem;
+                vertical-align: middle;
+                border-bottom: 1px solid var(--border);
+                border-right: 1px solid var(--border);
+            }
+
+            .schedule-table td:last-child {
+                border-right: none;
+            }
+
+            .schedule-table tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+            .schedule-table tbody tr:nth-child(even) {
+                background: #f8fafc;
+            }
+
+            .schedule-table td.num {
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+            }
+
+            .schedule-table td.center {
+                text-align: center;
+            }
+
+            /* ── Table Footer ── */
+            .table-footer td {
+                font-weight: 700;
+                background: var(--primary) !important;
+                color: #ffffff !important;
+                border-bottom: none !important;
+                border-right-color: var(--primary-light) !important;
+                padding: 0.55rem 0.4rem;
+            }
+
+            .table-footer td:last-child {
+                border-right: none !important;
+            }
+
+            /* ── Signature Section ── */
+            .signature-table {
+                width: 100%;
+                margin-top: 3rem;
+                font-size: 0.95rem;
+                font-weight: 700;
+                text-align: center;
+                border: none;
+            }
+
+            .signature-table td {
+                border: none;
+                vertical-align: top;
+                padding: 0 3rem;
+            }
+
+            .signature-space {
+                height: 80px;
+                border-bottom: 1px dashed var(--border-dark);
+                margin: 0.5rem 1rem 0;
+            }
+
+            /* ── Print Styles ── */
+            @@media print {
+                body {
+                    background: #fff;
+                    padding: 0;
+                }
+
+                .report-shell {
+                    margin: 0;
+                    padding: 10mm;
+                    box-shadow: none;
+                    width: 100%;
+                    min-height: auto;
+                }
+
+                .schedule-table {
+                    border-radius: 0;
+                }
+
+                .schedule-table thead,
+                .schedule-table tfoot {
+                    display: table-row-group;
+                }
+
+                .schedule-table thead tr {
+                    background: var(--primary) !important;
+                }
+
+                .schedule-table th {
+                    color: #fff !important;
+                }
+
+                .table-footer td {
+                    background: var(--primary) !important;
+                    color: #fff !important;
+                }
+
+                .schedule-table tbody tr:nth-child(even) {
+                    background: #f8fafc !important;
+                }
+
+                @@page {
+                    size: A4;
+                    margin: 2.5mm;
+                }
+
+                .schedule-table th, .table-footer td,
+                .schedule-table tbody tr:nth-child(even) {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+            }
+    </style>
+</head>
+<body>
+    <main class="report-shell">
+
+        <!-- ── Header ── -->
+        <div class="report-header">
+            <div class="header-logo">
+                <img src="data:image/jpeg;base64,@report.FontModel.LogoBase64" alt="Trapchum Logo" />
+            </div>
+            <div class="header-center">
+                <h2>ទ្រព្យជុំ ឃែស ផន សប</h2>
+                <h3>TRAP CHUM CASH PAWN SHOP</h3>
+                <div class="report-title">កាលវិភាគបង់ប្រាក់</div>
+            </div>
+            <div class="header-right"></div>
+        </div>
+
+        <!-- ── Info Section ── -->
+        <table class="info-table">
+            <tr><td colspan="6" style="height: 1.2rem;"></td></tr>
+            <tr>
+                <td class="lbl" style="width: 15%;">ឈ្មោះអតិថិជន</td>
+                <td style="width: 18%;">: @(report.AltName ?? "-")</td>
+                <td class="lbl" style="width: 15%;">អាសយដ្ឋាន</td>
+                <td style="width: 19%;" colspan="3">: @(report.Address ?? "-")</td>
+            </tr>
+            <tr>
+                <td class="lbl">កិច្ចសន្យាលេខ</td>
+                <td>: @(report.ContractNumber ?? "-")</td>
+                <td class="lbl">ចំនួនទឹកប្រាក់ខ្ចី</td>
+                <td>: @(report.Principle.Seperator(report.CurrencyId))</td>
+                <td class="lbl" style="width: 10%;">ទូរស័ព្ទ</td>
+                <td style="width: 23%;">: @(report.AgentPhone ?? "-")</td>
+            </tr>
+            <tr>
+                <td class="lbl">គណនីលេខ</td>
+                <td>: @(report.LoanAccount ?? "-")</td>
+                <td class="lbl">ថ្ងៃផុតកំណត់</td>
+                <td>: @(report.LastPaymentDate.DayFirst())</td>
+                <td class="lbl">ការប្រាក់</td>
+                <td>: @(report.InterestRate?.ToString("0.00") ?? "0.00") % /ខែ</td>
+            </tr>
+            <tr>
+                <td class="lbl">ថ្ងៃខ្ចីប្រាក់</td>
+                <td>: @(report.RegisterDate.DayFirst())</td>
+                <td class="lbl">ភ្នាក់ងារ</td>
+                <td>: @(report.CreditAgentKhmer ?? "-")</td>
+                <td class="lbl">ច្បាប់ទី</td>
+                <td>: 1</td>
+            </tr>
+            <tr>
+                <td class="lbl">រយៈពេលខ្ចីប្រាក់</td>
+                <td>: @(report.PeriodName ?? "-")</td>
+                <td class="lbl">ការិយាល័យ</td>
+                <td>: @(report.BranchName ?? "-")</td>
+                <td colspan="2"></td>
+            </tr>
+        </table>
+
+        <!-- ── Schedule Table ── -->
+        <table class="schedule-table">
+            <thead>
+                <tr>
+                    <th>ល.រ</th>
+                    <th>ថ្ងៃត្រូវបង់ប្រាក់</th>
+                    <th>ចំនួនថ្ងៃ</th>
+                    <th>ប្រាក់ដើមត្រូវបង់</th>
+                    <th>ការប្រាក់ត្រូវបង់</th>
+                    <th>ប្រាក់ប្រសិទ្ធភាព</th>
+                    <th>សរុបប្រាក់ត្រូវបង់</th>
+                    <th>ប្រាក់ដើមនៅសល់</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!schedules.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="center" style="padding: 2rem; color: #94a3b8;">មិនមានទិន្នន័យ (No Data)</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var schedule in schedules)
+                    {
+                        <tr>
+                            <td class="center">@schedule.InstallmentNo</td>
+                            <td class="center">@(schedule.PaymentDate?.ToString("dd-MM-yyyy") ?? "-")</td>
+                            <td class="center">@schedule.TotalDay ថ្ងៃ</td>
+                            <td class="num">@schedule.Principle.Seperator(report.CurrencyId)</td>
+                            <td class="num">@schedule.Interest.Seperator(report.CurrencyId)</td>
+                            <td class="num">@schedule.CollectionFee.Seperator(report.CurrencyId)</td>
+                            <td class="num">@schedule.TotalPay.Seperator(report.CurrencyId)</td>
+                            <td class="num">@schedule.LoanOutstanding.Seperator(report.CurrencyId)</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+            <tfoot class="table-footer">
+                <tr>
+                    <td class="center" colspan="2">សរុប</td>
+                    <td class="center">@(schedules.Sum(x => x.TotalDay)) ថ្ងៃ</td>
+                    <td class="num">@(schedules.Sum(x => x.Principle).Seperator(report.CurrencyId))</td>
+                    <td class="num">@(schedules.Sum(x => x.Interest).Seperator(report.CurrencyId))</td>
+                    <td class="num">@(schedules.Sum(x => x.CollectionFee).Seperator(report.CurrencyId))</td>
+                    <td class="num">@(schedules.Sum(x => x.TotalPay).Seperator(report.CurrencyId))</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <!-- ── Signature Section ── -->
+        <table class="signature-table">
+            <tr>
+                <td style="width: 50%;">
+                    <div>ស្នាមមេដៃអតិថិជន</div>
+                    <div class="signature-space"></div>
+                </td>
+                <td style="width: 50%;">
+                    <div>ហត្ថលេខាអ្នករៀបចំ</div>
+                    <div class="signature-space"></div>
+                </td>
+            </tr>
+        </table>
+    </main>
+</body>
+</html>

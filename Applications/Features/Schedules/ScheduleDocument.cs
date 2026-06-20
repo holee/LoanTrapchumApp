@@ -1,5 +1,6 @@
 ﻿using Applications.Extensions.DateTimes;
 using Applications.Extensions.Maths;
+using Applications.Features.Reports.Dtos;
 using Applications.Responses.ViewModels.Reports;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -8,28 +9,18 @@ namespace Applications.Features.Schedules;
 
 public sealed class ScheduleDocument : IDocument
 {
-    public DisbursmentsRpt Item { get; }
-    public VLoanDisbursments Value { get; }
-    public ScheduleDocument(VLoanDisbursments value)
+    public RptScheduleDetails Value { get; }
+    public ScheduleDocument(RptScheduleDetails value)
     {
-        Item = new();
-
         Value = value;
     }
-
-    public ScheduleDocument(DisbursmentsRpt loan)
-    {
-        Item = loan;
-        Value = new();
-    }
-
     public DocumentMetadata GetMetadata() => DocumentMetadata.Default;
     public DocumentSettings GetSettings() => DocumentSettings.Default;
     public void Compose(IDocumentContainer container)
     {
         container.Page(page =>
         {
-            //page.DefaultTextStyle(x => x.FontSize(10).FontFamily(ScheduleHelpers.FONT));
+            page.DefaultTextStyle(x => x.FontSize(10).FontFamily("Khmer Os Siemreap"));
 
             page.Size(PageSizes.A4);
 
@@ -59,14 +50,17 @@ public sealed class ScheduleDocument : IDocument
 
     private void ComposeContent(IContainer container)
     {
+
+        
+
         container.PaddingVertical(10F).Column(col =>
         {
             col.Item().Element(CompostTable);
-         
+
             col.Item().PaddingTop(20).Row(r =>
             {
-                r.RelativeItem().AlignCenter().Text("ស្នាមមេដៃអតិថិជន").FontFamily(ScheduleHelpers.FONT).SemiBold();
-                r.RelativeItem().AlignCenter().Text("ហត្ថលេខាអ្នករៀបចំ").FontFamily(ScheduleHelpers.FONT).SemiBold();
+                r.RelativeItem().AlignCenter().Text("ស្នាមមេដៃអតិថិជន").FontFamily("Khmer Os Siemreap").SemiBold();
+                r.RelativeItem().AlignCenter().Text("ហត្ថលេខាអ្នករៀបចំ").FontFamily("Khmer Os Siemreap").SemiBold();
             });
             col.Item().PaddingTop(100).Row(r =>
             {
@@ -94,8 +88,8 @@ public sealed class ScheduleDocument : IDocument
             });
             col.Item().PaddingTop(10).Row(r =>
             {
-                r.RelativeItem().AlignCenter().Text(DateTime.Now.ToLongDateString()).FontFamily(ScheduleHelpers.FONT).SemiBold();
-                r.RelativeItem().AlignCenter().Text(DateTime.Now.ToLongDateString()).FontFamily(ScheduleHelpers.FONT).SemiBold();
+                r.RelativeItem().AlignCenter().Text(DateTime.Now.ToLongDateString()).FontFamily("Khmer Os Siemreap").SemiBold();
+                r.RelativeItem().AlignCenter().Text(DateTime.Now.ToLongDateString()).FontFamily("Khmer Os Siemreap").SemiBold();
             });
         });
     }
@@ -132,15 +126,15 @@ public sealed class ScheduleDocument : IDocument
     private void AddTableHeaderCell(TableCellDescriptor header)
     {
         header.Cell().Element(HeaderCellStyle).Text("#").AlignCenter();
-        header.Cell().Element(HeaderCellStyle).Text("ថ្អៃបង់ប្រាក់").SemiBold().AlignCenter();
-        header.Cell().Element(HeaderCellStyle).Text("ចំនួនថ្ងៃ").SemiBold().AlignCenter();
-        header.Cell().Element(HeaderCellStyle).AlignRight().Text("ប្រាក់ដើមត្រូវបង់").SemiBold();
-        header.Cell().Element(HeaderCellStyle).AlignRight().Text("ការប្រាក់").SemiBold();
-        header.Cell().Element(HeaderCellStyle).AlignRight().Text("ប្រាក់បង់សរុប").SemiBold();
-        header.Cell().Element(HeaderCellStyle).AlignRight().Text("ប្រាក់ដើមនៅសាល់").SemiBold();
+        header.Cell().Element(HeaderCellStyle).Text("ថ្អៃបង់ប្រាក់").FontFamily("Khmer Os Siemreap").SemiBold().AlignCenter();
+        header.Cell().Element(HeaderCellStyle).Text("ចំនួនថ្ងៃ").FontFamily("Khmer Os Siemreap").SemiBold().AlignCenter();
+        header.Cell().Element(HeaderCellStyle).AlignRight().Text("ប្រាក់ដើមត្រូវបង់").FontFamily("Khmer Os Siemreap").SemiBold();
+        header.Cell().Element(HeaderCellStyle).AlignRight().Text("ការប្រាក់").FontFamily("Khmer Os Siemreap").SemiBold();
+        header.Cell().Element(HeaderCellStyle).AlignRight().Text("ប្រាក់បង់សរុប").FontFamily("Khmer Os Siemreap").SemiBold();
+        header.Cell().Element(HeaderCellStyle).AlignRight().Text("ប្រាក់ដើមនៅសល់").FontFamily("Khmer Os Siemreap").SemiBold();
     }
 
-    private void InsertTableRow(TableDescriptor table, VSchedule item)
+    private void InsertTableRow(TableDescriptor table, RptScheduleDetailsLine item)
     {
         table.Cell().Element(CellStyle).Text($"{item.InstallmentNo}").AlignCenter();
         table.Cell().Element(CellStyle).Text($"{item.PaymentDate.DayFirst()}").AlignCenter();
@@ -170,9 +164,9 @@ public sealed class ScheduleDocument : IDocument
                         .AlignCenter()
                             .FontFamily(ScheduleHelpers.TITLE_FONT);
                         col.Item().AlignCenter()
-                        .Text(ScheduleHelpers.COMPANY_NAME).FontFamily(ScheduleHelpers.FONT);
+                        .Text(ScheduleHelpers.COMPANY_NAME).FontFamily("Khmer Os Siemreap");
                         col.Item().AlignCenter()
-                        .Text(ScheduleHelpers.SCHEDULE_TITLE_KH).FontFamily(ScheduleHelpers.FONT);
+                        .Text(ScheduleHelpers.SCHEDULE_TITLE_KH).FontFamily("Khmer Os Siemreap");
                     });
 
                     r.RelativeItem().Text("");
@@ -182,7 +176,7 @@ public sealed class ScheduleDocument : IDocument
 
                 col.Item().Row(ro =>
                 {
-                    CreateHeaderRow(ro, ScheduleHelpers.FONT);
+                    CreateHeaderRow(ro);
                 });
 
             });
@@ -191,38 +185,38 @@ public sealed class ScheduleDocument : IDocument
 
     }
 
-    private void CreateHeaderRow(RowDescriptor row, string font)
+    private void CreateHeaderRow(RowDescriptor row)
     {
 
         row.ConstantItem(250).PaddingTop(10).Column(col =>
         {
-            CreateColumn(col, ScheduleHelpers.NAME, $"{Value.AltName}", font, 10);
-            CreateColumn(col, ScheduleHelpers.PERIOD, $"{Value.PeriodName}", font, 10);
-            CreateColumn(col, ScheduleHelpers.RATE, $"{Value.InterestRate.AsPercent()}", font, 10);
-            CreateColumn(col, ScheduleHelpers.PRINCIPLE, $"{Value.Principle.As(Value.CurrencyId)}", font, 10);
-            CreateColumn(col, ScheduleHelpers.BRANCH, $"{Value.BranchName}", font, 10);
+            CreateColumn(col, ScheduleHelpers.NAME, $"{Value.AltName}", 10);
+            CreateColumn(col, ScheduleHelpers.PERIOD, $"{Value.PeriodName}", 10);
+            CreateColumn(col, ScheduleHelpers.RATE, $"{Value.InterestRate.AsPercent()}", 10);
+            CreateColumn(col, ScheduleHelpers.PRINCIPLE, $"{Value.Principle.As(Value.CurrencyId)}", 10);
+            CreateColumn(col, ScheduleHelpers.BRANCH, $"{Value.BranchName}", 10);
         });
         row.RelativeItem().PaddingTop(10).Column(col =>
         {
-            CreateColumn(col, ScheduleHelpers.LAST_DUE_DATE, $"{Value.LastPaymentDate.DayFirst()}", font);
-            CreateColumn(col, ScheduleHelpers.ADDRESS, $"{Value.Address}", font);
-            CreateColumn(col, ScheduleHelpers.AGENT, $"{Value.CreditAgentKhmer}", font);
-            CreateColumn(col, ScheduleHelpers.PHONE, $"{Value.AgentPhone}", font);
-            CreateColumn(col, "", "", font);
+            CreateColumn(col, ScheduleHelpers.LAST_DUE_DATE, $"{Value.LastPaymentDate.DayFirst()}");
+            CreateColumn(col, ScheduleHelpers.ADDRESS, $"{Value.Address}");
+            CreateColumn(col, ScheduleHelpers.AGENT, $"{Value.CreditAgentKhmer}");
+            CreateColumn(col, ScheduleHelpers.PHONE, $"{Value.AgentPhone}");
+            CreateColumn(col, "", "");
         });
     }
 
-    private void CreateColumn(ColumnDescriptor col, string label, object? value, string font, float width = 1)
+    private void CreateColumn(ColumnDescriptor col, string label, object? value, float width = 10)
     {
         col.Item().Row(row =>
         {
             row.ConstantItem(30, Unit.Millimetre).Column(c =>
             {
-                c.Item().Text(label).FontSize(10).FontFamily(font);
+                c.Item().Text(label).FontSize(10).FontFamily("Khmer Os Siemreap");
             });
             row.ConstantItem(2, Unit.Millimetre).Column(c =>
             {
-                c.Item().Text(":").FontSize(10).FontFamily(font);
+                c.Item().Text(":").FontSize(10).FontFamily("Khmer Os Siemreap");
             });
             row.RelativeItem()
                     .ScaleToFit()
@@ -231,7 +225,7 @@ public sealed class ScheduleDocument : IDocument
                 c.Item()
                     .ScaleToFit()
                     .Text($"{value}")
-                    .FontSize(10).FontFamily(font);
+                    .FontSize(10).FontFamily("Khmer Os Siemreap");
             });
         });
 

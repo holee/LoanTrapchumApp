@@ -1,13 +1,19 @@
 using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Services;
+using Applications.Features.Reports.Queries.PrintLoanScheduleDetails;
+using Applications.Features.Reports.Queries.PrintLoanScheduleDetailsByGroup;
 using Applications.Features.Schedules;
 using Applications.Features.Schedules.GetLoanScheduleBySchedule;
 using Applications.Services.Loans;
 using Applications.Utils;
+using DocumentFormat.OpenXml.Bibliography;
 using Domains.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using PuppeteerSharp;
+using PuppeteerSharp.Media;
 using QuestPDF.Fluent;
+using Razor.Templating.Core;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -88,29 +94,10 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
         var reportGroup = endpoints.MapGroup("/Reports");
 
-        reportGroup.MapGet("/Schedules/{loanId}/{branchId:int}/{fileName}",
-            async ([FromServices] IPrintPdfServiceImpl printer,
-            string loanId, int branchId) =>
+        reportGroup.MapGet("/Schedules/{loanId}/{branchId:int}/{fileName}", async (IMediator mediator, string loanId, int branchId) =>
         {
 
-
-            var rsp = await printer.DownLoadScheduleAsPdf(branchId, loanId);
-
-            if (rsp.IsError)
-            {
-                return Results.Problem("Failed to generate PDF or no data returned.", statusCode: StatusCodes.Status500InternalServerError);
-            }
-
-            return TypedResults.File(rsp.Value, contentType: "application/pdf", null, enableRangeProcessing: true);
-
-        });
-
-        reportGroup.MapGet("/Schedules/Pdf/{loanId}/{branchId:int}/{fileName}",
-            async ([FromServices] SchedulePrintService pdf, IMediator mediator,
-            [FromServices] IWebHostEnvironment env, string loanId, int branchId) =>
-        {
-
-            var command = new GetLoanByIdQuery(loanId, branchId, Applications.Enumerations.ScheduleStatus.All, true);
+            var command = new PrintLoanScheduleDetailsQuery(loanId, branchId);
 
             var rsp = await mediator.Send(command);
 
@@ -119,18 +106,39 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
                 return Results.Problem();
             }
 
+            var data = rsp.Value;
+
             var doc = new ScheduleDocument(rsp.Value);
 
             var stream = doc.GeneratePdf();
 
-            return TypedResults.File(stream, contentType: "application/pdf", null, enableRangeProcessing: true);
+            return Results.File(stream, contentType: "application/pdf", null, enableRangeProcessing: false);
+        });
+
+        reportGroup.MapGet("/Schedules/Pdf/{loanId}/{branchId:int}/{fileName}", async (IMediator mediator, string loanId, int branchId) =>
+        {
+
+            var command = new PrintLoanScheduleDetailsQuery(loanId, branchId);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsError)
+            {
+                return Results.Problem();
+            }
+
+            var data = rsp.Value;
+
+            var doc = new ScheduleDocument(rsp.Value);
+
+            var stream = doc.GeneratePdf();
+
+            return Results.File(stream, contentType: "application/pdf", null, enableRangeProcessing: false);
 
 
         });
 
-        reportGroup.MapGet("/schedules/pdf/{loanId}/{branchId:int}/{scheduleId:int}", async ([FromServices] SchedulePrintService pdf,
-            [FromServices] IWebHostEnvironment env, IMediator mediator,
-            string loanId, int branchId, int scheduleId) =>
+        reportGroup.MapGet("/schedules/pdf/{loanId}/{branchId:int}/{scheduleId:int}", async (IMediator mediator, string loanId, int branchId, int scheduleId) =>
         {
 
             var command = new GetLoanScheduleByScheduleQuery(branchId, loanId, scheduleId);
@@ -154,9 +162,147 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
             var stream = doc.GeneratePdf();
 
-            return TypedResults.File(stream, contentType: "application/pdf", null, enableRangeProcessing: true);
+            return TypedResults.File(stream, contentType: "application/pdf", null, enableRangeProcessing: false);
 
         });
+
+
+
+
+        //this endpoint is for print loan schedule details with group by schedule, it will print each schedule in one pdf file, and return the pdf file of the schedule that is requested by the client
+
+        reportGroup.MapGet("/pdf/loans/schedules/{loanId}/{branchId:int}/{scheduleId:int}", async (IMediator mediator, IWebHostEnvironment env, string loanId, int branchId, int scheduleId) =>
+        {
+            var command = new PrintLoanScheduleDetailsByGroupQuery(loanId, branchId, scheduleId);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsError)
+            {
+                return Results.Problem();
+            }
+
+            var data = rsp.Value;
+
+
+            var fontPath = Path.Combine(env.WebRootPath, "lib", "dist", "fonts", "SiemreapSans.woff");
+
+            var fontMuolPath = Path.Combine(env.WebRootPath, "lib", "dist", "fonts", "KhmerOSmuollight.ttf");
+
+            var logoPath = Path.Combine(env.WebRootPath, "assets", "logo", "trapchum.jpg");
+
+            data.FontModel.FontBaseSiemReap64 = File.Exists(fontPath) ? Convert.ToBase64String(File.ReadAllBytes(fontPath)) : string.Empty;
+
+            data.FontModel.FontBaseKhmerMuol64 = File.Exists(fontMuolPath) ? Convert.ToBase64String(File.ReadAllBytes(fontMuolPath)) : string.Empty;
+
+            data.FontModel.LogoBase64 = File.Exists(logoPath) ? Convert.ToBase64String(File.ReadAllBytes(logoPath)) : string.Empty;
+
+            var html = await RazorTemplateEngine.RenderAsync("/Views/Reports/RptSchedules.cshtml", data);
+
+            using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+            {
+                Headless = true,
+            });
+
+
+            using var page = await browser.NewPageAsync();
+
+            await page.SetContentAsync(html);
+
+            await page.EvaluateExpressionHandleAsync("document.fonts.ready");
+
+            await page.BringToFrontAsync();
+
+            var pdf = await page.PdfDataAsync(new PdfOptions
+            {
+                Format = PaperFormat.A4,
+                PrintBackground = true,
+                MarginOptions = new MarginOptions
+                {
+                    Top = "12px",
+                    Bottom = "12px",
+                    Left = "12px",
+                    Right = "12px"
+                },
+                WaitForFonts = true,
+                DisplayHeaderFooter = false,
+
+            });
+
+            return Results.File(pdf, "application/pdf", null, enableRangeProcessing: false);
+
+        });
+
+
+        //this endpoint is for print loan schedule details without group by schedule, it will print all schedule in one pdf file
+
+        reportGroup.MapGet("/pdf/loans/schedules/{loanId}/{branchId:int}", async (IMediator mediator, IWebHostEnvironment env, string loanId, int branchId) =>
+        {
+            var command = new PrintLoanScheduleDetailsQuery(loanId, branchId);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsError)
+            {
+                return Results.Problem();
+            }
+
+            var data = rsp.Value;
+
+
+            var fontPath = Path.Combine(env.WebRootPath, "lib", "dist", "fonts", "SiemreapSans.woff");
+
+            var fontMuolPath = Path.Combine(env.WebRootPath, "lib", "dist", "fonts", "KhmerOSmuollight.ttf");
+
+            var logoPath = Path.Combine(env.WebRootPath, "assets", "logo", "trapchum.jpg");
+
+            data.FontModel.FontBaseSiemReap64 = File.Exists(fontPath) ? Convert.ToBase64String(File.ReadAllBytes(fontPath)) : string.Empty;
+
+            data.FontModel.FontBaseKhmerMuol64 = File.Exists(fontMuolPath) ? Convert.ToBase64String(File.ReadAllBytes(fontMuolPath)) : string.Empty;
+
+            data.FontModel.LogoBase64 = File.Exists(logoPath) ? Convert.ToBase64String(File.ReadAllBytes(logoPath)) : string.Empty;
+
+            var html = await RazorTemplateEngine.RenderAsync("/Views/Reports/RptSchedules.cshtml", data);
+
+            using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+            {
+                Headless = true,
+            });
+
+
+            using var page = await browser.NewPageAsync();
+
+            await page.SetContentAsync(html);
+
+            await page.EvaluateExpressionHandleAsync("document.fonts.ready");
+
+            await page.BringToFrontAsync();
+
+            var pdf = await page.PdfDataAsync(new PdfOptions
+            {
+                Format = PaperFormat.A4,
+                PrintBackground = true,
+                MarginOptions = new MarginOptions
+                {
+                    Top = "12px",
+                    Bottom = "12px",
+                    Left = "12px",
+                    Right = "12px"
+                },
+                WaitForFonts = true,
+                DisplayHeaderFooter = false,
+
+            });
+
+            return Results.File(pdf, "application/pdf", null, enableRangeProcessing: false);
+
+        });
+
+
+
+
+
+
 
 
 

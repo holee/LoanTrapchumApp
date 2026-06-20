@@ -1,0 +1,72 @@
+<title>Loan Schedule - {{ContractNumber}}</title>
+
+<style>
+@font-face {
+    font-family: 'KhmerOSsys';
+    src: url('data:font/ttf;base64,{{FontModel.FontBaseSiemReap64}}') format('truetype');
+}
+</style>
+
+<img src="data:image/jpeg;base64,{{FontModel.LogoBase64}}" alt="Logo" />
+
+<tr>
+    <td>ឈ្មោះអតិថិជន</td>
+    <td>: {{AltName}}</td>
+    <td>អាសយដ្ឋាន</td>
+    <td colspan="3">: {{Address}}</td>
+</tr>
+
+<tr>
+    <td>កិច្ចសន្យាលេខ</td>
+    <td>: {{ContractNumber}}</td>
+    <td>ចំនួនទឹកប្រាក់ខ្ចី</td>
+    <td>: {{money Principle CurrencyId}}</td>
+
+    <td>ទូរស័ព្ទ</td>
+    <td>: {{AgentPhone}}</td>
+    ```
+
+</tr>
+
+<tr>
+    <td>គណនីលេខ</td>
+    <td>: {{LoanAccount}}</td>
+    <td>ថ្ងៃផុតកំណត់</td>
+    <td>: {{date LastPaymentDate}}</td>
+
+    <td>ការប្រាក់</td>
+    <td>: {{InterestRate}} % /ខែ</td>
+</tr>
+
+<tbody>
+    {{#if Schedules}}
+    {{#each Schedules}}
+    <tr>
+        <td class="center">{{InstallmentNo}}</td>
+        <td class="center">{{date PaymentDate}}</td>
+        <td class="center">{{TotalDay}} ថ្ងៃ</td>
+        <td class="num">{{money Principle ../CurrencyId}}</td>
+        <td class="num">{{money Interest ../CurrencyId}}</td>
+        <td class="num">{{money CollectionFee ../CurrencyId}}</td>
+        <td class="num">{{money TotalPay ../CurrencyId}}</td>
+        <td class="num">{{money LoanOutstanding ../CurrencyId}}</td>
+    </tr>
+    {{/each}}
+    {{else}}
+    <tr>
+        <td colspan="8" class="center">មិនមានទិន្នន័យ (No Data)</td>
+    </tr>
+    {{/if}}
+</tbody>
+
+<tfoot>
+    <tr>
+        <td colspan="2">សរុប</td>
+        <td>{{sumDay Schedules}} ថ្ងៃ</td>
+        <td>{{sumMoney Schedules "Principle" CurrencyId}}</td>
+        <td>{{sumMoney Schedules "Interest" CurrencyId}}</td>
+        <td>{{sumMoney Schedules "CollectionFee" CurrencyId}}</td>
+        <td>{{sumMoney Schedules "TotalPay" CurrencyId}}</td>
+        <td></td>
+    </tr>
+</tfoot>

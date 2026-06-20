@@ -1,0 +1,77 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Applications.Constants
+@using Applications.Constants.Authorizations
+@using Applications.Extensions
+@using Applications.Extensions.DateTimes
+@using Applications.Extensions.Identity
+@using Applications.Extensions.Identity.Authorizations.Attributes
+@using Applications.Extensions.Identity.Enumerations
+@using Applications.Extensions.Identity.Policies
+@using Applications.Extensions.Maths
+@using Applications.Features.Addresses
+@using Applications.Features.Addresses.Interfaces
+@using Applications.Features.Branches
+@using Applications.Features.Branches.Interfaces
+@using Applications.Features.Currencies
+@using Applications.Features.Customers.Services
+@using Applications.Features.Employees
+@using Applications.Responses.ViewModels.Auths
+@using Applications.Responses.ViewModels.Customers
+@using Applications.Responses.ViewModels.Loans.Schedules
+@using Applications.Responses.ViewModels.Options
+@using Applications.Services.Identity
+@using Applications.Services.Lists
+@using Applications.Services.Loans
+@using Blazilla
+@using Domains.Models.Lists
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using Radzen
+@using Radzen.Blazor
+@using TrapchumApp
+@using TrapchumApp.Components
+@using TrapchumApp.Components.Comps
+@using TrapchumApp.Components.Comps.Cards
+@using TrapchumApp.Components.Comps.Controls
+@using TrapchumApp.Components.Toasts
+@using TrapchumApp.Components.Select2
+@using TrapchumApp.Components.Datatabes
+@using TrapchumApp.Components.Identity
+@using TrapchumApp.Components.Messageboxes
+@using TrapchumApp.Helpers.Constants
+@using TrapchumApp.Services
+@using TrapchumApp.Shared
+@using Applications.Utils
+@using TrapchumApp.Components.Modals.SweetAlerts
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using Applications.Enumerations
+@using Applications.Responses.Paginations
+@using BlazorExpress.ChartJS
+@attribute [Authorize]
+@inject IJSRuntime js
+@inject LoadingTrackerService Tracker
+@inject IAuthorizationService _authorizeService
+@inject NotificationService NotificationService
+@inject DialogService DialogService 
+@inject ContextMenuService ContextMenuService
+@inject TooltipService tooltipService
+@inject IdentityRedirectManager RedirectManager
+@inject IAddressServiceImpl _addressService
+@inject ICurrencyServiceImpl _curService
+@inject IUserServiceImpl _userService
+@inject IMediator mediator
+@inject NotificationServices _notiService
+@inject ToastService _toastService
+@inject MessageBoxService MsgBox
+@inject SwalService Swal
+@inject BranchService branchService 
+@inject UserServices userServices
+@inject CurrencyServices currencyServices 
+@inject NavigationManager NavigationManager
+@inject NavigationService _navService

@@ -14,7 +14,7 @@ public sealed class ScheduleByScheduleDocument(LoanResponse item) : IDocument
     {
         document.Page(page =>
         {
-            page.DefaultTextStyle(x => x.FontSize(14).FontFamily(ScheduleHelpers.FONT));
+            page.DefaultTextStyle(x => x.FontSize(10).FontFamily(ScheduleHelpers.FONT));
             page.Size(PageSizes.A4);
 
             page.Margin(0.5f, Unit.Millimetre);
@@ -29,7 +29,7 @@ public sealed class ScheduleByScheduleDocument(LoanResponse item) : IDocument
                 .PaddingVertical(20)
                 .Text(text =>
                 {
-                    text.DefaultTextStyle(TextStyle.Default.FontSize(16));
+                    text.DefaultTextStyle(TextStyle.Default.FontSize(12));
                     text.CurrentPageNumber();
                     text.Span("/");
                     text.TotalPages();

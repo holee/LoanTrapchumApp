@@ -1,16 +1,25 @@
 ﻿@using Applications.Features.Notifications.Dto
 @using Applications.Features.Notifications.Queries.GetNotification
 @using Applications.Features.Notifications.Queries.GetUnreadNotifications
+@using Applications.Utils
 @using Domains.Enumerations
 @using Humanizer
+@using Microsoft.JSInterop
+@using Radzen.Blazor
 @using TrapchumApp.Helpers.Extensions
+@using TrapchumApp.Services
+@using TrapchumApp.Shared
 @implements IAsyncDisposable
-
+@inject NotificationServices _notiService
+@inject IMediator mediator
+@inject NavigationManager NavigationManager
+@inject IJSRuntime js
 <div class="nb-wrap" @ref="@WrapperRef">
 
     @* ── Bell trigger ── *@
     <button class="nb-trigger" @onclick="Toggle" type="button" aria-label="Notifications">
         <RadzenIcon Icon="notifications" Style="font-size:1.4rem;color:#fff;" />
+
         @if (_notiService.UnReadCount > 0)
         {
             <span class="nb-badge">@(_notiService.UnReadCount > 99 ? "99+" : _notiService.UnReadCount.ToString())</span>

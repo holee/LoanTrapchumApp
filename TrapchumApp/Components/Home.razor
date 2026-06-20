@@ -1,8 +1,16 @@
 ﻿@page "/Home"
 @using Applications.Features.Documents.Dto
+@using Radzen.Blazor
+@using TrapchumApp.Components.Datatabes
 @using TrapchumApp.Components.FileUploads
+@using TrapchumApp.Components.Select2
+@using TrapchumApp.Components.Modals.SweetAlerts
+@using TrapchumApp.Components.Modals.Dialoques
 @inject IServiceProvider ServiceProvider
-@inject IWebHostEnvironment  Env
+@inject IWebHostEnvironment Env
+@inject SwalService Swal
+@inject Toasts.ToastService ToastService
+@inject MessageBoxService MsgBox
 <h3>Home</h3>
 
 
@@ -65,19 +73,6 @@
                 </SelectionTemplate>
             </BlabSelect2>
         </RadzenColumn>
-
-        @* ── 4. Async remote search (live from server) ── *@
-        @* <RadzenColumn Size="6">
-            <label class="rz-mb-1 d-block"><strong>Async Search – Server (min 2 chars)</strong></label>
-            <BlabSelect2 TItem="Nationality" TValue="int"
-                         ValueSelector="x => x.NationalityId"
-                         TextSelector="x => x.NationalityName ?? string.Empty"
-                         SearchAsync="SearchNationalitiesAsync"
-                         MinimumInputLength="2"
-                         @bind-Value="_asyncNationalityId"
-                         Placeholder="Search nationalities..." />
-            <small class="rz-mt-1 d-block text-muted">Selected: @_asyncNationalityId</small>
-        </RadzenColumn> *@
     </RadzenRow>
 </RadzenCard>
 
@@ -107,7 +102,6 @@
                        ShowColumnFilterPicker="true"
                        ShowSearchBox="true"
                        Responsive="true"
-                       
                        SearchPlaceholder="Search employees..."
                        PaginationPosition="BlabTablePaginationPosition.Top"
                        EditMode="BlabTableEditMode.Row"
@@ -221,21 +215,14 @@
         _blabUploadedCount = files.Count;
         _blabLastUploadedName = files.LastOrDefault()?.OriginalName;
         _blabUploadError = null;
-
-        NotificationService.Notify(
-            NotificationSeverity.Success,
-            "Upload complete",
-            $"{files.Count} file(s) uploaded successfully.");
+        ToastService.ShowSuccess($"{files.Count} file(s) uploaded successfully.", "Upload complete");
     }
 
     private void OnBlabFileRemoved(DocumentDto file)
     {
         _blabUploadedCount = Math.Max(0, _blabUploadedCount - 1);
 
-        NotificationService.Notify(
-            NotificationSeverity.Info,
-            "File removed",
-            file.OriginalName ?? "(unnamed)");
+        ToastService.ShowInfo($"File removed: {file.OriginalName}", "File removed");
     }
 
     private void OnProfileUploaded(List<DocumentDto> files)
@@ -243,20 +230,15 @@
         var file = files.LastOrDefault();
         if (file is null) return;
 
-        NotificationService.Notify(
-            NotificationSeverity.Success,
-            "Profile uploaded",
-            file.OriginalName ?? file.NewFileName ?? "(saved)");
+        ToastService.ShowSuccess($"Profile uploaded: {file.OriginalName}", "Upload complete");
     }
 
     private void OnBlabUploadError(string message)
     {
         _blabUploadError = message;
 
-        NotificationService.Notify(
-            NotificationSeverity.Error,
-            "Upload failed",
-            message);
+        ToastService.ShowError(message, "Upload failed");
+
     }
 }
 
@@ -393,7 +375,7 @@
         <small class="text-muted">Last result: <strong>@_msgBoxLastResult</strong></small>
     </div>
 </RadzenCard>
-@code{
+@code {
     void DevideByZero()
     {
         var x = 1 / int.Parse("0");

@@ -1,0 +1,515 @@
+@using Applications.Extensions.DateTimes
+@using Applications.Extensions.Maths
+@using Applications.Features.Reports.Dtos
+@model RptScheduleDetails
+@{
+    Layout = null;
+    var report = Model ?? new RptScheduleDetails();
+    var schedules = report.Schedules?.OrderBy(x => x.InstallmentNo).ToList() ?? [];
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@report.LoanId</title>
+
+    <style>
+            @@font-face {
+                font-family: 'KhmerOSsys';
+                src: url('data:application/font-woff;base64,@Html.Raw(Model?.FontModel?.FontBaseSiemReap64 ?? "")') format('woff');
+                font-display: block;
+            }
+
+            @@font-face {
+                font-family: 'Khmer Os Muol';
+                src: url('data:font/ttf;base64,@Html.Raw(Model?.FontModel?.FontBaseKhmerMuol64 ?? "")') format('truetype');
+                font-display: block;
+            }
+
+            :root {
+                --primary: #1e293b;
+                --primary-light: #334155;
+                --accent: #2563eb;
+                --border: #e2e8f0;
+                --border-dark: #cbd5e1;
+                --text-color: #000;
+                --text-secondary: #475569;
+                --text-muted: #94a3b8;
+                --radius: 6px;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body {
+                margin: 0;
+                padding: 0;
+                color: var(--text-color);
+                background: #fff;
+                font-family: KhmerOSsys;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            table td, table th {
+                font-family: KhmerOSsys;
+            }
+
+            /* ── Report Shell ── */
+            .report-shell {
+                width: 210mm;
+                min-height: 297mm;
+                margin: 2rem auto;
+                background: #fff;
+                padding: 0;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                overflow: hidden;
+            }
+
+            /* ── Top Header Bar ── */
+            .top-bar {
+                background: #f1f5f9;
+                padding: 1.2rem 2rem 1rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+                .top-bar .logo-area {
+                    flex: 0 0 auto;
+                }
+
+                    .top-bar .logo-area img {
+                        height: 55px;
+                        object-fit: contain;
+                        border-radius: 4px;
+                    }
+
+                .top-bar .title-area {
+                    flex: 1;
+                    text-align: center;
+                    padding: 0 1rem;
+                }
+
+                    .top-bar .title-area h2 {
+                        margin: 0;
+                        font-size: 1.15rem;
+                        font-weight: 700;
+                        letter-spacing: 0.5px;
+                        font-family: 'Khmer Os Muol';
+                        color: #000;
+                    }
+
+                    .top-bar .title-area h3 {
+                        margin: 0.2rem 0 0;
+                        font-size: 0.8rem;
+                        font-weight: 500;
+                        text-transform: uppercase;
+                        letter-spacing: 2px;
+                        color: #000;
+                    }
+
+                .top-bar .spacer {
+                    flex: 0 0 55px;
+                }
+
+            /* ── Summary Cards ── */
+            .summary-strip {
+                background: #f1f5f9; /* light color */
+                padding: 1.2rem 2rem;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 2rem;
+                border-bottom: 1px solid var(--border-dark);
+            }
+
+            .summary-card {
+                text-align: center;
+                min-width: 120px;
+            }
+
+                .summary-card.address-card {
+                    flex: 1 1 100%;
+                    margin-top: 0.5rem;
+                }
+
+                .summary-card .card-label {
+                    font-size: 1rem;
+                    color: var(--text-secondary);
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-bottom: 0.2rem;
+                }
+
+                .summary-card .card-value {
+                    font-size: 1.05rem;
+                    font-weight: 700;
+                    color: #000000; /* black */
+                    letter-spacing: 0.3px;
+                }
+
+                    .summary-card .card-value.highlight {
+                        color: var(--accent);
+                    }
+
+            /* ── Content Area ── */
+            .content-area {
+                padding: 1.5rem 2rem 2rem;
+            }
+
+            /* ── Info Table ── */
+            .info-table {
+                width: 100%;
+                margin-bottom: 1.5rem;
+                border: none;
+                font-size: 0.95rem;
+            }
+
+                .info-table td {
+                    border: none;
+                    padding: 0 0 6px 0;
+                    vertical-align: top;
+                }
+
+                .info-table .lbl {
+                    font-weight: 600;
+                    white-space: nowrap;
+                }
+
+                .info-table .val {
+                    color: var(--text-secondary);
+                }
+
+            /* ── Section Title ── */
+            .section-title {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: var(--primary);
+                margin: 0 0 0.8rem 0;
+                padding-bottom: 0.4rem;
+                border-bottom: 2px solid var(--primary);
+                display: inline-block;
+            }
+
+            /* ── Schedule Table ── */
+            .schedule-table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+                margin-bottom: 2rem;
+                font-size: 0.95rem;
+                border: 1px solid var(--border-dark);
+                border-radius: var(--radius);
+                overflow: hidden;
+            }
+
+                .schedule-table thead tr {
+                    background: var(--primary);
+                }
+
+                .schedule-table th {
+                    padding: 0.55rem 0.4rem;
+                    font-weight: 600;
+                    text-align: center;
+                    color: #ffffff;
+                    border: none;
+                    border-right: 1px solid var(--primary-light);
+                }
+
+                    .schedule-table th:last-child {
+                        border-right: none;
+                    }
+
+                .schedule-table td {
+                    padding: 0.45rem 0.4rem;
+                    vertical-align: middle;
+                    border-bottom: 1px solid var(--border);
+                    border-right: 1px solid var(--border);
+                }
+
+                    .schedule-table td:last-child {
+                        border-right: none;
+                    }
+
+                .schedule-table tbody tr:last-child td {
+                    border-bottom: none;
+                }
+
+                .schedule-table tbody tr:nth-child(even) {
+                    background: #f8fafc;
+                }
+
+                .schedule-table td.num {
+                    text-align: right;
+                    font-variant-numeric: tabular-nums;
+                }
+
+                .schedule-table td.center {
+                    text-align: center;
+                }
+
+            /* ── Table Footer ── */
+            .table-footer td {
+                font-weight: 700;
+                background: var(--primary) !important;
+                color: #ffffff !important;
+                border-bottom: none !important;
+                border-right-color: var(--primary-light) !important;
+                padding: 0.55rem 0.4rem;
+            }
+
+                .table-footer td:last-child {
+                    border-right: none !important;
+                }
+
+            /* ── Signature Section ── */
+            .signature-table {
+                width: 100%;
+                margin-top: 3rem;
+                font-size: 0.95rem;
+                font-weight: 700;
+                text-align: center;
+                border: none;
+            }
+
+                .signature-table td {
+                    border: none;
+                    vertical-align: top;
+                    padding: 0 3rem;
+                }
+
+            .signature-space {
+                height: 80px;
+                border-bottom: 1.5px dotted #000;
+                margin: 0.5rem 1rem 0;
+            }
+
+            /* ── Print Styles ── */
+            @@media print {
+                body {
+                    background: #fff;
+                    padding: 0;
+                }
+
+                .report-shell {
+                    margin: 0;
+                    box-shadow: none;
+                    width: 100%;
+                    min-height: auto;
+                }
+
+                .top-bar {
+                    background: #f1f5f9 !important;
+                    color: #000 !important;
+                }
+
+                .summary-strip {
+                    background: #f1f5f9 !important;
+                }
+
+                .schedule-table {
+                    border-radius: 0;
+                }
+
+                    .schedule-table thead,
+                    .schedule-table tfoot {
+                        display: table-row-group;
+                    }
+
+                        .schedule-table thead tr {
+                            background: var(--primary) !important;
+                        }
+
+                    .schedule-table th {
+                        color: #fff !important;
+                    }
+
+                .table-footer td {
+                    background: var(--primary) !important;
+                    color: #fff !important;
+                }
+
+                .schedule-table tbody tr:nth-child(even) {
+                    background: #f8fafc !important;
+                }
+
+                @@page {
+                    size: A4;
+                    margin: 2.5mm;
+                }
+
+                .top-bar, .summary-strip,
+                .schedule-table th, .table-footer td,
+                .summary-card .card-label,
+                .summary-card .card-value,
+                .schedule-table tbody tr:nth-child(even) {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+            }
+    </style>
+</head>
+<body>
+    <main class="report-shell">
+
+        <!-- ── Top Header Bar ── -->
+        <div class="top-bar">
+            <div class="logo-area">
+                <img src="data:image/jpeg;base64,@report.FontModel.LogoBase64" alt="Trapchum Logo" />
+            </div>
+            <div class="title-area">
+                <h2>ទ្រព្យជុំ ឃែស ផន សប</h2>
+                <h3>TRAP CHUM CASH PAWN SHOP</h3>
+            </div>
+            <div class="spacer"></div>
+        </div>
+
+        <!-- ── Summary Cards ── -->
+        <div class="summary-strip">
+            <div class="summary-card">
+                <div class="card-label">ឈ្មោះអតិថិជន</div>
+                <div class="card-value">@(report.AltName ?? "-")</div>
+            </div>
+            <div class="summary-card">
+                <div class="card-label">ចំនួនទឹកប្រាក់ខ្ចី</div>
+                <div class="card-value">@(report.Principle.WithSign(report.CurrencyId))</div>
+            </div>
+            <div class="summary-card">
+                <div class="card-label">ការប្រាក់</div>
+                <div class="card-value">@(report.InterestRate.AsPercent())</div>
+            </div>
+            <div class="summary-card">
+                <div class="card-label">រយៈពេលខ្ចីប្រាក់</div>
+                <div class="card-value">@(report.PeriodName ?? "-")</div>
+            </div>
+            <div class="summary-card address-card">
+                <div class="card-label">អាសយដ្ឋាន</div>
+                <div class="card-value" style="font-size: 0.95rem;">@(report.Address ?? "-")</div>
+            </div>
+        </div>
+
+        <!-- ── Content Area ── -->
+        <div class="content-area">
+
+            <!-- ── Info Section ── -->
+            <table class="info-table">
+                <tr>
+                    <td class="lbl" style="width: 15%;">កិច្ចសន្យាលេខ</td>
+                    <td class="val" style="width: 18%;">: @(report.ContractNumber ?? "-")</td>
+                    <td class="lbl" style="width: 15%;">គណនីលេខ</td>
+                    <td class="val" style="width: 19%;">: @(report.LoanAccount ?? "-")</td>
+                    <td class="lbl" style="width: 10%;">ទូរស័ព្ទ</td>
+                    <td class="val" style="width: 23%;">: @(report.AgentPhone ?? "-")</td>
+                </tr>
+                <tr>
+                    <td class="lbl">ថ្ងៃខ្ចីប្រាក់</td>
+                    <td class="val">: @(report.RegisterDate.DayFirst())</td>
+                    <td class="lbl">ថ្ងៃផុតកំណត់</td>
+                    <td class="val">: @(report.LastPaymentDate.DayFirst())</td>
+                    <td class="lbl">ច្បាប់ទី</td>
+                    <td class="val">: 1</td>
+                </tr>
+                <tr>
+                    <td class="lbl">ភ្នាក់ងារ</td>
+                    <td class="val">: @(report.CreditAgentKhmer ?? "-")</td>
+                    <td class="lbl">ទូរស័ព្ទភ្នាក់ងារ</td>
+                    <td class="val">: @(report.AgentPhone == null ? "-" : report.AgentPhone.ToString())</td>
+                    <td class="lbl">ការិយាល័យ</td>
+                    <td class="val">: @(report.BranchName ?? "-")</td>
+                </tr>
+            </table>
+
+            <!-- ── Schedule Table Title ── -->
+            <div class="section-title">កាលវិភាគបង់ប្រាក់</div>
+
+            <!-- ── Schedule Table ── -->
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>ល.រ</th>
+                        <th>ថ្ងៃត្រូវបង់ប្រាក់</th>
+                        <th>ចំនួនថ្ងៃ</th>
+                        <th>ប្រាក់ដើមត្រូវបង់</th>
+                        <th>ការប្រាក់ត្រូវបង់</th>
+                        <th>ប្រាក់ប្រសិទ្ធភាព</th>
+                        <th>សរុបប្រាក់ត្រូវបង់</th>
+                        <th>ប្រាក់ដើមនៅសល់</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!schedules.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="center" style="padding: 2rem; color: #94a3b8;">មិនមានទិន្នន័យ (No Data)</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var schedule in schedules)
+                        {
+                            <tr>
+                                <td class="center">@schedule.InstallmentNo</td>
+                                <td class="center">@(schedule.PaymentDate.DayFirst())</td>
+                                <td class="center">
+                                    @if (schedule.TotalDay.HasValue && schedule.TotalDay.Value > 0)
+                                    {
+                                        @schedule.TotalDay​
+                                        <span>ថ្ងៃ</span>
+                                    }
+                                    else
+                                    {
+                                        @("-")
+                                    }
+                                    )
+                                    @schedule.TotalDay ?? "-"
+                                </td>
+                                <td class="num">@schedule.Principle.As(report.CurrencyId)</td>
+                                <td class="num">@schedule.Interest.As(report.CurrencyId)</td>
+                                <td class="num">@schedule.CollectionFee.As(report.CurrencyId)</td>
+                                <td class="num">@schedule.TotalPay.As(report.CurrencyId)</td>
+                                <td class="num">@schedule.LoanOutstanding.As(report.CurrencyId)</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot class="table-footer">
+                    <tr>
+                        <td class="center" colspan="2">សរុប</td>
+                        <td class="center">@(schedules.Sum(x => x.TotalDay)) ថ្ងៃ</td>
+                        <td class="num">@(schedules.Sum(x => x.Principle).As(report.CurrencyId))</td>
+                        <td class="num">@(schedules.Sum(x => x.Interest).As(report.CurrencyId))</td>
+                        <td class="num">@(schedules.Sum(x => x.CollectionFee).As(report.CurrencyId))</td>
+                        <td class="num">@(schedules.Sum(x => x.TotalPay).As(report.CurrencyId))</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- ── Signature Section ── -->
+            <table class="signature-table">
+                <tr>
+                    <td style="width: 50%;">
+                        <div>ស្នាមមេដៃអតិថិជន</div>
+                        <div class="signature-space"></div>
+                        <div style="margin-block:1rem;">
+                            @DateTime.Now.ToLongDateString()
+                        </div>
+                    </td>
+                    <td style="width: 50%;">
+                        <div>ហត្ថលេខាអ្នករៀបចំ</div>
+                        <div class="signature-space"></div>
+                        <div style="margin-block:1rem;">
+                            @DateTime.Now.ToLongDateString()
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+    </main>
+</body>
+</html>

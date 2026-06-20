@@ -138,7 +138,9 @@ public static class InfrastructureServiceInjection
         services.AddSingleton<IDapperConnectionFactory, DapperConnectionFactory>();
         services.AddScoped<IDashboardService, DashboardRepository>();
         services.AddScoped<IDocumentServices, DocumentRepository>();
+        services.AddScoped<IPrintingLoanService, PrintingLoanRepository>();
         return services;
+
 
     }
 

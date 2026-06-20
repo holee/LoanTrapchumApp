@@ -1,6 +1,17 @@
-﻿@using Microsoft.AspNetCore.Components.Sections
-@using TrapchumApp.Pages.Transactions.Exchanges
+﻿@using Applications.Extensions.Identity.Policies
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Sections
+@using Microsoft.AspNetCore.Components.Web
+@using Radzen.Blazor
+@using TrapchumApp.Components.Comps
+@using TrapchumApp.Components.Toasts
+@using TrapchumApp.Helpers.Constants
+@using TrapchumApp.Services
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
 @inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+@inject LoadingTrackerService Tracker
 <Toastr />
 <RadzenComponents @rendermode="InteractiveServer" />
 <RadzenProgressBar Visible="@isLoading"

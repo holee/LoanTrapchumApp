@@ -52,9 +52,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
             }
 
             await js.InvokeVoidAsync("downloadFile", fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", base64);
-           
+
             await Task.Delay(1000);
-            
+
             Tracker.Hide();
         }
 
@@ -104,8 +104,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             var fileName = $"Loan_Schedule_{Guid.CreateVersion7()}.pdf";
 
-            await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanId}/{BranchId}/{fileName}", "_blank");
+            //await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanId}/{BranchId}/{fileName}", "_blank");
 
+            await js.InvokeVoidAsync("open", $"/Reports/Pdf/Loans/Schedules/{LoanId}/{BranchId}#{fileName}", "_blank");
 
         }
 

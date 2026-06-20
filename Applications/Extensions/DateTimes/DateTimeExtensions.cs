@@ -16,7 +16,8 @@
         }
         public static string DayFirst(this DateTime? dt)
         {
-            if (dt is null) return string.Empty;
+            if (dt is null) return "-";
+
             return string.Format("{0:dd/MM/yyyy}", dt);
         }
 

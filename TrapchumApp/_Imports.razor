@@ -24,7 +24,6 @@
 @using Applications.Services.Lists
 @using Applications.Services.Loans
 @using Blazilla
-@using Blazored.FluentValidation
 @using Domains.Models.Lists
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
@@ -56,15 +55,12 @@
 @using BlazorExpress.ChartJS
 @attribute [Authorize]
 @inject IJSRuntime js
-@inject NavigationService _navService
 @inject LoadingTrackerService Tracker
 @inject IAuthorizationService _authorizeService
 @inject NotificationService NotificationService
 @inject DialogService DialogService 
-@inject NavigationManager NavigationManager
 @inject ContextMenuService ContextMenuService
 @inject TooltipService tooltipService
-@inject IdentityRedirectManager RedirectManager
 @inject IAddressServiceImpl _addressService
 @inject ICurrencyServiceImpl _curService
 @inject IUserServiceImpl _userService

@@ -1,4 +1,8 @@
-﻿<AuthorizeView>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@inject NavigationManager NavigationManager
+<AuthorizeView>
     <Authorized>
         <li class="rz-navigation-item">
             <div class="rz-navigation-item-wrapper">

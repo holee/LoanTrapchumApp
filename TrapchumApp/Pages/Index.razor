@@ -1,0 +1,152 @@
+﻿@* Presentation/Components/Pages/LoanReportPage.razor *@
+@inject IJSRuntime JS
+<PageTitle>Loan Report — #@LoanId</PageTitle>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h4 class="mb-0">Loan Amortization Report</h4>
+    <button class="btn btn-primary d-flex align-items-center gap-2"
+            @onclick="DownloadPdfAsync"
+            disabled="@_generating">
+        @if (_generating)
+        {
+            <span class="spinner-border spinner-border-sm" role="status"></span>
+            <span>Generating PDF...</span>
+        }
+        else
+        {
+            <i class="bi bi-file-earmark-pdf"></i>
+            <span>Download PDF</span>
+        }
+    </button>
+</div>
+
+@if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@* Preview table (optional — mirrors template data) *@
+@* @if (_model is not null)
+{
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-sm table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Due Date</th>
+                        <th class="text-end">Principal</th>
+                        <th class="text-end">Interest</th>
+                        <th class="text-end">Fee</th>
+                        <th class="text-end">Total Due</th>
+                        <th class="text-end">Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in _model.Rows)
+                    {
+                        @if (row.IsGroupStart && !string.IsNullOrEmpty(row.GroupLabel))
+                        {
+                            <tr class="table-info fw-bold">
+                                <td colspan="7">@row.GroupLabel</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td>@row.InstallmentNo</td>
+                            <td>@row.DueDate.ToString("dd MMM yyyy")</td>
+                            <td class="text-end">@row.Principal.ToString("N2")</td>
+                            <td class="text-end">@row.Interest.ToString("N2")</td>
+                            <td class="text-end">@row.CollectionFee.ToString("N2")</td>
+                            <td class="text-end fw-semibold">@row.TotalDue.ToString("N2")</td>
+                            <td class="text-end">@row.EndBalance.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-dark fw-bold">
+                    <tr>
+                        <td colspan="2">TOTAL</td>
+                        <td class="text-end">@_model.TotalPrincipal.ToString("N2")</td>
+                        <td class="text-end">@_model.TotalInterest.ToString("N2")</td>
+                        <td class="text-end">@_model.TotalFee.ToString("N2")</td>
+                        <td class="text-end">@_model.TotalPayment.ToString("N2")</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+} *@
+
+@code {
+    [Parameter] public int LoanId { get; set; }
+
+    //private LoanSchedulePdfModel? _model;
+    private bool   _generating;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Map from your domain entity to the PDF view model
+        //var loan = await LoanService.GetLoanWithScheduleAsync(LoanId);
+       // _model = MapToPdfModel(loan);
+    }
+
+    private async Task DownloadPdfAsync()
+    {
+
+       // if (_model is null) return;
+
+        _generating = true;
+
+        _error = null;
+
+        try
+        {
+            // var pdfBytes = await PdfReportService.GenerateLoanScheduleAsync(_model);
+
+            // var fileName  = $"LoanSchedule_{_model.LoanNumber}_{DateTime.Now:yyyyMMdd}.pdf";
+
+            // await JS.InvokeVoidAsync("downloadFileFromBytes", fileName, "application/pdf", pdfBytes);
+
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to generate PDF: {ex.Message}";
+        }
+        finally
+        {
+            _generating = false;
+        }
+    }
+
+    // private LoanSchedulePdfModel MapToPdfModel(LoanEntity loan) => new()
+    // {
+    //     LoanNumber    = loan.LoanNumber,
+    //     CustomerName  = loan.Customer.FullName,
+    //     CustomerIdCard= loan.Customer.IdCard,
+    //     LoanAmount    = loan.Principal,
+    //     Currency      = loan.Currency,
+    //     InterestRate  = loan.MonthlyRate,
+    //     TermMonths    = loan.TermMonths,
+    //     DisbursedDate = loan.DisbursedDate,
+    //     MaturityDate  = loan.MaturityDate,
+    //     ApprovedBy    = loan.ApprovedByUser,
+    //     BranchName    = loan.Branch.Name,
+    //     Rows = loan.Schedule.Select((s, i) => new ScheduleRowModel
+    //     {
+    //         InstallmentNo = s.InstallmentNo,
+    //         DueDate       = s.DueDate,
+    //         BeginBalance  = s.BeginBalance,
+    //         Principal     = s.Principal,
+    //         Interest      = s.Interest,
+    //         CollectionFee = s.CollectionFee,
+    //         TotalDue      = s.TotalDue,
+    //         EndBalance    = s.EndBalance,
+    //         IsGroupStart  = s.IsGroupStart,   from your Decline3 logic
+    //         GroupLabel    = s.GroupLabel
+    //     }).ToList()
+    // };
+
+
+
+}

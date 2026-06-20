@@ -18,7 +18,6 @@ using Applications.Features.Identity.Roles.Commands.UpdateRole;
 using Applications.Features.Identity.Roles.Queries.EditRole;
 using Applications.Features.Identity.Roles.Queries.GetAllPermissions;
 using Applications.Features.Identity.Roles.Queries.GetPermissionsByRole;
-using Applications.Features.Identity.Roles.Queries.GetRoles;
 using Applications.Features.Identity.Roles.Queries.GetRolesAsPaging;
 using Applications.Features.Identity.Roles.Requests;
 using Applications.Features.Identity.Roles.Responses;
@@ -38,7 +37,9 @@ using Applications.Features.Locations.Queries.GetAllLocations;
 using Applications.Features.Locations.Queries.GetLocationById;
 using Applications.Features.Locations.Queries.GetLocationsAsPaging;
 using Applications.Features.OtherNames.Dto;
-using Applications.Features.Schedules.Dto;
+using Applications.Features.Reports.Dtos;
+using Applications.Features.Reports.Queries.PrintLoanScheduleDetails;
+using Applications.Features.Reports.Queries.PrintLoanScheduleDetailsByGroup;
 using Applications.Features.Settings.Queries.GetApprovedUsers;
 using Applications.Features.Settings.Queries.GetLoanCategories;
 using Applications.Features.Settings.Queries.GetSystemSettings;
@@ -53,7 +54,6 @@ using Applications.Features.Vendors.Queries.GetVendorById;
 using Applications.Features.Vendors.Queries.GetVendorsAsPaging;
 using Applications.Responses.Auths;
 using Applications.Responses.Loans.Disbursements;
-using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Models.Collaterals;
 using ErrorOr;
@@ -65,6 +65,12 @@ public static class ApplicationServiceInjection
     {
         services.AddValidatorsFromAssemblyContaining<GetCollateralLineDetailQueryValidator>();
         services.AddScoped<IMediator, SimpleMediator>();
+
+        ///Reports Services
+        services.AddScoped<IRequestHandler<PrintLoanScheduleDetailsQuery, ErrorOr<RptScheduleDetails?>>, PrintLoanScheduleDetailsQueryHandler>();
+        services.AddScoped<IRequestHandler<PrintLoanScheduleDetailsByGroupQuery, ErrorOr<RptScheduleDetails?>>, PrintLoanScheduleDetailsByGroupQueryHandler>();
+
+
 
 
         services.AddScoped<IRequestHandler<PassRequestCommand, ErrorOr<RequestResult>>, PassRequestCommandHandler>();
@@ -240,7 +246,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<ILoanReportServiceImpl, LoanReportServiceImpl>();
         services.AddScoped<INationalityServiceImpl, NationalityService>();
         services.AddScoped<IOtherNameServiceImpl, OtherNameService>();
-        services.AddScoped<IPrintPdfServiceImpl, PrintPdfServiceImpl>();
+       // services.AddScoped<IPrintPdfServiceImpl, PrintPdfServiceImpl>();
         services.AddScoped<IGuarantorServiceImpl, GuarantorService>();
         services.AddScoped<ISpotRateServiceImpl, SpotRateService>();
         services.AddScoped<ISettingServiceImpl, SettingService>();

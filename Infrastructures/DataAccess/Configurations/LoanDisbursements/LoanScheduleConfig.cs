@@ -14,6 +14,8 @@ namespace Infrastructures.DataAccess.Configurations.LoanDisbursements
             builder.ToTable("tt_loanSchedules");
             builder.HasKey(k => k.LoanScheduleId);
             builder.Property(x => x.LoanScheduleId).ValueGeneratedOnAdd();
+            builder.Property(x => x.TotalFee)
+                    .HasComputedColumnSql("isnull([Interest],(0))+isnull([CollectionFee],(0))", stored: true);
             builder.Property(x => x.ScheduleStatusRefId)
                                   .HasDefaultValue(2);
             builder.Property(x => x.PaymentDate)

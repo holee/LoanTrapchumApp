@@ -1,6 +1,14 @@
-﻿@implements IDisposable
+﻿@using Applications.Services.Identity
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.JSInterop
+@using Radzen.Blazor
+@implements IDisposable
 @inject TrapchumApp.Services.IProfilePhotoService ProfilePhotoService
-
+@inject NavigationManager NavigationManager
+@inject IUserServiceImpl _userService
+@inject IJSRuntime js
 <div class="fb-profile-wrap">
 <div class="fb-profile-trigger" @ref="_triggerRef" data-fb-trigger @onclick="ToggleMenu" @onclick:stopPropagation="true">
     <div class="fb-avatar fb-avatar--sm">
@@ -177,6 +185,7 @@
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
+
         ProfilePhotoService.OnPhotoChanged -= OnProfilePhotoChanged;
     }
 

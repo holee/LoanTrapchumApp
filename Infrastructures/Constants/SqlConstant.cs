@@ -3,8 +3,6 @@
 public static class SqlConstant
 {
 
-
-
     public const string GetLoanResponse = @"
             SELECT l.ContractNumber,
                 l.LoanAccount,

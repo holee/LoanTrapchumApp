@@ -1,5 +1,4 @@
 using Microsoft.JSInterop;
-using Microsoft.Playwright;
 using TrapchumApp.Components.Datatabes;
 using TrapchumApp.Components.Messageboxes;
 using TrapchumApp.Components.Modals.SweetAlerts;
@@ -19,63 +18,63 @@ namespace TrapchumApp.Components
 
         async Task Print()
         {
-            ILoggerFactory loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
+            //ILoggerFactory loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
 
-            using var htmlRender = new HtmlRenderer(ServiceProvider, loggerFactory);
+            //using var htmlRender = new HtmlRenderer(ServiceProvider, loggerFactory);
 
-            var html = await htmlRender.Dispatcher.InvokeAsync(async () =>
-            {
-                var output = await htmlRender.RenderComponentAsync<TestRazor>();
-                return output.ToHtmlString();
-            });
+            //var html = await htmlRender.Dispatcher.InvokeAsync(async () =>
+            //{
+            //    var output = await htmlRender.RenderComponentAsync<TestRazor>();
+            //    return output.ToHtmlString();
+            //});
 
-            // Ensure Playwright is properly referenced
+            //// Ensure Playwright is properly referenced
           
-            using var playWright = await Playwright.CreateAsync();
+            //using var playWright = await Playwright.CreateAsync();
 
-            //await Playwright.();
+            ////await Playwright.();
 
-            var browser = await playWright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-            {
-                Headless = true
-            });
+            //var browser = await playWright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+            //{
+            //    Headless = true
+            //});
 
-            var page = await browser.NewPageAsync();
+            //var page = await browser.NewPageAsync();
 
-            await page.SetContentAsync(html);
+            //await page.SetContentAsync(html);
 
-            //await page.EmulateMediaAsync(new PageEmulateMediaOptions { Media = Media.Print });
+            ////await page.EmulateMediaAsync(new PageEmulateMediaOptions { Media = Media.Print });
 
-            var pp = await page.PdfAsync(new PagePdfOptions
-            {
-                Format = "A4",
-                Path = Path.Combine(Env.WebRootPath, "schedules/test.pdf"),
-            });
+            //var pp = await page.PdfAsync(new PagePdfOptions
+            //{
+            //    Format = "A4",
+            //    Path = Path.Combine(Env.WebRootPath, "schedules/test.pdf"),
+            //});
 
-            await browser.CloseAsync();
+            //await browser.CloseAsync();
 
-            //var stream = new MemoryStream();
+            ////var stream = new MemoryStream();
 
 
-            //_schedule.GeneratePdf(stream);
+            ////_schedule.GeneratePdf(stream);
 
-            //stream.Position = 0;
+            ////stream.Position = 0;
 
-            //var bytes = stream.ToArray();
+            ////var bytes = stream.ToArray();
 
-            var xxx = Path.Combine(Env.WebRootPath, "schedules/test.pdf");
+            //var xxx = Path.Combine(Env.WebRootPath, "schedules/test.pdf");
 
-            var base64 = Convert.ToBase64String(pp);
+            //var base64 = Convert.ToBase64String(pp);
             
 
-            //Convert.FromBase64String()
+            ////Convert.FromBase64String()
 
-            url = $"data:application/pdf;base64,{base64}";
+            //url = $"data:application/pdf;base64,{base64}";
 
-            await js.InvokeVoidAsync("open", $"/Reports/Schedules", "_blank");
+            //await js.InvokeVoidAsync("open", $"/Reports/Schedules", "_blank");
 
 
-            //NavigationManager.NavigateTo("", true);
+            ////NavigationManager.NavigateTo("", true);
 
 
 

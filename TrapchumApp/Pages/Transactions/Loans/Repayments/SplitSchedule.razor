@@ -232,22 +232,14 @@
 
         if (string.IsNullOrEmpty(LoanId) || BranchId <= 0 || schuduleNum <= 0)
         {
-            NotificationService.Notify(new NotificationMessage
-            {
-                Severity = NotificationSeverity.Warning,
-                Summary = "Warning",
-                Detail = "LoanId and BranchId are required to download the schedule as PDF.",
-                Duration = 3000
-            });
+            _toastService.ShowError("LoanId and BranchId are required to download the schedule as PDF.", "Warning");
 
             Tracker.Hide();
 
             return;
         }
 
-        await js.InvokeVoidAsync("open", $"/reports/schedules/pdf/{LoanId}/{BranchId}/{schuduleNum}", "_blank");
-
-        await Task.Delay(1000); // Optional: Adjust the delay as needed to ensure the PDF is opened before hiding the tracker
+        await js.InvokeVoidAsync("open", $"/reports/pdf/loans/schedules/{LoanId}/{BranchId}/{schuduleNum}", "_blank");
 
         Tracker.Hide();
     }

@@ -31,27 +31,27 @@ public static class ScheduleEndpoint
 
             });
 
-        reportGroup.MapGet("/Schedules/Pdf/{loanId}/{branchId:int}/{fileName}", async ([FromServices] SchedulePrintService pdf, IMediator mediator,
-            [FromServices] IWebHostEnvironment env, string loanId, int branchId) =>
-            {
+        //reportGroup.MapGet("/Schedules/Pdf/{loanId}/{branchId:int}/{fileName}", async ([FromServices] SchedulePrintService pdf, IMediator mediator,
+        //    [FromServices] IWebHostEnvironment env, string loanId, int branchId) =>
+        //    {
 
-                var command = new GetLoanByIdQuery(loanId, branchId, Applications.Enumerations.ScheduleStatus.All, true);
+        //        var command = new GetLoanByIdQuery(loanId, branchId, Applications.Enumerations.ScheduleStatus.All, true);
 
-                var rsp = await mediator.Send(command);
+        //        var rsp = await mediator.Send(command);
 
-                if (rsp.IsError)
-                {
-                    return Results.Problem();
-                }
+        //        if (rsp.IsError)
+        //        {
+        //            return Results.Problem();
+        //        }
 
-                var doc = new ScheduleDocument(rsp.Value);
+        //        var doc = new ScheduleDocument(rsp.Value);
 
-                var stream = doc.GeneratePdf();
+        //        var stream = doc.GeneratePdf();
 
-                return TypedResults.File(stream, contentType: "application/pdf", null, enableRangeProcessing: true);
+        //        return TypedResults.File(stream, contentType: "application/pdf", null, enableRangeProcessing: true);
 
 
-            });
+        //    });
 
         reportGroup.MapGet("/schedules/pdf/{loanId}/{branchId:int}/{scheduleId:int}", async ([FromServices] SchedulePrintService pdf,
             [FromServices] IWebHostEnvironment env, IMediator mediator, string loanId, int branchId, int scheduleId) =>

@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.SignalR.Client
 @using TrapchumApp.Hubs
 @implements IAsyncDisposable
-ddfdff
+@inject NavigationManager NavigationManager
 <div class="notification-container">
     @foreach (var n in _notifications)
     {
@@ -63,13 +63,16 @@ ddfdff
     private async Task AutoDismiss(string id, TimeSpan delay)
     {
         await Task.Delay(delay, _cts.Token);
+
         _notifications.RemoveAll(n => n.Id == id);
+
         await InvokeAsync(StateHasChanged);
     }
 
     public async ValueTask DisposeAsync()
     {
         await _cts.CancelAsync();
+
         if (_hubConnection is not null)
         {
             if (!string.IsNullOrEmpty(UserId))

@@ -243,8 +243,7 @@ namespace Infrastructures.Repository
                 loanSchedules.Add(response);
             }
 
-            var selectedLoan = loanSchedules
-                                    .FirstOrDefault(ls => ls.ScheduleNum == scheduleNum);
+            var selectedLoan = loanSchedules.FirstOrDefault(ls => ls.ScheduleNum == scheduleNum);
 
             if ((selectedLoan is null))
             {
@@ -369,8 +368,6 @@ namespace Infrastructures.Repository
                 Schedules = []
             };
         }
-
-
         private static List<ScheduleResponse> BuildGroup(IEnumerable<ScheduleResponse> source)
         {
 
