@@ -150,9 +150,6 @@ internal static class MapAdditinalEndpoints
         }).DisableAntiforgery();
 
 
-
-
-
         uploadGroup.MapPost("/Customers/Profiles", async (IFormFile file,
             IMediator mediator,
             IWebHostEnvironment env,
@@ -278,6 +275,76 @@ internal static class MapAdditinalEndpoints
                 return Results.Problem(detail: $"Error uploading file: {ex.Message}", statusCode: 500);
             }
         }).DisableAntiforgery();
+
+
+        uploadGroup.MapPost("/branches/images", async (IFormFile file, IWebHostEnvironment env, IMediator mediator, ILogger<Program> logger) =>
+        {
+            if (file is null || file.Length == 0)
+            {
+                logger.LogWarning("No file uploaded for branch image.");
+
+                return Results.BadRequest("No file uploaded.");
+            }
+
+            const long maxFileSize = 10L * 1024 * 1024; // 10 MB
+
+            if (file.Length > maxFileSize)
+
+                return Results.BadRequest("File size exceeds 10 MB.");
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+            var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+
+            if (!permittedExtensions.Contains(extension))
+                return Results.BadRequest("Invalid file type. Only JPG, PNG and WEBP are allowed.");
+
+            try
+            {
+                var newFileName = $"{Guid.NewGuid()}{extension}";
+
+                var destinationPath = Path.Combine(env.WebRootPath, "assets/branches");
+
+                if (!Directory.Exists(destinationPath))
+                    Directory.CreateDirectory(destinationPath);
+
+                var fullPath = Path.Combine(destinationPath, newFileName);
+
+                using var fileStream = new FileStream(fullPath, FileMode.Create);
+
+                await file.CopyToAsync(fileStream);
+
+                var fileUrl = $"assets/branches/{newFileName}";
+
+                using var stream = new MemoryStream();
+
+                file.OpenReadStream().CopyTo(stream);
+
+                var fileModel = new DocumentDtoCreate
+                {
+                    OriginalName = file.FileName,
+                    NewFileName = newFileName,
+                    FileSize = file.Length,
+                    FileUrl = fileUrl
+                };
+
+                var command = new AddDocumentCommand(fileModel);
+
+                var result = await mediator.Send(command);
+
+                return Results.Ok(result.Value);
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error uploading branch image: {ErrorMessage}", ex.Message);
+
+                return Results.Problem(detail: $"Error uploading file: {ex.Message}", statusCode: 500);
+            }
+        }).DisableAntiforgery();
+
+
+
 
 
         return uploadGroup;

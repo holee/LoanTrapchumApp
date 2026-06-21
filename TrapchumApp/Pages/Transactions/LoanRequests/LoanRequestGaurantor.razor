@@ -44,7 +44,6 @@
         .guarantor-toolbar .search-slot {
             flex: 1 1 auto;
             min-width: 0;
-            
         }
 
     .guarantor-avatar {
@@ -121,6 +120,7 @@
                         @ref="gridGuarantors"
                         PagerHorizontalAlign="HorizontalAlign.Right"
                         EmptyText="No guarantors added yet."
+                        RowRender="@OnRowRender"
                         Style="min-height:14rem;height:14rem;max-height:14rem;border-radius:8px;overflow:hidden;">
             <Columns>
                 <RadzenDataGridColumn Context="g"
@@ -133,12 +133,12 @@
                         <span style="color:var(--rz-text-tertiary-color);font-size:.75rem;">#</span>
                     </HeaderTemplate>
                     <Template>
-                        <span style="color:var(--rz-text-tertiary-color);font-size:.8rem;">@(Guarantors.ToList().IndexOf(g) + 1)</span>
+                        <span style="color:var(--rz-text-tertiary-color);font-size:.8rem;">@g.RowIndex</span>
                     </Template>
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn Width="16rem"
-                                      Property="@(nameof(VLoanRequestGuarantor.FullName))"
+                                      Property="@(nameof(VLoanRequestGuarantor.GuarantorName))"
                                       Title="Name"
                                       Sortable="false">
                     <HeaderTemplate>
@@ -149,7 +149,7 @@
                             <div class="guarantor-avatar">
                                 @(string.IsNullOrWhiteSpace(g.FullName) ? "?" : g.FullName.Trim()[0].ToString().ToUpper())
                             </div>
-                            <span style="font-weight:500;font-size:.85rem;">@g.FullName</span>
+                            <span style="font-weight:500;font-size:.85rem;">@g.GuarantorName</span>
                         </div>
                     </Template>
                 </RadzenDataGridColumn>
@@ -208,5 +208,14 @@
 </div>
 
 @code {
+
     [Parameter] public RenderFragment? SearchBoxTemplate { get; set; }
+
+    private void OnRowRender(RowRenderEventArgs<VLoanRequestGuarantor> args)
+    {
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
+
+    }
 }

@@ -9,7 +9,7 @@ namespace Applications.Calculations;
 public sealed class CalculatorSceduleService(IMediator mediator)
 {
 
-    private decimal _effectiveBalance = 0;
+    private decimal _effectiveAmount = 0;
 
     private List<ScheduleLine>? _scheduleLines = null;
 
@@ -43,21 +43,21 @@ public sealed class CalculatorSceduleService(IMediator mediator)
 
         int period = req.Installments ?? 0;
 
-        decimal loanAmount = req.Principle ?? 0M;
+        decimal originalAmount = req.Principle ?? 0M;
 
         decimal rate = req.InterestRate ?? 0M;
 
-        decimal principalPerInstallment = loanAmount.PaidPrincipal(req.CurrencyId, period);
+        decimal principalPerInstallment = originalAmount.PaidPrincipal(req.CurrencyId, period);
 
-        decimal lastBalance = loanAmount;
+        decimal lastBalance = originalAmount;
 
         DateTime? paymentDate = req.FirstPaymentDate;
 
         DateTime? previousPaymentDate = req.StartDate;
 
-        _effectiveBalance = loanAmount;
+        _effectiveAmount = originalAmount;
 
-        InitializeGroups(req, loanAmount);
+        InitializeGroups(req, originalAmount);
 
         for (int i = 1; i <= period; i++)
         {
@@ -76,15 +76,24 @@ public sealed class CalculatorSceduleService(IMediator mediator)
 
             int totalDays = previousPaymentDate.TotalDays(adjustedPaymentDate);
 
-            UpdateEffectiveBalance(req, i, beginBalance);
+            UpdateEffectiveAmount(req, i, beginBalance);
 
-            decimal collectionFee = CalculateCollectionFee(req, _effectiveBalance, totalDays);
+            decimal collectionFee = CalculateCollectionFee(req, _effectiveAmount, totalDays);
 
             decimal interest = beginBalance.Interest(req.CurrencyId, rate, totalDays);
 
             bool isLastInstallment = i == period;
 
-            decimal principal = isLastInstallment ? beginBalance : principalPerInstallment;
+            decimal principal = 0;
+
+            if (isLastInstallment)
+            {
+                principal = originalAmount.LastScheduleAmount(req.CurrencyId, period, principalPerInstallment);
+            }
+            else
+            {
+                principal = principalPerInstallment;
+            }
 
             lastBalance = isLastInstallment ? 0M : beginBalance.LastBalance(principal);
 
@@ -98,21 +107,22 @@ public sealed class CalculatorSceduleService(IMediator mediator)
         return FinalizeSchedules();
     }
 
+
     private IEnumerable<ScheduleLine> Flat(LoanDtoCreate req)
     {
         _ = GetHolidays(req.InstallmentNo);
 
         decimal amount = req.Principle ?? 0M;
 
-        int periodInMonth = req.Installments ?? 12;
+        int termInMonth = req.Installments ?? 12;
 
         decimal monthlyRate = req.InterestRate ?? 0M;
 
-        decimal principalPaid = amount.PaidPrincipal(req.CurrencyId, periodInMonth);
+        decimal principalPaid = amount.PaidPrincipal(req.CurrencyId, termInMonth);
 
         decimal lastBalance = amount;
 
-        _effectiveBalance = amount;
+        _effectiveAmount = amount;
 
         DateTime? basePaymentDate = req.FirstPaymentDate;
 
@@ -120,7 +130,7 @@ public sealed class CalculatorSceduleService(IMediator mediator)
 
         InitializeGroups(req, amount);
 
-        for (int i = 1; i <= periodInMonth; i++)
+        for (int i = 1; i <= termInMonth; i++)
         {
             decimal beginBalance = lastBalance;
 
@@ -137,7 +147,7 @@ public sealed class CalculatorSceduleService(IMediator mediator)
 
             int totalDays = previousBaseDate.TotalDays(paymentDate);
 
-            if (i < periodInMonth)
+            if (i < termInMonth)
             {
                 lastBalance = beginBalance.LastBalance(principalPaid);
             }
@@ -148,13 +158,15 @@ public sealed class CalculatorSceduleService(IMediator mediator)
                 lastBalance = 0;
             }
 
-            UpdateEffectiveBalance(req, i, beginBalance);
+            UpdateEffectiveAmount(req, i, beginBalance);
+
+            decimal collectionFee = CalculateCollectionFee(req, _effectiveAmount, totalDays);
 
             decimal interest = amount.Interest(req.CurrencyId, monthlyRate, totalDays);
 
             int scheduleNum = ((i - 1) / _groupSize) + 1;
 
-            _scheduleLines!.Add(BuildScheduleLine(req, i, basePaymentDate, principalPaid, interest, totalDays, _effectiveBalance, lastBalance, scheduleNum));
+            _scheduleLines!.Add(BuildScheduleLine(req, i, basePaymentDate, principalPaid, interest, totalDays, collectionFee, lastBalance, scheduleNum));
 
             TryFlushGroup();
         }
@@ -176,7 +188,7 @@ public sealed class CalculatorSceduleService(IMediator mediator)
 
         decimal lastBalance = amount;
 
-        _effectiveBalance = amount;
+        _effectiveAmount = amount;
 
         DateTime? basePaymentDate = req.FirstPaymentDate;
 
@@ -205,9 +217,9 @@ public sealed class CalculatorSceduleService(IMediator mediator)
                 ? amount.PaidPrincipal(req.CurrencyId, circles)
                 : 0M;
 
-            UpdateEffectiveBalance(req, i, beginBalance);
+            UpdateEffectiveAmount(req, i, beginBalance);
 
-            decimal collectionFee = CalculateCollectionFee(req, beginBalance, totalDays);
+            decimal collectionFee = CalculateCollectionFee(req, _effectiveAmount, totalDays);
 
             decimal interestAmount = beginBalance.Interest(req.CurrencyId, monthlyRate, totalDays);
 
@@ -243,7 +255,7 @@ public sealed class CalculatorSceduleService(IMediator mediator)
 
         decimal lastBalance = req.Principle!.Value;
 
-        _effectiveBalance = req.Principle.Value;
+        _effectiveAmount = req.Principle.Value;
 
         DateTime? basePaymentDate = req.FirstPaymentDate;
 
@@ -268,9 +280,9 @@ public sealed class CalculatorSceduleService(IMediator mediator)
 
             int totalDays = previousBaseDate.TotalDays(paymentDate);
 
-            UpdateEffectiveBalance(req, i, beginBalance);
+            UpdateEffectiveAmount(req, i, beginBalance);
 
-            _effectiveBalance = CalculateCollectionFee(req, beginBalance, totalDays);
+            decimal collectionFee = CalculateCollectionFee(req, _effectiveAmount, totalDays);
 
             decimal interest = beginBalance.Interest(req.CurrencyId, req.InterestRate, totalDays);
 
@@ -291,7 +303,7 @@ public sealed class CalculatorSceduleService(IMediator mediator)
 
             int scheduleNum = ((i - 1) / _groupSize) + 1;
 
-            _scheduleLines!.Add(BuildScheduleLine(req, i, paymentDate, principal, interest, totalDays, _effectiveBalance, lastBalance, scheduleNum));
+            _scheduleLines!.Add(BuildScheduleLine(req, i, paymentDate, principal, interest, totalDays, collectionFee, lastBalance, scheduleNum));
 
             TryFlushGroup();
         }
@@ -343,7 +355,7 @@ public sealed class CalculatorSceduleService(IMediator mediator)
                                .ToHashSet() ?? [];
     }
 
-    private void UpdateEffectiveBalance(LoanDtoCreate req, int installmentNo, decimal beginBalance)
+    private void UpdateEffectiveAmount(LoanDtoCreate req, int installmentNo, decimal beginBalance)
     {
 
 
@@ -354,11 +366,11 @@ public sealed class CalculatorSceduleService(IMediator mediator)
             var lastBalances = _groupSchedules?.Where(x => x.Key == groupKey - 1)
                                                  .SelectMany(x => x.Value)
                                                  .FirstOrDefault()?.OutStanding;
-            _effectiveBalance = lastBalances ?? 00;
+            _effectiveAmount = lastBalances ?? 00;
         }
         else
         {
-            _effectiveBalance = beginBalance;
+            _effectiveAmount = beginBalance;
 
         }
 
@@ -368,7 +380,7 @@ public sealed class CalculatorSceduleService(IMediator mediator)
     {
         return (EffectiveEnum)req.CollectionFeeModeId! switch
         {
-            EffectiveEnum.IRR => CalculatorExtensions.CollectionFee(req, _effectiveBalance, totalDays),
+            EffectiveEnum.IRR => CalculatorExtensions.CollectionFee(req, _effectiveAmount, totalDays),
 
             EffectiveEnum.Declined => CalculatorExtensions.CollectionFee(req, beginBalance, totalDays),
 

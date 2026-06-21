@@ -4,7 +4,6 @@
 
 <RadzenStack Gap="1rem" class="rz-p-1">
     @* ── Customer / Collateral detail panel ── *@
-    <button @onclick="@DownloadPdf">DownLoad</button>
     <LoanInfos LoanSchedule="@loanSchedule" LoanId="@LoanId" BranchId="@BranchId" />
     @* ── Hero Banner ── *@
     <div style="background:linear-gradient(135deg,var(--rz-primary) 0%,var(--rz-primary-dark,#1a56a0) 100%);
@@ -265,7 +264,9 @@
 
         var fileName = $"Loan_Schedule_{Guid.CreateVersion7()}.pdf";
 
-        await js.InvokeVoidAsync("open", $"/reports/schedules/{LoanId}/{BranchId}/{fileName}", "_blank");
+        //await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanId}/{BranchId}/{fileName}", "_blank");
+
+        await js.InvokeVoidAsync("open", $"/Reports/Pdf/Loans/Schedules/{LoanId}/{BranchId}#{fileName}", "_blank");
 
     }
 

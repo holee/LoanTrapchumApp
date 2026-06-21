@@ -192,7 +192,8 @@
                 margin: 0 0 0.8rem 0;
                 padding-bottom: 0.4rem;
                 border-bottom: 2px solid var(--primary);
-                display: inline-block;
+                text-align: center;
+                display: block;
             }
 
             /* ── Schedule Table ── */
@@ -410,8 +411,8 @@
                     <td class="val">: @(report.RegisterDate.DayFirst())</td>
                     <td class="lbl">ថ្ងៃផុតកំណត់</td>
                     <td class="val">: @(report.LastPaymentDate.DayFirst())</td>
-                    <td class="lbl">ច្បាប់ទី</td>
-                    <td class="val">: 1</td>
+                    <td class="lbl">ខ្ជីលើកទី</td>
+                    <td class="val">: @report.Circle ?? 1</td>
                 </tr>
                 <tr>
                     <td class="lbl">ភ្នាក់ងារ</td>
@@ -455,7 +456,7 @@
                                 <td class="center">@schedule.InstallmentNo</td>
                                 <td class="center">@(schedule.PaymentDate.DayFirst())</td>
                                 <td class="center">
-                                    @if (schedule.TotalDay.HasValue && schedule.TotalDay.Value > 0)
+                                    @if (schedule.TotalDay.HasValue && schedule.TotalDay > 0)
                                     {
                                         @schedule.TotalDay​
                                         <span>ថ្ងៃ</span>
@@ -464,8 +465,6 @@
                                     {
                                         @("-")
                                     }
-                                    )
-                                    @schedule.TotalDay ?? "-"
                                 </td>
                                 <td class="num">@schedule.Principle.As(report.CurrencyId)</td>
                                 <td class="num">@schedule.Interest.As(report.CurrencyId)</td>

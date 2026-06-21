@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Domains.Models;
 
-namespace Domains.Models;
-
+using Domains.Models.Lists;
 using System;
 
 public sealed class LtDocument
@@ -23,4 +20,6 @@ public sealed class LtDocument
     public string? Description { get; set; }
 
     public DateTimeOffset? Created { get; set; } = DateTimeOffset.UtcNow;
+
+    public Branch? Branch { get; set; } = null;
 }

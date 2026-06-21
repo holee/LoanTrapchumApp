@@ -1,4 +1,5 @@
-﻿using QuestPDF.Drawing;
+﻿using QuestPDF;
+using QuestPDF.Drawing;
 using QuestPDF.Infrastructure;
 
 namespace TrapchumApp;
@@ -6,10 +7,10 @@ namespace TrapchumApp;
 internal static class QuestPdfSetup
 {
     //            
-    internal static void RegisterFonts()
+    internal static void QuestPdfConfig()
     {
-        QuestPDF.Settings.License = LicenseType.Community;
-        QuestPDF.Settings.UseEnvironmentFonts = false;
+        Settings.License = LicenseType.Community;
+        Settings.UseEnvironmentFonts = false;
         FontManager.RegisterFontFromEmbeddedResource("TrapchumApp.Resources.Fonts.KhmerOSsiemreap.ttf");
         FontManager.RegisterFontFromEmbeddedResource("TrapchumApp.Resources.Fonts.KhmerOSmuol.ttf");
     }

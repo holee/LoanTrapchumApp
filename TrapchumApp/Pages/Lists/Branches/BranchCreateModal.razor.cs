@@ -7,149 +7,150 @@ using Domains.Models.Addresses;
 using Mapster;
 using TrapchumApp.Helpers.Validations;
 
-namespace TrapchumApp.Pages.Lists.Branches
+namespace TrapchumApp.Pages.Lists.Branches;
+
+public partial class BranchCreateModal(ILogger<BranchCreateModal> logger)
 {
-    public partial class BranchCreateModal
+    private BranchDtoCreate model = new();
+    [Inject] IBankService bankService { get; set; } = default!;
+    protected IEnumerable<ProvinceDto> provinceList = [];
+    protected IEnumerable<CommuneDto> communeList = [];
+    protected IEnumerable<DistrictDto> districtList = [];
+    protected IEnumerable<VillageDto> villageList = [];
+    protected IEnumerable<BankResponse> bankList = [];
+    protected IEnumerable<Country> Countries = [];
+    protected IEnumerable<string> strCountries = [];
+
+    protected IEnumerable<string> Cities = [];
+
+    protected IEnumerable<string> filteredItems = [];
+
+    EditContext editContext = default!;
+
+    protected override async Task OnInitializedAsync()
     {
-        private BranchDtoCreate model = new();
-        [Inject] IBankService bankService { get; set; } = default!;
-        protected IEnumerable<ProvinceDto> provinceList = [];
-        protected IEnumerable<CommuneDto> communeList = [];
-        protected IEnumerable<DistrictDto> districtList = [];
-        protected IEnumerable<VillageDto> villageList = [];
-        protected IEnumerable<BankResponse> bankList = [];
-        protected IEnumerable<Country> Countries = [];
-        protected IEnumerable<string> strCountries = [];
 
-        protected IEnumerable<string> Cities = [];
+        editContext = new EditContext(model);
 
-        protected IEnumerable<string> filteredItems = [];
+        model.ImagePath ??= tempPath;
 
-        EditContext editContext = default!;
+        var rsp = await _addressService!.GetCountries(105);
 
-        protected override async Task OnInitializedAsync()
+        if (!rsp.IsError)
         {
+            Countries = rsp.Value;
+        }
 
-            editContext = new EditContext(model);
+        provinceList = await _addressService.GetsProvinces(string.Empty);
 
-            var rsp = await _addressService!.GetCountries(105);
+        await GetCities();
 
-            if (!rsp.IsError)
-            {
-                Countries = rsp.Value;
-            }
+        var results = await bankService!.GetAllAsync();
 
-            provinceList = await _addressService.GetsProvinces(string.Empty);
+        if (results.Any())
+        {
+            bankList = results.Adapt<IEnumerable<BankResponse>>();
+        }
+        await base.OnInitializedAsync();
+    }
 
+
+    async Task GetCities(string? filter = null)
+    {
+        Cities = await _addressService.GetCities(filter);
+
+        filteredItems = Cities;
+    }
+    async Task OnSubmit()
+    {
+
+        var bank = bankList?.FirstOrDefault();
+
+        model.BankRefId = bank?.BankId;
+
+        var command = new CreateBranchCommand(model);
+
+        var response = await mediator.Send(command);
+
+        if (response.IsSuccess())
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "New Branch", "Branch created successfully!");
+
+            DialogService.Close(true);
+        }
+        else
+        {
+            editContext.ApplyValidationSummary<BranchDtoCreate>(response.GetMessage());
+        }
+    }
+    protected async Task AddCity()
+    {
+        var city = new CityDtoCreate { CityName = searchText };
+
+        var message = await _addressService.AddCity(city);
+
+        if (!message.IsError)
+        {
             await GetCities();
 
-            var results = await bankService!.GetAllAsync();
-
-            if (results.Any())
-            {
-                bankList = results.Adapt<IEnumerable<BankResponse>>();
-            }
-            await base.OnInitializedAsync();
-        }
-
-
-        async Task GetCities(string? filter = null)
-        {
-            Cities = await _addressService.GetCities(filter);
-
-            filteredItems = Cities;
-        }
-        async Task OnSubmit()
-        {
-
-            var bank = bankList?.FirstOrDefault();
-
-            model.BankRefId = bank?.BankId;
-
-            var command = new CreateBranchCommand(model);
-
-            var response = await mediator.Send(command);
-
-            if (response.IsSuccess())
-            {
-                NotificationService.Notify(NotificationSeverity.Success, "New Branch", "Branch created successfully!");
-
-                DialogService.Close(true);
-            }
-            else
-            {
-                editContext.ApplyValidationSummary<BranchDtoCreate>(response.GetMessage());
-            }
-        }
-        protected async Task AddCity()
-        {
-            var city = new CityDtoCreate { CityName = searchText };
-
-            var message = await _addressService.AddCity(city);
-
-            if (!message.IsError)
-            {
-                await GetCities();
-
-                StateHasChanged();
-            }
-        }
-        async void SelectProvince(object e)
-        {
-            if (e is not null)
-            {
-                var id = ((ProvinceDto)e).ProvinceId;
-                districtList = await _addressService.GetDistrictsByProvinceId(id);
-                model.ProDescription = ((ProvinceDto)e).ProDescription;
-                model.ProInKhmer = ((ProvinceDto)e).ProInKhmer;
-            }
-            StateHasChanged();
-
-        }
-        async Task SelectDistrict(object e)
-        {
-            if (e is not null)
-            {
-                var id = ((DistrictDto)e).DistrictId;
-
-                communeList = await _addressService!.GetCommunesByDistrictId(id);
-                model.DisDescription = ((DistrictDto)e).DisDescription;
-                model.DisInKhmer = ((DistrictDto)e).DisInKhmer;
-            }
-            else
-            {
-                communeList = [];
-            }
             StateHasChanged();
         }
-        async Task SelectCommune(object e)
+    }
+    async void SelectProvince(object e)
+    {
+        if (e is not null)
         {
-            if (e is not null)
-            {
-                var id = ((CommuneDto)e).CommuneId;
-                villageList = await _addressService!.GetVillagesByCommuneId(id);
-                model.ComDescription = ((CommuneDto)e).ComDescription;
-                model.ComInKhmer = ((CommuneDto)e).ComInKhmer;
-            }
-            else
-            {
-                villageList = [];
-            }
-            StateHasChanged();
+            var id = ((ProvinceDto)e).ProvinceId;
+            districtList = await _addressService.GetDistrictsByProvinceId(id);
+            model.ProDescription = ((ProvinceDto)e).ProDescription;
+            model.ProInKhmer = ((ProvinceDto)e).ProInKhmer;
         }
-
-        void SelectVillage(object e)
-        {
-            if (e is not null)
-            {
-                model.ComDescription = ((VillageDto)e)?.VillDescription;
-
-                model.ComInKhmer = ((VillageDto)e!)?.VilInKhmer;
-            }
-            StateHasChanged();
-        }
-
-
+        StateHasChanged();
 
     }
+    async Task SelectDistrict(object e)
+    {
+        if (e is not null)
+        {
+            var id = ((DistrictDto)e).DistrictId;
+
+            communeList = await _addressService!.GetCommunesByDistrictId(id);
+            model.DisDescription = ((DistrictDto)e).DisDescription;
+            model.DisInKhmer = ((DistrictDto)e).DisInKhmer;
+        }
+        else
+        {
+            communeList = [];
+        }
+        StateHasChanged();
+    }
+    async Task SelectCommune(object e)
+    {
+        if (e is not null)
+        {
+            var id = ((CommuneDto)e).CommuneId;
+            villageList = await _addressService!.GetVillagesByCommuneId(id);
+            model.ComDescription = ((CommuneDto)e).ComDescription;
+            model.ComInKhmer = ((CommuneDto)e).ComInKhmer;
+        }
+        else
+        {
+            villageList = [];
+        }
+        StateHasChanged();
+    }
+
+    void SelectVillage(object e)
+    {
+        if (e is not null)
+        {
+            model.ComDescription = ((VillageDto)e)?.VillDescription;
+
+            model.ComInKhmer = ((VillageDto)e!)?.VilInKhmer;
+        }
+        StateHasChanged();
+    }
+
+
+
 }

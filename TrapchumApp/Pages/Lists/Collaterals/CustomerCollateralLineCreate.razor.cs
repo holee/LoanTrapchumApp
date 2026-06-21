@@ -97,10 +97,9 @@ public partial class CustomerCollateralLineCreate
 
         baseModel = collateral.ToCollateralDtoCreate();
 
-        model.OwnerName = baseModel.CustomerName;
-
         await GetCollaralLine();
 
+        model.OwnerName = baseModel.CustomerName;
     }
 
     private async Task GetCollaralLine()

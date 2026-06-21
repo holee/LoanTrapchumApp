@@ -1,10 +1,12 @@
 ﻿using Domains.Models.Bases;
 using Domains.Models.Currencies;
 using Domains.Models.Lists.Employees;
+using Domains.Models.Loans;
+using System.Globalization;
 
 namespace Domains.Models.Lists;
 
-public class Branch:BaseEntity
+public class Branch : BaseEntity
 {
     public int BranchId { get; set; }
     public int? BankRefId { get; set; }
@@ -26,8 +28,10 @@ public class Branch:BaseEntity
     public string? VillDescription { get; set; }
     public string? VilInKhmer { get; set; }
     public bool IsActive { get; set; }
-    public Bank? Bank { get; set; }
-    public List<Employee>? Employees { get; set; } = [];
     public bool? IsHeadOffice { get; set; } = false;
+    public Bank? Bank { get; set; }
+    public Guid? ImagePathId { get; set; } = Guid.Empty;
+    public LtDocument? LtDocument { get; set; } = null; 
+    public List<Employee>? Employees { get; set; } = [];
 
 }

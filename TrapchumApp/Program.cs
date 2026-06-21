@@ -20,7 +20,7 @@ using TrapchumApp.Hubs;
 using TrapchumApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-QuestPdfSetup.RegisterFonts();
+QuestPdfSetup.QuestPdfConfig();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddRadzenComponents();
 builder.Services.AddControllersWithViews();

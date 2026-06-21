@@ -1,6 +1,8 @@
-﻿namespace Applications.Responses.ViewModels.Loans.Requests
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Applications.Responses.ViewModels.Loans.Requests
 {
-    public sealed class VLoanRequestGuarantor   
+    public sealed class VLoanRequestGuarantor
     {
         public long Id { get; set; }
         public string? GuarantorId { get; set; }
@@ -11,7 +13,8 @@
         public string? Gender { get; set; }
         public string? Phone { get; set; }
         public string? Address { get; set; }
-        public bool? IsActive { get; set; }=false;
+        public bool? IsActive { get; set; } = false;
+        [NotMapped] public int RowIndex { get; set; } = 0;
     }
 
 }

@@ -8,7 +8,7 @@ using Domains.Models.Addresses;
 
 namespace TrapchumApp.Pages.Lists.Branches
 {
-    public partial class BranchUpdateModal
+    public partial class BranchUpdateModal(ILogger<BranchUpdateModal> logger)
     {
         [Parameter] public int Id { get; set; }
 
@@ -65,13 +65,17 @@ namespace TrapchumApp.Pages.Lists.Branches
 
                 if (result.IsError)
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, "Error", result.GetMessage());
+                    _toastService.ShowError(result.GetMessage(), "Error");
+
                     DialogService.Close();
+
                     return;
                 }
 
 
                 model = result.Value;
+
+                model.ImagePath ??= tempPath;
 
                 ProvinceList = await _addressService!.GetsProvinces(string.Empty);
 
@@ -104,9 +108,9 @@ namespace TrapchumApp.Pages.Lists.Branches
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
 
-                Console.WriteLine(ex.Message);
+                _toastService.ShowError(ex.Message, "Exception");
+
             }
 
         }

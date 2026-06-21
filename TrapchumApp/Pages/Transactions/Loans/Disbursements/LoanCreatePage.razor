@@ -104,7 +104,7 @@ else
                                 <RadzenStack Gap="0.2rem">
                                     <RadzenFormField Text="រយៈពេលខ្ចីប្រាក់">
                                         <ChildContent>
-                                            <RadzenNumeric @bind-Value="model!.Installments" ReadOnly="true" />
+                                            <RadzenNumeric @bind-Value="model!.Installments" ReadOnly="true" ShowUpDown="false" />
                                         </ChildContent>
                                         <End>
                                             <small class="rz-color-base-500">@model?.InstallmentName</small>
@@ -291,7 +291,7 @@ else
                           Icon="@IconNames.Save"
                           ButtonStyle="ButtonStyle.Primary"
                           Text="រក្សាទុក" />
-            <RadzenButton Click="HandleFormSubmit"
+            <RadzenButton Click="@HandleFormSubmit"
                           Size="@Styles.DefaultSize"
                           Icon="@IconNames.Done"
                           ButtonStyle="ButtonStyle.Success"

@@ -1,92 +1,121 @@
-﻿@using Applications.Features.Addresses.Dto
+﻿@using System.Text.Json
+@using Applications.Features.Addresses.Dto
+@using Applications.Features.Documents.Dto
 @using Domains.Models.Addresses
 
-<style>
-    .branch-form-label {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--rz-text-secondary-color);
-    }
-    .branch-status-badge {
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 2px 8px;
-        border-radius: 12px;
-    }
-    .status-active {
-        background-color: var(--rz-success-lighter);
-        color: var(--rz-success-dark);
-    }
-    .status-inactive {
-        background-color: var(--rz-danger-lighter);
-        color: var(--rz-danger-dark);
-    }
-</style>
-
 <EditForm Model="@model" OnValidSubmit="@OnSubmit">
-    <FluentValidationValidator DisableAssemblyScanning="true" />
+    <FluentValidator />
     <input type="hidden" @bind-value="@model.BranchId" />
+    <input type="hidden" @bind-value="@_tempPathId" />
+    <div class="branch-modal-shell">
+        @* ── Branch Info ── *@
+        <div class="branch-section-card">
+            <div class="branch-section-header">
+                <div class="branch-section-header-left">
+                    <div class="branch-section-icon">
+                        <RadzenIcon Icon="corporate_fare" Style="font-size:1.05rem;" />
+                    </div>
 
-    @* ── Branch Info ── *@
-    <RadzenFieldset AllowCollapse="false" Collapsed="false" class="rz-mb-3">
-        <HeaderTemplate>
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
-                <RadzenIcon Icon="corporate_fare" Style="color:var(--rz-primary)" />
-                <b>Branch Information</b>
-            </RadzenStack>
-        </HeaderTemplate>
-        <ChildContent>
-            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-3">
-                <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenStack Gap="0.25rem">
-                        <RadzenLabel Text="Branch Name *" class="branch-form-label" />
-                        <RadzenTextBox Name="BranchName"
-                                       @bind-Value="model.BranchName"
-                                       Placeholder="Enter branch name..."
-                                       Style="width:100%" />
-                        <ValidationMessage For="@(() => model.BranchName)" />
-                    </RadzenStack>
-                </RadzenColumn>
-                <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenStack Gap="0.25rem">
-                        <RadzenLabel Text="Branch Code *" class="branch-form-label" />
-                        <RadzenTextBox Name="Description"
-                                       @bind-Value="model.Description"
-                                       Placeholder="Enter branch code..."
-                                       Style="width:100%" />
-                        <ValidationMessage For="@(() => model.Description)" />
-                    </RadzenStack>
-                </RadzenColumn>
-            </RadzenRow>
+                    <div class="branch-section-heading">
+                        <div class="branch-section-title">Branch information</div>
+                        <div class="branch-section-subtitle">Update the branch identity with name, code, and status.</div>
+                    </div>
+                </div>
 
-            <RadzenRow AlignItems="AlignItems.Center">
-                <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                        <RadzenLabel Text="Status" Component="IsActive" class="branch-form-label" />
-                        <RadzenCheckBox @bind-Value="@model.IsActive" Name="IsActive" />
-                        <span class="branch-status-badge @(model.IsActive ? "status-active" : "status-inactive")">
-                            <RadzenIcon Icon="@(model.IsActive ? "check_circle" : "cancel")" Style="font-size:0.75rem;vertical-align:middle" />
-                            @(model.IsActive ? "Active" : "Inactive")
-                        </span>
-                    </RadzenStack>
-                </RadzenColumn>
-            </RadzenRow>
-        </ChildContent>
-    </RadzenFieldset>
+                <div class="branch-status-badge @(model.IsActive ? "status-active" : "status-inactive")">
+                    <RadzenIcon Icon="@(model.IsActive ? "check_circle" : "cancel")" Style="font-size:0.75rem;vertical-align:middle" />
+                    @(model.IsActive ? "Active" : "Inactive")
+                </div>
+            </div>
 
-    @* ── Address ── *@
-    <RadzenFieldset AllowCollapse="false" Collapsed="false" class="rz-mb-3">
-        <HeaderTemplate>
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
-                <RadzenIcon Icon="location_on" Style="color:var(--rz-danger)" />
-                <b>Address</b>
-            </RadzenStack>
-        </HeaderTemplate>
-        <ChildContent>
-            @* Row 1: Country + City *@
+            <div class="branch-section-body">
+                <ValidationSummary />
+                <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
+                    <RadzenColumn Size="12">
+                        <RadzenStack Gap="0.85rem">
+                            <RadzenStack Gap="0.35rem">
+                                <RadzenLabel Text="Branch Name *" class="branch-form-label" />
+                                <RadzenTextBox Name="BranchName"
+                                               @bind-Value="model.BranchName"
+                                               Placeholder="Enter branch name..."
+                                               Style="width:100%" />
+                                <ValidationMessage For="@(() => model.BranchName)" />
+                            </RadzenStack>
+
+                            <RadzenStack Gap="0.35rem">
+                                <RadzenLabel Text="Branch Code *" class="branch-form-label" />
+                                <RadzenTextBox Name="Description"
+                                               @bind-Value="model.Description"
+                                               Placeholder="Enter branch code..."
+                                               Style="width:100%" />
+                                <ValidationMessage For="@(() => model.Description)" />
+                            </RadzenStack>
+
+                            <div class="branch-preview-card">
+                                <div class="branch-preview-frame">
+                                    <RadzenImage Path="@model.ImagePath"
+                                                 class="branch-preview-image" />
+                                </div>
+                                <div class="branch-upload-copy">
+                                    <RadzenUpload Auto="true"
+                                                  Multiple="false"
+                                                  Accept=".jpg,.png"
+                                                  Url="upload/branches/images"
+                                                  Complete="@OnFileUploadComplete"
+                                                  Progress="@UploadProgress"
+                                                  Error="@OnUploadError"
+                                                  Style="width:100%;background-color:transparent;"
+                                                  ChooseText="@(string.IsNullOrWhiteSpace(model.ImagePath) ? "Upload branch image" : "Change branch image")"
+                                                  InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})">
+                                    </RadzenUpload>
+
+                                    @if (_isUploading)
+                                    {
+                                        <RadzenText TextStyle="TextStyle.Caption" TextAlign="TextAlign.Center"
+                                                    Style="color:var(--rz-primary);">
+                                            Uploading... @_progress%
+                                        </RadzenText>
+                                    }
+
+                                    @if (_isError && !string.IsNullOrWhiteSpace(_errorMessage))
+                                    {
+                                        <RadzenText TextStyle="TextStyle.Caption" TextAlign="TextAlign.Center"
+                                                    Style="color:var(--rz-danger-dark);">
+                                            @_errorMessage
+                                        </RadzenText>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="branch-status-toggle">
+                                <RadzenLabel Text="Status" class="branch-form-label" />
+                                <div class="branch-status-toggle-row">
+                                    <RadzenCheckBox @bind-Value="@model.IsActive" Name="IsActive" />
+                                    <span>Visible in active branch lists</span>
+                                </div>
+                            </div>
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+            </div>
+        </div>
+        @* ── Address ── *@
+    </div>
+    <div class="branch-section-card">
+        <div class="branch-section-header">
+            <div>
+                <div class="branch-section-title">
+                    <RadzenIcon Icon="location_on" Style="color:var(--rz-danger);font-size:1rem;vertical-align:middle;margin-right:0.35rem;" />
+                    Address
+                </div>
+                <div class="branch-section-subtitle">Update the branch location from country down to village.</div>
+            </div>
+        </div>
+
+        <div class="branch-section-body">
             <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
-                <RadzenColumn Size="12" SizeMD="12">
-                    <RadzenStack Gap="0.25rem">
+                <RadzenColumn Size="12">
+                    <RadzenStack Gap="0.35rem">
                         <RadzenLabel Text="Country" class="branch-form-label" />
                         <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                         FilterOperator="StringFilterOperator.Contains"
@@ -100,49 +129,11 @@
                                         Name="DropDownFiltering1" />
                     </RadzenStack>
                 </RadzenColumn>
-                @* <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenStack Gap="0.25rem">
-                        <RadzenLabel Text="City" class="branch-form-label" />
-                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        AllowFiltering="false"
-                                        Data="@filteredItems"
-                                        AllowClear="false"
-                                        TValue="string"
-                                        @bind-Value="@model.City"
-                                        Placeholder="Select or add city..."
-                                        Style="width: 100%;"
-                                        Context="c"
-                                        Name="DropDownFiltering2">
-                            <HeaderTemplate>
-                                <div class="rz-dropdown-filter-container">
-                                    <input aria-label="Search" id="search-@Guid.NewGuid().ToString("N")"
-                                           tabindex="0"
-                                           placeholder="Type to search or add..."
-                                           class="rz-dropdown-filter rz-inputtext"
-                                           autocomplete="Off"
-                                           aria-autocomplete="none"
-                                           autofocus="true"
-                                           @bind="@searchText"
-                                           @oninput="@OnSearchTextChanged"
-                                           @onkeypress="@OnKeyPress"
-                                           type="search">
-                                    <span class="notranslate rz-dropdown-filter-icon rzi rzi-search"></span>
-                                </div>
-                            </HeaderTemplate>
-                        </RadzenDropDown>
-                        <small class="text-muted" style="font-size:0.7rem">
-                            <RadzenIcon Icon="info" Style="font-size:0.7rem;vertical-align:middle" />
-                            Press <kbd>Enter</kbd> to add a new city
-                        </small>
-                    </RadzenStack>
-                </RadzenColumn> *@
             </RadzenRow>
 
-            @* Row 2: Province + District *@
             <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
                 <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenStack Gap="0.25rem">
+                    <RadzenStack Gap="0.35rem">
                         <RadzenLabel Text="Province" class="branch-form-label" />
                         <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                         FilterOperator="StringFilterOperator.Contains"
@@ -159,7 +150,7 @@
                     </RadzenStack>
                 </RadzenColumn>
                 <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenStack Gap="0.25rem">
+                    <RadzenStack Gap="0.35rem">
                         <RadzenLabel Text="District" class="branch-form-label" />
                         <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                         FilterOperator="StringFilterOperator.Contains"
@@ -177,10 +168,9 @@
                 </RadzenColumn>
             </RadzenRow>
 
-            @* Row 3: Commune + Village *@
             <RadzenRow AlignItems="AlignItems.Start">
                 <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenStack Gap="0.25rem">
+                    <RadzenStack Gap="0.35rem">
                         <RadzenLabel Text="Commune" class="branch-form-label" />
                         <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                         FilterOperator="StringFilterOperator.Contains"
@@ -197,7 +187,7 @@
                     </RadzenStack>
                 </RadzenColumn>
                 <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenStack Gap="0.25rem">
+                    <RadzenStack Gap="0.35rem">
                         <RadzenLabel Text="Village" class="branch-form-label" />
                         <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                         FilterOperator="StringFilterOperator.Contains"
@@ -214,28 +204,103 @@
                     </RadzenStack>
                 </RadzenColumn>
             </RadzenRow>
-        </ChildContent>
-    </RadzenFieldset>
+        </div>
+    </div>
 
-    @* ── Footer Actions ── *@
-    <RadzenStack Gap="0.5rem" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" AlignItems="AlignItems.Center">
+    <div class="branch-footer rz-mt-2">
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Save Changes"
+                      Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Success"
+                      Icon="save" />
         <RadzenButton Click="@(() => DialogService!.Close(false))"
                       Variant="Variant.Filled"
                       Text="Cancel"
                       Icon="close"
                       Size="ButtonSize.ExtraSmall"
                       ButtonStyle="ButtonStyle.Danger" />
-        <RadzenButton ButtonType="ButtonType.Submit"
-                      Text="Save Changes"
-                      Size="ButtonSize.ExtraSmall"
-                      ButtonStyle="ButtonStyle.Success"
-                      Icon="save" />
-    </RadzenStack>
+    </div>
 </EditForm>
 
 @code {
     int selectedIndex = 0;
+
     RadzenDropDown<string> radzenDropDown = default!;
+
+
+    private string tempPath = "/assets/logo/tch_Logo.png";
+
+    private string _errorMessage = string.Empty;
+
+    private bool _isError = false;
+
+    private int _progress = 0;
+
+    private bool _isUploading = false;
+
+    private string? _tempPathId = "";
+
+    void OnFileUploadComplete(UploadCompleteEventArgs args)
+    {
+        if (string.IsNullOrEmpty(args.RawResponse))
+        {
+            model.ImagePath = tempPath;
+
+            return;
+        }
+
+        try
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            var fileModels = JsonSerializer.Deserialize<DocumentDto>(args.RawResponse!, options);
+
+            if (fileModels is not null)
+            {
+                model.ImagePath = fileModels.FileUrl;
+
+                model.ImagePathId = fileModels.Id;
+
+                _toastService.ShowSuccess("Photo uploaded successfully!", "Upload Complete");
+            }
+            else
+            {
+                _isError = true;
+
+                model.ImagePath = tempPath;
+
+                _errorMessage = "Failed to parse upload response.";
+            }
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error parsing upload response: {ex.Message}";
+
+            logger.LogError(ex, "Error parsing upload response: {Message}", ex.Message);
+        }
+    }
+
+    void OnUploadError(UploadErrorEventArgs args)
+    {
+        _isError = true;
+
+        _errorMessage = $"Upload failed: {args.Message}";
+
+        _toastService.ShowError(_errorMessage, "Upload Error");
+
+        logger.LogError("Upload failed: {Message}", args.Message);
+    }
+
+    void UploadProgress(UploadProgressArgs args)
+    {
+        _isUploading = true;
+
+        _progress = args.Progress;
+
+        logger.LogInformation("Upload progress: {Progress}%", args.Progress);
+    }
 }
 
 

@@ -74,14 +74,15 @@ namespace TrapchumApp.Pages.Lists.Branches
 
             if (rsp!.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Branch state updated successfully.");
+
+                _toastService.ShowSuccess("Branch state updated successfully.");
 
                 await GetBranches(searchText);
 
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+                _toastService.ShowError(rsp.GetMessage());
             }
         }
         protected override async Task OnInitializedAsync()
@@ -133,7 +134,16 @@ namespace TrapchumApp.Pages.Lists.Branches
         string BranchName = "Siem Reap";
         protected async void OnCreate()
         {
-            bool? resultModal = await DialogService.OpenAsync<BranchCreateModal>("Add Branch");
+
+            var options = new DialogOptions()
+            {
+                AutoFocusFirstElement = false,
+                Width = "40vw",
+                Resizable = false,
+            };
+
+
+            bool? resultModal = await DialogService.OpenAsync<BranchCreateModal>("Add Branch", options: options);
 
             if (resultModal != null && resultModal == true)
             {
@@ -161,16 +171,18 @@ namespace TrapchumApp.Pages.Lists.Branches
 
             if (isDe.Value.IsSuccess)
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Branch deleted successfully.");
+                _toastService.ShowSuccess("Branch deleted successfully.");
+
                 await GetBranches(searchText);
+               
                 return;
             }
 
             if (isDe.Value.Status == DeleteStatus.InUse)
             {
-                NotificationService.Notify(NotificationSeverity.Warning, isDe.Value.Message ?? string.Empty);
+                _toastService.ShowWarning(isDe.Value.Message ?? string.Empty);
             }
-             
+
             var options1 = new ConfirmOptions()
             {
                 OkButtonText = "Yes",
@@ -187,12 +199,13 @@ namespace TrapchumApp.Pages.Lists.Branches
 
             if (rsp!.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success,"Branch state changed successfully.");
+
+                _toastService.ShowWarning("Branch you are trying to delete has started its operation, so you cannot delete it. Make inactive is strongly recommmended!");
 
                 await GetBranches(searchText);
             }
 
-            NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+            _toastService.ShowError(rsp.GetMessage());
 
         }
         private async Task PageSizeChanged(int args)

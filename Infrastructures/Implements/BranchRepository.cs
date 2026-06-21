@@ -190,6 +190,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
         await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
         var branch = await context.Branches
+                            .Include(x => x.LtDocument)
                             .IgnoreQueryFilters()
                             .AsNoTracking()
                             .FirstOrDefaultAsync(x => x.BranchId == id, cancellation);

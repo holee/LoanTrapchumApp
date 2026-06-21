@@ -66,6 +66,7 @@
 		<Folder Include="Components\Payments\" />
 		<Folder Include="wwwroot\assets\docs\" />
 		<Folder Include="wwwroot\assets\docs\" />
+		<Folder Include="wwwroot\assets\branches\" />
 		<Folder Include="wwwroot\schedules\" />
 	</ItemGroup>
 

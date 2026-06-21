@@ -47,7 +47,7 @@ internal static class CalculatorExtensions
 
         if (currencyId == (int)CurrencyEnum.KHR) return (amount / nper).RoundDown(-3);
 
-        return (amount / nper).RoundDown(3);
+        return (amount / nper).RoundDown(2);
 
     }
     internal static decimal LastBalance(decimal? beginBalance, decimal? principalPaid)
@@ -196,6 +196,27 @@ internal static class CalculatorExtensions
         return principleDouble.RoundDown(2);
     }
 
+
+
+    internal static decimal LastScheduleAmount(this decimal baseAmount, int? currencyId, int? period, decimal? principalPerInstallment)
+    {
+
+        var lastAmount = (baseAmount - (principalPerInstallment * (period - 1))) ?? 0.00M;
+
+        if (currencyId == (int)CurrencyEnum.KHR) return lastAmount.RoundUp(-2);
+
+        return Math.Round(lastAmount, 2);
+    }
+
+    internal static decimal LastScheduleAmount(this decimal? baseAmount, int? currencyId, int? period, decimal? principalPerInstallment)
+    {
+         
+        decimal lastAmount = (baseAmount - (principalPerInstallment * (period - 1))) ?? 0.00M;
+
+        if (currencyId == (int)CurrencyEnum.KHR) return lastAmount.RoundUp(-2);
+
+        return Math.Round(lastAmount, 2);
+    }
 
     internal static int TotalDays(DateTimeOffset? start, DateTimeOffset? end)
     {

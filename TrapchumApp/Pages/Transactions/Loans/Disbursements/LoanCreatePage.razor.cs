@@ -239,7 +239,7 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
             string loanUrl = $"/App/Loan/{rsp.Value.LoanId}/Branches/{BranchId}/Currencies/{model.CurrencyRefId}";
 
-            NavigationManager.NavigateTo(loanUrl);
+            NavigationManager.NavigateTo(loanUrl,true);
 
             StateHasChanged();
         }

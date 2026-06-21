@@ -1,127 +1,151 @@
 ﻿@page "/App/Branches"
 @using Applications.Features.Branches.Dtos
 <PageTitle>Branches</PageTitle>
-<style>
-    .rz-grid-table td .rz-cell-data {
-        line-height: 1.5rem;
-        font-size: 0.8rem;
-    }
-</style>
-<RadzenCard class="rz-background-color-base-200" Variant="Variant.Outlined">
-    <RadzenTabs RenderMode="TabRenderMode.Server">
-        <Tabs>
-            <RadzenTabsItem Text="Branches" Icon="account_balance">
-                <GridToolbar SearchChanged="SearchChanged">
-                    <LeftChildren>
-                        <AuthorizeView>
-                            <Authorized>
-                                <RadzenButton Click="OnCreate"
-                                              Text="New Branch"
-                                              Icon="add"
-                                              ButtonStyle="ButtonStyle.Primary"
-                                              Size="ButtonSize.Small" />
-                            </Authorized>
-                        </AuthorizeView>
-                    </LeftChildren>
-                    <RightChildren>
-                        <div class="ml-2">
-                            <RadzenCheckBox TValue="bool" @bind-Value="@InActive" Change="ex => OnIncludeInactive(ex)" Name="InActive" />
-                            <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left:3px; vertical-align: middle;" />
+<RadzenCard class="branch-page-card rz-background-color-base-200" Variant="Variant.Outlined">
+    <div class="branch-page-header">
+        <div>
+            <h3 class="branch-title">Branches</h3>
+            <div class="branch-subtitle">Manage branch information in a clean and modern table view.</div>
+        </div>
+    </div>
+
+    <GridToolbar SearchChanged="SearchChanged">
+        <LeftChildren>
+            <AuthorizeView>
+                <Authorized>
+                    <RadzenButton Click="OnCreate"
+                                  Text="New Branch"
+                                  Icon="add"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Size="ButtonSize.Small" />
+                </Authorized>
+            </AuthorizeView>
+        </LeftChildren>
+        <RightChildren>
+            <div class="ml-2 branch-filter-toggle">
+                <RadzenCheckBox TValue="bool" @bind-Value="@InActive" Change="ex => OnIncludeInactive(ex)" Name="InActive" />
+                <RadzenLabel Text="Include inactive" Component="InActive" Style="margin-left:6px; vertical-align: middle;" />
+            </div>
+        </RightChildren>
+    </GridToolbar>
+
+    <RadzenDataGrid class="branch-grid"
+                    GridLines="DataGridGridLines.None"
+                    Count="@counts"
+                    PageSize="@pageSize"
+                    AllowPaging="true"
+                    ShowPagingSummary="true"
+                    Density="Density.Compact"
+                    AllowColumnPicking="true"
+                    AllowAlternatingRows="true"
+                    AllowRowSelectOnRowClick="true"
+                    PagerHorizontalAlign="HorizontalAlign.Right"
+                    AllowSorting="true"
+                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    LogicalFilterOperator="LogicalFilterOperator.Or"
+                    AllowFiltering="true"
+                    IsLoading="@Tracker.IsLoading"
+                    LoadData="@LoadData"
+                    PageSizeOptions="@StorageConstant.PageSizeOptions"
+                    PageSizeChanged="PageSizeChanged"
+                    CellContextMenu="@ShowContextMenu"
+                    Data="@Branches"
+                    @ref="@_grid"
+                    RowRender="@OnRowRender"
+                    TItem="VBranch">
+        <Columns>
+            <RadzenDataGridColumn Property="@nameof(VBranch.BranchId)"
+                                  Width="4rem"
+                                  Title="#"
+                                  TextAlign="TextAlign.Center"
+                                  Pickable="false"
+                                  Filterable="false"
+                                  Sortable="false"
+                                  Context="h">
+                <Template>
+                    @h.RowIndex
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Width="20rem"
+                                  Title="Branch"
+                                  Property="@nameof(VBranch.BranchName)"
+                                  Context="b">
+                <Template>
+                    <div class="branch-identity">
+                        @if (!string.IsNullOrWhiteSpace(b.ImagePath))
+                        {
+                            <img src="@b.ImagePath" alt="@b.BranchName" class="branch-image" />
+                        }
+                        else
+                        {
+                            <div class="branch-image branch-image--placeholder">
+                                <RadzenIcon Icon="account_balance" />
+                            </div>
+                        }
+                        <div>
+                            <div class="branch-name">@b.BranchName</div>
                         </div>
-                    </RightChildren>
-                </GridToolbar>
-                <RadzenDataGrid GridLines="DataGridGridLines.Both"
-                                Count="@counts"
-                                PageSize="@pageSize"
-                                AllowPaging="true"
-                                ShowPagingSummary="true"
-                                Density="Density.Compact"
-                                AllowColumnPicking="true"
-                                AllowAlternatingRows="true"
-                                AllowRowSelectOnRowClick="true"
-                                PagerHorizontalAlign="HorizontalAlign.Right"
-                                AllowSorting="true"
-                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                LogicalFilterOperator="LogicalFilterOperator.Or"
-                                AllowFiltering="true"
-                                IsLoading="@Tracker.IsLoading"
-                                LoadData="@LoadData"
-                                PageSizeOptions="@StorageConstant.PageSizeOptions"
-                                PageSizeChanged="PageSizeChanged"
-                                CellContextMenu="@ShowContextMenu"
-                                Data="@Branches"
-                                @ref="@_grid"
-                                TItem="VBranch">
-                    <Columns>
-                        <RadzenDataGridColumn Property="@nameof(VBranch.BranchId)"
-                                              Width="4rem"
-                                              Title="#"
-                                              TextAlign="TextAlign.Center"
-                                              Pickable="false"
-                                              Filterable="false"
-                                              Sortable="false"
-                                              Context="h">
-                            <Template>
-                                @(Branches!.ToList()!.IndexOf(h) + 1)
-                            </Template>
-                        </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Width="10rem"
-                                              Title="Branch Name"
-                                              Property="@nameof(VBranch.BranchName)" />
-                        <RadzenDataGridColumn Title="Branch Code"
-                                              Sortable="false"
-                                              Filterable="false"
-                                              Property="@nameof(VBranch.Description)" />
-                        <RadzenDataGridColumn Title="Address"
-                                              Sortable="false"
-                                              Filterable="false"
-                                              Context="b">
-                            <Template>
-                                @b.ToString()
-                            </Template>
-                        </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Width="6rem"
-                                              Title="Status"
-                                              TextAlign="TextAlign.Center"
-                                              Filterable="false"
-                                              Property="@nameof(VBranch.IsActive)"
-                                              Sortable="false"
-                                              Context="c">
-                            <Template>
-                                <RadzenBadge Text="@(c.IsActive == true ? "Active" : "Inactive")"
-                                             BadgeStyle="@(c.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
-                                             Shade="Shade.Light"
-                                             IsPill="true" />
-                            </Template>
-                        </RadzenDataGridColumn>
-                        <AuthorizeView>
-                            <Authorized>
-                                <RadzenDataGridColumn Width="5rem"
-                                                      Title="Actions"
-                                                      Filterable="false"
-                                                      Sortable="false"
-                                                      Pickable="false"
-                                                      TextAlign="TextAlign.Center"
-                                                      Context="c">
-                                    <Template>
-                                        <RadzenButton Size="ButtonSize.ExtraSmall"
-                                                      Icon="more_vert"
-                                                      Variant="Variant.Text"
-                                                      Click="@((args) => ShowContextMenuWithItems(args, c))" />
-                                    </Template>
-                                </RadzenDataGridColumn>
-                            </Authorized>
-                        </AuthorizeView>
-                    </Columns>
-                    <LoadingTemplate>
-                        <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate"
-                                                   ProgressBarStyle="ProgressBarStyle.Danger"
-                                                   Value="100" ShowValue="false" />
-                    </LoadingTemplate>
-                </RadzenDataGrid>
-            </RadzenTabsItem>
-        </Tabs>
-    </RadzenTabs>
+                    </div>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Title="Branch Code"
+                                  Sortable="false"
+                                  Filterable="false"
+                                  Property="@nameof(VBranch.Description)" />
+
+            <RadzenDataGridColumn Title="Address"
+                                  Sortable="false"
+                                  Filterable="false"
+                                  Context="b">
+                <Template>
+                    @b.ToString()
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Width="7rem"
+                                  Title="Status"
+                                  TextAlign="TextAlign.Center"
+                                  Filterable="false"
+                                  Property="@nameof(VBranch.IsActive)"
+                                  Sortable="false"
+                                  Context="c">
+                <Template>
+                    <RadzenBadge Text="@(c.IsActive == true ? "Active" : "Inactive")"
+                                 BadgeStyle="@(c.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                 Shade="Shade.Light"
+                                 IsPill="true"
+                                 class="branch-status-badge" />
+                </Template>
+            </RadzenDataGridColumn>
+
+            <AuthorizeView>
+                <Authorized>
+                    <RadzenDataGridColumn Width="5rem"
+                                          Title="Actions"
+                                          Filterable="false"
+                                          Sortable="false"
+                                          Pickable="false"
+                                          TextAlign="TextAlign.Center"
+                                          Context="c">
+                        <Template>
+                            <RadzenButton Size="ButtonSize.ExtraSmall"
+                                          Icon="more_vert"
+                                          Variant="Variant.Text"
+                                          Click="@((args) => ShowContextMenuWithItems(args, c))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Authorized>
+            </AuthorizeView>
+        </Columns>
+
+        <LoadingTemplate>
+            <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate"
+                                       ProgressBarStyle="ProgressBarStyle.Danger"
+                                       Value="100" ShowValue="false" />
+        </LoadingTemplate>
+    </RadzenDataGrid>
 </RadzenCard>
 
 @code {
@@ -135,10 +159,10 @@
             new ContextMenuItem { Text = "Edit",       Icon = "edit",   Value = "2" },
             new ContextMenuItem { Text = "Delete",     Icon = "delete", Value = "3" },
         }, e =>
-        {
-            ContextMenuService.Close();
-            HandleBranchAction(e.Value?.ToString(), branch);
-        });
+    {
+        ContextMenuService.Close();
+        HandleBranchAction(e.Value?.ToString(), branch);
+    });
     }
 
     void ShowContextMenu(DataGridCellMouseEventArgs<VBranch> args)
@@ -151,10 +175,10 @@
             new ContextMenuItem { Text = "Edit",       Icon = "edit",   Value = "2" },
             new ContextMenuItem { Text = "Delete",     Icon = "delete", Value = "3" },
         }, e =>
-        {
-            ContextMenuService.Close();
-            HandleBranchAction(e.Value?.ToString(), args.Data);
-        });
+    {
+        ContextMenuService.Close();
+        HandleBranchAction(e.Value?.ToString(), args.Data);
+    });
     }
 
     void HandleBranchAction(string? value, VBranch branch)
@@ -162,8 +186,98 @@
         switch (value)
         {
             case "1": _ = OnDetail(branch); break;
-            case "2": _ = OnEdit(branch);   break;
+            case "2": _ = OnEdit(branch); break;
             case "3": _ = OnDelete(branch); break;
         }
     }
+
+    private void OnRowRender(RowRenderEventArgs<VBranch> args)
+    {
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
+
+        if (args.Data.IsActive != true)
+        {
+            args.Attributes["class"] = "branch-row-inactive";
+        }
+    }
 }
+
+<style>
+    .branch-page-card {
+        border-radius: 16px;
+        padding: 0.5rem;
+    }
+
+    .branch-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        padding: 0.25rem 0.25rem 0;
+    }
+
+    .branch-title {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+    .branch-subtitle {
+        margin-top: 0.2rem;
+        color: var(--rz-text-secondary-color, #6b7280);
+        font-size: 0.82rem;
+    }
+
+    .branch-filter-toggle {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .branch-grid {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .branch-identity {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .branch-image {
+        width: 2.4rem;
+        height: 2.4rem;
+        border-radius: 0.75rem;
+        object-fit: cover;
+        border: 1px solid var(--rz-base-300, #e5e7eb);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        background: #fff;
+    }
+
+    .branch-image--placeholder {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--rz-text-secondary-color, #6b7280);
+        background: var(--rz-base-200, #f3f4f6);
+    }
+
+    .branch-name {
+        font-weight: 600;
+    }
+
+    .branch-mini-text {
+        font-size: 0.76rem;
+        color: var(--rz-text-secondary-color, #6b7280);
+    }
+
+    .branch-row-inactive {
+        opacity: 0.68;
+    }
+
+    .branch-status-badge {
+        min-width: 72px;
+    }
+</style>

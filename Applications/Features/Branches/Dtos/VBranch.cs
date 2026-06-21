@@ -16,19 +16,15 @@ public sealed class VBranch
     public string? DisInKhmer { get; set; }
     public string? ComInKhmer { get; set; }
     public string? VilInKhmer { get; set; }
+    public string? ImagePath { get; set; } = string.Empty;
     public bool Used { get; set; } = false;
     public int OpenStatus { get; set; } = 0;
-    public int? EditSeq { get; set; } = 0;
     public override string ToString()
     {
         return $"{ProInKhmer} {DisInKhmer} {ComInKhmer} {VilInKhmer}";
     }
 
     [NotMapped] public int RowIndex { get; set; } = 1;
-    public int? ProvinceRefId { get; set; }
-    public int? DistrictRefId { get; set; }
-    public int? CommuneRefId { get; set; }
-    public int? VillageRefId { get; set; }
     public bool? IsHeadOffice { get; set; } = false;
 
 }

@@ -73,12 +73,15 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             var parameters = new Dictionary<string, object?> {
 
             {"CollateralId", CustomerId },
+
             { "PageType", PageType.Dialog  }
         };
 
             var options = new DialogOptions
             {
-                Width = "50vw"
+                Width = "100vw",
+                AutoFocusFirstElement = false,
+                Resizable = false
             };
 
             var dia = await DialogService.OpenAsync<CustomerCollateralLineCreate>("Add Collateral", parameters, options);

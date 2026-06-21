@@ -1,39 +1,65 @@
-﻿<RadzenStack Gap="1rem" Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
-    <RadzenStack>
-        <RadzenRow>
-            <RadzenColumn Size="12" SizeMD="12" Class="rz-p-2 rz-border-radius-1" Style="border: var(--rz-grid-cell-border)">
-                <RadzenText TextStyle="TextStyle.Subtitle1">Branch Info.</RadzenText>
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
-                    <RadzenStack Gap="0" Class="rz-text-truncate">
-                        <RadzenText TextStyle="TextStyle.Overline" Class="rz-my-0" Style="color: var(--rz-text-tertiary-color);">Name</RadzenText>
-                        <RadzenText TextStyle="TextStyle.Body1" Class="rz-text-truncate"><b>@(branch!.BranchName)</b></RadzenText>
-                        <RadzenText TextStyle="TextStyle.Overline" Class="rz-my-0" Style="color: var(--rz-text-tertiary-color);">Bank</RadzenText>
-                        <RadzenText TextStyle="TextStyle.Body2" Class="rz-text-truncate"><b>@(branch?.BankName)</b></RadzenText>
-                        <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-2 rz-mb-0" Style="color: var(--rz-text-tertiary-color);">Description</RadzenText>
-                        <RadzenText TextStyle="TextStyle.Body2" Class="rz-text-truncate"><b>@branch!.Description</b></RadzenText>
-                    </RadzenStack>
-                </RadzenStack>
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="12" Class="rz-p-2 rz-border-radius-1" Style="border: var(--rz-grid-cell-border)">
-                <RadzenText TextStyle="TextStyle.Subtitle1">Address</RadzenText>
-                <RadzenStack Gap="0" Class="rz-text-truncate">
-                    <RadzenText TextStyle="TextStyle.Overline" Class="rz-my-0" Style="color: var(--rz-text-tertiary-color);">Address-Khmer</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body2" Class="rz-text-truncate"><b>@branch!.CountryName @branch.City @branch.ProInKhmer @branch.DisInKhmer @branch.ComInKhmer @branch.VilInKhmer</b></RadzenText>
-                    <RadzenText TextStyle="TextStyle.Overline" Class="rz-mt-2 rz-my-0" Style="color: var(--rz-text-tertiary-color);">Address-English</RadzenText>
-                    <RadzenText TextStyle="TextStyle.Body2" Class="rz-text-truncate"><b>@branch?.ToString()</b></RadzenText>
-                </RadzenStack>
-            </RadzenColumn>
-        </RadzenRow>
+﻿<div class="branch-detail-modal-shell">
+    @* ── Branch Info ── *@
+    <div class="branch-detail-card">
+        <div class="branch-detail-header">
+            <div class="branch-detail-header-left">
+                <div class="branch-detail-icon">
+                    <RadzenIcon Icon="corporate_fare" Style="font-size:1.05rem;" />
+                </div>
 
-    </RadzenStack>
-    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
-        <RadzenButton Icon="cancel"
+                <div class="branch-detail-heading">
+                    <div class="branch-detail-title">Branch Information</div>
+                    <div class="branch-detail-subtitle">View branch identity and associated bank details.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="branch-detail-body">
+            <div class="branch-detail-field">
+                <div class="branch-detail-label">Branch Name</div>
+                <div class="branch-detail-value">@branch?.BranchName</div>
+            </div>
+            <div class="branch-detail-divider"></div>
+
+            <div class="branch-detail-field">
+                <div class="branch-detail-label">Branch Code</div>
+                <div class="branch-detail-value">@branch?.Description</div>
+            </div>
+        </div>
+    </div>
+
+    @* ── Address ── *@
+    <div class="branch-detail-card">
+        <div class="branch-detail-header">
+            <div class="branch-detail-header-left">
+                <div class="branch-detail-icon" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(220, 38, 38, 0.2)); color: var(--rz-danger);">
+                    <RadzenIcon Icon="location_on" Style="font-size:1.05rem;" />
+                </div>
+
+                <div class="branch-detail-heading">
+                    <div class="branch-detail-title">Address Information</div>
+                    <div class="branch-detail-subtitle">Branch location details in Khmer and English.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="branch-detail-body">
+            <div class="branch-detail-field">
+                <div class="branch-detail-label">Address (Khmer)</div>
+                <div class="branch-detail-value">
+                    @branch?.CountryName @branch?.City @branch?.ProInKhmer @branch?.DisInKhmer @branch?.ComInKhmer @branch?.VilInKhmer
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="branch-detail-footer">
+        <RadzenButton Click="@(() => DialogService.Close(true))"
+                      Text="Close"
+                      Icon="close"
                       Size="ButtonSize.ExtraSmall"
-                      ButtonStyle="ButtonStyle.Danger"
-                      Click="@((args) => DialogService.Close(true))"
-                      Variant="Variant.Flat"
-                      Text="Close" />
-    </RadzenStack>
-</RadzenStack>
+                      ButtonStyle="ButtonStyle.Danger" />
+    </div>
+</div>
 
 

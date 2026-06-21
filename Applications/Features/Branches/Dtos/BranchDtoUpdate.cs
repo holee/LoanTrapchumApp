@@ -22,5 +22,6 @@ public sealed class BranchDtoUpdate
     public string? VilInKhmer { get; set; }
     public int? EditSeq { get; set; }
     public bool IsActive { get; set; }
-  
+    public Guid? ImagePathId { get; set; } = Guid.Empty;
+    public string? ImagePath { get; set; }
 }

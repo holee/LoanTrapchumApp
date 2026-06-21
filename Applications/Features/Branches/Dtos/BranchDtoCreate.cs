@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Applications.Features.Branches.Dtos; 
+namespace Applications.Features.Branches.Dtos;
 
-public class BranchDtoCreate 
+public class BranchDtoCreate
 {
     public int? BankRefId { get; set; } = 11;
     public string? BranchName { get; set; }
@@ -22,5 +22,8 @@ public class BranchDtoCreate
     public string? VillDescription { get; set; }
     public string? VilInKhmer { get; set; }
     public bool IsActive { get; set; } = true;
-   
+
+    public string? ImagePathId { get; set; } = string.Empty;
+    public string? ImagePath { get; set; } = string.Empty;
+
 }
