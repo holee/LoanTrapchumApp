@@ -1,5 +1,4 @@
 ﻿using Applications.Features.LoanRequests.Requests;
-using Applications.Features.Loans.Dtos.Requests;
 
 namespace Applications.Helpers
 {
@@ -50,7 +49,7 @@ namespace Applications.Helpers
             {
                 LoanRequestId = req.LoanRequestId,
                 CustomerRefId = req.CustomerId,
-                CustomerName = req.FullName,
+                AltName = req.FullName,
                 BranchId = req.BranchId,
                 LoanCategoryRefId = req.LoanCategoryRefId,
                 LoanCategoryName=req.LoanCategoryName,
@@ -61,7 +60,7 @@ namespace Applications.Helpers
                 InstallmentName = req.InstallmentName,
                 InstallmentTypeId = req.InstallmentTypeId,
                 PayEvery = req.PayEvery,
-                CurrencyRefId = req.CurrencyId,
+                CurrencyId = req.CurrencyId,
                 CurrencyName = req.CurrencyName,
                 StartDate = req.RequestDate,
                 RegisterDate = req.RequestDate,

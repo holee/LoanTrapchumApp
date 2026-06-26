@@ -1,5 +1,4 @@
-﻿using Applications.Features.Loans.Dtos.Requests;
-using FluentValidation;
+﻿using FluentValidation;
 namespace Applications.Validations.Loans
 {
     public class LoanCreateDtoValidator : AbstractValidator<LoanDtoCreate>

@@ -1,5 +1,4 @@
 ﻿using Applications.Features.LoanRequests.Requests;
-using Applications.Features.Loans.Dtos.Requests;
 
 namespace Applications.Calculations;
 
@@ -53,7 +52,7 @@ public static class LoanRequestExtension
         {
             LoanRequestId = req.LoanRequestId,
             CustomerRefId = req.CustomerId,
-            CustomerName = req.AltName,
+            AltName = req.AltName,
             BranchId = req.BranchId,
             LoanCategoryRefId = req.LoanCategoryRefId,
             LoanCategoryName = req.LoanCategoryName,
@@ -64,7 +63,7 @@ public static class LoanRequestExtension
             InstallmentName = req.InstallmentName,
             InstallmentTypeId = req.InstallmentTypeId,
             PayEvery = req.PayEvery,
-            CurrencyRefId = req.CurrencyId,
+            CurrencyId = req.CurrencyId,
             CurrencyName = req.CurrencyName,
             StartDate = req.RequestDate,
             RegisterDate = req.RequestDate,

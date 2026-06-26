@@ -1,155 +1,171 @@
 ﻿@page "/App/Branches"
 @using Applications.Features.Branches.Dtos
+@attribute [StreamRendering]
 <PageTitle>Branches</PageTitle>
-<RadzenCard class="branch-page-card rz-background-color-base-200" Variant="Variant.Outlined">
-    <div class="branch-page-header">
-        <div>
-            <h3 class="branch-title">Branches</h3>
-            <div class="branch-subtitle">Manage branch information in a clean and modern table view.</div>
-        </div>
-    </div>
 
-    <GridToolbar SearchChanged="SearchChanged">
-        <LeftChildren>
-            <AuthorizeView>
-                <Authorized>
-                    <RadzenButton Click="OnCreate"
-                                  Text="New Branch"
-                                  Icon="add"
-                                  ButtonStyle="ButtonStyle.Primary"
-                                  Size="ButtonSize.Small" />
-                </Authorized>
-            </AuthorizeView>
-        </LeftChildren>
-        <RightChildren>
-            <div class="ml-2 branch-filter-toggle">
-                <RadzenCheckBox TValue="bool" @bind-Value="@InActive" Change="ex => OnIncludeInactive(ex)" Name="InActive" />
-                <RadzenLabel Text="Include inactive" Component="InActive" Style="margin-left:6px; vertical-align: middle;" />
-            </div>
-        </RightChildren>
-    </GridToolbar>
-
-    <RadzenDataGrid class="branch-grid"
-                    GridLines="DataGridGridLines.None"
-                    Count="@counts"
-                    PageSize="@pageSize"
-                    AllowPaging="true"
-                    ShowPagingSummary="true"
-                    Density="Density.Compact"
-                    AllowColumnPicking="true"
-                    AllowAlternatingRows="true"
-                    AllowRowSelectOnRowClick="true"
-                    PagerHorizontalAlign="HorizontalAlign.Right"
-                    AllowSorting="true"
-                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                    LogicalFilterOperator="LogicalFilterOperator.Or"
-                    AllowFiltering="true"
-                    IsLoading="@Tracker.IsLoading"
-                    LoadData="@LoadData"
-                    PageSizeOptions="@StorageConstant.PageSizeOptions"
-                    PageSizeChanged="PageSizeChanged"
-                    CellContextMenu="@ShowContextMenu"
-                    Data="@Branches"
-                    @ref="@_grid"
-                    RowRender="@OnRowRender"
-                    TItem="VBranch">
-        <Columns>
-            <RadzenDataGridColumn Property="@nameof(VBranch.BranchId)"
-                                  Width="4rem"
-                                  Title="#"
-                                  TextAlign="TextAlign.Center"
-                                  Pickable="false"
-                                  Filterable="false"
-                                  Sortable="false"
-                                  Context="h">
-                <Template>
-                    @h.RowIndex
-                </Template>
-            </RadzenDataGridColumn>
-
-            <RadzenDataGridColumn Width="20rem"
-                                  Title="Branch"
-                                  Property="@nameof(VBranch.BranchName)"
-                                  Context="b">
-                <Template>
-                    <div class="branch-identity">
-                        @if (!string.IsNullOrWhiteSpace(b.ImagePath))
-                        {
-                            <img src="@b.ImagePath" alt="@b.BranchName" class="branch-image" />
-                        }
-                        else
-                        {
-                            <div class="branch-image branch-image--placeholder">
-                                <RadzenIcon Icon="account_balance" />
-                            </div>
-                        }
-                        <div>
-                            <div class="branch-name">@b.BranchName</div>
-                        </div>
+<RadzenTabs RenderMode="TabRenderMode.Client" Change="TabChanged" @bind-SelectedIndex="@selectedIndex">
+    <Tabs>
+        <RadzenTabsItem Text="Branches" Icon="list">
+            <RadzenCard class="branch-page-card rz-background-color-base-200" Variant="Variant.Outlined">
+                <div class="branch-page-header">
+                    <div>
+                        <h3 class="branch-title">Branches</h3>
+                        <div class="branch-subtitle">Manage branch information in a clean and modern table view.</div>
                     </div>
-                </Template>
-            </RadzenDataGridColumn>
+                </div>
 
-            <RadzenDataGridColumn Title="Branch Code"
-                                  Sortable="false"
-                                  Filterable="false"
-                                  Property="@nameof(VBranch.Description)" />
+                <GridToolbar SearchChanged="SearchChanged">
+                    <LeftChildren>
+                        <AuthorizeView>
+                            <Authorized>
+                                <RadzenButton Click="OnCreate"
+                                              Text="New Branch"
+                                              Icon="add"
+                                              ButtonStyle="ButtonStyle.Primary"
+                                              Size="ButtonSize.Small" />
+                            </Authorized>
+                        </AuthorizeView>
+                    </LeftChildren>
+                    <RightChildren>
+                        <div class="ml-2 branch-filter-toggle">
+                            <RadzenCheckBox TValue="bool" @bind-Value="@InActive" Change="ex => OnIncludeInactive(ex)" Name="InActive" />
+                            <RadzenLabel Text="Include inactive" Component="InActive" Style="margin-left:6px; vertical-align: middle;" />
+                        </div>
+                    </RightChildren>
+                </GridToolbar>
 
-            <RadzenDataGridColumn Title="Address"
-                                  Sortable="false"
-                                  Filterable="false"
-                                  Context="b">
+                <RadzenDataGrid class="branch-grid"
+                                GridLines="DataGridGridLines.None"
+                                Count="@counts"
+                                PageSize="@pageSize"
+                                AllowPaging="true"
+                                ShowPagingSummary="true"
+                                Density="Density.Compact"
+                                AllowColumnPicking="true"
+                                AllowAlternatingRows="true"
+                                AllowRowSelectOnRowClick="true"
+                                PagerHorizontalAlign="HorizontalAlign.Right"
+                                AllowSorting="true"
+                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                LogicalFilterOperator="LogicalFilterOperator.Or"
+                                AllowFiltering="true"
+                                LoadData="@LoadData"
+                                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                                PageSizeChanged="PageSizeChanged"
+                                CellContextMenu="@ShowContextMenu"
+                                Data="@Branches"
+                                @ref="@_grid"
+                                RowRender="@OnRowRender"
+                                RowDoubleClick="@OnRowDoubleClick"
+                                TItem="VBranch">
+                    <Columns>
+                        <RadzenDataGridColumn Property="@nameof(VBranch.BranchId)"
+                                              Width="4rem"
+                                              Title="#"
+                                              TextAlign="TextAlign.Center"
+                                              Pickable="false"
+                                              Filterable="false"
+                                              Sortable="false"
+                                              Context="h">
+                            <Template>
+                                @h.RowIndex
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Width="20rem"
+                                              Title="Branch"
+                                              Property="@nameof(VBranch.BranchName)"
+                                              Context="b">
+                            <Template>
+                                <div class="branch-identity">
+                                    @if (!string.IsNullOrWhiteSpace(b.ImagePath))
+                                    {
+                                        <img src="@b.ImagePath" alt="@b.BranchName" class="branch-image" />
+                                    }
+                                    else
+                                    {
+                                        <div class="branch-image branch-image--placeholder">
+                                            <RadzenIcon Icon="account_balance" />
+                                        </div>
+                                    }
+                                    <div>
+                                        <div class="branch-name">@b.BranchName</div>
+                                    </div>
+                                </div>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Title="Branch Code"
+                                              Sortable="false"
+                                              Filterable="false"
+                                              Property="@nameof(VBranch.Description)" />
+
+                        <RadzenDataGridColumn Title="Address"
+                                              Sortable="false"
+                                              Filterable="false"
+                                              Context="b">
+                            <Template>
+                                @b.ToString()
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Width="7rem"
+                                              Title="Status"
+                                              TextAlign="TextAlign.Center"
+                                              Filterable="false"
+                                              Property="@nameof(VBranch.IsActive)"
+                                              Sortable="false"
+                                              Context="c">
+                            <Template>
+                                <RadzenBadge Text="@(c.IsActive == true ? "Active" : "Inactive")"
+                                             BadgeStyle="@(c.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                             Shade="Shade.Light"
+                                             IsPill="true"
+                                             class="branch-status-badge" />
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <AuthorizeView>
+                            <Authorized>
+                                <RadzenDataGridColumn Width="5rem"
+                                                      Title="Actions"
+                                                      Filterable="false"
+                                                      Sortable="false"
+                                                      Pickable="false"
+                                                      TextAlign="TextAlign.Center"
+                                                      Context="c">
+                                    <Template>
+                                        <RadzenButton Size="ButtonSize.ExtraSmall"
+                                                      Icon="more_vert"
+                                                      Variant="Variant.Text"
+                                                      Click="@((args) => ShowContextMenuWithItems(args, c))" />
+                                    </Template>
+                                </RadzenDataGridColumn>
+                            </Authorized>
+                        </AuthorizeView>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenCard>
+        </RadzenTabsItem>
+
+        @foreach (var item in _tabs)
+        {
+            <RadzenTabsItem Text="@item.Title" Icon="@item.Icon" @key="item.Key">
                 <Template>
-                    @b.ToString()
+                    <ClosedTab TabId="@item.Key" Title="@item.Title" Closed="@(() => CloseTab(item.Key))" />
                 </Template>
-            </RadzenDataGridColumn>
-
-            <RadzenDataGridColumn Width="7rem"
-                                  Title="Status"
-                                  TextAlign="TextAlign.Center"
-                                  Filterable="false"
-                                  Property="@nameof(VBranch.IsActive)"
-                                  Sortable="false"
-                                  Context="c">
-                <Template>
-                    <RadzenBadge Text="@(c.IsActive == true ? "Active" : "Inactive")"
-                                 BadgeStyle="@(c.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
-                                 Shade="Shade.Light"
-                                 IsPill="true"
-                                 class="branch-status-badge" />
-                </Template>
-            </RadzenDataGridColumn>
-
-            <AuthorizeView>
-                <Authorized>
-                    <RadzenDataGridColumn Width="5rem"
-                                          Title="Actions"
-                                          Filterable="false"
-                                          Sortable="false"
-                                          Pickable="false"
-                                          TextAlign="TextAlign.Center"
-                                          Context="c">
-                        <Template>
-                            <RadzenButton Size="ButtonSize.ExtraSmall"
-                                          Icon="more_vert"
-                                          Variant="Variant.Text"
-                                          Click="@((args) => ShowContextMenuWithItems(args, c))" />
-                        </Template>
-                    </RadzenDataGridColumn>
-                </Authorized>
-            </AuthorizeView>
-        </Columns>
-
-        <LoadingTemplate>
-            <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate"
-                                       ProgressBarStyle="ProgressBarStyle.Danger"
-                                       Value="100" ShowValue="false" />
-        </LoadingTemplate>
-    </RadzenDataGrid>
-</RadzenCard>
+                <ChildContent>
+                    @item.Content
+                </ChildContent>
+            </RadzenTabsItem>
+        }
+    </Tabs>
+</RadzenTabs>
 
 @code {
     private RadzenDataGrid<VBranch> _grid = default!;
+    private int selectedIndex = 0;
+    private List<CustomTab> _tabs = [];
 
     void ShowContextMenuWithItems(MouseEventArgs args, VBranch branch)
     {
@@ -185,8 +201,8 @@
     {
         switch (value)
         {
-            case "1": _ = OnDetail(branch); break;
-            case "2": _ = OnEdit(branch); break;
+            case "1": AddDetailsTab(branch); break;
+            case "2": AddEditTab(branch); break;
             case "3": _ = OnDelete(branch); break;
         }
     }
@@ -201,6 +217,162 @@
         {
             args.Attributes["class"] = "branch-row-inactive";
         }
+    }
+
+    private void OnRowDoubleClick(DataGridRowMouseEventArgs<VBranch> args)
+    {
+        if (args.Data is null) return;
+        AddDetailsTab(args.Data);
+    }
+
+    void OnCreate()
+    {
+        CreateNewBranchTab();
+    }
+
+    void CreateNewBranchTab()
+    {
+        var newTabId = Guid.NewGuid().ToString("N");
+
+        RenderFragment childContent = builder =>
+        {
+            builder.OpenComponent(0, typeof(BranchCreatePage));
+
+            builder.AddAttribute(1, "OnClose", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(newTabId);
+            }));
+
+            builder.AddAttribute(2, "OnCreated", EventCallback.Factory.Create(this, async (VBranch branch) =>
+            {
+                CloseTab(newTabId);
+                await GetBranches(searchText);
+            }));
+
+            builder.SetKey(newTabId);
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab
+        {
+            Key = newTabId,
+            Title = "New Branch",
+            TabAction = TabActions.Create,
+            Content = childContent,
+        };
+
+        _tabs.Add(newTab);
+        selectedIndex = _tabs.Count;
+        StateHasChanged();
+    }
+
+    void AddDetailsTab(VBranch branch)
+    {
+        ContextMenuService.Close();
+
+        var detailsTabId = $"{branch.BranchId}_details";
+        var existingTabIndex = _tabs.FindIndex(t => t.Key == detailsTabId);
+
+        if (existingTabIndex != -1)
+        {
+            selectedIndex = existingTabIndex + 1;
+            return;
+        }
+
+        RenderFragment childContent = builder =>
+        {
+            builder.OpenComponent(0, typeof(BranchDetailsPage));
+            builder.AddAttribute(1, "BranchId", branch.BranchId.ToString());
+
+            builder.AddAttribute(2, "OnClose", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(detailsTabId);
+            }));
+
+            builder.AddAttribute(3, "OnEdit", EventCallback.Factory.Create(this, async (int branchId) =>
+            {
+                AddEditTab(new VBranch { BranchId = branchId });
+            }));
+
+            builder.SetKey(detailsTabId);
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab
+        {
+            Key = detailsTabId,
+            Title = "Details",
+            TabAction = TabActions.Details,
+            Content = childContent,
+        };
+
+        _tabs.Add(newTab);
+        selectedIndex = _tabs.Count;
+        StateHasChanged();
+    }
+
+    void AddEditTab(VBranch branch)
+    {
+        ContextMenuService.Close();
+
+        var editTabId = $"{branch.BranchId}_edit";
+        var existingTabIndex = _tabs.FindIndex(t => t.Key == editTabId);
+
+        if (existingTabIndex != -1)
+        {
+            selectedIndex = existingTabIndex + 1;
+            return;
+        }
+
+        RenderFragment childContent = builder =>
+        {
+            builder.OpenComponent(0, typeof(BranchEditPage));
+            builder.AddAttribute(1, "BranchId", branch.BranchId.ToString());
+
+            builder.AddAttribute(2, "OnClose", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(editTabId);
+            }));
+
+            builder.AddAttribute(3, "OnUpdated", EventCallback.Factory.Create(this, async (VBranch updatedBranch) =>
+            {
+                CloseTab(editTabId);
+                await GetBranches(searchText);
+            }));
+
+            builder.SetKey(editTabId);
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab
+        {
+            Key = editTabId,
+            Title = "Edit",
+            TabAction = TabActions.Edit,
+            Content = childContent,
+        };
+
+        _tabs.Add(newTab);
+        selectedIndex = _tabs.Count;
+        StateHasChanged();
+    }
+
+    private void CloseTab(string? id)
+    {
+        var tab = _tabs.FirstOrDefault(t => t.Key == id);
+
+        if (tab != null)
+        {
+            var idx = _tabs.IndexOf(tab);
+            _tabs.Remove(tab);
+            selectedIndex = Math.Max(0, idx);
+        }
+    }
+
+    void TabChanged(int e)
+    {
+        selectedIndex = e;
+        StateHasChanged();
     }
 }
 

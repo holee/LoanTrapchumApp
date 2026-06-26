@@ -8,6 +8,7 @@ using Applications.Features.LoanRequests.Command.SaveLoanRequests;
 using Applications.Features.LoanRequests.Queryies.GetApprovedLoanRequest;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Command.CreateLoan;
+using Applications.Features.Loans.Dtos;
 using Applications.Features.Loans.Dtos.Requests;
 using Applications.Features.Loans.Mappers;
 using Applications.Responses.ViewModels.Loans.Requests;
@@ -180,7 +181,7 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
         var test = _calSceduleService.Calculate(model).MapToLoanSchedules();
 
-        ShowPreviewTab(test, model.CurrencyRefId);
+        ShowPreviewTab(test, model.CurrencyId);
 
         StateHasChanged();
     }
@@ -237,7 +238,7 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
             isWaiting = false;
 
-            string loanUrl = $"/App/Loan/{rsp.Value.LoanId}/Branches/{BranchId}/Currencies/{model.CurrencyRefId}";
+            string loanUrl = $"/App/Loan/{rsp.Value.LoanId}/Branches/{BranchId}/Currencies/{model.CurrencyId}";
 
             NavigationManager.NavigateTo(loanUrl,true);
 

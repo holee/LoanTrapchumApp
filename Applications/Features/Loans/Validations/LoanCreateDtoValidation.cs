@@ -1,5 +1,4 @@
 ﻿using Applications.Features.LoanRequests.Requests;
-using Applications.Features.Loans.Dtos.Requests;
 using FluentValidation;
 
 namespace Applications.Requests.Validations.Loans

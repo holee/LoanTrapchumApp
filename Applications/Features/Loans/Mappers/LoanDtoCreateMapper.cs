@@ -28,7 +28,7 @@ public static class LoanDtoCreateMapper
             LoanAccountCode = dto.LoanAccountCode,
             Period = dto.Period,
             PeriodName = dto.PeriodName,
-            CurrencyRefId = dto.CurrencyRefId,
+            CurrencyRefId = dto.CurrencyId,
             PenaltyRate = dto.PenaltyRate,
             StartDate = dto.StartDate,
             FirstPaymentDate = dto.FirstPaymentDate,

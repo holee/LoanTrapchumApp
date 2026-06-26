@@ -1,5 +1,6 @@
 ﻿@page "/App/Loans/{LoanRequestId}/Disbursements/{BranchId:int}/Branches/CreateNew"
 @using TrapchumApp.Components.Actionbars
+@using TrapchumApp.Components.Buttons
 @using TrapchumApp.Components.Indicatros
 @using TrapchumApp.Pages.Transactions.LoanRequests
 <PageTitle>បង្កើតការបញ្ចេញប្រាក់កម្ចី</PageTitle>
@@ -15,11 +16,11 @@ else
     <RadzenTabs @bind-SelectedIndex="selectedTabIndex" RenderMode="TabRenderMode.Client">
         <Tabs>
             <RadzenTabsItem Text="ព័ត៌មានប្រាក់កម្ចី" Icon="@IconNames.Info">
-                <EditForm Model="model" @ref="editForm">
+                <EditForm Model="model" @ref="editForm" OnValidSubmit="@HandleFormSubmit">
+                    <FluentValidator />
+                    <ValidationSummary />
                     <input type="hidden" @bind-value="penaltyRate" />
                     <input type="hidden" @bind="model.CustomerRefId" />
-
-                    @* ── Customer & Loan Summary ── *@
                     <RadzenCard Variant="Variant.Flat" class="rz-my-2 rz-background-color-base-100">
 
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
@@ -30,7 +31,7 @@ else
                         <RadzenRow Gap="0.75rem">
                             <RadzenColumn SizeSM="6" SizeMD="3">
                                 <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អតិថិជន</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Body1"><strong>@model?.CustomerName</strong></RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1"><strong>@model?.AltName</strong></RadzenText>
                             </RadzenColumn>
                             <RadzenColumn SizeSM="6" SizeMD="3">
                                 <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">រូបិយប័ណ្ណ</RadzenText>
@@ -38,7 +39,7 @@ else
                             </RadzenColumn>
                             <RadzenColumn SizeSM="6" SizeMD="3">
                                 <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រាក់ដើម</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Body1"><strong>@model?.Principle.WithSign(model?.CurrencyRefId)</strong></RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1"><strong>@model?.Principle.WithSign(model?.CurrencyId)</strong></RadzenText>
                             </RadzenColumn>
                             <RadzenColumn SizeSM="6" SizeMD="3">
                                 <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ខ្ចីលើកទី</RadzenText>
@@ -69,8 +70,6 @@ else
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenCard>
-
-                    @* ── Repayment Terms ── *@
                     <RadzenCard Variant="Variant.Flat" class="rz-my-2 rz-background-color-base-100">
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
                                      class="rz-mb-3 rz-pb-2" style="border-bottom:2px solid var(--rz-success);">
@@ -190,8 +189,6 @@ else
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenCard>
-
-                    @* ── Dates ── *@
                     <RadzenCard Variant="Variant.Flat" class="rz-my-2 rz-background-color-base-100">
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
                                      class="rz-mb-3 rz-pb-2" style="border-bottom:2px solid var(--rz-success);">
@@ -236,9 +233,7 @@ else
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenCard>
-
-                    @* ── Note ── *@
-                    <RadzenRow class="rz-mt-2 rz-px-4" Gap="0.75rem">
+                    <RadzenRow class="rz-my-4 rz-px-2" Gap="0.75rem">
                         <RadzenColumn Size="12">
                             <RadzenFormField Text="កំណត់សម្គាល់" class="rz-w-100">
                                 <RadzenTextArea Rows="3"
@@ -248,6 +243,37 @@ else
                             </RadzenFormField>
                         </RadzenColumn>
                     </RadzenRow>
+
+                    <AppActions>
+                        @if (BState.CanDisbursed)
+                        {
+                            <RadzenButton Click="@SaveLoanDisbursement"
+                                          Size="@Styles.DefaultSize"
+                                          Icon="@IconNames.Save"
+                                          ButtonStyle="ButtonStyle.Primary"
+                                          Text="រក្សាទុក" />
+                            <SaveButton IsBusy="@isWaiting"
+                                        BusyText="សូមរង់ចាំ..."
+                                        Icon="@IconNames.Done"
+                                        Title="បញ្ចេញប្រាក់" />
+                            <RadzenButton Click="SendRechecked"
+                                          Size="@Styles.DefaultSize"
+                                          Icon="@IconNames.Undo"
+                                          ButtonStyle="ButtonStyle.Secondary"
+                                          Text="ពិនិត្យឡើងវិញ" />
+                        }
+
+                        <RadzenButton Icon="@IconNames.Preview"
+                                      Click="@PrintPreview"
+                                      Size="@Styles.DefaultSize"
+                                      Text="បោះពុម្ភសាកល្បង" />
+
+                        <RadzenLink Icon="@IconNames.ArrowCircleLeft"
+                                    IconColor="@Colors.Danger"
+                                    Path="@_navService.PreviousUrl"
+                                    Text="ត្រឡប់ក្រោយ" />
+                    </AppActions>
+
                 </EditForm>
             </RadzenTabsItem>
             <RadzenTabsItem Text="អ្នកធានានិងទ្រព្យបញ្ចាំ" Icon="@IconNames.Inventory">
@@ -281,39 +307,6 @@ else
             }
         </Tabs>
     </RadzenTabs>
-
-    @* ── Action Toolbar ── *@
-    <AppActions>
-        @if (BState.CanDisbursed)
-        {
-            <RadzenButton Click="@SaveLoanDisbursement"
-                          Size="@Styles.DefaultSize"
-                          Icon="@IconNames.Save"
-                          ButtonStyle="ButtonStyle.Primary"
-                          Text="រក្សាទុក" />
-            <RadzenButton Click="@HandleFormSubmit"
-                          Size="@Styles.DefaultSize"
-                          Icon="@IconNames.Done"
-                          ButtonStyle="ButtonStyle.Success"
-                          IsBusy="@isWaiting"
-                          Text="បញ្ចេញប្រាក់" />
-            <RadzenButton Click="SendRechecked"
-                          Size="@Styles.DefaultSize"
-                          Icon="@IconNames.Undo"
-                          ButtonStyle="ButtonStyle.Secondary"
-                          Text="ពិនិត្យឡើងវិញ" />
-        }
-
-        <RadzenButton Icon="@IconNames.Preview"
-                      Click="@PrintPreview"
-                      Size="@Styles.DefaultSize"
-                      Text="បោះពុម្ភសាកល្បង" />
-
-        <RadzenLink Icon="@IconNames.ArrowCircleLeft"
-                    IconColor="@Colors.Danger"
-                    Path="@_navService.PreviousUrl"
-                    Text="ត្រឡប់ក្រោយ" />
-    </AppActions>
 
 }
 

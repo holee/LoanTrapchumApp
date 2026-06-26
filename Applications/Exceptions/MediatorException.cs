@@ -37,8 +37,7 @@ public sealed class MediatorException : Exception
         }
     }
 
-
-
+    public string ErrorMessage => this.GetErrorMessage();//  MediatorExceptionExension.GetErrorMessage(this);
 
 }
 

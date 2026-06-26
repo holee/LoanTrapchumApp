@@ -1,5 +1,4 @@
 ﻿using Applications.Extensions.Maths;
-using Applications.Features.Loans.Dtos.Requests;
 using Domains.Enumerations;
 using Microsoft.VisualBasic;
 namespace Applications.Calculations;
@@ -88,7 +87,7 @@ internal static class CalculatorExtensions
 
         decimal collectionAmount = (amount * ratePerday * days) ?? 0;
 
-        if (arg.CurrencyRefId == (int)CurrencyEnum.KHR) return collectionAmount.RoundUp(-2);
+        if (arg.CurrencyId == (int)CurrencyEnum.KHR) return collectionAmount.RoundUp(-2);
 
         return collectionAmount.RoundUp(5);
     }
@@ -101,7 +100,7 @@ internal static class CalculatorExtensions
 
         decimal collectionAmount = (amount * ratePerday * days) ?? 0;
 
-        if (arg.CurrencyRefId == (int)CurrencyEnum.KHR) return collectionAmount.RoundUp(-2);
+        if (arg.CurrencyId == (int)CurrencyEnum.KHR) return collectionAmount.RoundUp(-2);
 
         return collectionAmount.RoundUp(5);
     }
@@ -114,7 +113,7 @@ internal static class CalculatorExtensions
 
         decimal collectionAmount = (amount * ratePerday * days) ?? 0;
 
-        if (arg.CurrencyRefId == (int)CurrencyEnum.KHR) return collectionAmount.RoundUp(-2);
+        if (arg.CurrencyId == (int)CurrencyEnum.KHR) return collectionAmount.RoundUp(-2);
 
         return collectionAmount.RoundUp(5);
     }

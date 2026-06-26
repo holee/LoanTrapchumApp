@@ -8,8 +8,10 @@ public sealed class VLoanDisbursments
     public string? LoanId { get; set; }
     public string? LoanAccount { get; set; }
     public string? LoanRequestId { get; set; }
-    public string? RequestUserRefId { get; set; } 
-    public string? AprovedUserId { get; set; } 
+    public string? RequestUserRefId { get; set; }
+    public string? AprovedUserId { get; set; }
+    public string? ApprovedBy { get; set; } = string.Empty;
+    public int? RepaymentModeRefId { get; set; }
     public int? BranchId { get; set; }
     public string? ContractNumber { get; set; }
     public string? BranchName { get; set; }
@@ -19,7 +21,7 @@ public sealed class VLoanDisbursments
     public string? Phone { get; set; }
     public string? Salutation { get; set; }
     public DateTime? RegisterDate { get; set; }
-
+    public DateTime? StartDate { get; set; }
     public string? ManagerId { get; set; } = string.Empty;
     public string? CreditAgentRefId { get; set; }
     public string? AgentName { get; set; }
@@ -27,8 +29,9 @@ public sealed class VLoanDisbursments
     public string? AgentPhone { get; set; }
     public DateTime? FirstPaymentDate { get; set; }
     public int? CurrencyId { get; set; }
+    public int? PayEvery { get; set; }
     public string? CurrencyName { get; set; }
-    public decimal? Principle { get; set; } 
+    public decimal? Principle { get; set; }
     public decimal? Amount { get; set; }
     public decimal? InterestRate { get; set; }
     public decimal? CollectionFeeRate { get; set; }
@@ -47,9 +50,8 @@ public sealed class VLoanDisbursments
     public int? Period { get; set; }
     public string? PeriodName { get; set; }
     public string? InstallmentType { get; set; }
+    public string? LoanCategoryName { get; set; } = string.Empty;
     public List<VSchedule> Schedules { get; set; } = [];
-
-    [NotMapped]
-    public int RowIndex { get; set; } = 0;
+    [NotMapped] public int RowIndex { get; set; } = 0;
 
 }

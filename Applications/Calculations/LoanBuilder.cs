@@ -1,7 +1,6 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions.DateTimes;
 using Applications.Features.Holidays.Dtos;
-using Applications.Features.Loans.Dtos.Requests;
 using Domains.Enumerations;
 using Domains.Models.Loans;
 
@@ -275,7 +274,7 @@ public sealed class LoanBuilder
 
             var totalDays = 0;
 
-            var principal = CalculatorExtensions.PaidPrincipal(_calculateBuiler.CurrencyRefId, _amount, circles);
+            var principal = CalculatorExtensions.PaidPrincipal(_calculateBuiler.CurrencyId, _amount, circles);
 
             DateTime? previusDate;
 
@@ -300,14 +299,14 @@ public sealed class LoanBuilder
             {
                 if (_calculateBuiler.CollectionFeeModeId == (int)EffectiveEnum.IRR)
                 {
-                    effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyRefId, _amount, _calculateBuiler.CollectionFeeRate, totalDays);
+                    effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyId, _amount, _calculateBuiler.CollectionFeeRate, totalDays);
                 }
                 else
                 {
-                    effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyRefId, beginBalance, _calculateBuiler.CollectionFeeRate, totalDays);
+                    effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyId, beginBalance, _calculateBuiler.CollectionFeeRate, totalDays);
                 }
 
-                interestAmount = CalculatorExtensions.Interest(_calculateBuiler.CurrencyRefId, beginBalance, _monthlyRate, totalDays);
+                interestAmount = CalculatorExtensions.Interest(_calculateBuiler.CurrencyId, beginBalance, _monthlyRate, totalDays);
 
                 totalPayAmount = CalculatorExtensions.TotalPay(principal, interestAmount, effAmount);
 
@@ -333,14 +332,14 @@ public sealed class LoanBuilder
                         _effectiveBalance = lastBalance;
                     }
 
-                    effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyRefId, _effectiveBalance, _calculateBuiler.CollectionFeeRate, totalDays);
+                    effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyId, _effectiveBalance, _calculateBuiler.CollectionFeeRate, totalDays);
                 }
                 else
                 {
-                    effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyRefId, beginBalance, _calculateBuiler.CollectionFeeRate, totalDays);
+                    effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyId, beginBalance, _calculateBuiler.CollectionFeeRate, totalDays);
                 }
 
-                interestAmount = CalculatorExtensions.Interest(_calculateBuiler.CurrencyRefId, beginBalance, _monthlyRate, totalDays);
+                interestAmount = CalculatorExtensions.Interest(_calculateBuiler.CurrencyId, beginBalance, _monthlyRate, totalDays);
 
                 totalPayAmount = CalculatorExtensions.TotalPay(principal, interestAmount, effAmount);
             }
@@ -423,7 +422,7 @@ public sealed class LoanBuilder
 
             decimal effAmount = 0.00M;
 
-            decimal principal = CalculatorExtensions.PaidPrincipal(_calculateBuiler.CurrencyRefId, amount, circles);
+            decimal principal = CalculatorExtensions.PaidPrincipal(_calculateBuiler.CurrencyId, amount, circles);
 
             if (i % _calculateBuiler.PayEvery == 0)
             {
@@ -436,7 +435,7 @@ public sealed class LoanBuilder
                     effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler, beginBalance, totalDays);
                 }
 
-                interestAmount = CalculatorExtensions.Interest(_calculateBuiler.CurrencyRefId,
+                interestAmount = CalculatorExtensions.Interest(_calculateBuiler.CurrencyId,
                     beginBalance, monthlyRate, totalDays);
 
                 totalPayAmount = CalculatorExtensions.TotalPay(principal, interestAmount, effAmount);
@@ -463,16 +462,16 @@ public sealed class LoanBuilder
                         _effectiveBalance = lastBalance;
                     }
 
-                    effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyRefId,
+                    effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyId,
                         _effectiveBalance, _calculateBuiler.CollectionFeeRate, totalDays);
                 }
                 else
                 {
-                    effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyRefId,
+                    effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyId,
                         beginBalance, _calculateBuiler.CollectionFeeRate, totalDays);
                 }
 
-                interestAmount = CalculatorExtensions.Interest(_calculateBuiler.CurrencyRefId,
+                interestAmount = CalculatorExtensions.Interest(_calculateBuiler.CurrencyId,
                     beginBalance, monthlyRate, totalDays);
 
                 totalPayAmount = CalculatorExtensions.TotalPay(principal, interestAmount, effAmount);
@@ -513,7 +512,7 @@ public sealed class LoanBuilder
 
         var monthlyRate = req.InterestRate ?? 0.00M;
 
-        var principalPaid = CalculatorExtensions.PaidPrincipal(_calculateBuiler.CurrencyRefId, amount, periodInMonth);
+        var principalPaid = CalculatorExtensions.PaidPrincipal(_calculateBuiler.CurrencyId, amount, periodInMonth);
 
         decimal beginBalance = 0, lastBalance = 0;
 
@@ -574,14 +573,14 @@ public sealed class LoanBuilder
                     _effectiveBalance = lastBalance;
                 }
 
-                effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyRefId, _effectiveBalance, _calculateBuiler.CollectionFeeRate, totalDays);
+                effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyId, _effectiveBalance, _calculateBuiler.CollectionFeeRate, totalDays);
             }
             if (_calculateBuiler.CollectionFeeModeId == (int)EffectiveEnum.Declined)
             {
-                effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyRefId, beginBalance, _calculateBuiler.CollectionFeeRate, totalDays);
+                effAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyId, beginBalance, _calculateBuiler.CollectionFeeRate, totalDays);
             }
 
-            interest = CalculatorExtensions.Interest(_calculateBuiler.CurrencyRefId, amount, monthlyRate, totalDays);
+            interest = CalculatorExtensions.Interest(_calculateBuiler.CurrencyId, amount, monthlyRate, totalDays);
 
             totalPay = CalculatorExtensions.TotalPay(principalPaid, interest, effAmount);
 
@@ -624,7 +623,7 @@ public sealed class LoanBuilder
         decimal monthlyRate = req.InterestRate ?? 0M;
 
         decimal principalPaid = CalculatorExtensions.PaidPrincipal(
-            _calculateBuiler.CurrencyRefId,
+            _calculateBuiler.CurrencyId,
             amount,
             periodInMonth);
 
@@ -685,7 +684,7 @@ public sealed class LoanBuilder
                 }
 
                 effAmount = CalculatorExtensions.CollectionFee(
-                    _calculateBuiler.CurrencyRefId,
+                    _calculateBuiler.CurrencyId,
                     _effectiveBalance,
                     _calculateBuiler.CollectionFeeRate,
                     totalDays);
@@ -693,7 +692,7 @@ public sealed class LoanBuilder
             else if (_calculateBuiler.CollectionFeeModeId == (int)EffectiveEnum.Declined)
             {
                 effAmount = CalculatorExtensions.CollectionFee(
-                    _calculateBuiler.CurrencyRefId,
+                    _calculateBuiler.CurrencyId,
                     beginBalance,
                     _calculateBuiler.CollectionFeeRate,
                     totalDays);
@@ -701,7 +700,7 @@ public sealed class LoanBuilder
 
             // Flat interest is always calculated from original loan amount
             decimal interest = CalculatorExtensions.Interest(
-                _calculateBuiler.CurrencyRefId,
+                _calculateBuiler.CurrencyId,
                 amount,
                 monthlyRate,
                 totalDays);
@@ -740,7 +739,7 @@ public sealed class LoanBuilder
     {
         List<ScheduleLine> loanScheduleLines = [];
 
-        var principleAndInterestAmount = CalculatorExtensions.CalcPmt(_calculateBuiler.CurrencyRefId, req.Installments, req.InterestRate, -req.Principle);
+        var principleAndInterestAmount = CalculatorExtensions.CalcPmt(_calculateBuiler.CurrencyId, req.Installments, req.InterestRate, -req.Principle);
 
         decimal beginBalance = 0, lastBalance = 0;
 
@@ -794,14 +793,14 @@ public sealed class LoanBuilder
                     _effectiveBalance = lastBalance;
                 }
 
-                _collectionFeeAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyRefId, _effectiveBalance, _calculateBuiler.CollectionFeeRate, totalDays);
+                _collectionFeeAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyId, _effectiveBalance, _calculateBuiler.CollectionFeeRate, totalDays);
 
             }
             if (_calculateBuiler.CollectionFeeModeId == (int)EffectiveEnum.Declined)
             {
-                _collectionFeeAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyRefId, beginBalance, _calculateBuiler.CollectionFeeRate, totalDays);
+                _collectionFeeAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyId, beginBalance, _calculateBuiler.CollectionFeeRate, totalDays);
             }
-            interest = CalculatorExtensions.Interest(_calculateBuiler.CurrencyRefId, beginBalance, req.InterestRate, totalDays);
+            interest = CalculatorExtensions.Interest(_calculateBuiler.CurrencyId, beginBalance, req.InterestRate, totalDays);
 
             totalPay = CalculatorExtensions.TotalPay(principleAndInterestAmount, _collectionFeeAmount);
 
@@ -850,7 +849,7 @@ public sealed class LoanBuilder
         List<ScheduleLine> loanScheduleLines = [];
 
         decimal principleAndInterestAmount = CalculatorExtensions.CalcPmt(
-            _calculateBuiler.CurrencyRefId,
+            _calculateBuiler.CurrencyId,
             req.Installments,
             req.InterestRate,
             -req.Principle);
@@ -897,7 +896,7 @@ public sealed class LoanBuilder
                 }
 
                 collectionFeeAmount = CalculatorExtensions.CollectionFee(
-                    _calculateBuiler.CurrencyRefId,
+                    _calculateBuiler.CurrencyId,
                     _effectiveBalance,
                     _calculateBuiler.CollectionFeeRate,
                     totalDays);
@@ -905,14 +904,14 @@ public sealed class LoanBuilder
             else if (_calculateBuiler.CollectionFeeModeId == (int)EffectiveEnum.Declined)
             {
                 collectionFeeAmount = CalculatorExtensions.CollectionFee(
-                    _calculateBuiler.CurrencyRefId,
+                    _calculateBuiler.CurrencyId,
                     beginBalance,
                     _calculateBuiler.CollectionFeeRate,
                     totalDays);
             }
 
             decimal interest = CalculatorExtensions.Interest(
-                _calculateBuiler.CurrencyRefId,
+                _calculateBuiler.CurrencyId,
                 beginBalance,
                 req.InterestRate,
                 totalDays);
@@ -972,7 +971,7 @@ public sealed class LoanBuilder
 
         decimal rate = req.InterestRate ?? 0;
 
-        var principalPaid = CalculatorExtensions.PaidPrincipal(_calculateBuiler.CurrencyRefId, loanAmount, period);
+        var principalPaid = CalculatorExtensions.PaidPrincipal(_calculateBuiler.CurrencyId, loanAmount, period);
 
         var collectionFeeAmount = 0M;
 
@@ -1023,15 +1022,15 @@ public sealed class LoanBuilder
                     _effectiveBalance = lastBalance;
                 }
 
-                collectionFeeAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyRefId, _effectiveBalance, _calculateBuiler.CollectionFeeRate, totalDays);
+                collectionFeeAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyId, _effectiveBalance, _calculateBuiler.CollectionFeeRate, totalDays);
             }
 
             if (_calculateBuiler.CollectionFeeModeId == (int)EffectiveEnum.Declined)
             {
-                collectionFeeAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyRefId, beginBalance, _calculateBuiler.CollectionFeeRate, totalDays);
+                collectionFeeAmount = CalculatorExtensions.CollectionFee(_calculateBuiler.CurrencyId, beginBalance, _calculateBuiler.CollectionFeeRate, totalDays);
             }
 
-            interest = CalculatorExtensions.Interest(_calculateBuiler.CurrencyRefId, beginBalance, rate, totalDays);
+            interest = CalculatorExtensions.Interest(_calculateBuiler.CurrencyId, beginBalance, rate, totalDays);
 
             totalPay = CalculatorExtensions.TotalPay(principalPaid, interest, collectionFeeAmount);
 
@@ -1088,7 +1087,7 @@ public sealed class LoanBuilder
 
         decimal rate = req.InterestRate ?? 0;
 
-        decimal principalPaid = CalculatorExtensions.PaidPrincipal(_calculateBuiler.CurrencyRefId, loanAmount, period);
+        decimal principalPaid = CalculatorExtensions.PaidPrincipal(_calculateBuiler.CurrencyId, loanAmount, period);
 
         decimal collectionFeeAmount = 0M;
 
@@ -1154,7 +1153,7 @@ public sealed class LoanBuilder
                 collectionFeeAmount = CalculatorExtensions.CollectionFee(_calculateBuiler, beginBalance, totalDays);
             }
 
-            decimal interest = CalculatorExtensions.Interest(_calculateBuiler.CurrencyRefId, beginBalance, rate, totalDays);
+            decimal interest = CalculatorExtensions.Interest(_calculateBuiler.CurrencyId, beginBalance, rate, totalDays);
 
             decimal totalPay = CalculatorExtensions.TotalPay(principalPaid, interest, collectionFeeAmount);
 
@@ -1208,7 +1207,7 @@ public sealed class LoanBuilder
 
         const int GroupSize = 5;
 
-        decimal principalPerInstallment = loanAmount.PaidPrincipal(_calculateBuiler.CurrencyRefId, period);
+        decimal principalPerInstallment = loanAmount.PaidPrincipal(_calculateBuiler.CurrencyId, period);
 
         decimal beginBalance = loanAmount;
 
@@ -1256,7 +1255,7 @@ public sealed class LoanBuilder
             decimal collectionFee = CalculateCollectionFee(i, beginBalance, totalDays);
 
 
-            decimal interest = beginBalance.Interest(_calculateBuiler.CurrencyRefId, rate, totalDays);
+            decimal interest = beginBalance.Interest(_calculateBuiler.CurrencyId, rate, totalDays);
 
             bool isLastInstallment = i == period;
 
@@ -1297,7 +1296,7 @@ public sealed class LoanBuilder
 
         decimal rate = req.InterestRate ?? 0M;
 
-        decimal principalPerInstallment = loanAmount.PaidPrincipal(_calculateBuiler.CurrencyRefId, period);
+        decimal principalPerInstallment = loanAmount.PaidPrincipal(_calculateBuiler.CurrencyId, period);
 
         decimal lastBalance = loanAmount;
 
@@ -1335,7 +1334,7 @@ public sealed class LoanBuilder
 
             decimal collectionFee = CalculateCollectionFee(beginBalance, totalDays);
 
-            decimal interest = beginBalance.Interest(_calculateBuiler.CurrencyRefId, rate, totalDays);
+            decimal interest = beginBalance.Interest(_calculateBuiler.CurrencyId, rate, totalDays);
 
             bool isLastInstallment = i == period;
 
@@ -1363,7 +1362,7 @@ public sealed class LoanBuilder
 
         decimal rate = req.InterestRate ?? 0M;
 
-        decimal principalPerInstallment = loanAmount.PaidPrincipal(_calculateBuiler.CurrencyRefId, period);
+        decimal principalPerInstallment = loanAmount.PaidPrincipal(_calculateBuiler.CurrencyId, period);
 
         decimal lastBalance = loanAmount;
 
@@ -1408,7 +1407,7 @@ public sealed class LoanBuilder
 
             decimal collectionFee = CalculateCollectionFee(_effectiveBalance.Value, totalDays);
 
-            decimal interest = beginBalance.Interest(_calculateBuiler.CurrencyRefId, rate, totalDays);
+            decimal interest = beginBalance.Interest(_calculateBuiler.CurrencyId, rate, totalDays);
 
             bool isLastInstallment = i == period;
 

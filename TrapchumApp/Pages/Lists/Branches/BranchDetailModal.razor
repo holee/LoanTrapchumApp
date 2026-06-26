@@ -9,21 +9,33 @@
 
                 <div class="branch-detail-heading">
                     <div class="branch-detail-title">Branch Information</div>
-                    <div class="branch-detail-subtitle">View branch identity and associated bank details.</div>
+                    <div class="branch-detail-subtitle">View branch identity details in a clean summary.</div>
                 </div>
             </div>
         </div>
 
         <div class="branch-detail-body">
-            <div class="branch-detail-field">
-                <div class="branch-detail-label">Branch Name</div>
-                <div class="branch-detail-value">@branch?.BranchName</div>
-            </div>
-            <div class="branch-detail-divider"></div>
+            <div class="branch-detail-overview-grid">
+                <div class="branch-detail-info-panel">
+                    <div class="branch-detail-field">
+                        <div class="branch-detail-label">Branch Name</div>
+                        <div class="branch-detail-value">@branch?.BranchName</div>
+                    </div>
 
-            <div class="branch-detail-field">
-                <div class="branch-detail-label">Branch Code</div>
-                <div class="branch-detail-value">@branch?.Description</div>
+                    <div class="branch-detail-divider"></div>
+
+                    <div class="branch-detail-field">
+                        <div class="branch-detail-label">Branch Code</div>
+                        <div class="branch-detail-value">@branch?.Description</div>
+                    </div>
+                </div>
+
+                <div class="branch-detail-image-panel">
+                    <div class="branch-detail-image-frame">
+                        <RadzenImage Path="@(string.IsNullOrWhiteSpace(branch?.ImagePath) ? "/assets/logo/tch_Logo.png" : branch.ImagePath)"
+                                     Style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -32,34 +44,74 @@
     <div class="branch-detail-card">
         <div class="branch-detail-header">
             <div class="branch-detail-header-left">
-                <div class="branch-detail-icon" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(220, 38, 38, 0.2)); color: var(--rz-danger);">
+                <div class="branch-detail-icon branch-detail-icon-danger">
                     <RadzenIcon Icon="location_on" Style="font-size:1.05rem;" />
                 </div>
 
                 <div class="branch-detail-heading">
                     <div class="branch-detail-title">Address Information</div>
-                    <div class="branch-detail-subtitle">Branch location details in Khmer and English.</div>
+                    <div class="branch-detail-subtitle">Branch location details in Khmer.</div>
                 </div>
             </div>
         </div>
 
         <div class="branch-detail-body">
-            <div class="branch-detail-field">
-                <div class="branch-detail-label">Address (Khmer)</div>
-                <div class="branch-detail-value">
-                    @branch?.CountryName @branch?.City @branch?.ProInKhmer @branch?.DisInKhmer @branch?.ComInKhmer @branch?.VilInKhmer
+            <div class="branch-detail-address-grid">
+                <div class="branch-detail-field">
+                    <div class="branch-detail-label">Country</div>
+                    <div class="branch-detail-value">@branch?.CountryName</div>
+                </div>
+
+                <div class="branch-detail-field">
+                    <div class="branch-detail-label">City</div>
+                    <div class="branch-detail-value">@branch?.City</div>
+                </div>
+
+                <div class="branch-detail-field">
+                    <div class="branch-detail-label">Province</div>
+                    <div class="branch-detail-value">@branch?.ProInKhmer</div>
+                </div>
+
+                <div class="branch-detail-field">
+                    <div class="branch-detail-label">District</div>
+                    <div class="branch-detail-value">@branch?.DisInKhmer</div>
+                </div>
+
+                <div class="branch-detail-field">
+                    <div class="branch-detail-label">Commune</div>
+                    <div class="branch-detail-value">@branch?.ComInKhmer</div>
+                </div>
+
+                <div class="branch-detail-field">
+                    <div class="branch-detail-label">Village</div>
+                    <div class="branch-detail-value">@branch?.VilInKhmer</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="branch-detail-footer">
-        <RadzenButton Click="@(() => DialogService.Close(true))"
+    <div class="branch-detail-footer rz-m-2">
+        <RadzenButton Click="@Close"
                       Text="Close"
                       Icon="close"
                       Size="ButtonSize.ExtraSmall"
                       ButtonStyle="ButtonStyle.Danger" />
     </div>
 </div>
-
-
+@code {
+    async Task Close()
+    {
+        if (PageType == PageType.Tab)
+        {
+            await OnClose.InvokeAsync();
+        }
+        else if (PageType == PageType.Dialog)
+        {
+            DialogService.Close(false);
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/App/Branches");
+        }
+    }
+}

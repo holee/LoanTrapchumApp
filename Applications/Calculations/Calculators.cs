@@ -1,7 +1,4 @@
-﻿
-using Applications.Features.Loans.Dtos.Requests;
-
-namespace Applications.Calculations
+﻿namespace Applications.Calculations
 {
 
     public sealed class LoanCreateConfiguration

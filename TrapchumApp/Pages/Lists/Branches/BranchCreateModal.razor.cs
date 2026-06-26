@@ -11,6 +11,9 @@ namespace TrapchumApp.Pages.Lists.Branches;
 
 public partial class BranchCreateModal(ILogger<BranchCreateModal> logger)
 {
+    [Parameter] public PageType PageType { get; set; } = PageType.Tab;
+    [Parameter] public EventCallback OnClose { get; set; }
+
     private BranchDtoCreate model = new();
     [Inject] IBankService bankService { get; set; } = default!;
     protected IEnumerable<ProvinceDto> provinceList = [];
@@ -151,6 +154,21 @@ public partial class BranchCreateModal(ILogger<BranchCreateModal> logger)
         StateHasChanged();
     }
 
-
-
+    async Task Close()
+    {
+        if (PageType == PageType.Tab)
+        {
+            await OnClose.InvokeAsync();
+        }
+        else if(PageType == PageType.Dialog)
+        {
+            DialogService.Close(false);
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/App/Branches");
+        }
+    }
 }
+
+

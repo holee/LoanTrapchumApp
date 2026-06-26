@@ -3,5 +3,6 @@
 public enum PageType
 {
     Tab,
-    Dialog
+    Dialog,
+    Page
 }

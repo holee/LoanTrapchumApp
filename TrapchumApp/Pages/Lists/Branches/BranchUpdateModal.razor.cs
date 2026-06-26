@@ -11,6 +11,8 @@ namespace TrapchumApp.Pages.Lists.Branches
     public partial class BranchUpdateModal(ILogger<BranchUpdateModal> logger)
     {
         [Parameter] public int Id { get; set; }
+        [Parameter] public EventCallback OnClose { get; set; }
+        [Parameter] public PageType PageType { get; set; }
 
         private BranchDtoUpdate model = new();
         [Inject] private IBankService? bankService { get; set; }
@@ -24,35 +26,6 @@ namespace TrapchumApp.Pages.Lists.Branches
         protected IEnumerable<Country> Countries = new List<Country>();
         protected IEnumerable<string>? strCountries = new List<string>();
         string? searchText = string.Empty;
-
-        void OnSearchTextChanged(ChangeEventArgs e)
-        {
-            searchText = e.Value?.ToString() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(searchText))
-            {
-                filteredItems = Cities; // Show all items if search is empty
-            }
-            else
-            {
-                filteredItems = Cities
-                    .Where(i => i.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
-        }
-
-        async Task OnKeyPress(KeyboardEventArgs args)
-        {
-            if (args.Key == "Enter" && !string.IsNullOrWhiteSpace(searchText))
-            {
-                if (!Cities.Any(i => i.Equals(searchText, StringComparison.OrdinalIgnoreCase)))
-                {
-                    await AddCity();
-
-                    searchText = ""; //Clear the textbox
-                }
-            }
-        }
 
         protected override async Task OnInitializedAsync()
         {
@@ -122,14 +95,15 @@ namespace TrapchumApp.Pages.Lists.Branches
 
             if (rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Branch updated successfully!");
 
-                DialogService.Close(true);
+                _toastService.ShowSuccess("Branch updated successfully!", "Success");
+
+                await Close();
 
                 return;
             }
 
-            NotificationService.Notify(NotificationSeverity.Error, "Error", rsp.GetMessage());
+            _toastService.ShowError(rsp.GetMessage(), "Error");
         }
 
         async Task GetCities(string? filter = null)

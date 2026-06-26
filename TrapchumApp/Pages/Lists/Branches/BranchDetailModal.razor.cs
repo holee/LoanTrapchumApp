@@ -6,6 +6,8 @@ namespace TrapchumApp.Pages.Lists.Branches;
 public partial class BranchDetailModal
 {
     [Parameter] public int Id { get; set; }
+    [Parameter] public PageType PageType { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
 
     VBranch? branch = new();
     protected override async Task OnInitializedAsync()

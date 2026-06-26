@@ -273,13 +273,17 @@ public sealed class HolidayRepository(IDbContextFactory<DataContext> contextFact
             var queries = db.Set<HolidayDto>()
                             .Where(x => x.HolidayDt >= DateTime.Now && x.HolidayDt <= endDate)
                             .OrderBy(x => x.HolidayDt);
+
             var counts = await queries.CountAsync(cancellation);
+
             var items = await queries.AsNoTracking().ToListAsync(cancellation);
+
             return PagerExtensions.Create(items, counts);
         }
         catch (Exception ex)
         {
             logger.LogError($"Error in GetActiveHolidays: {ex.Message}", ex);
+
             throw new Exception($"Error in GetActiveHolidays: {ex.Message}");
         }
 

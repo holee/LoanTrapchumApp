@@ -173,7 +173,7 @@
     private string _getLoanWriteOffUrl = "";
     private string _loanPayOffUrl = "";
     private string _loanCollateralWidthrawUrl = "";
-
+    private string _loanEdit = "";
     void GetLoanDetails(VLoanDisbursments? p)
     {
         ContextMenuService.Close();
@@ -258,15 +258,25 @@
 
         var multiUrl = $"/app/loans/{p.LoanId}/collection-repayment-schedules/{p.BranchId}/Branches?creditAgentId={p.CreditAgentRefId}&currencyId={p.CurrencyId}";
 
+        _loanEdit = $"/App/Loans/{p.LoanId}/Disbursements/{p.BranchId}/Branches/Edit?customerId={p.CustomerId}";
+
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
             <RadzenMenuItem Icon="money"
                             Path="@_getPaymentSchedulesUrl"
                             Visible="@bState.CanRecievePayment"
                             Text="Recieve Payment"></RadzenMenuItem>
+
+
             <RadzenMenuItem Icon="paid"
                             Path="@_getSchedulePayOffUrl"
                             Visible="@bState.CanPayOff"
                             Text="Pay Off"></RadzenMenuItem>
+
+            <RadzenMenuItem Icon="edit"
+                            Path="@_loanEdit"
+                            Disabled
+                            Text="Edit"></RadzenMenuItem>
+
             <RadzenMenuItem Icon="paid"
                             Path="@_getLoanWriteOffUrl"
                             Visible="@bState.CanWriteOff"
@@ -328,6 +338,7 @@
             new ContextMenuItem { Text = "Change Credit Agent", Value="5",Icon="find_replace",Disabled=!bState.IsManager},
             new ContextMenuItem { Text = "Pre Paid", Value="6",Icon="money",Disabled=!bState.CanRecievePayment},
             new ContextMenuItem { Text = "Widthraw Collaterals", Value="8",Icon="remove"},
+            new ContextMenuItem { Text = "Edit", Value="10",Icon="edit"},
             new ContextMenuItem { Text = "Export As Excel", Value="3", Icon="file_download"},
             new ContextMenuItem { Text = "Export As Pdf", Value="4", Icon="picture_as_pdf"},
         }, (e) => DoContextMenuAction(e, args.Data));
@@ -342,6 +353,9 @@
         if (data is null) return;
 
         _loanCollateralWidthrawUrl = $"/App/Loans/{data.LoanId}/WidthrwalCollateral/{data.BranchId}/Branches";
+
+
+        _loanEdit = $"/App/Loans/{data.LoanId}/Disbursements/{data.BranchId}/Branches/Edit?customerId={data.CustomerId}";
 
         switch (e.Value)
         {
@@ -366,8 +380,11 @@
             case "8":
                 NavigationManager.NavigateTo(_loanCollateralWidthrawUrl);
                 break;
+            case "10":
+                NavigationManager.NavigateTo(_loanEdit);
+                break;
             default:
-                NavigationManager.NavigateTo($"App/Loans/Disbursments/Credit-Agent/{data.BranchId}/Branches?CreditAgentId={data.CreditAgentRefId}");
+                //NavigationManager.NavigateTo($"App/Loans/Disbursments/Credit-Agent/{data.BranchId}/Branches?CreditAgentId={data.CreditAgentRefId}");
                 break;
         }
     }

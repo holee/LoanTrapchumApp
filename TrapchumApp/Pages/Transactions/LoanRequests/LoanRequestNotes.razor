@@ -4,7 +4,7 @@
     @if (Data is null || !Data.Any())
     {
         <div class="notes-empty">
-            <span class="notes-empty__icon material-icons">chat_bubble_outline</span>
+            <RadzenIcon Icon="chat_bubble_outline" class="notes-empty__icon" />
             <span class="notes-empty__text">No notes yet.</span>
         </div>
     }
@@ -74,9 +74,9 @@
         transition: box-shadow 0.15s;
     }
 
-    .note-card:hover {
-        box-shadow: 0 3px 8px rgba(0,0,0,.09);
-    }
+        .note-card:hover {
+            box-shadow: 0 3px 8px rgba(0,0,0,.09);
+        }
 
     /* Avatar circle */
     .note-card__avatar {

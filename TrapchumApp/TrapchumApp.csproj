@@ -34,6 +34,10 @@
 		<Content Remove="Pages\Managers\ManagerRequestIndexPage.razor" />
 		<Content Remove="Pages\Transactions\Exchanges\ExchangesPopup.razor" />
 		<Content Remove="Pages\Transactions\Exchanges\ExchangesSidebar.razor" />
+		<Content Remove="Pages\Transactions\Loans\Disbursements\LoanCollaterals.razor" />
+		<Content Remove="Pages\Transactions\Loans\Disbursements\LoanDcuments.razor" />
+		<Content Remove="Pages\Transactions\Loans\Disbursements\LoanEditPage.razor" />
+		<Content Remove="Pages\Transactions\Loans\Disbursements\LoanGaurantors.razor" />
 		<Content Remove="Pages\Transactions\RecievePayements\PaymentOffSideBar.razor" />
 		<Content Remove="Pages\Transactions\RecievePayements\RepaymentMultiplePage.razor" />
 	</ItemGroup>
@@ -201,6 +205,10 @@
 		<AdditionalFiles Include="Pages\Transactions\Ledgers\CreateLedgerModal.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Ledgers\EditLedgerModal.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Ledgers\LedgerIndexPage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanEditPage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanCollaterals.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanDcuments.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanGaurantors.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\TabAllLoans.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\CustomersActiveLoanPage.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\IndexLoanPage.razor" />

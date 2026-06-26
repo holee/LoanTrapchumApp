@@ -1,0 +1,133 @@
+﻿@using Applications.Features.Loans.Dtos
+<RadzenCard class="rz-border-radius-3 rz-shadow-3 rz-my-2" Style="padding:0;overflow:hidden;background:var(--rz-base-200);">
+    <RadzenStack AlignItems="AlignItems.Center"
+                 Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.SpaceBetween"
+                 Style="padding:0.6rem 1rem;background:var(--rz-primary);color:#fff;">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+            <RadzenIcon Icon="home_work" Style="font-size:1.2rem;" />
+            <RadzenText TextStyle="TextStyle.Subtitle1"
+                        Style="margin:0;font-weight:600;color:#fff;">
+                Collateral Information
+            </RadzenText>
+            <RadzenBadge BadgeStyle="BadgeStyle.Light"
+                         Text="@($"{Collaterals.Count()} item{(Collaterals.Count() == 1 ? "" : "s")}")"
+                         Style="font-size:0.7rem;" />
+        </RadzenStack>
+
+    </RadzenStack>
+    <RadzenDataGrid GridLines="DataGridGridLines.Horizontal"
+                    Responsive
+                    TItem="LoanCollateralLinesDtoEdit"
+                    Density="Density.Compact"
+                    AllowSorting="true"
+                    Style="min-height:15rem;height:15rem;max-height:15rem;border:none;"
+                    Data="Collaterals">
+        <Columns>
+
+            <RadzenDataGridColumn Title="#"
+                                  TextAlign="TextAlign.Center"
+                                  Property="@(nameof(LoanCollateralLinesDtoEdit.CollateralId))"
+                                  Width="2.8rem"
+                                  Sortable="false"
+                                  Context="g">
+                <HeaderTemplate>
+                    <span style="color:var(--rz-text-secondary-color);font-size:0.72rem;">#</span>
+                </HeaderTemplate>
+                <Template>
+                    <input type="hidden" @bind="@g.CollateralId" />
+                    <RadzenBadge BadgeStyle="BadgeStyle.Light"
+                                 Text="@((Collaterals.ToList().IndexOf(g) + 1).ToString())"
+                                 Style="min-width:1.4rem;font-size:0.72rem;" />
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Title="Collateral"
+                                  Property="@(nameof(LoanCollateralLinesDtoEdit.SubTypeName))"
+                                  Context="c">
+                <HeaderTemplate>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                        <RadzenIcon Icon="category"
+                                    Style="font-size:0.9rem;color:var(--rz-primary);" />
+                        <span>Collateral</span>
+                    </RadzenStack>
+                </HeaderTemplate>
+                <Template>
+                    <span style="font-weight:500;">@c.SubTypeName</span>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Title="Type"
+                                  Property="@(nameof(LoanCollateralLinesDtoEdit.TypeName))"
+                                  Context="c">
+                <HeaderTemplate>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                        <RadzenIcon Icon="label" Style="font-size:0.9rem;color:var(--rz-primary);" />
+                        <span>Type</span>
+                    </RadzenStack>
+                </HeaderTemplate>
+                <Template>@c.TypeName</Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Title="Owner"
+                                  Property="@(nameof(LoanCollateralLinesDtoEdit.OwnerName))"
+                                  Context="c">
+                <HeaderTemplate>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                        <RadzenIcon Icon="person" Style="font-size:0.9rem;color:var(--rz-primary);" />
+                        <span>Owner</span>
+                    </RadzenStack>
+                </HeaderTemplate>
+                <Template>@c.OwnerName</Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Title="Qty"
+                                  Width="4rem"
+                                  TextAlign="TextAlign.Center"
+                                  Property="@(nameof(LoanCollateralLinesDtoEdit.Quantity))"
+                                  Context="c">
+                <Template>
+                    <RadzenBadge BadgeStyle="BadgeStyle.Info"
+                                 Text="@c.Quantity.ToString()"
+                                 Style="font-size:0.72rem;" />
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="📈 Market Price"
+                                  Property="@(nameof(LoanCollateralLinesDtoEdit.MarketPrice))"
+                                  Context="c">
+                <Template>
+                    <span style="font-variant-numeric:tabular-nums;">@($"{c.MarketPrice:N2}")</span>
+                </Template>
+                <FooterTemplate>
+                    <strong style="font-variant-numeric:tabular-nums;color:var(--rz-success);">@($"{Collaterals.Sum(x => x.MarketPrice):N2}")</strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="🔥 Hot Price"
+                                  Property="@(nameof(LoanCollateralLinesDtoEdit.HotPrice))"
+                                  Context="c">
+                <Template>
+                    <span style="font-variant-numeric:tabular-nums;">@($"{c.HotPrice:N2}")</span>
+                </Template>
+                <FooterTemplate>
+                    <strong style="font-variant-numeric:tabular-nums;color:var(--rz-danger);">@($"{Collaterals.Sum(x => x.HotPrice):N2}")</strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="🔨 Pawn Price"
+                                  Property="@(nameof(LoanCollateralLinesDtoEdit.PawnPrice))"
+                                  Context="c">
+                <Template>
+                    <span style="font-variant-numeric:tabular-nums;">@($"{c.PawnPrice:N2}")</span>
+                </Template>
+                <FooterTemplate>
+                    <strong style="font-variant-numeric:tabular-nums;color:var(--rz-warning);">@($"{Collaterals.Sum(x => x.PawnPrice):N2}")</strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+
+</RadzenCard>
+

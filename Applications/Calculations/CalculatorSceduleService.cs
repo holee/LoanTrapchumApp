@@ -1,6 +1,5 @@
 ﻿using Applications.Enumerations;
 using Applications.Features.Holidays.Dtos;
-using Applications.Features.Loans.Dtos.Requests;
 using Domains.Enumerations;
 using Domains.Models.Loans;
 
@@ -19,11 +18,17 @@ public sealed class CalculatorSceduleService(IMediator mediator)
 
     private const int _numPerSchedule = 4;
 
-    private IEnumerable<HolidayDto> _holidays = [];
+    public IEnumerable<HolidayDto> Holidays { get; private set; } = [];
 
     private int groupKey = 0;
-    public IEnumerable<ScheduleLine> Calculate(LoanDtoCreate req)
+    public IEnumerable<ScheduleLine> Calculate(LoanDtoCreate? req)
     {
+
+        if (req == null)
+        {
+            return [];
+        }
+
         return req.RepaymentModeRefId switch
         {
             (int)RepaymentOption.Declined => Decline(req),
@@ -37,8 +42,10 @@ public sealed class CalculatorSceduleService(IMediator mediator)
 
     }
 
-    private IEnumerable<ScheduleLine> Decline(LoanDtoCreate req)
+    private IEnumerable<ScheduleLine> Decline(LoanDtoCreate? req)
     {
+        ArgumentNullException.ThrowIfNull(req, nameof(req));
+
         _ = GetHolidays(req.InstallmentNo);
 
         int period = req.Installments ?? 0;
@@ -107,9 +114,10 @@ public sealed class CalculatorSceduleService(IMediator mediator)
         return FinalizeSchedules();
     }
 
-
-    private IEnumerable<ScheduleLine> Flat(LoanDtoCreate req)
+    private IEnumerable<ScheduleLine> Flat(LoanDtoCreate? req)
     {
+        ArgumentNullException.ThrowIfNull(req, nameof(req));
+
         _ = GetHolidays(req.InstallmentNo);
 
         decimal amount = req.Principle ?? 0M;
@@ -174,8 +182,9 @@ public sealed class CalculatorSceduleService(IMediator mediator)
         return FinalizeSchedules();
     }
 
-    private IEnumerable<ScheduleLine> Balloon(LoanDtoCreate req)
+    private IEnumerable<ScheduleLine> Balloon(LoanDtoCreate? req)
     {
+        ArgumentNullException.ThrowIfNull(req, nameof(req));
         _ = GetHolidays(req.InstallmentNo);
 
         decimal monthlyRate = req.InterestRate ?? 0.00M;
@@ -247,8 +256,11 @@ public sealed class CalculatorSceduleService(IMediator mediator)
         return FinalizeSchedules();
     }
 
-    private IEnumerable<ScheduleLine> Annurity(LoanDtoCreate req)
+    private IEnumerable<ScheduleLine> Annurity(LoanDtoCreate? req)
     {
+
+        ArgumentNullException.ThrowIfNull(req, nameof(req));
+
         _ = GetHolidays(req.InstallmentNo);
 
         decimal principleAndInterestAmount = req.Principle.CalcPmt(req.CurrencyId, req.Installments, req.InterestRate);
@@ -467,14 +479,16 @@ public sealed class CalculatorSceduleService(IMediator mediator)
     {
         if (date is null) return false;
 
-        return _holidays.Any(h =>
+        return Holidays.Any(h =>
             h.HolidayDt.HasValue &&
             h.HolidayDt.Value.Date == date.Value.Date &&
             h.Status == true);
     }
 
-    private async Task GetHolidays(int? installment = 6)
+    public async Task GetHolidays(int? installment = 6)
     {
+
+        ArgumentNullException.ThrowIfNullOrEmpty(nameof(installment));
 
         var year = (installment / 12) < 0 ? 1 : (installment / 12) + 1;
 
@@ -482,8 +496,7 @@ public sealed class CalculatorSceduleService(IMediator mediator)
 
         var rsp = await mediator.Send(command);
 
-        _holidays = rsp.Items;
-
+        Holidays = rsp.Items;
     }
 
 }

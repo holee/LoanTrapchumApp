@@ -1,33 +1,10 @@
 ﻿using Applications.Calculations;
 using Applications.Enumerations;
 using Applications.Features.Holidays.Dtos;
+using Applications.Features.Loans.Dtos.Requests;
 using Domains.Enumerations;
 
-namespace Applications.Features.Loans.Dtos.Requests;
-
-public static class LoanDtoCreateExtension
-{
-    public static LoanDtoCreate ToLoanDtoCreate(this LoanDtoCreate loanDtoCreate,
-        int? branchId,
-        string? userId,
-        decimal? penaltyRate,
-        int? loanStatusRefId,
-        int? loanProductRefId,
-        int? loanSubTypeRefId,
-        int? bankId = 11,
-        int? termTypeId = 11)
-    {
-        return new LoanDtoCreate(
-            branchId,
-            userId,
-            penaltyRate,
-            loanStatusRefId,
-            loanProductRefId,
-            loanSubTypeRefId,
-            bankId,
-            termTypeId);
-    }
-}
+namespace Applications.Features.Loans.Dtos;
 
 public sealed class LoanDtoCreate : CalculatorBase, ICalculatorBase
 {
@@ -68,7 +45,6 @@ public sealed class LoanDtoCreate : CalculatorBase, ICalculatorBase
     public long LoanAccountCode { get; set; }
     public int? Period { get; set; }
     public string? PeriodName { get; set; }
-    public int? CurrencyRefId { get; set; }
     public decimal? PenaltyRate { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? FirstPaymentDate { get; set; }
@@ -86,7 +62,7 @@ public sealed class LoanDtoCreate : CalculatorBase, ICalculatorBase
     public string? Remark { get; set; }
     public string? BranchName { get; set; }
     public int Circle { get; set; } = 1;
-    public string? CustomerName { get; set; } = string.Empty;
+    public string? AltName { get; set; } = string.Empty;
     public string? CreditAgentName { get; set; } = string.Empty;
     public string? RepaymentModeName { get; set; } = string.Empty;
     public string? LoanCategoryName { get; set; } = string.Empty;
@@ -99,6 +75,11 @@ public sealed class LoanDtoCreate : CalculatorBase, ICalculatorBase
     public AdjustmentOption ScheduleMode { get; set; } = AdjustmentOption.After;
     public List<HolidayDto> Holidays { get; set; } = [];
     public List<LoanScheduleDtoCreate>? LoanSchedules { get; set; } = [];
+    public List<LoanGuarantorDtoEdit>? Guarantors { get; set; } = [];
+    public List<LoanCollateralLinesDtoEdit>? Collaterals { get; set; } = [];
+    public List<LoanDescriptionDtoEdit>? Descriptions { get; set; } = [];
+    public List<CoPawnCustomerDtoEdit>? CoPawCustomers { get; set; } = [];
+    public List<LoanDocumentsDtoEdit>? Documents { get; set; } = [];
 }
 
 

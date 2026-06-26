@@ -1,0 +1,174 @@
+﻿@using Applications.Features.Loans.Dtos
+@using System.Linq
+
+<style>
+    .copawn-card {
+        border-radius: 12px;
+        border: 1px solid var(--rz-base-200);
+        background: var(--rz-base-200);
+        box-shadow: 0 2px 8px rgba(0,0,0,.06);
+        overflow: hidden;
+    }
+
+    .copawn-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: .75rem 1.25rem;
+        background: linear-gradient(135deg, var(--rz-primary) 0%, var(--rz-primary-darker) 100%);
+        color: #fff;
+        gap: .5rem;
+    }
+
+        .copawn-card-header .header-title {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: .01em;
+        }
+
+    .copawn-card-body {
+        padding: .0rem 1rem;
+    }
+
+    .copawn-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--rz-primary-lighter);
+        color: var(--rz-primary-darker);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .7rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .copawn-name-cell {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .rz-datatable .rz-datatable-data td {
+        vertical-align: middle !important;
+    }
+
+    .badge-count {
+        background: rgba(255,255,255,.22);
+        color: #fff;
+        font-size: .7rem;
+        font-weight: 600;
+        padding: .1rem .5rem;
+        border-radius: 999px;
+        margin-left: .25rem;
+    }
+</style>
+
+<div class="copawn-card rz-my-2">
+    <div class="copawn-card-header">
+        <span class="header-title">
+            <RadzenIcon Icon="group" Style="font-size:1.2rem;" />
+            Co-Borrowers Information
+            @if (Customers?.Any() == true)
+            {
+                <span class="badge-count">@Customers.Count()</span>
+            }
+        </span>
+    </div>
+
+    <div class="copawn-card-body">
+        <RadzenDataGrid Data="Customers"
+                        GridLines="DataGridGridLines.Horizontal"
+                        Responsive
+                        TItem="CoPawnCustomerDtoEdit"
+                        Density="Density.Compact"
+                        @ref="gridCustomers"
+                        EmptyText="No co-borrowers added yet."
+                        RowRender="@OnRowRender"
+                        Style="min-height:14rem;height:14rem;max-height:14rem;border-radius:8px;overflow:hidden;">
+            <Columns>
+                <RadzenDataGridColumn Context="g"
+                                      Property="@(nameof(CoPawnCustomerDtoEdit.Id))"
+                                      Width="3rem"
+                                      Title="#"
+                                      Sortable="false"
+                                      TextAlign="TextAlign.Center">
+                    <HeaderTemplate>
+                        <span style="color:var(--rz-text-tertiary-color);font-size:.75rem;">#</span>
+                    </HeaderTemplate>
+                    <Template>
+                        <input type="hidden" @bind="@g.CustomerId" />
+                        <span style="color:var(--rz-text-tertiary-color);font-size:.8rem;">@g.RowIndex</span>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Width="16rem"
+                                      Property="@(nameof(CoPawnCustomerDtoEdit.CustomerName))"
+                                      Title="ឈ្មោះ"
+                                      Sortable="false">
+                    <HeaderTemplate>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">ឈ្មោះ</span>
+                    </HeaderTemplate>
+                    <Template Context="c">
+                        <div class="copawn-name-cell">
+                            <div class="copawn-avatar">
+                                @GetInitial(c.CustomerName)
+                            </div>
+                            <span style="font-weight:500;font-size:.85rem;">@c.CustomerName</span>
+                        </div>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Width="10rem"
+                                      Property="@(nameof(CoPawnCustomerDtoEdit.CustomerPhone))"
+                                      Title="លេខទូរស័ព្ទ"
+                                      Sortable="false">
+                    <HeaderTemplate>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">លេខទូរស័ព្ទ</span>
+                    </HeaderTemplate>
+                    <Template Context="c">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="phone" Style="font-size:.85rem;color:var(--rz-text-tertiary-color);" />
+                            <span style="font-size:.82rem;">@c.CustomerPhone</span>
+                        </RadzenStack>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Context="c" Title="អាសយដ្ឋាន" Sortable="false">
+                    <HeaderTemplate>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">អាសយដ្ឋាន</span>
+                    </HeaderTemplate>
+                    <Template>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="location_on" Style="font-size:.85rem;color:var(--rz-text-tertiary-color);" />
+                            <span style="font-size:.82rem;">@c.CustomerAddress</span>
+                        </RadzenStack>
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+</div>
+
+@code {
+    RadzenDataGrid<CoPawnCustomerDtoEdit> gridCustomers = default!;
+
+    [Parameter] public IEnumerable<CoPawnCustomerDtoEdit>? Customers { get; set; } = [];
+
+    void OnRowRender(RowRenderEventArgs<CoPawnCustomerDtoEdit> args)
+    {
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
+    }
+
+    static string GetInitial(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        return name.Trim()[0].ToString().ToUpperInvariant();
+    }
+}

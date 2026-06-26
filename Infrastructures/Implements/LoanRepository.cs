@@ -1,4 +1,5 @@
-﻿using Applications.Commons.Messages.LoanDisbursements;
+﻿using Applications.Commons.ExceptionHandlers;
+using Applications.Commons.Messages.LoanDisbursements;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.Customers.Response;
@@ -17,9 +18,11 @@ using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
 using Infrastructures.Implements.Extensions;
 using Mapster;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using static Dapper.SqlMapper;
 
 namespace Infrastructures.Implements;
 
@@ -86,6 +89,137 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
             await transaction.RollbackAsync(CancellationToken.None);
 
             return Error.Unexpected("CreateLoan.DbError", ex.InnerException?.Message ?? ex.Message);
+        }
+    }
+
+
+    public async Task<LoanDtoCreate> GetLoanForEditAsync(string? loanId, int? branchId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(loanId) || branchId is null)
+        {
+            throw new NotFoundException($"Loan with ID '{loanId}' not found for branch {branchId}.");
+        }
+
+        var command = new CommandDefinition(
+            ProcedureConstant.SpGetLoanForEdit,
+            new { LoanId = loanId, BranchId = branchId },
+            commandType: CommandType.StoredProcedure,
+            commandTimeout: 30,
+            cancellationToken: cancellationToken);
+
+        using var connection = await connectionFactory.CreateConnectionAsync(cancellationToken).ConfigureAwait(false);
+
+        await using GridReader multi = await connection.QueryMultipleAsync(command).ConfigureAwait(false);
+
+        var loan = await multi.ReadSingleOrDefaultAsync<LoanDtoCreate>().ConfigureAwait(false)
+            ?? throw new NotFoundException($"Loan with ID '{loanId}' not found for branch {branchId}.");
+
+        loan.Collaterals = (await multi.ReadAsync<LoanCollateralLinesDtoEdit>().ConfigureAwait(false)).AsList();
+
+        loan.Guarantors = (await multi.ReadAsync<LoanGuarantorDtoEdit>().ConfigureAwait(false)).AsList();
+
+        loan.Descriptions = (await multi.ReadAsync<LoanDescriptionDtoEdit>().ConfigureAwait(false)).AsList();
+
+        loan.CoPawCustomers = (await multi.ReadAsync<CoPawnCustomerDtoEdit>().ConfigureAwait(false)).AsList();
+
+        loan.Documents = (await multi.ReadAsync<LoanDocumentsDtoEdit>().ConfigureAwait(false)).AsList();
+
+        return loan;
+    }
+
+    public async Task<DisburseResult> EditLoanDisbursementAsync(LoanDisbursment req, CancellationToken cancellation = default)
+    {
+        ArgumentNullException.ThrowIfNull(req);
+
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        if (await IsScheduleAlreadyPayment(context, req.LoanId, req.BranchRefId, cancellation))
+        {
+            throw new InvalidOperationException("Cannot edit loan disbursement because some schedules have already been paid.");
+        }
+
+        await using var transaction = await context.Database.BeginTransactionAsync(cancellation);
+
+        try
+        {
+            var existingLoan = await context.LoanDisbursments
+                                             .Include(x => x.LoanSchedules)
+                                             .Where(x => x.LoanStatusRefId == (int)LoanStatuses.Active)
+                                             .FirstOrDefaultAsync(x => x.LoanId == req.LoanId &&
+                                                                  x.BranchRefId == req.BranchRefId, cancellation);
+
+            if (existingLoan is null)
+            {
+                throw new NotFoundException("No Loan was found for the given ID and branch.");
+            }
+
+            existingLoan.Installments = req.Installments;
+            existingLoan.InterestRate = req.InterestRate;
+            existingLoan.CollectionFeeRate = req.CollectionFeeRate;
+            existingLoan.RepaymentModeRefId = req.RepaymentModeRefId;
+            existingLoan.PayEvery = req.PayEvery;
+            existingLoan.IsEdit = req.IsEdit;
+            existingLoan.ModifiedDt = DateTime.UtcNow;
+            existingLoan.FirstPaymentDate = req.FirstPaymentDate;
+            existingLoan.StartDate = req.StartDate;
+            existingLoan.LastPaymentDate = req.LastPaymentDate;
+            existingLoan.Period = req.Period;
+            existingLoan.PeriodName = req.PeriodName;
+            existingLoan.Principle = req.Principle;
+            existingLoan.Remark = req.Remark;
+
+            context.LoanSchedules.RemoveRange(existingLoan.LoanSchedules!);
+
+            existingLoan.LoanSchedules = req.LoanSchedules;
+
+            await context.SaveChangesAsync(cancellation);
+
+            await transaction.CommitAsync(cancellation);
+
+            return new DisburseResult(true, req.LoanId, req.BranchRefId, "Loan updated successfully.");
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex, "Failed to edit loan disbursement for customer {CustomerId}", req.CustomerRefId);
+
+            await transaction.RollbackAsync(CancellationToken.None);
+
+            throw new UnexpectedException(ex.InnerException?.Message ?? ex.Message);
+        }
+    }
+
+    public async Task<DisburseResult> DeleteLoanDisbursementAsync(string? loanId, int? branchId, string customerId, CancellationToken cancellation = default)
+    {
+        if (await IsScheduleAlreadyPayment(loanId, branchId, cancellation))
+        {
+            throw new InvalidOperationException("Cannot delete loan disbursement because some schedules have already been paid.");
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        try
+        {
+            var existingLoan = await context.LoanDisbursments
+                                             .Include(x => x.LoanSchedules)
+                                             .FirstOrDefaultAsync(x => x.LoanId == loanId &&
+                                                                  x.BranchRefId == branchId, cancellation);
+
+            if (existingLoan is null)
+            {
+                throw new NotFoundException("No Loan was found for the given ID and branch.");
+            }
+
+            context.LoanDisbursments.Remove(existingLoan);
+
+            await context.SaveChangesAsync(cancellation);
+
+            return new DisburseResult(true, loanId, branchId, "Loan disbursement deleted successfully.");
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex, "Failed to delete loan disbursement for customer {CustomerId}", customerId);
+
+            throw new UnexpectedException(ex.InnerException?.Message ?? ex.Message);
         }
     }
 
@@ -509,8 +643,6 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
         return PagerExtensions.Create(items, counts);
     }
 
-
-
     public async Task<Pager<VSchedule>> GetScheduleLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus state, DateTime? dueDate = null, CancellationToken cancellation = default)
     {
 
@@ -769,7 +901,25 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
                               x.LoanstatusId == (int)LoanStatuses.Active);
     }
 
+    private async Task<bool> IsScheduleAlreadyPayment(string? loanId, int? branchId, CancellationToken cancellation = default)
+    {
+        ArgumentNullException.ThrowIfNull(loanId, nameof(loanId));
 
+        ArgumentNullException.ThrowIfNull(branchId, nameof(branchId));
+
+        await using var db = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        return await db.LoanRepayments.AnyAsync(x => x.LoanRefId == loanId && x.BranchRefId == branchId, cancellation);
+    }
+
+    private static async Task<bool> IsScheduleAlreadyPayment(DataContext context, string? loanId, int? branchId, CancellationToken cancellation = default)
+    {
+        ArgumentNullException.ThrowIfNull(loanId, nameof(loanId));
+
+        ArgumentNullException.ThrowIfNull(branchId, nameof(branchId));
+
+        return await context.LoanRepayments.AnyAsync(x => x.LoanRefId == loanId && x.BranchRefId == branchId, cancellation);
+    }
 }
 
 

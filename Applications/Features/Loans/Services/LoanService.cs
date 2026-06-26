@@ -1,6 +1,5 @@
 ﻿using Applications.Enumerations;
 using Applications.Features.CreditAgents.Requests;
-using Applications.Features.Loans.Dtos.Requests;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Mappers;
 using Applications.Interfaces.Lists;
@@ -93,7 +92,7 @@ namespace Applications.Features.Loans.Services
 
                 Amount = req.PaidAmount,
 
-                CurrencyRefId = req.CurrencyRefId,
+                CurrencyRefId = req.CurrencyId,
 
                 CashStatusRefId = 2,
 

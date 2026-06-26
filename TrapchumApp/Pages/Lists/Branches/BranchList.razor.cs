@@ -8,7 +8,7 @@ namespace TrapchumApp.Pages.Lists.Branches
 {
     public partial class BranchList
     {
-        protected string searchText { get; set; } = string.Empty;
+        protected string searchText = string.Empty;
 
         int pageIndex = 0;
 
@@ -28,7 +28,7 @@ namespace TrapchumApp.Pages.Lists.Branches
 
         bool isLoading = false;
 
-        IEnumerable<VBranch>? Branches;
+        IEnumerable<VBranch>? Branches = Array.Empty<VBranch>();
 
         IEnumerable<RowNumber>? rowNumbers;
 
@@ -42,6 +42,7 @@ namespace TrapchumApp.Pages.Lists.Branches
         protected async Task PerformSearch(string? searchText = null)
         {
             searchText = searchText ?? string.Empty;
+
             await GetBranches(searchText);
         }
 
@@ -70,9 +71,9 @@ namespace TrapchumApp.Pages.Lists.Branches
 
             var command = new ChangeBranchStateCommand(branchId, state);
 
-            var rsp = await mediator.Send(command);// _branchService!.UpdateStatusAsync(command);
+            var rsp = await mediator.Send(command);
 
-            if (rsp!.IsSuccess())
+            if (rsp.IsSuccess())
             {
 
                 _toastService.ShowSuccess("Branch state updated successfully.");
@@ -117,53 +118,13 @@ namespace TrapchumApp.Pages.Lists.Branches
 
             await GetBranches(searchText);
         }
-        protected async Task OnDetail(VBranch? branch)
-        {
-            await DialogService!.OpenAsync<BranchDetailModal>("Branch Details", new Dictionary<string, object?> { { "Id", branch!.BranchId } });
-        }
-        protected async Task OnEdit(VBranch? branch)
-        {
-
-            var resultModal = await DialogService!.OpenAsync<BranchUpdateModal>("Edit Branch", new Dictionary<string, object?> { { "Id", branch!.BranchId } });
-            if (resultModal != null)
-            {
-                await GetBranches(searchText);
-            }
-
-        }
-        string BranchName = "Siem Reap";
-        protected async void OnCreate()
-        {
-
-            var options = new DialogOptions()
-            {
-                AutoFocusFirstElement = false,
-                Width = "40vw",
-                Resizable = false,
-            };
-
-
-            bool? resultModal = await DialogService.OpenAsync<BranchCreateModal>("Add Branch", options: options);
-
-            if (resultModal != null && resultModal == true)
-            {
-                await GetBranches(searchText);
-            }
-        }
 
         async Task OnDelete(VBranch? branch)
         {
 
-            var options = new ConfirmOptions()
-            {
-                OkButtonText = "Yes",
-                CancelButtonText = "No"
-            };
+            var confirm = await MsgBox.ConfirmAsync("Branch deleted will not be able to recover, would you like to continue?");
 
-
-            bool? confirm = await DialogService.Confirm("Branch deleted will not be able to recover, would you like to continue?", options: options);
-
-            if (confirm == false) return;
+            if (confirm == MsgBoxResult.No) return;
 
             var command = new DeleteBranchCommand(branch!.BranchId);
 
@@ -174,7 +135,7 @@ namespace TrapchumApp.Pages.Lists.Branches
                 _toastService.ShowSuccess("Branch deleted successfully.");
 
                 await GetBranches(searchText);
-               
+
                 return;
             }
 
@@ -183,15 +144,10 @@ namespace TrapchumApp.Pages.Lists.Branches
                 _toastService.ShowWarning(isDe.Value.Message ?? string.Empty);
             }
 
-            var options1 = new ConfirmOptions()
-            {
-                OkButtonText = "Yes",
-                CancelButtonText = "No"
-            };
+            var confirm1 = await MsgBox.ConfirmAsync("Branch you are trying to delete has started its operation, so you cannot delete it. Make inactive is strongly recommmended!");
 
-            var confirm1 = await DialogService.Confirm("Branch you are trying to delete has started its operation, so you cannot delete it. Make inactive is strongly recommmended!", options: options1);
 
-            if (confirm1 == false) return;
+            if (confirm1 == MsgBoxResult.No) return;
 
             var commandStatus = new ChangeBranchStateCommand(branch!.BranchId, false);
 

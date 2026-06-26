@@ -169,7 +169,10 @@
     </Authorized>
 </AuthorizeView>
 
+<BarChart @ref="barChart" Width="600" />
+
 @* ── MyTable Demo Section ── *@
+@* 
 <AuthorizeView>
     <Authorized>
         <div class="db-page" style="margin-top:2rem;">
@@ -180,21 +183,21 @@
                 </div>
             </div>
 
-            @* @if (_demoSelected.Count > 0)
+            @if (_demoSelected.Count > 0)
             {
                 <div style="margin-bottom:.75rem;padding:.5rem 1rem;background:#dbeafe;border-radius:6px;font-size:13px;color:#1d4ed8;">
                     Selected: @string.Join(", ", _demoSelected.Select(r => r.CustomerName))
                 </div>
-            } *@
+            }
 
-            @* @if (_demoSelected.Count > 0)
+            @if (_demoSelected.Count > 0)
             {
                 <div class="my-tbl__sel-bar" style="margin-bottom:1rem;">
                     <span>@_demoSelected.Count row@(_demoSelected.Count > 1 ? "s" : "") selected</span>
                     <button class="my-tbl__sel-clear" type="button">@_demoSelected.Sum(x => x.Amount)</button>
                 </div>
             }
-                 *@
+                
 
             <MyTable TItem="Home.LoanDemoRow"
                      Data="@_demoRows"
@@ -228,5 +231,4 @@
             </MyTable>
         </div>
     </Authorized>
-</AuthorizeView>
-<BarChart @ref="barChart" Width="600" />
+</AuthorizeView> *@

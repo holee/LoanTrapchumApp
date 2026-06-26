@@ -5,10 +5,11 @@
 
 <EditForm Model="@model" OnValidSubmit="@OnSubmit">
     <FluentValidator />
+    <ValidationSummary />
     <input type="hidden" @bind-value="@model.BranchId" />
     <input type="hidden" @bind-value="@_tempPathId" />
+
     <div class="branch-modal-shell">
-        @* ── Branch Info ── *@
         <div class="branch-section-card">
             <div class="branch-section-header">
                 <div class="branch-section-header-left">
@@ -27,66 +28,29 @@
                     @(model.IsActive ? "Active" : "Inactive")
                 </div>
             </div>
-
             <div class="branch-section-body">
-                <ValidationSummary />
                 <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
-                    <RadzenColumn Size="12">
-                        <RadzenStack Gap="0.85rem">
-                            <RadzenStack Gap="0.35rem">
-                                <RadzenLabel Text="Branch Name *" class="branch-form-label" />
-                                <RadzenTextBox Name="BranchName"
-                                               @bind-Value="model.BranchName"
-                                               Placeholder="Enter branch name..."
-                                               Style="width:100%" />
-                                <ValidationMessage For="@(() => model.BranchName)" />
+                    <RadzenColumn Size="9">
+                        <div class="branch-field-group">
+                            <RadzenStack Gap="0.85rem">
+                                <RadzenStack Gap="0.35rem">
+                                    <RadzenLabel Text="Branch Name *" class="branch-form-label" />
+                                    <RadzenTextBox Name="BranchName"
+                                                   @bind-Value="model.BranchName"
+                                                   Placeholder="Enter branch name..."
+                                                   Style="width:100%" />
+                                    <ValidationMessage For="@(() => model.BranchName)" />
+                                </RadzenStack>
+
+                                <RadzenStack Gap="0.35rem">
+                                    <RadzenLabel Text="Branch Code *" class="branch-form-label" />
+                                    <RadzenTextBox Name="Description"
+                                                   @bind-Value="model.Description"
+                                                   Placeholder="Enter branch code..."
+                                                   Style="width:100%" />
+                                    <ValidationMessage For="@(() => model.Description)" />
+                                </RadzenStack>
                             </RadzenStack>
-
-                            <RadzenStack Gap="0.35rem">
-                                <RadzenLabel Text="Branch Code *" class="branch-form-label" />
-                                <RadzenTextBox Name="Description"
-                                               @bind-Value="model.Description"
-                                               Placeholder="Enter branch code..."
-                                               Style="width:100%" />
-                                <ValidationMessage For="@(() => model.Description)" />
-                            </RadzenStack>
-
-                            <div class="branch-preview-card">
-                                <div class="branch-preview-frame">
-                                    <RadzenImage Path="@model.ImagePath"
-                                                 class="branch-preview-image" />
-                                </div>
-                                <div class="branch-upload-copy">
-                                    <RadzenUpload Auto="true"
-                                                  Multiple="false"
-                                                  Accept=".jpg,.png"
-                                                  Url="upload/branches/images"
-                                                  Complete="@OnFileUploadComplete"
-                                                  Progress="@UploadProgress"
-                                                  Error="@OnUploadError"
-                                                  Style="width:100%;background-color:transparent;"
-                                                  ChooseText="@(string.IsNullOrWhiteSpace(model.ImagePath) ? "Upload branch image" : "Change branch image")"
-                                                  InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})">
-                                    </RadzenUpload>
-
-                                    @if (_isUploading)
-                                    {
-                                        <RadzenText TextStyle="TextStyle.Caption" TextAlign="TextAlign.Center"
-                                                    Style="color:var(--rz-primary);">
-                                            Uploading... @_progress%
-                                        </RadzenText>
-                                    }
-
-                                    @if (_isError && !string.IsNullOrWhiteSpace(_errorMessage))
-                                    {
-                                        <RadzenText TextStyle="TextStyle.Caption" TextAlign="TextAlign.Center"
-                                                    Style="color:var(--rz-danger-dark);">
-                                            @_errorMessage
-                                        </RadzenText>
-                                    }
-                                </div>
-                            </div>
-
                             <div class="branch-status-toggle">
                                 <RadzenLabel Text="Status" class="branch-form-label" />
                                 <div class="branch-status-toggle-row">
@@ -94,140 +58,165 @@
                                     <span>Visible in active branch lists</span>
                                 </div>
                             </div>
+                        </div>
+                    </RadzenColumn>
+                    <RadzenColumn Size="3">
+                        <div class="branch-preview-card">
+                            <div class="branch-preview-frame">
+                                <RadzenImage Path="@model.ImagePath"
+                                             Style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+                            </div>
+                            <div class="branch-upload-copy">
+                                <RadzenUpload Auto="true"
+                                              Multiple="false"
+                                              Accept=".jpg,.png"
+                                              Url="upload/branches/images"
+                                              Complete="@OnFileUploadComplete"
+                                              Progress="@UploadProgress"
+                                              Error="@OnUploadError"
+                                              Style="width:100%;background-color:transparent;"
+                                              ChooseText="@(string.IsNullOrWhiteSpace(model.ImagePath) ? "Upload branch image" : "Change branch image")"
+                                              InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})">
+                                </RadzenUpload>
+
+                                @if (_isUploading)
+                                {
+                                    <RadzenText TextStyle="TextStyle.Caption" TextAlign="TextAlign.Center"
+                                                Style="color:var(--rz-primary);">
+                                        Uploading... @_progress%
+                                    </RadzenText>
+                                }
+
+                                @if (_isError && !string.IsNullOrWhiteSpace(_errorMessage))
+                                {
+                                    <RadzenText TextStyle="TextStyle.Caption" TextAlign="TextAlign.Center"
+                                                Style="color:var(--rz-danger-dark);">
+                                        @_errorMessage
+                                    </RadzenText>
+                                }
+                            </div>
+                        </div>
+                    </RadzenColumn>
+                </RadzenRow>
+            </div>
+        </div>
+
+        <div class="branch-section-card">
+            <div class="branch-section-header">
+                <div>
+                    <div class="branch-section-title">
+                        <RadzenIcon Icon="location_on" Style="color:var(--rz-danger);font-size:1rem;vertical-align:middle;margin-right:0.35rem;" />
+                        Address
+                    </div>
+                    <div class="branch-section-subtitle">Update the branch location from country down to village.</div>
+                </div>
+            </div>
+            <div class="branch-section-body">
+                <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
+                    <RadzenColumn Size="3">
+                        <RadzenStack Gap="0.35rem">
+                            <RadzenLabel Text="Country" class="branch-form-label" />
+                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            AllowFiltering="true"
+                                            Data="@Countries"
+                                            TextProperty="@nameof(Country.DesInKhmer)"
+                                            ValueProperty="@nameof(Country.DesInKhmer)"
+                                            @bind-Value="@model.CountryName"
+                                            Placeholder="Select country..."
+                                            Style="width: 100%;"
+                                            Name="DropDownFiltering1" />
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="3" SizeMD="3">
+                        <RadzenStack Gap="0.35rem">
+                            <RadzenLabel Text="Province" class="branch-form-label" />
+                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            AllowFiltering="true"
+                                            Data="@ProvinceList"
+                                            AllowClear="false"
+                                            TextProperty="@nameof(ProvinceDto.ProInKhmer)"
+                                            ValueProperty="@nameof(ProvinceDto.ProvinceId)"
+                                            SelectedItemChanged="SelectProvince"
+                                            @bind-Value="model.ProvinceRefId"
+                                            Placeholder="Select province..."
+                                            Style="width: 100%;"
+                                            Name="DropDownFiltering3" />
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="2" SizeMD="2">
+                        <RadzenStack Gap="0.35rem">
+                            <RadzenLabel Text="District" class="branch-form-label" />
+                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            AllowFiltering="true"
+                                            Data="@DistrictList"
+                                            AllowClear="false"
+                                            TextProperty="@nameof(DistrictDto.DisInKhmer)"
+                                            ValueProperty="@nameof(DistrictDto.DistrictId)"
+                                            SelectedItemChanged="SelectDistrict"
+                                            @bind-Value="model.DistrictRefId"
+                                            Placeholder="Select district..."
+                                            Style="width: 100%;"
+                                            Name="DropDownFiltering4" />
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="2" SizeMD="2">
+                        <RadzenStack Gap="0.35rem">
+                            <RadzenLabel Text="Commune" class="branch-form-label" />
+                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            AllowFiltering="true"
+                                            Data="@CommuneList"
+                                            AllowClear="false"
+                                            TextProperty="@nameof(CommuneDto.ComInKhmer)"
+                                            ValueProperty="@nameof(CommuneDto.CommuneId)"
+                                            SelectedItemChanged="SelectCommune"
+                                            @bind-Value="model.CommuneRefId"
+                                            Placeholder="Select commune..."
+                                            Style="width: 100%;"
+                                            Name="DropDownFiltering5" />
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="2" SizeMD="2">
+                        <RadzenStack Gap="0.35rem">
+                            <RadzenLabel Text="Village" class="branch-form-label" />
+                            <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            AllowFiltering="true"
+                                            Data="@VillageList"
+                                            AllowClear="false"
+                                            TextProperty="@nameof(VillageDto.VilInKhmer)"
+                                            ValueProperty="@nameof(VillageDto.VillageId)"
+                                            SelectedItemChanged="SelectVillage"
+                                            @bind-Value="model.VillageRefId"
+                                            Placeholder="Select village..."
+                                            Style="width: 100%;"
+                                            Name="DropDownFiltering6" />
                         </RadzenStack>
                     </RadzenColumn>
                 </RadzenRow>
             </div>
         </div>
-        @* ── Address ── *@
-    </div>
-    <div class="branch-section-card">
-        <div class="branch-section-header">
-            <div>
-                <div class="branch-section-title">
-                    <RadzenIcon Icon="location_on" Style="color:var(--rz-danger);font-size:1rem;vertical-align:middle;margin-right:0.35rem;" />
-                    Address
-                </div>
-                <div class="branch-section-subtitle">Update the branch location from country down to village.</div>
-            </div>
+
+        <div class="branch-footer rz-my-2 rz-mr-2">
+            <RadzenButton ButtonType="ButtonType.Submit"
+                          Text="Save Changes"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Success"
+                          Icon="save" />
+            <RadzenButton Click="@Close"
+                          Variant="Variant.Filled"
+                          Text="Cancel"
+                          Icon="close"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Danger" />
         </div>
-
-        <div class="branch-section-body">
-            <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
-                <RadzenColumn Size="12">
-                    <RadzenStack Gap="0.35rem">
-                        <RadzenLabel Text="Country" class="branch-form-label" />
-                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        AllowFiltering="true"
-                                        Data="@Countries"
-                                        TextProperty="@nameof(Country.DesInKhmer)"
-                                        ValueProperty="@nameof(Country.DesInKhmer)"
-                                        @bind-Value="@model.CountryName"
-                                        Placeholder="Select country..."
-                                        Style="width: 100%;"
-                                        Name="DropDownFiltering1" />
-                    </RadzenStack>
-                </RadzenColumn>
-            </RadzenRow>
-
-            <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
-                <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenStack Gap="0.35rem">
-                        <RadzenLabel Text="Province" class="branch-form-label" />
-                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        AllowFiltering="true"
-                                        Data="@ProvinceList"
-                                        AllowClear="false"
-                                        TextProperty="@nameof(ProvinceDto.ProInKhmer)"
-                                        ValueProperty="@nameof(ProvinceDto.ProvinceId)"
-                                        SelectedItemChanged="SelectProvince"
-                                        @bind-Value="model.ProvinceRefId"
-                                        Placeholder="Select province..."
-                                        Style="width: 100%;"
-                                        Name="DropDownFiltering3" />
-                    </RadzenStack>
-                </RadzenColumn>
-                <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenStack Gap="0.35rem">
-                        <RadzenLabel Text="District" class="branch-form-label" />
-                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        AllowFiltering="true"
-                                        Data="@DistrictList"
-                                        AllowClear="false"
-                                        TextProperty="@nameof(DistrictDto.DisInKhmer)"
-                                        ValueProperty="@nameof(DistrictDto.DistrictId)"
-                                        SelectedItemChanged="SelectDistrict"
-                                        @bind-Value="model.DistrictRefId"
-                                        Placeholder="Select district..."
-                                        Style="width: 100%;"
-                                        Name="DropDownFiltering4" />
-                    </RadzenStack>
-                </RadzenColumn>
-            </RadzenRow>
-
-            <RadzenRow AlignItems="AlignItems.Start">
-                <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenStack Gap="0.35rem">
-                        <RadzenLabel Text="Commune" class="branch-form-label" />
-                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        AllowFiltering="true"
-                                        Data="@CommuneList"
-                                        AllowClear="false"
-                                        TextProperty="@nameof(CommuneDto.ComInKhmer)"
-                                        ValueProperty="@nameof(CommuneDto.CommuneId)"
-                                        SelectedItemChanged="SelectCommune"
-                                        @bind-Value="model.CommuneRefId"
-                                        Placeholder="Select commune..."
-                                        Style="width: 100%;"
-                                        Name="DropDownFiltering5" />
-                    </RadzenStack>
-                </RadzenColumn>
-                <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenStack Gap="0.35rem">
-                        <RadzenLabel Text="Village" class="branch-form-label" />
-                        <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        AllowFiltering="true"
-                                        Data="@VillageList"
-                                        AllowClear="false"
-                                        TextProperty="@nameof(VillageDto.VilInKhmer)"
-                                        ValueProperty="@nameof(VillageDto.VillageId)"
-                                        SelectedItemChanged="SelectVillage"
-                                        @bind-Value="model.VillageRefId"
-                                        Placeholder="Select village..."
-                                        Style="width: 100%;"
-                                        Name="DropDownFiltering6" />
-                    </RadzenStack>
-                </RadzenColumn>
-            </RadzenRow>
-        </div>
-    </div>
-
-    <div class="branch-footer rz-mt-2">
-        <RadzenButton ButtonType="ButtonType.Submit"
-                      Text="Save Changes"
-                      Size="ButtonSize.ExtraSmall"
-                      ButtonStyle="ButtonStyle.Success"
-                      Icon="save" />
-        <RadzenButton Click="@(() => DialogService!.Close(false))"
-                      Variant="Variant.Filled"
-                      Text="Cancel"
-                      Icon="close"
-                      Size="ButtonSize.ExtraSmall"
-                      ButtonStyle="ButtonStyle.Danger" />
     </div>
 </EditForm>
 
 @code {
-    int selectedIndex = 0;
-
-    RadzenDropDown<string> radzenDropDown = default!;
-
-
     private string tempPath = "/assets/logo/tch_Logo.png";
 
     private string _errorMessage = string.Empty;
@@ -300,6 +289,22 @@
         _progress = args.Progress;
 
         logger.LogInformation("Upload progress: {Progress}%", args.Progress);
+    }
+
+    private async Task Close()
+    {
+        if(PageType == PageType.Tab)
+        {
+            await OnClose.InvokeAsync();
+        }
+        else if (PageType == PageType.Dialog)
+        {
+            DialogService.Close();
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/App/Branches");
+        }
     }
 }
 

@@ -81,7 +81,7 @@ namespace Applications.Features.Loans.Mappers
                 TotalPay = source.TotalPay,
                 ScheduleNum = source.ScheduleNum,
                 AgentRefId = source.CreditAgentRefId ?? string.Empty,
-                RepaymentModeRefId = source.RepaymentModeRefId ?? 1,
+                RepaymentModeRefId = source.RepaymentModeRefId ?? (int)RepaymentOption.Declined,
                 ScheduleStatusRefId = (int)ScheduleStatus.Unpaid
             };
         }
