@@ -1,7 +1,7 @@
 using Applications.Commons.Mappers;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Dtos.Responses;
-using Applications.Features.Loans.Queries.GetLoanById;
+using Applications.Features.Loans.Queries.GetLoanDetailsById;
 using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
@@ -65,7 +65,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         {
 
 
-            var query = new GetLoanByIdQuery(LoanId, BranchId, ScheduleStatus.All, true);
+            var query = new GetLoanDetailsByIdQuery(LoanId, BranchId, ScheduleStatus.All, true);
 
             var rsp = await mediator.Send(query);  
 

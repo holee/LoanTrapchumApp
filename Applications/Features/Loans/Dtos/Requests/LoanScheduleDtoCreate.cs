@@ -11,7 +11,8 @@ public sealed class LoanScheduleDtoCreate
     public decimal? Principal { get; set; }
     public decimal? InterestRate { get; set; }
     public decimal? Interest { get; set; }
-    public decimal? CollectionFee { get; set; } 
+    public decimal? CollectionFee { get; set; }
+    public decimal? TotalFee { get; set; }
     public decimal? TotalPay { get; set; }
     public decimal? LoanOutstanding { get; set; }
     public int? ScheduleStatusRefId { get; set; } = 2;

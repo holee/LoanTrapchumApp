@@ -254,18 +254,37 @@ else
                         </RadzenColumn>
                     </RadzenRow>
                     <AppActions>
-                        <SaveButton IsBusy="@isWaiting"
-                                    BusyText="រង់ចាំ...."
-                                    Title="បញ្ចេញប្រាក់" />
+                        @if (resource is not null && BState.CanRequestEditLoan)
+                        {
+                            <SaveButton IsBusy="@isWaiting"
+                                        BusyText="រង់ចាំ...."
+                                        ButtonType="ButtonType.Button"
+                                        OnClick="@HandleRequestEditLoan"
+                                        Title="ស្នើរសុំកែប្រែ"/>
+                        }
+                        @if (resource is not null && BState.IsAllowEditLoan)
+                        {
+                            <SaveButton IsBusy="@isWaiting"
+                                        BusyText="រង់ចាំ...."
+                                        Title="បញ្ចេញប្រាក់"/>
+                        }
+                        @if (resource is not null && BState.AllowApproveDelete)
+                        {
+                            <SaveButton IsBusy="@isWaiting"
+                                        BusyText="រង់ចាំ...."
+                                        ButtonType="ButtonType.Button"
+                                        OnClick="@HandleApproveDelete"
+                                        Title="អនុញ្ញាតិអោយកែ"/>
+                        }
                         <RadzenButton Icon="@IconNames.Preview"
                                       Click="@PrintPreview"
                                       Size="@Styles.DefaultSize"
-                                      Text="បោះពុម្ភសាកល្បង" />
+                                      Text="បោះពុម្ភសាកល្បង"/>
 
                         <RadzenLink Icon="@IconNames.ArrowCircleLeft"
                                     IconColor="@Colors.Danger"
                                     Path="@_navService.PreviousUrl"
-                                    Text="ត្រឡប់ក្រោយ" />
+                                    Text="ត្រឡប់ក្រោយ"/>
                     </AppActions>
 
                 </EditForm>

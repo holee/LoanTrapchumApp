@@ -46,7 +46,7 @@
                 RowRender="@OnRowRender"
                 CellContextMenu="@ContextMenuClick"
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
-                Style="height:30rem;max-height:40rem;overflow:auto;margin:0;padding:0;"
+                Style="height:min(80vh,30rem);overflow:auto;margin:0;padding:0;"
                 AllowPaging="true">
     <Columns>
         <RadzenDataGridColumn Context="p"
@@ -157,6 +157,23 @@
     </Columns>
 </RadzenDataGrid>
 
+@* <RadzenMenuItem Icon="paid"
+                Path="@_getSchedulePayOffUrl"
+                Visible="@bState.CanPayOff"
+                Text="Pay Off"></RadzenMenuItem>
+<RadzenMenuItem Icon="paid"
+                Path="@_getLoanWriteOffUrl"
+                Visible="@bState.CanWriteOff"
+                Text="Write Off"></RadzenMenuItem>
+<RadzenMenuItem Icon="money"
+                Path="@_loanPayOffUrl"
+                Visible="false"
+                Text="Pay Off"></RadzenMenuItem>
+<RadzenMenuItem Icon="change_circle"
+                Path="@_getChangeCreditAgentUrl"
+                Visible="@bState.IsManager"
+                Text="Change Credit Agent"></RadzenMenuItem> *@
+
 @code {
 
     [Parameter]
@@ -254,41 +271,20 @@
 
         _getLoanWriteOffUrl = $"/App/Loans/{p.LoanId}/WidthrwalCollateral/{p.BranchId}/Branches";
 
-        var multiplePaymentUrl = $"/App/Loans/Repayment/{p.LoanId}/Multiple?BranchId={p.BranchId}&CurrencyId={p.CurrencyId}";
-
-        var multiUrl = $"/app/loans/{p.LoanId}/collection-repayment-schedules/{p.BranchId}/Branches?creditAgentId={p.CreditAgentRefId}&currencyId={p.CurrencyId}";
+        string multiUrl = $"/app/loans/{p.LoanId}/collection-repayment/{p.BranchId}/Branches?creditAgentId={p.CreditAgentRefId}&currencyId={p.CurrencyId}";
 
         _loanEdit = $"/App/Loans/{p.LoanId}/Disbursements/{p.BranchId}/Branches/Edit?customerId={p.CustomerId}";
+
+        string loanDelete = $"/App/Loans/{p.LoanId}/Disbursements/{p.BranchId}/Branches/Delete?customerId={p.CustomerId}";
+
+        _ = bState.CanDeleteLoanDisbursement(p);
+        _ = bState.CanEditLoanDisbursement(p);
 
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
             <RadzenMenuItem Icon="money"
                             Path="@_getPaymentSchedulesUrl"
                             Visible="@bState.CanRecievePayment"
                             Text="Recieve Payment"></RadzenMenuItem>
-
-
-            <RadzenMenuItem Icon="paid"
-                            Path="@_getSchedulePayOffUrl"
-                            Visible="@bState.CanPayOff"
-                            Text="Pay Off"></RadzenMenuItem>
-
-            <RadzenMenuItem Icon="edit"
-                            Path="@_loanEdit"
-                            Disabled
-                            Text="Edit"></RadzenMenuItem>
-
-            <RadzenMenuItem Icon="paid"
-                            Path="@_getLoanWriteOffUrl"
-                            Visible="@bState.CanWriteOff"
-                            Text="Write Off"></RadzenMenuItem>
-            <RadzenMenuItem Icon="money"
-                            Path="@_loanPayOffUrl"
-                            Visible="@bState.CanPayOff"
-                            Text="Pay Off"></RadzenMenuItem>
-            <RadzenMenuItem Icon="change_circle"
-                            Path="@_getChangeCreditAgentUrl"
-                            Visible="@bState.IsManager"
-                            Text="Change Credit Agent"></RadzenMenuItem>
             <RadzenMenuItem Icon="change_circle"
                             Path="@multiUrl"
                             Visible="@bState.CanRecieveMultiple"
@@ -298,6 +294,7 @@
                             Text="Schedule Details"></RadzenMenuItem>
             <RadzenMenuItem Icon="info"
                             Path="@_loanCollateralWidthrawUrl"
+                            Visible="false"
                             Text="Widtraw Collaterals"></RadzenMenuItem>
             <RadzenMenuItem Icon="file_download"
                             Click="@(()=>DownLoadScheduleAsExcel(p))"
@@ -305,6 +302,14 @@
             <RadzenMenuItem Icon="picture_as_pdf"
                             Click="@(()=>DownLoadScheduleAsPdf(p))"
                             Text="Export Loan to Pdf" />
+            <RadzenMenuItem Icon="edit"
+                            Path="@_loanEdit"
+                            Visible="bState.CanRequestEditLoan"
+                            Text="Edit"></RadzenMenuItem>
+            <RadzenMenuItem Icon="delete"
+                            Path="@loanDelete"
+                            Visible="bState.CanRequestDeleteLoan"
+                            Text="Delete"></RadzenMenuItem>
         </RadzenMenu>
     );
 
@@ -327,21 +332,42 @@
     void ContextMenuClick(DataGridCellMouseEventArgs<VLoanDisbursments> args)
     {
 
+        List<ContextMenuItem> items = [];
+
         if (args.Data is null) return;
 
-        ContextMenuService.Open(args, new List<ContextMenuItem>
+        _ = bState.CanDeleteLoanDisbursement(args.Data);
+
+        _ = bState.CanEditLoanDisbursement(args.Data);
+
+        if (bState.CanRecievePayment)
         {
-            new ContextMenuItem { Text = "Recieve Payment", Value="1",Icon="money_bag",Disabled=!bState.CanRecievePayment},
-            new ContextMenuItem { Text = "Schedule Detials", Value="2",Icon="info"},
-            new ContextMenuItem { Text = "Pay Off", Value="7",Icon="money",Disabled=!bState.CanPayOff},
-            new ContextMenuItem { Text = "Collection Payment", Value="9",Icon="money",Disabled=!bState.CanRecieveMultiple},
-            new ContextMenuItem { Text = "Change Credit Agent", Value="5",Icon="find_replace",Disabled=!bState.IsManager},
-            new ContextMenuItem { Text = "Pre Paid", Value="6",Icon="money",Disabled=!bState.CanRecievePayment},
-            new ContextMenuItem { Text = "Widthraw Collaterals", Value="8",Icon="remove"},
-            new ContextMenuItem { Text = "Edit", Value="10",Icon="edit"},
-            new ContextMenuItem { Text = "Export As Excel", Value="3", Icon="file_download"},
-            new ContextMenuItem { Text = "Export As Pdf", Value="4", Icon="picture_as_pdf"},
-        }, (e) => DoContextMenuAction(e, args.Data));
+            items.Add(new ContextMenuItem { Text = "Recieve Payment", Value = "1", Icon = "money_bag" });
+        }
+
+        if (bState.CanRecieveMultiple)
+        {
+            items.Add(new ContextMenuItem { Text = "Collection Payment", Value = "9", Icon = "money" });
+        }
+
+        if (bState.CanPayOff)
+        {
+            items.Add(new ContextMenuItem { Text = "Pay Off", Value = "7", Icon = "money" });
+        }
+
+        if (bState.CanRequestEditLoan)
+        {
+            items.Add(new ContextMenuItem { Text = "Edit", Value = "10", Icon = "edit" });
+        }
+
+        if (bState.CanRequestDeleteLoan)
+        {
+            items.Add(new ContextMenuItem { Text = "Delete", Value = "11", Icon = "delete" });
+        }
+        items.Add(new ContextMenuItem { Text = "Schedule Detials", Value = "2", Icon = "info" });
+        items.Add(new ContextMenuItem { Text = "Export As Excel", Value = "3", Icon = "file_download" });
+        items.Add(new ContextMenuItem { Text = "Export As Pdf", Value = "4", Icon = "picture_as_pdf" });
+        ContextMenuService.Open(args, items, (e) => DoContextMenuAction(e, args.Data));
     }
 
     void DoContextMenuAction(MenuItemEventArgs e, VLoanDisbursments? data)
@@ -354,8 +380,11 @@
 
         _loanCollateralWidthrawUrl = $"/App/Loans/{data.LoanId}/WidthrwalCollateral/{data.BranchId}/Branches";
 
-
         _loanEdit = $"/App/Loans/{data.LoanId}/Disbursements/{data.BranchId}/Branches/Edit?customerId={data.CustomerId}";
+
+        string multiUrl = $"/app/loans/{data.LoanId}/collection-repayment/{data.BranchId}/Branches?creditAgentId={data.CreditAgentRefId}&currencyId={data.CurrencyId}";
+
+        string loanDelete = $"/App/Loans/{data.LoanId}/Disbursements/{data.BranchId}/Branches/Delete?customerId={data.CustomerId}";
 
         switch (e.Value)
         {
@@ -383,8 +412,12 @@
             case "10":
                 NavigationManager.NavigateTo(_loanEdit);
                 break;
+            case "11":
+                NavigationManager.NavigateTo(loanDelete);
+                break;
             default:
-                //NavigationManager.NavigateTo($"App/Loans/Disbursments/Credit-Agent/{data.BranchId}/Branches?CreditAgentId={data.CreditAgentRefId}");
+
+                NavigationManager.NavigateTo(multiUrl);
                 break;
         }
     }

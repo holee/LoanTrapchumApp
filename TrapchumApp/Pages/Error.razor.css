@@ -1,0 +1,383 @@
+/* ═══════════════════════════════════════════
+   Error Page — Premium Design
+   Brand: #25476a (navy), #94d1b8 (mint), #ef4444 (red)
+   ═══════════════════════════════════════════ */
+
+/* ── Page Layout ── */
+.error-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 85vh;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(165deg, #f0f4f8 0%, #e8edf3 40%, #f5f3f0 100%);
+}
+
+/* ── Animated Background Circles ── */
+.error-page__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.error-page__circle {
+    position: absolute;
+    border-radius: 50%;
+}
+
+.error-page__circle--1 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(37, 71, 106, 0.06) 0%, transparent 70%);
+    top: -10%;
+    right: -8%;
+    animation: drift1 30s ease-in-out infinite alternate;
+}
+
+.error-page__circle--2 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(148, 209, 184, 0.08) 0%, transparent 70%);
+    bottom: -5%;
+    left: -5%;
+    animation: drift2 25s ease-in-out infinite alternate;
+}
+
+.error-page__circle--3 {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.04) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: drift3 20s ease-in-out infinite alternate;
+}
+
+/* ── Card ── */
+.error-page__card {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 20px;
+    padding: 3rem 2.5rem 2.5rem;
+    max-width: 460px;
+    width: 100%;
+    text-align: center;
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.03),
+        0 2px 4px rgba(0, 0, 0, 0.02),
+        0 12px 24px rgba(0, 0, 0, 0.04),
+        0 24px 48px rgba(37, 71, 106, 0.06);
+    animation: cardEnter 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── SVG Illustration ── */
+.error-page__illustration {
+    margin: 0 auto 1.25rem;
+    width: 180px;
+    height: 140px;
+    animation: illustrationFloat 6s ease-in-out infinite;
+}
+
+.error-page__svg {
+    width: 100%;
+    height: 100%;
+}
+
+.error-page__warning-icon {
+    animation: warningPulse 2s ease-in-out infinite;
+    transform-origin: 132px 110px;
+}
+
+.error-page__particle--1 { animation: particleDrift1 8s ease-in-out infinite; }
+.error-page__particle--2 { animation: particleDrift2 10s ease-in-out infinite; }
+.error-page__particle--3 { animation: particleDrift3 7s ease-in-out infinite; }
+
+/* ── Error Badge ── */
+.error-page__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #dc2626;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.25rem;
+}
+
+.error-page__badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ef4444;
+    animation: dotPulse 2s ease-in-out infinite;
+}
+
+.error-page__badge-text {
+    font-family: inherit;
+}
+
+/* ── Typography ── */
+.error-page__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.75rem;
+    letter-spacing: -0.025em;
+    line-height: 1.3;
+}
+
+.error-page__description {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.65;
+    margin: 0 0 1.5rem;
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ── Request ID ── */
+.error-page__request-id {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-bottom: 1.5rem;
+    word-break: break-all;
+    max-width: 100%;
+    transition: border-color 0.2s;
+}
+
+.error-page__request-id:hover {
+    border-color: #cbd5e1;
+}
+
+.error-page__request-id-label {
+    font-weight: 600;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+.error-page__request-id-value {
+    font-family: 'Consolas', 'SF Mono', 'Fira Code', monospace;
+    font-weight: 500;
+    color: #334155;
+    font-size: 0.75rem;
+}
+
+.error-page__copy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.error-page__copy-btn:hover {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.error-page__copy-btn ::deep .rzi {
+    font-size: 14px;
+}
+
+.error-page__copy-btn ::deep .error-page__check-icon {
+    display: none;
+}
+
+.error-page__copy-btn.copied {
+    color: #10b981;
+}
+
+.error-page__copy-btn.copied ::deep .error-page__copy-icon {
+    display: none;
+}
+
+.error-page__copy-btn.copied ::deep .error-page__check-icon {
+    display: inline-block;
+}
+
+/* ── Divider ── */
+.error-page__divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #e2e8f0 20%, #e2e8f0 80%, transparent);
+    margin-bottom: 1.5rem;
+}
+
+/* ── Action Buttons ── */
+.error-page__actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.error-page__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0.6rem 1.4rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    white-space: nowrap;
+}
+
+.error-page__btn ::deep .rzi {
+    font-size: 16px;
+}
+
+.error-page__btn--primary {
+    background: #25476a;
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(37, 71, 106, 0.2), 0 4px 12px rgba(37, 71, 106, 0.15);
+}
+
+.error-page__btn--primary:hover {
+    background: #1e3a58;
+    box-shadow: 0 2px 6px rgba(37, 71, 106, 0.25), 0 8px 20px rgba(37, 71, 106, 0.2);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.error-page__btn--primary:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(37, 71, 106, 0.2);
+}
+
+.error-page__btn--ghost {
+    background: transparent;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.error-page__btn--ghost:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #1e293b;
+    transform: translateY(-1px);
+}
+
+.error-page__btn--ghost:active {
+    transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════
+   Animations
+   ═══════════════════════════════════════════ */
+
+@keyframes cardEnter {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes illustrationFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes warningPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+}
+
+@keyframes dotPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.75); }
+}
+
+@keyframes particleDrift1 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(5px, -8px); }
+}
+
+@keyframes particleDrift2 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-6px, 5px); }
+}
+
+@keyframes particleDrift3 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(4px, 6px); }
+}
+
+@keyframes drift1 {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-30px, 20px); }
+}
+
+@keyframes drift2 {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(25px, -15px); }
+}
+
+@keyframes drift3 {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    100% { transform: translate(-40%, -60%) scale(1.2); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+    .error-page {
+        padding: 1rem;
+    }
+
+    .error-page__card {
+        padding: 2rem 1.5rem 1.75rem;
+        border-radius: 16px;
+    }
+
+    .error-page__illustration {
+        width: 140px;
+        height: 110px;
+    }
+
+    .error-page__title {
+        font-size: 1.25rem;
+    }
+
+    .error-page__actions {
+        flex-direction: column;
+    }
+
+    .error-page__btn {
+        width: 100%;
+    }
+}

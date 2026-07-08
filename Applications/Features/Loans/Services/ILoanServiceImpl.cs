@@ -7,10 +7,10 @@ namespace Applications.Features.Loans.Services;
 
 public interface ILoanServiceImpl
 {
-    Task<Result<string>> ChangedCreditAgent(int? branchId, List<LoanChangedCaDtoCreate> req);
-    Task<Result<string>> DeleteAsync(string? loanId, int? branchId);
-    Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);  
-    Task<Pager<VLoanDisbursments>> GetLoansByBranchIdAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default);   
+    //Task<Result<string>> ChangedCreditAgent(int? branchId, List<LoanChangedCaDtoCreate> req);
+    //Task<Result<string>> DeleteAsync(string? loanId, int? branchId);
+    //Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);  
+    //Task<Pager<VLoanDisbursments>> GetLoansByBranchIdAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default);   
     Task<Result<VLoanDisbursments>> GetLoanByCreditAgentIdAsync(string? creditAgentId,string? loanId, int? branchId, CancellationToken cancellation = default);
     Task<Pager<VLoanDisbursments>> GetLoanByCreditAgentsAsync(string? creditAgentId, int? branchId, CancellationToken cancellation = default);
   

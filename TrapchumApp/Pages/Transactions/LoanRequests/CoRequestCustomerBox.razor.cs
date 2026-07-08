@@ -14,11 +14,12 @@ public partial class CoRequestCustomerBox
 
     RadzenDataGrid<CoPawnCustomerDto> gridCustomers = default!;
      
-    async void ClickedAdd()
+    private async Task ClickedAdd()
     {
         await Add.InvokeAsync();
     }
-    async void ClickedRevmove(CoPawnCustomerDto g)
+
+    private async Task ClickedRemove(CoPawnCustomerDto g)
     {
         await Remove.InvokeAsync(g);
     }

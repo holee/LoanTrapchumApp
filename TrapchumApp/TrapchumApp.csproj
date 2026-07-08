@@ -36,6 +36,7 @@
 		<Content Remove="Pages\Transactions\Exchanges\ExchangesSidebar.razor" />
 		<Content Remove="Pages\Transactions\Loans\Disbursements\LoanCollaterals.razor" />
 		<Content Remove="Pages\Transactions\Loans\Disbursements\LoanDcuments.razor" />
+		<Content Remove="Pages\Transactions\Loans\Disbursements\LoanDeletePage.razor" />
 		<Content Remove="Pages\Transactions\Loans\Disbursements\LoanEditPage.razor" />
 		<Content Remove="Pages\Transactions\Loans\Disbursements\LoanGaurantors.razor" />
 		<Content Remove="Pages\Transactions\RecievePayements\PaymentOffSideBar.razor" />
@@ -205,6 +206,7 @@
 		<AdditionalFiles Include="Pages\Transactions\Ledgers\CreateLedgerModal.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Ledgers\EditLedgerModal.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Ledgers\LedgerIndexPage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanDeletePage.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanEditPage.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanCollaterals.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanDcuments.razor" />
@@ -266,7 +268,6 @@
 		<AdditionalFiles Include="Pages\Transactions\RecievePayements\PaymentOffSideBar.razor" />
 		<AdditionalFiles Include="Pages\Transactions\RecievePayements\RepaymentMultiplePage.razor" />
 		<AdditionalFiles Include="Shared\CascadingAppState.razor" />
-		<AdditionalFiles Include="Shared\CascadingAuthState.razor" />
 		<AdditionalFiles Include="Shared\CascadingCurrency.razor" />
 		<AdditionalFiles Include="Shared\MessageStatus.razor" />
 		<AdditionalFiles Include="Shared\RedirectToAccessDenied.razor" />

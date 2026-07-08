@@ -1,10 +1,13 @@
-﻿using Applications.Commons.ExceptionHandlers;
+﻿using Applications.Bases;
+using Applications.Commons.ExceptionHandlers;
 using Applications.Commons.Messages.LoanDisbursements;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.Customers.Response;
 using Applications.Features.Loans.Dtos;
+using Applications.Features.Loans.Dtos.Requests;
 using Applications.Features.Loans.Dtos.Responses;
+using Applications.Interfaces.Identity;
 using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.Paginations;
@@ -18,17 +21,18 @@ using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
 using Infrastructures.Implements.Extensions;
 using Mapster;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using static Dapper.SqlMapper;
+using Applications.Bases;
 
 namespace Infrastructures.Implements;
 
 
 public sealed class LoanRepository(ILogger<LoanRepository> logger,
                                   IDapperConnectionFactory connectionFactory,
+                                  ICurrentUserService currentUser,
                                   IDbContextFactory<DataContext> dbContextFactory) : ILoanService
 {
     public async Task<ErrorOr<DisburseResult>> CreateLoanDisbursementAsync(LoanDisbursment req, CancellationToken cancellation = default)
@@ -52,6 +56,8 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
         try
         {
             req.LoanAccountCode = await GetMaxLoanAccountCode(context);
+
+            req.CreatedBy = currentUser.UserId;
 
             var entry = context.LoanDisbursments.Add(req);
 
@@ -92,7 +98,6 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
         }
     }
 
-
     public async Task<LoanDtoCreate> GetLoanForEditAsync(string? loanId, int? branchId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(loanId) || branchId is null)
@@ -100,45 +105,43 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
             throw new NotFoundException($"Loan with ID '{loanId}' not found for branch {branchId}.");
         }
 
+        var normalizedLoanId = loanId.Trim();
+        var branch = branchId.Value;
+        var notFoundMessage = $"Loan with ID '{normalizedLoanId}' not found for branch {branch}.";
+
         var command = new CommandDefinition(
             ProcedureConstant.SpGetLoanForEdit,
-            new { LoanId = loanId, BranchId = branchId },
+            new { LoanId = normalizedLoanId, BranchId = branch },
             commandType: CommandType.StoredProcedure,
             commandTimeout: 30,
             cancellationToken: cancellationToken);
 
         using var connection = await connectionFactory.CreateConnectionAsync(cancellationToken).ConfigureAwait(false);
-
         await using GridReader multi = await connection.QueryMultipleAsync(command).ConfigureAwait(false);
 
         var loan = await multi.ReadSingleOrDefaultAsync<LoanDtoCreate>().ConfigureAwait(false)
-            ?? throw new NotFoundException($"Loan with ID '{loanId}' not found for branch {branchId}.");
+            ?? throw new NotFoundException(notFoundMessage);
 
+        loan.LoanSchedules = (await multi.ReadAsync<LoanScheduleDtoCreate>().ConfigureAwait(false)).AsList();
         loan.Collaterals = (await multi.ReadAsync<LoanCollateralLinesDtoEdit>().ConfigureAwait(false)).AsList();
-
         loan.Guarantors = (await multi.ReadAsync<LoanGuarantorDtoEdit>().ConfigureAwait(false)).AsList();
-
         loan.Descriptions = (await multi.ReadAsync<LoanDescriptionDtoEdit>().ConfigureAwait(false)).AsList();
-
         loan.CoPawCustomers = (await multi.ReadAsync<CoPawnCustomerDtoEdit>().ConfigureAwait(false)).AsList();
-
         loan.Documents = (await multi.ReadAsync<LoanDocumentsDtoEdit>().ConfigureAwait(false)).AsList();
 
         return loan;
     }
 
+
     public async Task<DisburseResult> EditLoanDisbursementAsync(LoanDisbursment req, CancellationToken cancellation = default)
     {
-        ArgumentNullException.ThrowIfNull(req);
 
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
         if (await IsScheduleAlreadyPayment(context, req.LoanId, req.BranchRefId, cancellation))
         {
-            throw new InvalidOperationException("Cannot edit loan disbursement because some schedules have already been paid.");
+            throw new ScheduleAlreadyPaidException("Cannot edit loan disbursement because some schedules have already been paid.");
         }
-
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellation);
 
         try
         {
@@ -153,13 +156,20 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
                 throw new NotFoundException("No Loan was found for the given ID and branch.");
             }
 
+            int dayDiff = existingLoan.CreatedDt.DaysUntil(DateTimeOffset.UtcNow);
+
+            if (dayDiff > 1 || existingLoan.AllowEdit == false)
+            {
+                throw new UpdateException("Loan disbursement cannot be edited after 1 day or if editing is not allowed.");
+            }
+
             existingLoan.Installments = req.Installments;
             existingLoan.InterestRate = req.InterestRate;
             existingLoan.CollectionFeeRate = req.CollectionFeeRate;
             existingLoan.RepaymentModeRefId = req.RepaymentModeRefId;
             existingLoan.PayEvery = req.PayEvery;
-            existingLoan.IsEdit = req.IsEdit;
-            existingLoan.ModifiedDt = DateTime.UtcNow;
+            existingLoan.IsEdit = true;
+            existingLoan.ModifiedDt = DateTimeOffset.UtcNow;
             existingLoan.FirstPaymentDate = req.FirstPaymentDate;
             existingLoan.StartDate = req.StartDate;
             existingLoan.LastPaymentDate = req.LastPaymentDate;
@@ -167,32 +177,23 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
             existingLoan.PeriodName = req.PeriodName;
             existingLoan.Principle = req.Principle;
             existingLoan.Remark = req.Remark;
-
             context.LoanSchedules.RemoveRange(existingLoan.LoanSchedules!);
-
             existingLoan.LoanSchedules = req.LoanSchedules;
-
             await context.SaveChangesAsync(cancellation);
-
-            await transaction.CommitAsync(cancellation);
-
             return new DisburseResult(true, req.LoanId, req.BranchRefId, "Loan updated successfully.");
         }
         catch (DbUpdateException ex)
         {
             logger.LogError(ex, "Failed to edit loan disbursement for customer {CustomerId}", req.CustomerRefId);
-
-            await transaction.RollbackAsync(CancellationToken.None);
-
             throw new UnexpectedException(ex.InnerException?.Message ?? ex.Message);
         }
     }
 
-    public async Task<DisburseResult> DeleteLoanDisbursementAsync(string? loanId, int? branchId, string customerId, CancellationToken cancellation = default)
+    public async Task<DeleteResult> DeleteLoanDisbursementAsync(string? loanId, int? branchId, string? customerId, CancellationToken cancellation = default)
     {
-        if (await IsScheduleAlreadyPayment(loanId, branchId, cancellation))
+        if (await IsScheduleSomePayment(loanId, branchId, cancellation))
         {
-            throw new InvalidOperationException("Cannot delete loan disbursement because some schedules have already been paid.");
+            throw new ScheduleAlreadyPaidException("Cannot delete loan disbursement because some schedules have already been paid.");
         }
 
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
@@ -209,11 +210,21 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
                 throw new NotFoundException("No Loan was found for the given ID and branch.");
             }
 
-            context.LoanDisbursments.Remove(existingLoan);
+
+            int dayDiff = existingLoan.CreatedDt.DaysUntil(DateTimeOffset.Now);
+
+            if (dayDiff > 1 || existingLoan.AllowDelete == false)
+            {
+                throw new DeleteException("Loan disbursement cannot be deleted after 1 day or if deletion is not allowed.");
+            }
+
+            existingLoan.IsDeleted = true;
+
+            existingLoan.ModifiedDt = DateTimeOffset.UtcNow;
 
             await context.SaveChangesAsync(cancellation);
 
-            return new DisburseResult(true, loanId, branchId, "Loan disbursement deleted successfully.");
+            return DeleteResult.Success("Loan disbursement deleted successfully.");
         }
         catch (DbUpdateException ex)
         {
@@ -223,6 +234,260 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
         }
     }
 
+    public async Task<DeleteResult> RequestDeleteLoanAsync(RequestDeleteDtoCreate request, CancellationToken cancellation = default)
+    {
+        if (await IsScheduleSomePayment(request.LoanId, request.BranchId, cancellation))
+        {
+            return DeleteResult.InUse("មិនអាចស្នើរសុំលុបប្រាក់កម្ចីបាន ព្រោះមានប្រតិបត្តិការបង់ប្រាក់សងប្រាក់រួចហើយ។");
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        try
+        {
+            var existingLoan = await context.LoanDisbursments
+                                             .FirstOrDefaultAsync(x => x.LoanId == request.LoanId &&
+                                                                  x.BranchRefId == request.BranchId, cancellation);
+
+            if (existingLoan is null)
+            {
+                return DeleteResult.NotFound("មិនមានប្រាក់កម្ចីណាមួយសម្រាប់ ID និងសាខាដែលបានផ្តល់។");
+            }
+
+            existingLoan.RequestDelete = true;
+
+            existingLoan.ModifiedDt = DateTimeOffset.UtcNow;
+
+            if (!string.IsNullOrEmpty(request.Note))
+            {
+
+                context.LoanDescriptions.Add(new LoanDescriptions
+                {
+                    LoanRequestRefId = existingLoan.LoanRequestId,
+
+                    Memo = request.Note,
+
+                    UserRefId = currentUser.UserId
+                });
+
+            }
+
+            await context.SaveChangesAsync(cancellation);
+
+            return DeleteResult.Success("ស្នើសុំលុបប្រាក់កម្ចីដោយជោគជ័យ។");
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex, "Failed to request deletion for loan disbursement for loan {LoanId} and branch {BranchId}", request.LoanId, request.BranchId);
+
+            throw new UnexpectedException(ex.InnerException?.Message ?? ex.Message);
+        }
+    }
+
+    public async Task<AppResult> RequestEditLoanAsync(RequestDeleteDtoCreate request, CancellationToken cancellation = default)
+    {
+        if (await IsScheduleSomePayment(request.LoanId, request.BranchId, cancellation))
+        {
+            return AppResult.InUse("មិនអាចស្នើរសុំលុបប្រាក់កម្ចីបាន ព្រោះមានប្រតិបត្តិការបង់ប្រាក់សងប្រាក់រួចហើយ។");
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        try
+        {
+            var existingLoan = await context.LoanDisbursments
+                .FirstOrDefaultAsync(x => x.LoanId == request.LoanId &&
+                                          x.BranchRefId == request.BranchId, cancellation);
+
+            if (existingLoan is null)
+            {
+                return AppResult.NotFound("មិនមានប្រាក់កម្ចីណាមួយសម្រាប់ ID និងសាខាដែលបានផ្តល់។");
+            }
+
+            existingLoan.RequestEdit = true;
+
+            existingLoan.ModifiedDt = DateTimeOffset.UtcNow;
+
+            if (!string.IsNullOrEmpty(request.Note))
+            {
+
+                context.LoanDescriptions.Add(new LoanDescriptions
+                {
+                    LoanRequestRefId = existingLoan.LoanRequestId,
+
+                    Memo = request.Note,
+
+                    UserRefId = currentUser.UserId
+                });
+
+            }
+
+            await context.SaveChangesAsync(cancellation);
+
+            return AppResult.Success("ស្នើសុំលុបប្រាក់កម្ចីដោយជោគជ័យ។");
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex, "Failed to request deletion for loan disbursement for loan {LoanId} and branch {BranchId}", request.LoanId, request.BranchId);
+
+            throw new UnexpectedException(ex.InnerException?.Message ?? ex.Message);
+        }
+    }
+
+    public async Task<DisburseResult> ApproveDeleteRequestAsync(RequestDeleteDtoCreate request, CancellationToken cancellation = default)
+    {
+        if (await IsScheduleSomePayment(request.LoanId, request.BranchId, cancellation))
+        {
+            throw new ScheduleAlreadyPaidException("Cannot delete loan disbursement because some schedules have already been paid.");
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        try
+        {
+            var existingLoan = await context.LoanDisbursments
+                                            .FirstOrDefaultAsync(x => x.LoanId == request.LoanId &&
+                                                                  x.BranchRefId == request.BranchId, cancellation);
+
+            if (existingLoan is null)
+            {
+                throw new NotFoundException("No Loan was found for the given ID and branch.");
+            }
+
+            existingLoan.AllowDelete = true;
+
+            existingLoan.ModifiedDt = DateTimeOffset.UtcNow;
+
+            if (!string.IsNullOrEmpty(request.Note))
+            {
+
+                context.LoanDescriptions.Add(new LoanDescriptions
+                {
+                    LoanRequestRefId = existingLoan.LoanRequestId,
+
+                    Memo = request.Note,
+
+                    UserRefId = currentUser.UserId
+                });
+
+            }
+
+            await context.SaveChangesAsync(cancellation);
+
+            return new DisburseResult(true, request.LoanId, request.BranchId, "Loan disbursement deletion approved successfully.");
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex, "Failed to approve deletion for loan disbursement for loan {LoanId} and branch {BranchId}", request.LoanId, request.BranchId);
+
+            throw new UnexpectedException(ex.InnerException?.Message ?? ex.Message);
+        }
+    }
+
+
+
+    public async Task<AppResult> ApproveEditLoanRequestAsync(RequestDeleteDtoCreate request, CancellationToken cancellation = default)
+    {
+        if (await IsScheduleSomePayment(request.LoanId, request.BranchId, cancellation))
+        {
+            throw new ScheduleAlreadyPaidException("Cannot delete loan disbursement because some schedules have already been paid.");
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        try
+        {
+            var existingLoan = await context.LoanDisbursments
+                .FirstOrDefaultAsync(x => x.LoanId == request.LoanId &&
+                                          x.BranchRefId == request.BranchId, cancellation);
+
+            if (existingLoan is null)
+            {
+                throw new NotFoundException("No Loan was found for the given ID and branch.");
+            }
+
+            existingLoan.AllowEdit = true;
+
+            existingLoan.ModifiedDt = DateTimeOffset.UtcNow;
+
+            if (!string.IsNullOrEmpty(request.Note))
+            {
+
+                context.LoanDescriptions.Add(new LoanDescriptions
+                {
+                    LoanRequestRefId = existingLoan.LoanRequestId,
+
+                    Memo = request.Note,
+
+                    UserRefId = currentUser.UserId
+                });
+
+            }
+
+            await context.SaveChangesAsync(cancellation);
+
+            return AppResult.Success("Loan disbursement deletion approved successfully.");
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex, "Failed to approve deletion for loan disbursement for loan {LoanId} and branch {BranchId}", request.LoanId, request.BranchId);
+
+            throw new UnexpectedException(ex.InnerException?.Message ?? ex.Message);
+        }
+    }
+
+
+    public async Task<DeleteResult> DeniedDeleteRequestAsync(RequestDeleteDtoCreate request, CancellationToken cancellation = default)
+    {
+        if (await IsScheduleSomePayment(request.LoanId, request.BranchId, cancellation))
+        {
+            return DeleteResult.InUse("មិនអាចលុបប្រាក់កម្ចីបាន ព្រោះមានប្រតិបត្តិការបង់ប្រាក់សងប្រាក់រួចហើយ។");
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        try
+        {
+            var existingLoan = await context.LoanDisbursments
+                                             .FirstOrDefaultAsync(x => x.LoanId == request.LoanId &&
+                                                                  x.BranchRefId == request.BranchId, cancellation);
+
+            if (existingLoan is null)
+            {
+                return DeleteResult.NotFound("មិនមានប្រាក់កម្ចីណាមួយសម្រាប់ ID និងសាខាដែលបានផ្តល់។");
+            }
+
+            existingLoan.RequestDelete = false;
+
+            existingLoan.AllowDelete = false;
+
+            existingLoan.ModifiedDt = DateTimeOffset.UtcNow;
+
+            if (!string.IsNullOrEmpty(request.Note))
+            {
+
+                context.LoanDescriptions.Add(new LoanDescriptions
+                {
+                    LoanRequestRefId = existingLoan.LoanRequestId,
+
+                    Memo = request.Note,
+
+                    UserRefId = currentUser.UserId
+                });
+
+            }
+
+            await context.SaveChangesAsync(cancellation);
+
+            return DeleteResult.Success("ស្នើសុំលុបប្រាក់កម្ចីដោយជោគជ័យ។");
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex, "Failed to request deletion for loan disbursement for loan {LoanId} and branch {BranchId}", request.LoanId, request.BranchId);
+
+            throw new UnexpectedException(ex.InnerException?.Message ?? ex.Message);
+        }
+    }
 
     public async Task<bool> WidthrawalLoanCollateralsAsync(IEnumerable<WidthrawCollateralDtoCreate> req, CancellationToken cancellation = default)
     {
@@ -515,74 +780,6 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
         return (new Pager<VLoanDisbursments>(items, counts), counts);
     }
 
-    public async Task<ErrorOr<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false)
-    {
-        using var db = connectionFactory.CreateConnection();
-
-        if (include)
-        {
-            var jointDictionary = new Dictionary<string, VLoanDisbursments>();
-
-            var queries = await db.QueryAsync<VLoanDisbursments, VSchedule, VLoanDisbursments>(ProcedureConstant.GetLoanById,
-                (disbursment, schedule) =>
-                {
-                    if (jointDictionary.TryGetValue(disbursment.LoanId!, out var existingDis))
-                    {
-                        disbursment = existingDis!;
-                    }
-                    else
-                    {
-                        jointDictionary.Add(disbursment.LoanId!, disbursment);
-                    }
-
-                    disbursment.Schedules?.Add(schedule);
-
-                    return disbursment;
-                },
-                param: new
-                {
-                    @LoanId = loanId,
-
-                    @BranchId = branchId,
-
-                    @ScheduleStatusId = (int)status,
-
-                    @Include = include
-                }, splitOn: "LoanScheduleId"
-                , commandType: CommandType.StoredProcedure);
-
-            var item = queries.FirstOrDefault();
-
-            if (item is null)
-            {
-                return Error.NotFound(LoanMessages.LoanNotFound);
-            }
-
-            return item;
-        }
-
-        var result = await db.QueryFirstOrDefaultAsync<VLoanDisbursments>("spGetLoanById",
-            param: new
-            {
-                @LoanId = loanId,
-
-                @BranchId = branchId,
-
-                @ScheduleStatusId = (int)status,
-
-                @Include = include
-            }, commandType: CommandType.StoredProcedure);
-
-
-        if (result is null)
-        {
-            return Error.NotFound(LoanMessages.LoanNotFound);
-        }
-
-        return result;
-    }
-
-
     public async Task<ErrorOr<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default)
     {
 
@@ -623,6 +820,21 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
                             : ErrorOr.Error.NotFound("NotFound", "No loan disbursement found.");
     }
 
+    public async Task<LoanDisbursment?> GetLoanByIdAsync(string? loanId, int? branchId, CancellationToken cancellation = default)
+    {
+        await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var loan = await _context.LoanDisbursments
+                                .Include(x => x.LoanSchedules.Where(x => x.LoanRefId == loanId && x.BranchId == branchId))
+                                .Include(x => x.LoanRequest)
+                                    .ThenInclude(x => x.LoanDescriptions)
+                                .Include(x => x.LoanRequest)
+                                    .ThenInclude(x => x.CoPawnRequests)
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(x => x.LoanId == loanId && x.BranchRefId == branchId, cancellation);
+
+        return loan;
+    }
 
     public async Task<Pager<VSchedule>> GetDueScheduleLoanByIdAsync(string? loanId, int? branchId, CancellationToken cancellation = default)
     {
@@ -671,7 +883,6 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
 
         return PagerExtensions.Create(items, counts);
     }
-
 
     public async Task<IEnumerable<VSchedule>> GetLoanSchedulesAsync(string? loanId, int? branchId,
                     ScheduleStatus status, bool include = false,
@@ -733,8 +944,6 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
 
     }
 
-
-
     public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId)
     {
         using var db = connectionFactory.CreateConnection();
@@ -756,9 +965,6 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
 
         return Applications.Responses.Result.Success(result);
     }
-
-
-
 
     public async Task<Result<VLoanDisbursments>> GetLoanWithSchedulesByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false)
     {
@@ -823,8 +1029,6 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
 
         return Applications.Responses.Result.Success(result);
     }
-
-
 
     public async Task<VLoanDisbursments?> GetLoanByCreditAgentIdAsync(string? creditAgentId, string? loanId, int? branchId, CancellationToken cancellation = default)
     {
@@ -901,7 +1105,7 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
                               x.LoanstatusId == (int)LoanStatuses.Active);
     }
 
-    private async Task<bool> IsScheduleAlreadyPayment(string? loanId, int? branchId, CancellationToken cancellation = default)
+    private async Task<bool> IsScheduleSomePayment(string? loanId, int? branchId, CancellationToken cancellation = default)
     {
         ArgumentNullException.ThrowIfNull(loanId, nameof(loanId));
 
@@ -1348,4 +1552,70 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
 
 //        return Result.Failure<bool>(ErrorResponse.ServerError($"{ex.Message}"));
 //    }
+//}
+//public async Task<ErrorOr<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false)
+//{
+//    using var db = connectionFactory.CreateConnection();
+
+//    if (include)
+//    {
+//        var jointDictionary = new Dictionary<string, VLoanDisbursments>();
+
+//        var queries = await db.QueryAsync<VLoanDisbursments, VSchedule, VLoanDisbursments>(ProcedureConstant.GetLoanById,
+//            (disbursment, schedule) =>
+//            {
+//                if (jointDictionary.TryGetValue(disbursment.LoanId!, out var existingDis))
+//                {
+//                    disbursment = existingDis!;
+//                }
+//                else
+//                {
+//                    jointDictionary.Add(disbursment.LoanId!, disbursment);
+//                }
+
+//                disbursment.Schedules?.Add(schedule);
+
+//                return disbursment;
+//            },
+//            param: new
+//            {
+//                @LoanId = loanId,
+
+//                @BranchId = branchId,
+
+//                @ScheduleStatusId = (int)status,
+
+//                @Include = include
+//            }, splitOn: "LoanScheduleId"
+//            , commandType: CommandType.StoredProcedure);
+
+//        var item = queries.FirstOrDefault();
+
+//        if (item is null)
+//        {
+//            return Error.NotFound(LoanMessages.LoanNotFound);
+//        }
+
+//        return item;
+//    }
+
+//    var result = await db.QueryFirstOrDefaultAsync<VLoanDisbursments>("spGetLoanById",
+//        param: new
+//        {
+//            @LoanId = loanId,
+
+//            @BranchId = branchId,
+
+//            @ScheduleStatusId = (int)status,
+
+//            @Include = include
+//        }, commandType: CommandType.StoredProcedure);
+
+
+//    if (result is null)
+//    {
+//        return Error.NotFound(LoanMessages.LoanNotFound);
+//    }
+
+//    return result;
 //}

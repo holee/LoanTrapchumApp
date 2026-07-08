@@ -1,9 +1,6 @@
-﻿using Applications.Enumerations;
-using Applications.Features.Loans.Dtos.Responses;
-using Applications.Responses;
+﻿using Domains.Models.Loans;
 using ErrorOr;
 
 namespace Applications.Features.Loans.Queries.GetLoanById;
 
-public record GetLoanByIdQuery(string? LoanId, int? BranchId, ScheduleStatus Status = ScheduleStatus.All, bool Include = false)
-    : IRequest<ErrorOr<VLoanDisbursments>>;
+public record GetLoanByIdQuery(string? LoanId, int? BranchId) : IRequest<ErrorOr<LoanDisbursment>>;

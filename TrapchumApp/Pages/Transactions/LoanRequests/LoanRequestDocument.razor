@@ -1,70 +1,5 @@
 ﻿@using Applications.Responses.ViewModels.Loans.Requests
 
-<style>
-    .doc-card {
-        border-radius: 12px;
-        border: 1px solid var(--rz-base-200);
-        background: var(--rz-base-background-color);
-        box-shadow: 0 2px 8px rgba(0,0,0,.06);
-        overflow: hidden;
-    }
-    .doc-card-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: .75rem 1.25rem;
-        background: linear-gradient(135deg, var(--rz-primary) 0%, var(--rz-primary-darker) 100%);
-        color: #fff;
-        gap: .5rem;
-    }
-    .doc-card-header .header-title {
-        display: flex;
-        align-items: center;
-        gap: .4rem;
-        font-size: 1rem;
-        font-weight: 600;
-        letter-spacing: .01em;
-    }
-    .doc-card-body {
-        padding: .75rem 1rem 1rem;
-    }
-    .badge-count {
-        background: rgba(255,255,255,.22);
-        color: #fff;
-        font-size: .7rem;
-        font-weight: 600;
-        padding: .1rem .5rem;
-        border-radius: 999px;
-        margin-left: .25rem;
-    }
-    .doc-file-icon {
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
-        background: var(--rz-primary-lighter);
-        color: var(--rz-primary-darker);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        font-size: .9rem;
-    }
-    .doc-name-cell {
-        display: flex;
-        align-items: center;
-        gap: .5rem;
-    }
-    .doc-size-badge {
-        display: inline-block;
-        background: var(--rz-base-200);
-        color: var(--rz-text-secondary-color);
-        font-size: .72rem;
-        font-weight: 600;
-        padding: .1rem .45rem;
-        border-radius: 999px;
-    }
-</style>
-
 <div class="doc-card">
     <div class="doc-card-header">
         <span class="header-title">
@@ -114,11 +49,11 @@
 
                 <RadzenDataGridColumn Context="g"
                                       Width="16rem"
-                                      Title="File Title"
+                                      Title="ចំណងជើងឯកសារ"
                                       Property="@(nameof(VLoanRequestsDocuments.OriginalName))"
                                       Sortable="false">
                     <HeaderTemplate>
-                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">File Title</span>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">ចំណងជើងឯកសារ</span>
                     </HeaderTemplate>
                     <Template>
                         <div class="doc-name-cell">
@@ -132,11 +67,11 @@
 
                 <RadzenDataGridColumn Width="22rem"
                                       Property="@(nameof(VLoanRequestsDocuments.NewFileName))"
-                                      Title="Link"
+                                      Title="តំណរភ្ជាប់"
                                       Context="d"
                                       Sortable="false">
                     <HeaderTemplate>
-                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Link</span>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">តំណរភ្ជាប់</span>
                     </HeaderTemplate>
                     <Template>
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.2rem">
@@ -147,13 +82,13 @@
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn Context="g"
-                                      Title="Size"
+                                      Title="ទំហំ"
                                       TextAlign="TextAlign.Center"
                                       Width="7rem"
                                       Property="@(nameof(VLoanRequestsDocuments.FileSize))"
                                       Sortable="false">
                     <HeaderTemplate>
-                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Size</span>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">ទំហំ</span>
                     </HeaderTemplate>
                     <Template>
                         <span class="doc-size-badge">
@@ -163,11 +98,11 @@
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn Context="g"
-                                      Title="Description"
+                                      Title="ផ្សេងៗ"
                                       Property="@(nameof(VLoanRequestsDocuments.Description))"
                                       Sortable="false">
                     <HeaderTemplate>
-                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Description</span>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">ផ្សេងៗ</span>
                     </HeaderTemplate>
                     <Template>
                         <span style="font-size:.82rem;color:var(--rz-text-secondary-color);">@g.Description</span>

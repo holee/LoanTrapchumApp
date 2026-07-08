@@ -17,18 +17,14 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
         RadzenDataGrid<VLoanRequestGuarantor> gridGuarantors = default!;
 
-        private readonly IGuarantorServiceImpl _gService;
+        [Inject] private IGuarantorServiceImpl _gService { get; set; } = default!;
 
-        public LoanRequestGaurantor(IGuarantorServiceImpl gService)
-        {
-            _gService = gService;
-        }
-
-        async void ClickedAdd()
+        private async Task ClickedAdd()
         {
             await Add.InvokeAsync();
         }
-        async void ClickedRevmove(VLoanRequestGuarantor g)
+
+        private async Task ClickedRemove(VLoanRequestGuarantor g)
         {
             await Remove.InvokeAsync(g);
         }

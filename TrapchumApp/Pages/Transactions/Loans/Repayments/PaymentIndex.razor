@@ -436,10 +436,6 @@
 </RadzenTabs>
 @code {
 
-    // ── AllTab (inlined from ClientAllPayTab) ──────────────────────────────
-    [Inject] private ILoanServiceImpl _allTab_loanService { get; set; } = default!;
-    [Inject] private ILoanScheduleServiceImpl _allTab_loanScheduleService { get; set; } = default!;
-
     private List<VSchedule> _allTab_scheduleItems = [];
 
     private string? _allTab_filter = string.Empty;
@@ -806,6 +802,7 @@
 
     }
 
+  
     private void ShowLateScheduleDetails(string loanId)
     {
         var existingIndex = _tabs.FindIndex(t => t.Key == loanId);

@@ -1,4 +1,5 @@
 ﻿using Applications.Commons.Authorizations;
+using Applications.Commons.Authorizations.Handlers;
 using Applications.Constants.Authorizations;
 using Applications.Extensions.Identity.Policies;
 using Microsoft.AspNetCore.Authorization;
@@ -99,11 +100,31 @@ namespace Applications
             options.AddPolicy(Policies.SameUser, policy => policy.Requirements.Add(new SameUserRequestRequirement()));
         }
 
-        public static IServiceCollection AddPolicyServices(this IServiceCollection services)
+        public static IServiceCollection AddPoliciesServices(this IServiceCollection services)
         {
             services.AddTransientServices();
 
             services.AddAuthorizationCore(option => RegisterPermissionClaims(option));
+
+            {
+                services.AddScoped<IAuthorizationHandler, SameUserRequestAuthorizationHandler>();
+                services.AddScoped<IAuthorizationHandler, SameUserApprovedAuthorizationHandler>();
+                services.AddScoped<IAuthorizationHandler, IsCanApprovedNormalAmountHandler>();
+                services.AddScoped<IAuthorizationHandler, IsCanApprovedMaximumAmountHandler>();
+                services.AddScoped<IAuthorizationHandler, CanApprovedRequestHandler>();
+                services.AddScoped<IAuthorizationHandler, CanDisburseRequestHandler>();
+                services.AddScoped<IAuthorizationHandler, CanRequestHandler>();
+                services.AddScoped<IAuthorizationHandler, CanReceivePaymentHandler>();
+                services.AddScoped<IAuthorizationHandler, ManagerLoanDisbursementHandler>();
+                services.AddScoped<IAuthorizationHandler, AllowDeleteLoanHandler>();
+                services.AddScoped<IAuthorizationHandler, AllowApproveDeleteLoanHandler>();
+                services.AddScoped<IAuthorizationHandler, CanRequestDeleteLoanHandler>();
+                services.AddScoped<IAuthorizationHandler, CanRequestEditLoanHandler>();
+                services.AddScoped<IAuthorizationHandler, IsAllowEditLoanHandler>();
+
+            }
+
+
 
             return services;
         }

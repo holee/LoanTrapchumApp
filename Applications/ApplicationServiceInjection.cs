@@ -28,8 +28,15 @@ using Applications.Features.LoanRequests.Command.DeleteCoPawnCustomer;
 using Applications.Features.LoanRequests.Command.PassRequest;
 using Applications.Features.LoanRequests.Dtos;
 using Applications.Features.LoanRequests.Queryies.IsCoPawnExist;
+using Applications.Features.Loans.Command.ApproveDeleteReuquest;
+using Applications.Features.Loans.Command.ApproveEditLoanRequest;
+using Applications.Features.Loans.Command.DeleteLoan;
 using Applications.Features.Loans.Command.EditLoanDisbursment;
+using Applications.Features.Loans.Command.RequestDelete;
+using Applications.Features.Loans.Command.RequestEditLoan;
 using Applications.Features.Loans.Command.WidrawCollateral;
+using Applications.Features.Loans.Queries.GetLoanById;
+using Applications.Features.Loans.Queries.GetLoanDetailsById;
 using Applications.Features.Loans.Queries.GetLoanForEdit;
 using Applications.Features.Locations.Command.CreateLocation;
 using Applications.Features.Locations.Command.DeleteLocation;
@@ -58,6 +65,7 @@ using Applications.Responses.Auths;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Models.Collaterals;
+using Domains.Models.Loans;
 using ErrorOr;
 namespace Applications;
 
@@ -76,7 +84,10 @@ public static class ApplicationServiceInjection
 
 
         services.AddScoped<IRequestHandler<PassRequestCommand, ErrorOr<RequestResult>>, PassRequestCommandHandler>();
-
+        services.AddScoped<IRequestHandler<RequestDeleteCommand, ErrorOr<DeleteResult>>, RequestDeleteCommandHandler>();
+        services.AddScoped<IRequestHandler<ApproveDeleteRequestCommand, ErrorOr<DisburseResult>>, ApproveDeleteRequestCommandHandler>();
+        services.AddScoped<IRequestHandler<ApproveEditLoanRequestCommand, ErrorOr<AppResult>>, ApproveEditLoanRequestCommandHandler>();
+        services.AddScoped<IRequestHandler<RequestEditLoanCommand, ErrorOr<AppResult>>, RequestEditLoanCommandHandler>();
 
 
         //Locations Services
@@ -242,7 +253,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IForiegnCurrencyExchangeImpl, ForiegnCurrencyExchange>();
         services.AddScoped<IJournalServiceImpl, JournalService>();
         services.AddScoped<ILedgerServiceImpl, LedgerService>();
-        services.AddScoped<ILoanServiceImpl, LoanService>();
+        //services.AddScoped<ILoanServiceImpl, LoanService>();
         services.AddScoped<ILoanScheduleServiceImpl, LoanScheduleService>();
         services.AddScoped<ILoanCategoryServiceImpl, LoanCategoryService>();
         services.AddScoped<ILoanProductServiceImpl, LoanProductService>();
@@ -389,13 +400,15 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetLoanCollateralsQuery, Pager<VLoanCollateral>>, GetLoanCollateralsQueryHandler>();
         services.AddScoped<IRequestHandler<WidrawalCollateralCommand, ErrorOr<bool>>, WidrawalCollateralCommandHandler>();
         services.AddScoped<IRequestHandler<CloseLoanDisbursementCommand, ErrorOr<string>>, CloseLoanDisbursementCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteLoanCommand, ErrorOr<DeleteResult>>, DeleteLoanCommandHandler>();
+        services.AddScoped<IRequestHandler<GetLoanByIdQuery, ErrorOr<LoanDisbursment>>, GetLoanByIdQueryHandler>();
 
         //commands and queries for loan schedules
 
         services.AddScoped<IRequestHandler<RecievePaymentCommand, ErrorOr<string>>, RecievePaymentCommandHandler>();
         services.AddScoped<IRequestHandler<GetLoanSchedulesByLoanIdQuery, ErrorOr<IEnumerable<VSchedule>>>, GetLoanSchedulesByLoanIdQueryHandler>();
         services.AddScoped<IRequestHandler<Applications.Features.LoanPayments.Queries.GetScheduleById.GetScheduleByIdQuery, ErrorOr<ScheduleDetailsDto>>, Applications.Features.LoanPayments.Queries.GetScheduleById.GetScheduleByIdQueryHandler>();
-        services.AddScoped<IRequestHandler<GetLoanByIdQuery, ErrorOr<VLoanDisbursments>>, GetLoanByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLoanDetailsByIdQuery, ErrorOr<VLoanDisbursments>>, GetLoanDetialsByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanByBranchIdQuery, Pager<VLoanDisbursments>>, GetLoanByBranchIdQueryHandler>();
         services.AddScoped<IRequestHandler<EditLoanDisbursmentCommand, ErrorOr<DisburseResult>>, EditLoanDisbursmentCommandHandler>();
 

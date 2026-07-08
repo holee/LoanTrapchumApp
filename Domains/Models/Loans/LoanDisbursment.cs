@@ -59,7 +59,7 @@ public sealed class LoanDisbursment : BaseEntity
     public decimal? InsurranceNew { get; set; }
     public decimal? InsInstallment { get; set; }
     public decimal? CollectionFeeRate { get; set; }
-    public decimal? Amount { get; set; } 
+    public decimal? Amount { get; set; }
     public decimal? RiskFeeRate { get; set; }
     public decimal? AdminFeeRate { get; set; }
     public decimal? PenaltyRate { get; set; } = 0.02M;
@@ -83,7 +83,13 @@ public sealed class LoanDisbursment : BaseEntity
     public string? BranchName { get; set; }
     public int? Circle { get; set; }
     public int? Period { get; set; }
+    public bool AllowEdit { get; set; } = false;
+    public bool RequestEdit { get; set; } = false;
+    public bool RequestDelete { get; set; } = false;
+    public bool AllowDelete { get; set; } = false;
+    public bool IsDeleted { get; set; } = false;
     public string? PeriodName { get; set; } = "Months";
+    public string? CreatedBy { get; set; } = string.Empty;
     public LoanRequest? LoanRequest { get; set; }
     public LoanTransaction? LoanTransaction { get; set; }
     public ICollection<LoanSchedule>? LoanSchedules { get; set; } = [];

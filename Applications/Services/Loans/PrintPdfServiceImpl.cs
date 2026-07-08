@@ -1,4 +1,5 @@
-﻿using Applications.Features.Schedules;
+﻿using Applications.Features.Loans.Queries.GetLoanDetailsById;
+using Applications.Features.Schedules;
 using ErrorOr;
 using Microsoft.Extensions.Logging;
 using QuestPDF.Fluent;
@@ -53,7 +54,7 @@ public sealed class PrintPdfServiceImpl(ILoanReportServiceImpl loanService,
 
             //var data = await loanService.PrintLoanScheduleAsync(branchId, loanId);
 
-            var rsp = await mediator.Send(new GetLoanByIdQuery(loanId, branchId, Include: true));
+            var rsp = await mediator.Send(new GetLoanDetailsByIdQuery(loanId, branchId, Include: true));
 
             if (rsp.IsError)
             {

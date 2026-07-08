@@ -20,6 +20,7 @@ public class GetLoanForEditQueryHandler : IRequestHandler<GetLoanForEditQuery, E
             {
                 return Error.NotFound($"Loan with ID {request.LoanId} not found.");
             }
+
             return loan;
         }
         catch (Exception ex)

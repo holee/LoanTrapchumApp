@@ -4,7 +4,7 @@ using Applications.Features.Branches.Dtos;
 using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Dtos.Responses;
-using Applications.Features.Loans.Queries.GetLoanById;
+using Applications.Features.Loans.Queries.GetLoanDetailsById;
 using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Radzen.Blazor;
@@ -450,7 +450,7 @@ public partial class PaymentPage
         isLoading = true;
 
 
-        var query = new GetLoanByIdQuery(LoanId, BranchId, ScheduleStatus.Unpaid, false);
+        var query = new GetLoanDetailsByIdQuery(LoanId, BranchId, ScheduleStatus.Unpaid, false);
 
         var rsp = await mediator.Send(query);
 

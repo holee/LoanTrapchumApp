@@ -1,6 +1,5 @@
-﻿using Applications.Extensions.DateTimes;
+﻿using Applications.Extensions;
 using Applications.Extensions.Maths;
-using Applications.Features.Loans.Dtos.Responses;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;

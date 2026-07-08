@@ -19,4 +19,8 @@ public interface IAppStateService
     bool NormalAmountApproved { get; set; }
     bool ManageDisbursement { get; set; }
     bool ManageRequest { get; set; }
+    bool AllowDeleteLoan { get; set; }
+    bool AllowApproveDelete { get; set; }
+    bool CanRequestDeleteLoan { get; set; }
+    bool CanRequestEditLoan { get; set; }
 }

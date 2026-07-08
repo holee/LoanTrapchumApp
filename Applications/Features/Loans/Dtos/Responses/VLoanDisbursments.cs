@@ -51,6 +51,11 @@ public sealed class VLoanDisbursments
     public string? PeriodName { get; set; }
     public string? InstallmentType { get; set; }
     public string? LoanCategoryName { get; set; } = string.Empty;
+    public string? CreatedBy { get; set; } = string.Empty;
+    public bool? RequestDelete { get; set; } = false;
+    public bool? RequestEdit { get; set; } = false;
+    public bool? AllowDelete { get; set; } = false;
+    public bool? AllowEdit { get; set; } = false;
     public List<VSchedule> Schedules { get; set; } = [];
     [NotMapped] public int RowIndex { get; set; } = 0;
 

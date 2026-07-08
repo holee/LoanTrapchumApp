@@ -50,7 +50,11 @@ namespace Infrastructures.DataAccess.Configurations.LoanDisbursements
             builder.Property(x => x.LastPaymentDate).HasColumnType("DATE");
             builder.Property(x => x.TransactionsRefId).HasMaxLength(250);
             builder.Property(x => x.LoanRequestId).HasMaxLength(250);
-           
+
+            builder.Property(x => x.AllowEdit).HasDefaultValue(false);
+            builder.Property(x => x.IsDeleted).HasDefaultValue(false);
+            builder.Property(x => x.RequestEdit).HasDefaultValue(false);
+
             builder.HasMany(x => x.LoanSchedules)
                     .WithOne()
                     .HasForeignKey(x => x.LoanRefId);

@@ -45,13 +45,13 @@
                     </CoRequestCustomerBox>
                 </RadzenStepsItem>
                 <RadzenStepsItem Text="ទ្រព្យសម្បត្តិបញ្ចាំ">
-                    <LoanRequestCollaterals CustomerId="CustomerId"
+                    <LoanRequestCollaterals CustomerId="@CustomerId"
                                             ShowCommand="true"
                                             ShowAdd="true"
                                             ShowRemove="true"
                                             @ref="CollateralRef"
                                             Add="@AddCollaterals"
-                                            RemoveCollateral="RemovedCollateral"
+                                            RemoveCollateral="@RemovedCollateral"
                                             Collaterals="@requestCollateralLines">
                         <SearchBoxTemplate>
                             <CollateralSearchList CustomerId="@CustomerId"
@@ -62,12 +62,12 @@
                     </LoanRequestCollaterals>
                 </RadzenStepsItem>
                 <RadzenStepsItem Text="អ្នកធានា">
-                    <LoanRequestGaurantor Guarantors="Guarantors"
+                    <LoanRequestGaurantor Guarantors="@Guarantors"
                                           ShowAdd="true"
-                                          Add="AddGuarantors"
+                                          Add="@AddGuarantors"
                                           ShowRemove="true"
                                           ShowCommand="true"
-                                          Remove="RemoveGuarantor"
+                                          Remove="@RemoveGuarantor"
                                           @ref="GuarantorRef">
                         <SearchBoxTemplate>
                             <GuarantorSearchList OnSelected="SelectedGuarantors"

@@ -7,7 +7,7 @@ using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Radzen.Blazor;
 using Applications.Commons.Mappers;
-using Applications.Features.Loans.Queries.GetLoanById;
+using Applications.Features.Loans.Queries.GetLoanDetailsById;
 using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
 
@@ -275,9 +275,9 @@ public partial class CollectionPaymentPageTest
             {
                 line = new();
 
-                line.LoanRefId= schedule.LoanId;
+                line.LoanRefId = schedule.LoanId;
 
-                line.BranchRefId= schedule.BranchId;
+                line.BranchRefId = schedule.BranchId;
 
                 line.PayDate = DateTime.Now;
 
@@ -499,7 +499,7 @@ public partial class CollectionPaymentPageTest
 
         LoanSchedule = null;
 
-        schedules = rsp.Items;
+        schedules = rsp.Items.Where(x => x.Principle > 0).ToList();
 
         Tracker.Hide();
 
@@ -540,7 +540,7 @@ public partial class CollectionPaymentPageTest
         isLoading = true;
 
 
-        var query = new GetLoanByIdQuery(LoanId, BranchId, ScheduleStatus.Unpaid, false);
+        var query = new GetLoanDetailsByIdQuery(LoanId, BranchId, ScheduleStatus.Unpaid, false);
 
         var rsp = await mediator.Send(query);
 

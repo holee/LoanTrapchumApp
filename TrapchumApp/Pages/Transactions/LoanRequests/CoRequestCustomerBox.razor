@@ -92,18 +92,18 @@
                         <span style="font-family:monospace;font-size:0.85rem;">@c.CustomerPhone</span>
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="លេខទូរស័ព្ទ"
-                                      Property="@(nameof(CoPawnCustomerDto.CustomerPhone))"
+                <RadzenDataGridColumn Title="អត្តសញ្ណាណប័ណ្ណ"
+                                      Property="@(nameof(CoPawnCustomerDto.CustomerIdCard))"
                                       Width="8rem"
                                       Context="c">
                     <HeaderTemplate>
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
                             <RadzenIcon Icon="phone" Style="font-size:0.85rem;color:var(--rz-primary);" />
-                            <span>លេខទូរស័ព្ទ</span>
+                            <span>អត្តសញ្ណាណប័ណ្ណ</span>
                         </RadzenStack>
                     </HeaderTemplate>
                     <Template>
-                        <span style="font-family:monospace;font-size:0.85rem;">@c.CustomerPhone</span>
+                        <span style="font-family:monospace;font-size:0.85rem;">@c.CustomerIdCard</span>
                     </Template>
                 </RadzenDataGridColumn>
 
@@ -132,7 +132,7 @@
                                       ButtonStyle="ButtonStyle.Danger"
                                       Variant="Variant.Text"
                                       Size="ButtonSize.ExtraSmall"
-                                      Click="() => ClickedRevmove(g)"
+                                      Click="() => ClickedRemove(g)"
                                       title="Remove" />
                     </Template>
                 </RadzenDataGridColumn>

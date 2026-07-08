@@ -1,16 +1,20 @@
-﻿using FluentValidation;
-
-namespace Applications.Features.Loans.Queries.GetLoanById;
+﻿namespace Applications.Features.Loans.Queries.GetLoanById;
 
 public sealed class GetLoanByIdQueryValidator : AbstractValidator<GetLoanByIdQuery>
 {
-    public GetLoanByIdQueryValidator() 
+    public GetLoanByIdQueryValidator()
     {
-        RuleFor(x => x.LoanId).Cascade(CascadeMode.Stop)
-            .NotNull().WithMessage("LoanId cannot be null.")
-            .NotEmpty().WithMessage("LoanId is required.");
-        RuleFor(x => x.BranchId).Cascade(CascadeMode.Stop)
-            .NotNull().WithMessage("BranchId cannot be null.")
-            .GreaterThan(0).WithMessage("BranchId must be greater than zero.");
+        RuleFor(x => x.LoanId)
+            .NotEmpty()
+                .WithMessage("Loan ID is required.")
+            .NotNull()
+                .WithMessage("Loan ID must not be null.")
+            .MaximumLength(450)
+                .WithMessage("Loan ID must not exceed 450 characters.");
+        RuleFor(x => x.BranchId)
+            .NotNull()
+                .WithMessage("Branch ID is required.")
+            .GreaterThan(0)
+                .WithMessage("Branch ID must be greater than 0.");
     }
 }

@@ -1,6 +1,6 @@
 using Applications.Extensions;
 using Applications.Features.Loans.Dtos.Responses;
-using Applications.Features.Loans.Queries.GetLoanById;
+using Applications.Features.Loans.Queries.GetLoanDetailsById;
 using Microsoft.JSInterop;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
 using TrapchumApp.Services;
@@ -72,7 +72,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         async Task GetLoanWithSchedules(int? branchId, string? loanId)
         {
 
-            var query = new GetLoanByIdQuery(loanId, BranchId, ScheduleStatus.All, false);
+            var query = new GetLoanDetailsByIdQuery(loanId, BranchId, ScheduleStatus.All, false);
 
             var rsp = await mediator.Send(query);
 

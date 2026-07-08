@@ -1,0 +1,498 @@
+﻿@page "/App/Loans/{LoanId}/Disbursements/{BranchId:int}/Branches/Delete"
+@using TrapchumApp.Components.Actionbars
+@using TrapchumApp.Components.Buttons
+@using TrapchumApp.Components.Indicatros
+@using TrapchumApp.Pages.Transactions.LoanRequests
+@using Applications.Features.Loans.Command.DeleteLoan
+@using Applications.Features.Loans.Command.RequestDelete
+@using Applications.Features.Loans.Dtos.Requests
+@using Applications.Exceptions
+@using Applications.Bases
+@using Applications.Features.Loans.Dtos
+@using Applications.Features.Loans.Command.ApproveDeleteReuquest;
+<PageTitle>លុបប្រាក់កម្ចី</PageTitle>
+@inject Applications.Calculations.CalculatorSceduleService _calSceduleService
+@attribute [StreamRendering]
+@if (IsLoading)
+{
+
+    <Loading Text="កំពុងផ្ទុកការលុបប្រាក់កម្ចី..." />
+}
+else
+{
+    <LoanInfos BranchId="@BranchId" LoanId="@LoanId" />
+    <RadzenTabs @bind-SelectedIndex="selectedTabIndex" RenderMode="TabRenderMode.Client">
+        <Tabs>
+            <RadzenTabsItem Text="ព័ត៌មានប្រាក់កម្ចី" Icon="@IconNames.Info">
+                <EditForm Model="_model" @ref="editForm" OnValidSubmit="@HandleFormEdit">
+                    <FluentValidator />
+                    <ValidationSummary />
+                    <input type="hidden" @bind-value="penaltyRate" />
+                    <input type="hidden" @bind="_model!.CustomerRefId" />
+                    <input type="hidden" @bind="_model!.LoanId" />
+                    @* ── Customer & Loan Summary ── *@
+                    <RadzenCard Variant="Variant.Flat" class="rz-my-2 rz-background-color-base-100">
+
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
+                                     class="rz-mb-3 rz-pb-2" style="border-bottom:2px solid var(--rz-success);">
+                            <RadzenIcon Icon="@IconNames.ReceiptLong" style="color:var(--rz-primary);font-size:1.1rem;" />
+                            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:700;color:var(--rz-primary);">អតិថិជន និង កម្ចី</RadzenText>
+                        </RadzenStack>
+                        <RadzenRow Gap="0.75rem">
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អតិថិជន</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1"><strong>@_model?.AltName</strong></RadzenText>
+                                <input type="hidden" @bind="_model.CustomerRefId" />
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">រូបិយប័ណ្ណ</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1">@_model?.CurrencyName</RadzenText>
+                                <input type="hidden" @bind="_model!.CurrencyId" />
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រាក់ដើម</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1"><strong>@_model?.Principle.WithSign(_model?.CurrencyId)</strong></RadzenText>
+                                <input type="hidden" @bind="_model!.Principle" />
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ខ្ចីលើកទី</RadzenText>
+                                <input type="hidden" @bind="_model!.Circle" />
+                                <RadzenText TextStyle="TextStyle.Body1">@_model?.Circle</RadzenText>
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow Gap="0.75rem" class="rz-mt-2">
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រភេទកម្ចី</RadzenText>
+                                <input type="hidden" @bind="_model!.LoanCategoryRefId" />
+                                <RadzenText TextStyle="TextStyle.Body1">@_model?.LoanCategoryName</RadzenText>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">មន្ត្រីស្នើរសុំ</RadzenText>
+                                <input type="hidden" @bind="_model!.CreditAgentRefId" />
+                                <RadzenText TextStyle="TextStyle.Body1">@_model?.CreditAgentName</RadzenText>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អនុម័តដោយ</RadzenText>
+                                <input type="hidden" @bind="_model!.AprovedUserId" />
+                                <RadzenText TextStyle="TextStyle.Body1">@_model?.ApprovedBy</RadzenText>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">សេវារដ្ឋបាល</RadzenText>
+                                <input type="hidden" @bind="_model!.AdminFeeRate" />
+                                <RadzenText TextStyle="TextStyle.Body1">@_model?.AdminFeeAmount.ToFormattedNumber()</RadzenText>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenCard>
+
+                    @* ── Repayment Terms ── *@
+                    <RadzenCard Variant="Variant.Flat" class="rz-my-2 rz-background-color-base-100">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
+                                     class="rz-mb-3 rz-pb-2" style="border-bottom:2px solid var(--rz-success);">
+                            <RadzenIcon Icon="@IconNames.ReceiptLong" style="color:var(--rz-primary);font-size:1.1rem;" />
+                            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:700;color:var(--rz-primary);">លក្ខខណ្ឌបង់សង</RadzenText>
+                        </RadzenStack>
+
+                        @* Info fields *@
+                        <RadzenRow Gap="1rem" class="rz-mb-3">
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រភេទបង់រំលោះ</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@_model?.InstallmentType</RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">របៀបបង់សង</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@_model?.RepaymentModeName</RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">រយៈពេលខ្ចីប្រាក់</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@_model?.Installments <small class="rz-color-base-500">@_model?.InstallmentName</small></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">បង់រៀងរាល់</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@_model?.PayEvery <small class="rz-color-base-500">@_model?.InstallmentName</small></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+
+                        <hr style="border:none;border-top:1px solid var(--rz-base-300);margin:0 0 0.75rem;" />
+
+                        @* Editable rate & settings *@
+                        <RadzenRow Gap="1rem">
+                            <RadzenColumn SizeSM="6" SizeMD="3" Size="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អត្រាការប្រាក់ (%)</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@_model?.InterestRate?.ToString("#.00") <small class="rz-color-base-500">%</small></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3" Size="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អត្រាថ្លៃប្រសិទ្ធិភាព(%)</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@_model?.CollectionFeeRate?.ToString("#.00") <small class="rz-color-base-500">%</small></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3" Size="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រភេទថ្លៃប្រសិទ្ធិភាព</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@(StorageConstant.CollectionFeeModes.FirstOrDefault(x => x.Value == _model?.CollectionFeeModeId)?.Label)</RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3" Size="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ការកែតម្រូវកាលវិភាគបង់ប្រាក់</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@(_model?.PayementSechuleModeId == 1 ? "មុន" : _model?.PayementSechuleModeId == 2 ? "ក្រោយ" : "រំលង")</RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenCard>
+
+                    @* ── Dates ── *@
+                    <RadzenCard Variant="Variant.Flat" class="rz-my-2 rz-background-color-base-100">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
+                                     class="rz-mb-3 rz-pb-2" style="border-bottom:2px solid var(--rz-success);">
+                            <RadzenIcon Icon="@IconNames.ReceiptLong" style="color:var(--rz-primary);font-size:1.1rem;" />
+                            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:700;color:var(--rz-primary);">កាលបរិច្ឆេទ</RadzenText>
+                        </RadzenStack>
+                        <RadzenRow Gap="0.75rem">
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ថ្ងៃចុះឈ្មោះ</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@_model?.RegisterDate?.ToString("dd/MM/yyyy")</RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ថ្ងៃចាប់ផ្តើម</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@_model?.StartDate?.ToString("dd/MM/yyyy")</RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ថ្ងៃបង់ប្រាក់លើកដំបូង</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@_model?.FirstPaymentDate?.ToString("dd/MM/yyyy")</RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ថ្ងៃបង់ប្រាក់ចុងក្រោយ</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@_model?.LastPaymentDate?.ToString("dd/MM/yyyy")</RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenCard>
+                    @* ── Note ── *@
+                    <RadzenCard Variant="Variant.Flat" class="rz-my-2 rz-background-color-base-100">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
+                                     class="rz-mb-3 rz-pb-2" style="border-bottom:2px solid var(--rz-success);">
+                            <RadzenIcon Icon="@IconNames.ReceiptLong" style="color:var(--rz-primary);font-size:1.1rem;" />
+                            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:700;color:var(--rz-primary);">ផ្សេងៗ</RadzenText>
+                        </RadzenStack>
+                        <RadzenRow Gap="0.75rem">
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Body1">@_model?.Remark</RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenCard>
+                    @* ── Note ── *@
+                    <RadzenRow class="rz-my-3 rz-px-2" Gap="0.75rem">
+                        <RadzenColumn Size="12">
+                            <RadzenFormField Text="កំណត់សម្គាល់" class="rz-w-100">
+                                <RadzenTextArea Rows="3"
+                                                Placeholder="បញ្ចូលកំណត់សម្គាល់..."
+                                                class="@Styles.W100"
+                                                @bind-Value="Note" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <AppActions>
+                        @if (resource is not null && resource.RequestDelete == false && BState.CanRequestDeleteLoan)
+                        {
+                            <SaveButton IsBusy="@isWaiting"
+                                        BusyText="រង់ចាំ...."
+                                        ButtonType="ButtonType.Button"
+                                        OnClick="HandleRequestDelete"
+                                        Title="ស្នើសុំលុបប្រាក់កម្ចី" />
+                        }
+
+                        @if (BState.AllowDeleteLoan)
+                        {
+                            <SaveButton IsBusy="@isWaiting"
+                                        BusyText="រង់ចាំ...."
+                                        ButtonType="ButtonType.Button"
+                                        OnClick="@HandleDelete"
+                                        Title="លុបប្រាក់កម្ចី" />
+                        }
+
+
+                        @if (BState.AllowApproveDelete && (resource is not null && resource.AllowDelete == false))
+                        {
+                            <RadzenButton Icon="@IconNames.Preview"
+                                          Click="@HandleApproveRequest"
+                                          ButtonStyle="ButtonStyle.Warning"
+                                          Size="@Styles.DefaultSize"
+                                          Visible="@resource.RequestDelete"
+                                          Text="អនុញ្ញាតិអោយលុប" />
+
+                            <RadzenButton Icon="@IconNames.Preview"
+                                          Click="@HandleDeniedRequest"
+                                          ButtonStyle="ButtonStyle.Danger"
+                                          Size="@Styles.DefaultSize"
+                                          Visible="@resource.RequestDelete"
+                                          Text="មិនអនុញ្ញាតិ" />
+                        }
+
+
+                        <RadzenLink Icon="@IconNames.ArrowCircleLeft"
+                                    IconColor="@Colors.Danger"
+                                    Path="@_navService.PreviousUrl"
+                                    Text="ត្រឡប់ក្រោយ" />
+                    </AppActions>
+
+                </EditForm>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="អ្នកធានានិងទ្រព្យបញ្ចាំ" Icon="@IconNames.Inventory">
+                <LoanCollaterals Collaterals="@_model!.Collaterals" />
+                <LoanGaurantors Guarantors="@_model!.Guarantors" />
+                <LoanCoPawns Customers="_model!.CoPawCustomers" />
+                <LoanRequestDocument Documents="@req.Documents.ToList()" ShowUpload="false" />
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="តារាងសងប្រាក់" Icon="@IconNames​.Schedule">
+                <RadzenCard Variant="Variant.Flat" class="rz-my-2 rz-background-color-base-100">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
+                                 class="rz-mb-3 rz-pb-2" style="border-bottom:2px solid var(--rz-success);">
+                        <RadzenIcon Icon="@IconNames.CalendarMonth" style="color:var(--rz-primary);font-size:1.1rem;" />
+                        <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:700;color:var(--rz-primary);">តារាងបង់ប្រាក់</RadzenText>
+                        <RadzenBadge BadgeStyle="BadgeStyle.Info"
+                                     Text="@($"{_model!.LoanSchedules?.Count ?? 0} ជួរ")"
+                                     Style="font-size:0.65rem;margin-left:auto;" />
+                    </RadzenStack>
+
+                    <RadzenDataGrid Data="@_model!.LoanSchedules"
+                                    TItem="LoanScheduleDtoCreate"
+                                    Density="Density.Compact"
+                                    AllowAlternatingRows="false"
+                                    GridLines="DataGridGridLines.Both"
+                                    Responsive="true"
+                                    RowRender="@OnRowRender"
+                                    RowSelect="@OnRowSelected"
+                                    Style="border-radius:0.5rem;overflow:hidden;">
+                        <Columns>
+                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.InstallmentNo))"
+                                                  Title="#" Width="2.5rem"
+                                                  TextAlign="TextAlign.Center" Sortable="false">
+                                <Template Context="s">
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Light"
+                                                 Text="@s.InstallmentNo?.ToString()"
+                                                 Style="font-size:0.65rem;min-width:1.5rem;" />
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.PaymentDate))"
+                                                  Title="ថ្ងៃបង់ប្រាក់" Width="5.5rem" Sortable="false">
+                                <Template Context="s">@s.PaymentDate.DayFirst()</Template>
+                                <FooterTemplate><strong>សរុប</strong></FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.TotalDay))"
+                                                  Title="ថ្ងៃ" Width="3.5rem"
+                                                  TextAlign="TextAlign.Center" Sortable="false">
+                                <Template Context="s">@s.TotalDay</Template>
+                                <FooterTemplate><strong>@(_model!.LoanSchedules?.Sum(x => x.TotalDay))</strong></FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.Principal))"
+                                                  Title="ប្រាក់ដើម" Width="6rem"
+                                                  TextAlign="TextAlign.Right" Sortable="false">
+                                <Template Context="s">@s.Principal.As(_model?.CurrencyId)</Template>
+                                <FooterTemplate><strong>@(_model!.LoanSchedules?.Sum(x => x.Principal).As(_model?.CurrencyId))</strong></FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.Interest))"
+                                                  Title="ការប្រាក់" Width="6rem"
+                                                  TextAlign="TextAlign.Right" Sortable="false">
+                                <Template Context="s">@s.Interest.As(_model?.CurrencyId)</Template>
+                                <FooterTemplate><strong>@(_model!.LoanSchedules?.Sum(x => x.Interest).As(_model?.CurrencyId))</strong></FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.CollectionFee))"
+                                                  Title="ប្រាក់ប្រមូលសេវា" Width="6.5rem"
+                                                  TextAlign="TextAlign.Right" Sortable="false">
+                                <Template Context="s">@s.CollectionFee.As(_model?.CurrencyId)</Template>
+                                <FooterTemplate><strong>@(_model!.LoanSchedules?.Sum(x => x.CollectionFee).As(_model?.CurrencyId))</strong></FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.TotalPay))"
+                                                  Title="បង់សរុប" Width="6rem"
+                                                  TextAlign="TextAlign.Right" Sortable="false">
+                                <Template Context="s">
+                                    <strong>@s.TotalPay.As(_model?.CurrencyId)</strong>
+                                </Template>
+                                <FooterTemplate>
+                                    <strong style="color:var(--rz-primary);">@(_model!.LoanSchedules?.Sum(x => x.TotalPay).As(_model?.CurrencyId))</strong>
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.LoanOutstanding))"
+                                                  Title="នៅសល់" Width="6.5rem"
+                                                  TextAlign="TextAlign.Right" Sortable="false">
+                                <Template Context="s">@s.LoanOutstanding.As(_model?.CurrencyId)</Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+
+                </RadzenCard>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="កំណត់សម្គាល់" Icon="@IconNames.Comment">
+                <LoanRequestNotes Data="@req.Descriptions" />
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+}
+
+@code
+{
+    private async Task HandleRequestDelete()
+    {
+        var confirm = await MsgBox.ConfirmAsync("តើអ្នកពិតជាចង់ស្នើសុំលុបប្រាក់កម្ចីនេះឬ?", "បញ្ជាក់ការស្នើសុំលុប");
+
+        if (confirm == MsgBoxResult.No) return;
+
+        isWaiting = true;
+
+        try
+        {
+            var command = new RequestDeleteCommand(new RequestDeleteDtoCreate(LoanId, BranchId, Note));
+
+            var rsp = await mediator.Send(command);
+
+            var result = rsp.Value;
+
+            if (result.Status == DeleteStatus.Success)
+            {
+
+                isWaiting = false;
+
+                _toastService.ShowSuccess("ស្នើសុំលុបប្រាក់កម្ចីដោយជោគជ័យ", "ជោគជ័យ");
+
+                return;
+            }
+            else
+            {
+                isWaiting = false;
+
+                await MsgBox.ErrorAsync($"{result.Message}", "កំហុស");
+
+                return;
+            }
+
+        }
+        catch (MediatorException ex)
+        {
+            isWaiting = false;
+
+            await MsgBox.ErrorAsync($"មានកំហុសកើតឡើង: {ex.ErrorMessage}", "កំហុស");
+        }
+        catch (Exception ex)
+        {
+            isWaiting = false;
+
+            await MsgBox.ErrorAsync($"មានកំហុសកើតឡើង: {ex.Message}", "កំហុស");
+        }
+
+
+    }
+
+    void OnRowSelected(LoanScheduleDtoCreate arg)
+    {
+
+    }
+
+    private async Task HandleDelete()
+    {
+        var confirm = await MsgBox.ConfirmAsync("តើអ្នកពិតជាចង់លុបប្រាក់កម្ចីនេះឬ?", "បញ្ជាក់ការលុប");
+
+        if (confirm == MsgBoxResult.No) return;
+
+        isWaiting = true;
+
+        try
+        {
+            var command = new DeleteLoanCommand(LoanId, BranchId, CustomerId);
+
+            var result = await mediator.Send(command);
+
+            if (result.Value.IsSuccess)
+            {
+
+                isWaiting = false;
+
+                _toastService.ShowSuccess("លុបប្រាក់កម្ចីដោយជោគជ័យ", "ជោគជ័យ");
+
+                return;
+            }
+
+            if (result.Value.IsInUse)
+            {
+                isWaiting = false;
+
+                await MsgBox.ErrorAsync("ការលុបប្រាក់កម្ចីមិនអាចធ្វើបានទេ ព្រោះមានប្រតិបត្តិការបង់ប្រាក់សងប្រាក់រួចហើយ។", "កំហុស");
+
+                return;
+            }
+
+            if (result.Value.IsError)
+            {
+                isWaiting = false;
+
+                await MsgBox.ErrorAsync($"មានកំហុសកើតឡើង: {result.Value.Message}", "កំហុស");
+
+                return;
+            }
+
+        }
+        catch (MediatorException ex)
+        {
+            isWaiting = false;
+
+            await MsgBox.ErrorAsync($"មានកំហុសកើតឡើង: {ex.ErrorMessage}", "កំហុស");
+        }
+        catch (Exception ex)
+        {
+            isWaiting = false;
+
+            await MsgBox.ErrorAsync($"មានកំហុសកើតឡើង: {ex.Message}", "កំហុស");
+        }
+
+
+    }
+
+    private void OnRowRender(RowRenderEventArgs<LoanScheduleDtoCreate> args)
+    {
+
+    }
+
+    private async Task HandleApproveRequest()
+    {
+        var command = new ApproveDeleteRequestCommand(new RequestDeleteDtoCreate(LoanId, BranchId, Note));
+
+        var rsp = await mediator.Send(command);
+
+        if (rsp.IsSuccess())
+        {
+            resource?.AllowDelete = true;
+        }
+
+    }
+
+    private void HandleDeniedRequest()
+    {
+        throw new NotImplementedException();
+    }
+}

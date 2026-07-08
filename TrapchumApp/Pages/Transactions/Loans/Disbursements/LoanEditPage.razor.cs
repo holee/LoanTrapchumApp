@@ -4,13 +4,16 @@ using Applications.Features.Holidays.Dtos;
 using Applications.Features.LoanRequests.Queryies.GetApprovedLoanRequest;
 using Applications.Features.Loans.Command.CreateLoan;
 using Applications.Features.Loans.Command.EditLoanDisbursment;
+using Applications.Features.Loans.Command.RequestEditLoan;
 using Applications.Features.Loans.Dtos;
 using Applications.Features.Loans.Dtos.Requests;
 using Applications.Features.Loans.Mappers;
+using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Queries.GetLoanForEdit;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Enumerations;
 using Domains.Models.Identity;
+using Domains.Models.Loans;
 using TrapchumApp.Pages.Lists.Customers;
 using TrapchumApp.Shared;
 
@@ -18,20 +21,16 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
 
 public partial class LoanEditPage
 {
-
     [Parameter] public int BranchId { get; set; }
     [Parameter] public string? LoanRequestId { get; set; } = string.Empty;
     [Parameter, SupplyParameterFromQuery] public string? CustomerId { get; set; } = string.Empty;
 
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
-    [CascadingParameter]
-    private CascadingAppState BState { get; set; } = default!;
+    [CascadingParameter] private CascadingAppState BState { get; set; } = default!;
     [Parameter] public string? LoanId { get; set; } = string.Empty;
 
-    [PersistentState]
-    public LoanDtoCreate? _model { get; set; }
+    [PersistentState] public LoanDtoCreate? _model { get; set; }
 
     private const int FixedTabCount = 3;
 
@@ -61,6 +60,8 @@ public partial class LoanEditPage
 
     private VCustomerDetails _customer = new();
 
+    private LoanDisbursment? resource = null;
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -72,7 +73,6 @@ public partial class LoanEditPage
             await GetLoanEdit();
 
             await BState.WhoCanDisbursemnt(req);
-
         }
         catch (Exception ex)
         {
@@ -81,7 +81,6 @@ public partial class LoanEditPage
 
         await base.OnInitializedAsync();
     }
-
 
 
     private async Task GetLoanEdit()
@@ -100,12 +99,19 @@ public partial class LoanEditPage
 
                 ChangedSchedule(_model.RepaymentModeRefId);
             }
+        }
 
+        var command = new GetLoanByIdQuery(LoanId, BranchId);
+
+        var result = await mediator.Send(command);
+
+        if (result.IsSuccess())
+        {
+            resource = result.Value;
         }
 
         IsLoading = false;
     }
-
 
 
     private async Task GetHolidays(int? installment = 12)
@@ -113,7 +119,6 @@ public partial class LoanEditPage
         var yearAdded = (installment / 12) + 1;
 
         await _calSceduleService.GetHolidays(yearAdded);
-
     }
 
     private void OnScheduleChanged(int arg)
@@ -129,7 +134,6 @@ public partial class LoanEditPage
                 _ => AdjustmentOption.Skip
             };
         }
-
     }
 
     private void ChangedSchedule(int? arg)
@@ -145,8 +149,6 @@ public partial class LoanEditPage
                 _ => AdjustmentOption.Skip
             };
         }
-
-
     }
 
     private void OnStartDateChanged(DateTime? args)
@@ -155,7 +157,6 @@ public partial class LoanEditPage
 
         if (_model is not null)
         {
-
             _model.RegisterDate = args.Value;
 
             int addedDays = _model.InstallmentTypeId switch
@@ -171,7 +172,7 @@ public partial class LoanEditPage
 
             if (addedDays > 0)
             {
-                _model.FirstPaymentDate = _model.StartDate!.Value.AddDays(addedDays);    //args.Value.AddDays(addedDays);
+                _model.FirstPaymentDate = _model.StartDate!.Value.AddDays(addedDays); //args.Value.AddDays(addedDays);
             }
         }
 
@@ -202,12 +203,10 @@ public partial class LoanEditPage
 
     private void PrintPreview()
     {
-
         try
         {
             if (_model is not null)
             {
-
                 var test = _calSceduleService.Calculate(_model).MapToLoanSchedules();
 
                 ShowPreviewTab(test, _model.CurrencyId);
@@ -219,7 +218,6 @@ public partial class LoanEditPage
         }
         catch (Exception ex)
         {
-
             _toastService.ShowError($"An error occurred while calculating the loan schedule due to {ex.Message}");
         }
 
@@ -229,7 +227,6 @@ public partial class LoanEditPage
 
     private async Task HandleFormSubmit()
     {
-
         isWaiting = true;
 
         if (_model is null)
@@ -269,7 +266,6 @@ public partial class LoanEditPage
 
             if (!rsp.IsSuccess())
             {
-
                 _toastService.ShowError(rsp.GetMessage());
 
 
@@ -296,7 +292,8 @@ public partial class LoanEditPage
         }
         catch (Exception ex)
         {
-            _toastService.ShowError($"An error occurred while disbursing the loan request due to {ex.InnerException?.Message}");
+            _toastService.ShowError(
+                $"An error occurred while disbursing the loan request due to {ex.InnerException?.Message}");
 
             isWaiting = false;
         }
@@ -399,4 +396,29 @@ public partial class LoanEditPage
         IsLoading = false;
     }
 
+    private async Task HandleRequestEditLoan()
+    {
+        var confirm = await MsgBox.ConfirmAsync("តើអ្នកពិតជាចង់ស្នើសុំកែប្រែការស្នើសុំឥណទាននេះ?", "បញ្ជាក់");
+
+        if (confirm == MsgBoxResult.No) return;
+
+        var command = new RequestEditLoanCommand(new RequestDeleteDtoCreate(LoanRequestId, BranchId, memo));
+
+        var rsp = await mediator.Send(command);
+
+        if (rsp.IsSuccess())
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleApproveDelete()
+    {
+        var confirm = await MsgBox.ConfirmAsync("", "Approve");
+
+        if (confirm == MsgBoxResult.No) return;
+
+        var command = new ApprovedRequest();
+
+    }
 }

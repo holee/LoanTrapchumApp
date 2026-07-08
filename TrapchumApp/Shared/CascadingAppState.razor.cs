@@ -1,12 +1,14 @@
-﻿using Applications.Extensions.Identity.Authorizations.Extensions;
+﻿using Applications.Commons.Authorizations.Rquirements;
+using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Settings.Dto;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
+using Domains.Models.Loans;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Text.Json;
-using TrapchumApp.Authorizations.Rquirements;
 
 namespace TrapchumApp.Shared
 {
@@ -46,8 +48,196 @@ namespace TrapchumApp.Shared
 
         private bool _manageDisbursement;
 
-        private bool _manageRequest;
+        private bool _isAllowEditLoan = false;
 
+        public bool IsAllowEditLoan
+        {
+            get { return _isAllowEditLoan; }
+            set
+            {
+                _isAllowEditLoan = value;
+
+                StateHasChanged();
+            }
+        }
+
+        internal async Task IsAllowEditLoanDisbursment(LoanDisbursment? resource) 
+        {
+            if (resource is null)
+            {
+                _isAllowEditLoan = false;
+
+                return;
+            }
+
+            var user = (await AuthenticationState).User;
+
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                var result = await _authorizeService.AuthorizeAsync(user, resource, new AllowApproveDeleteLoanRequirement());
+
+                _isAllowEditLoan = result.Succeeded; 
+            }
+
+        }
+
+
+        /// <summary>
+        /// BM,CEO to approve and delete loan disbursement
+        /// </summary>
+        private bool _allowApproveDelete;
+
+        public bool AllowApproveDelete
+        {
+            get => _allowApproveDelete;
+            set
+            {
+                _allowApproveDelete = value;
+
+                StateHasChanged();
+            }
+        }
+
+        internal async Task AllowApproveDeleteLoanDisbursment(LoanDisbursment? resource)
+        {
+            if (resource is null)
+            {
+                _allowApproveDelete = false;
+
+                return;
+            }
+
+            var user = (await AuthenticationState).User;
+
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                var result = await _authorizeService.AuthorizeAsync(user, resource, new AllowApproveDeleteLoanRequirement());
+
+                _allowApproveDelete = result.Succeeded;
+            }
+
+        }
+
+
+        /// <summary>
+        /// For Account, Chief Account, Teller to edit loan disbursement
+        /// </summary>
+        private bool _canEditLoan;
+
+        public bool CanRequestEditLoan
+        {
+            get { return _canEditLoan; }
+            set
+            {
+                _canEditLoan = value;
+
+                StateHasChanged();
+            }
+        }
+
+        internal async Task CanEditLoanDisbursement(VLoanDisbursments? resource)
+        {
+            if (resource is null)
+            {
+                _canEditLoan = false;
+
+                return;
+            }
+
+            var user = (await AuthenticationState).User;
+
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                var result = await _authorizeService.AuthorizeAsync(user, resource, new CanRequestEditLoanDisbursementRequirement());
+
+                _canEditLoan = result.Succeeded;
+            }
+
+
+        }
+
+
+        /// <summary>
+        /// For Account, Chief Account, Teller,BM to delete loan disbursement
+        /// </summary>
+        private bool _canRequestDeleteLoan;
+
+        public bool CanRequestDeleteLoan
+        {
+            get
+            {
+                return _canRequestDeleteLoan;
+            }
+            set
+            {
+
+                _canRequestDeleteLoan = value;
+
+                StateHasChanged();
+            }
+        }
+
+        internal async Task CanDeleteLoanDisbursement(VLoanDisbursments? resource)
+        {
+            if (resource is null)
+            {
+                _canRequestDeleteLoan = false;
+
+                return;
+            }
+
+            var user = (await AuthenticationState).User;
+
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                var result = await _authorizeService.AuthorizeAsync(user, resource, new CanRequestDeleteLoanDisbursementRequirement());
+
+                _canRequestDeleteLoan = result.Succeeded;
+            }
+
+
+        }
+
+        /// <summary>
+        /// For Account, Chief Account, Teller to delete loan disbursement
+        /// </summary>
+
+        private bool _allowDeleteLoan;
+
+        public bool AllowDeleteLoan
+        {
+            get { return _allowDeleteLoan; }
+
+            set
+            {
+                _allowDeleteLoan = value;
+
+                StateHasChanged();
+            }
+
+        }
+
+        internal async Task AllowDeleteLoanDisbursment(LoanDisbursment? resource)
+        {
+            if (resource is null)
+            {
+                _allowDeleteLoan = false;
+
+                return;
+            }
+
+            var user = (await AuthenticationState).User;
+
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                var result = await _authorizeService.AuthorizeAsync(user, resource, new AllowDeleteLoanRequirement());
+
+                _allowDeleteLoan = result.Succeeded;
+            }
+
+        }
+
+        private bool _manageRequest;
         public bool ManageRequest
         {
             get
@@ -323,6 +513,7 @@ namespace TrapchumApp.Shared
             }
         }
 
+
         internal async Task CheckedCanMultipleRecieve(ClaimsPrincipal user)
         {
             if (user is not null && user?.Identity?.IsAuthenticated == true)
@@ -488,6 +679,11 @@ namespace TrapchumApp.Shared
 
 
         }
+
+
+
+
+
 
 
 

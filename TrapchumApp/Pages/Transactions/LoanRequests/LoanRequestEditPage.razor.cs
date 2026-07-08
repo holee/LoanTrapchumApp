@@ -390,7 +390,9 @@ public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger) : 
 
             if (reqResp.IsError && reqResp.Value is null)
             {
-                NotificationService.Notify(NotificationSeverity.Error, reqResp.FirstError.Description);
+
+                _toastService.ShowError(reqResp.GetMessage());
+
 
                 NavigationManager.NavigateTo($"/App/Loan/Requests/{BranchId}/Branches");
 

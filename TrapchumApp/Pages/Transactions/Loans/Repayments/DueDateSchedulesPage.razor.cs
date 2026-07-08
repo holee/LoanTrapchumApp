@@ -438,7 +438,7 @@ public partial class DueDateSchedulesPage
 
         LoanSchedule = null;
 
-        schedules = rsp.Items;
+        schedules = rsp.Items.Where(x => x.Principle > 0).ToList();
 
         _selectedSchedules = schedules.Take(1).ToList();
 

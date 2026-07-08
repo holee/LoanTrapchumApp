@@ -8,7 +8,7 @@ using Applications.Calculations.Extensions;
 using Applications.Commons.Mappers;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
-using Applications.Features.Loans.Queries.GetLoanById;
+using Applications.Features.Loans.Queries.GetLoanDetailsById;
 using Applications.Features.Loans.Services;
 using Applications.Services.Loans;
 using Applications.Features.Loans.Dtos.Responses;
@@ -455,7 +455,7 @@ public partial class SchedulesPage
 
         isLoading = true;
 
-        var query = new GetLoanByIdQuery(loanId, BranchId, ScheduleStatus.Unpaid, true);
+        var query = new GetLoanDetailsByIdQuery(loanId, BranchId, ScheduleStatus.Unpaid, true);
 
         var rsp = await mediator.Send(query);
 

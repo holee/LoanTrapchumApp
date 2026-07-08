@@ -16,6 +16,7 @@ public sealed class CoPawnCustomerDto
     public string? CustomerName { get; set; } = string.Empty;
     public string? CustomerPhone { get; set; } = string.Empty;
     public string? CustomerAddress { get; set; } = string.Empty;
+    public string? CustomerIdCard { get; set; } = string.Empty;
     public string? Description { get; set; } = string.Empty;
     [NotMapped] public int RowIndex { get; set; } = 0;
 }

@@ -1,4 +1,5 @@
 using Applications.Commons.Authorizations;
+using Applications.Commons.Authorizations.Handlers;
 using Applications.Commons.Mappers;
 using Applications.Extensions;
 using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;

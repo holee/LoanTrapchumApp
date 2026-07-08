@@ -1,4 +1,4 @@
-﻿using Applications.Commons.ExceptionHandlers;
+using Applications.Commons.ExceptionHandlers;
 using Applications.Commons.Mappers;
 using Applications.Commons.Messages.Loanrequests;
 using Applications.Enumerations;
@@ -10,6 +10,7 @@ using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Interfaces.Identity;
 using Applications.Interfaces.Loans;
+using Applications.Responses.Lists.Entities;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
@@ -26,6 +27,7 @@ using Infrastructures.Implements.Extensions;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Data;
 using System.Linq.Expressions;
 
 namespace Infrastructures.Implements;
@@ -1240,62 +1242,59 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         }
     }
 
-
     public async Task<ErrorOr<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include)
     {
         try
         {
             using var db = await dapperFactory.CreateConnectionAsync();
 
-            var sql = @"SELECT * 
-                        FROM VLoanRequests WHERE BranchId=@branchId AND 
-                            CustomerId=@customerId AND LoanRequestId=@loanRequestId";
-
-            var resultQueries = await db.QueryFirstOrDefaultAsync<VLoanRequests>(sql, new
+            var multiMap = await db.QueryMultipleAsync("spGetLoanRequestForEdit", new
             {
                 branchId,
                 customerId,
-                loanRequestId
-            });
+                loanRequestId,
+                include
+            }, commandType: CommandType.StoredProcedure);
 
-            if (resultQueries is null)
+            var requestResult = await multiMap.ReadFirstOrDefaultAsync<VLoanRequests>();
+
+            if (requestResult is null)
             {
-                return Error.NotFound("No Data not found.");
+                return Error.NotFound(description: "Loan request not found.");
             }
 
-            if (!include)
+            if (include)
             {
-                return resultQueries;
-            }
-            var guarantorsTask = GetLoanGuarantors(loanRequestId, branchId);
-            var collateralsTask = GetLoanCollateralLines(loanRequestId, branchId);
-            var documentsTask = GetLoanDocuments(loanRequestId, branchId);
-            var descriptionsTask = GetLoanRequestDescriptions(loanRequestId);
-            var customerTask = GetLoanCustomer(customerId);
-            var copawnTask = GetCoPawnCustomers(loanRequestId, branchId);
-            await Task.WhenAll(guarantorsTask, collateralsTask, documentsTask, descriptionsTask, customerTask, copawnTask);
-
-            resultQueries.Guarantors = guarantorsTask.Result.ToList();
-
-            resultQueries.Collaterals = collateralsTask.Result.ToList();
-
-            resultQueries.Documents = documentsTask.Result.ToList();
-
-            resultQueries.Descriptions = descriptionsTask.Result.ToList();
-
-            resultQueries.CoPawnRequests = copawnTask.Result.ToList();
-
-            if (customerTask.Result is { IsError: false, Value: not null })
-            {
-                resultQueries.Customer = customerTask.Result.Value;
+                await PopulateLoanRequestDetailsAsync(multiMap, requestResult);
             }
 
-            return resultQueries;
-
+            return requestResult;
         }
         catch (Exception ex)
         {
-            return Error.Unexpected($"{ex.Message}");
+            return Error.Unexpected(description: ex.Message);
+        }
+    }
+
+    private static async Task PopulateLoanRequestDetailsAsync(SqlMapper.GridReader multiMap, VLoanRequests request)
+    {
+        request.Guarantors = (await multiMap.ReadAsync<VLoanRequestGuarantor>()).AsList();
+
+        request.Descriptions = (await multiMap.ReadAsync<VLoanRequestDescription>()).AsList();
+
+        request.Collaterals = (await multiMap.ReadAsync<VLoanRequestCollateralLines>()).AsList();
+
+        request.Documents = (await multiMap.ReadAsync<VLoanRequestsDocuments>()).AsList();
+
+        request.CoPawnRequests = (await multiMap.ReadAsync<CoPawnCustomerDto>()).AsList();
+
+        request.Customer = await multiMap.ReadFirstOrDefaultAsync<VCustomerDetails>();
+
+        if (request.Customer is not null)
+        {
+            request.Customer.CustomerIncomes = (await multiMap.ReadAsync<VCustomerIncomes>()).AsList();
+
+            request.Customer.CustomerExpenses = (await multiMap.ReadAsync<VCustomerExpenses>()).AsList();
         }
     }
 
@@ -1696,7 +1695,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
     }
 
 
-    private async Task<CoPawnCustomerDto?> GetCoPawnCustomer(Guid id, string? customerId, int? branchId, CancellationToken cancellation = default)
+    private async Task<CoPawnCustomerDto?> GetCoPawnCustomer(Guid? id, string? customerId, int? branchId, CancellationToken cancellation = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
@@ -1708,6 +1707,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                 co.CustomerId,
                 e.AltName AS CustomerName,
                 e.Phone AS CustomerPhone,
+                e.IdCard As CustomerIdCard,
                 CONCAT(e.ProInKhmer, ' ', e.DisInKhmer, ' ', e.ComInKhmer, ' ', e.VilInKhmer) AS CustomerAddress,
                 co.Status, 
                 co.Description
@@ -1733,6 +1733,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                 co.CustomerId,
                 e.AltName AS CustomerName,
                 e.Phone AS CustomerPhone,
+                e.IdCard As CustomerIdCard,
                 CONCAT(e.ProInKhmer, ' ', e.DisInKhmer, ' ', e.ComInKhmer, ' ', e.VilInKhmer) AS CustomerAddress,
                 co.Status, 
                 co.Description
@@ -1891,6 +1892,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                             co.CustomerId,
                             e.AltName AS CustomerName,
                             e.Phone AS CustomerPhone,
+                            e.IdCard As CustomerIdCard,
                             CONCAT(e.ProInKhmer, ' ', e.DisInKhmer, ' ', e.ComInKhmer, ' ', e.VilInKhmer) AS CustomerAddress,
                             co.Status, 
                             co.Description

@@ -9,6 +9,8 @@ public sealed class LoanGuarantorDtoEdit
     public string? LoanRequestRefId { get; set; }
     public int? BranchId { get; set; }
     public string? GuarantorName { get; set; }
+
+    public string? IdCard { get; set; }=string.Empty;
     public string? FullName { get; set; }
     public string? Gender { get; set; }
     public string? Phone { get; set; }

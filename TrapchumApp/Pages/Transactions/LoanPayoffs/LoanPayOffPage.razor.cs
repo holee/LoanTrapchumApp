@@ -1,5 +1,5 @@
 using Applications.Features.Loans.Dtos.Responses;
-using Applications.Features.Loans.Queries.GetLoanById;
+using Applications.Features.Loans.Queries.GetLoanDetailsById;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using TrapchumApp.Pages.Transactions.RecievePayements;
 using TrapchumApp.Shared;
@@ -33,7 +33,7 @@ public partial class LoanPayOffPage
     {
         Tracker.Show();
 
-        var query = new GetLoanByIdQuery(LoanId, BranchId, ScheduleStatus.Unpaid, true);
+        var query = new GetLoanDetailsByIdQuery(LoanId, BranchId, ScheduleStatus.Unpaid, true);
 
         var rsp = await mediator.Send(query);
 

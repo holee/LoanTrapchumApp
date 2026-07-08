@@ -14,14 +14,14 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         [Parameter] public EventCallback<VLoanRequestCollateralLines> RemoveCollateral { get; set; }
 
         RadzenDataGrid<VLoanRequestCollateralLines> gridColaterals = default!;
-        async void ClickedAdd()
+        private async Task ClickedAdd()
         {
             await Add.InvokeAsync();
 
             await gridColaterals.Reload();
         }
 
-        async void ClickedRemove(VLoanRequestCollateralLines c)
+        private async Task ClickedRemove(VLoanRequestCollateralLines c)
         {
             await RemoveCollateral.InvokeAsync(c);
         }

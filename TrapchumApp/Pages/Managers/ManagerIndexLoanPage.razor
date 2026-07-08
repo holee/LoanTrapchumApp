@@ -330,6 +330,11 @@
 
         _loanCollateralWidthrawUrl = $"/App/Loans/{p.LoanId}/WidthrwalCollateral/{p.BranchId}/Branches";
 
+        string loanEdit = $"/App/Loans/{p.LoanId}/Disbursements/{p.BranchId}/Branches/Edit?customerId={p.CustomerId}";
+
+        string loanDelete = $"/App/Loans/{p.LoanId}/Disbursements/{p.BranchId}/Branches/Delete?customerId={p.CustomerId}";
+
+
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
             <RadzenMenuItem Icon="money"
                             Path="@_getPaymentSchedulesUrl"
@@ -363,6 +368,12 @@
             <RadzenMenuItem Icon="picture_as_pdf"
                             Click="@(()=>DownLoadScheduleAsPdf(p))"
                             Text="Export Loan to Pdf" />
+            <RadzenMenuItem Icon="delete"
+                            Path="@loanDelete"
+                            Text="Request Delete"></RadzenMenuItem>
+            <RadzenMenuItem Icon="edit"
+                            Path="@loanEdit"
+                            Text="Request Edit"></RadzenMenuItem>
         </RadzenMenu>
     );
 

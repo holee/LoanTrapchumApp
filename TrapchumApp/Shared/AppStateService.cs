@@ -22,6 +22,9 @@ public sealed class AppStateService : IAppStateService
     public bool MaximumAmountApproved { get; set; }
     public bool NormalAmountApproved { get; set; }
     public bool ManageDisbursement { get; set; }
-    public bool ManageRequest { get; set; } 
-
+    public bool ManageRequest { get; set; }
+    public bool AllowDeleteLoan { get; set; }
+    public bool AllowApproveDelete { get; set; }
+    public bool CanRequestDeleteLoan { get; set; }
+    public bool CanRequestEditLoan { get; set; }
 }

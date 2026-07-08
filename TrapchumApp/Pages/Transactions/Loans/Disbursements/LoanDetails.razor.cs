@@ -3,7 +3,7 @@ using Applications.Calculations.Extensions;
 using Applications.Commons.Mappers;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Dtos.Responses;
-using Applications.Features.Loans.Queries.GetLoanById;
+using Applications.Features.Loans.Queries.GetLoanDetailsById;
 using Applications.Features.Loans.Queries.GetLoanWithScedules;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
@@ -180,9 +180,9 @@ public partial class LoanDetails
 
     private bool IsFirstScheduleSelected(VSchedule p)
     {
-        var schedulesList = loanSchedule?.Schedules?.ToList();
+        var schedulesList = loanSchedule?.Schedules?.Where(x => x.Principle > 0).ToList();
 
-        var firstSchedule = schedulesList?.First(x => x.IsPaid == false);
+        var firstSchedule = schedulesList?.FirstOrDefault(x => x.IsPaid == false);
 
         return p == firstSchedule;
 
@@ -276,7 +276,7 @@ public partial class LoanDetails
     {
         isVible = true;
 
-        var query = new GetLoanByIdQuery(LoanId, BranchId, status, true);
+        var query = new GetLoanDetailsByIdQuery(LoanId, BranchId, status, true);
 
         var rsp = await mediator.Send(query);
 
@@ -286,7 +286,7 @@ public partial class LoanDetails
 
             _creditAgentId = loanSchedule.CreditAgentRefId;
 
-            Schedules = rsp.Value.Schedules ?? [];
+            Schedules = rsp.Value.Schedules.Where(x => x.Principle > 0) ?? [];
 
         }
         else

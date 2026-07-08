@@ -1,130 +1,94 @@
-﻿@page "/Error"
+@page "/Error"
 @using System.Diagnostics
 
 <PageTitle>Error</PageTitle>
 
-<div class="ep-container">
-    <div class="ep-card">
+<div class="error-page">
+    <div class="error-page__bg">
+        <div class="error-page__circle error-page__circle--1"></div>
+        <div class="error-page__circle error-page__circle--2"></div>
+        <div class="error-page__circle error-page__circle--3"></div>
+    </div>
 
-        <span class="material-icons ep-icon">report_problem</span>
+    <div class="error-page__card">
+        <div class="error-page__illustration">
+            <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg" class="error-page__svg">
+                <!-- Cloud -->
+                <ellipse cx="100" cy="52" rx="52" ry="26" fill="#e2e8f0" opacity="0.5" />
+                <ellipse cx="72" cy="48" rx="28" ry="20" fill="#e2e8f0" opacity="0.6" />
+                <ellipse cx="130" cy="50" rx="24" ry="18" fill="#e2e8f0" opacity="0.55" />
 
-        <h2 class="ep-title">Unexpected Error</h2>
-        <p class="ep-subtitle">
-            An error occurred while processing your request.<br />
-            Please try again or contact your administrator.
+                <!-- Document body -->
+                <rect x="62" y="40" width="76" height="96" rx="8" fill="white" stroke="#cbd5e1" stroke-width="1.5" />
+                <rect x="62" y="40" width="76" height="96" rx="8" fill="url(#docGrad)" />
+
+                <!-- Document lines -->
+                <rect x="76" y="60" width="48" height="4" rx="2" fill="#e2e8f0" />
+                <rect x="76" y="72" width="36" height="4" rx="2" fill="#e2e8f0" />
+                <rect x="76" y="84" width="42" height="4" rx="2" fill="#e2e8f0" />
+                <rect x="76" y="96" width="30" height="4" rx="2" fill="#e2e8f0" />
+
+                <!-- Warning triangle -->
+                <g class="error-page__warning-icon">
+                    <circle cx="132" cy="110" r="22" fill="#25476a" opacity="0.1" />
+                    <path d="M132 94 L148 120 H116 Z" fill="#ef4444" stroke="#fff" stroke-width="2" stroke-linejoin="round" />
+                    <text x="132" y="116" text-anchor="middle" fill="white" font-size="14" font-weight="700">!</text>
+                </g>
+
+                <!-- Floating particles -->
+                <circle cx="40" cy="70" r="3" fill="#25476a" opacity="0.15" class="error-page__particle--1" />
+                <circle cx="165" cy="65" r="2" fill="#94d1b8" opacity="0.3" class="error-page__particle--2" />
+                <circle cx="50" cy="120" r="2.5" fill="#ef4444" opacity="0.15" class="error-page__particle--3" />
+                <circle cx="158" cy="130" r="2" fill="#25476a" opacity="0.2" class="error-page__particle--1" />
+
+                <defs>
+                    <linearGradient id="docGrad" x1="62" y1="40" x2="138" y2="136" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white" stop-opacity="0.9" />
+                        <stop offset="1" stop-color="#f8fafc" stop-opacity="0.5" />
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+
+        <div class="error-page__badge">
+            <span class="error-page__badge-dot"></span>
+            <span class="error-page__badge-text">Error</span>
+        </div>
+
+        <h1 class="error-page__title">Something went wrong</h1>
+        <p class="error-page__description">
+            An unexpected error occurred while processing your request.
+            Please try again or contact your administrator for assistance.
         </p>
 
         @if (ShowRequestId)
         {
-            <div class="ep-request-id">
-                <strong>Request ID:</strong> <code>@RequestId</code>
+            <div class="error-page__request-id">
+                <span class="error-page__request-id-label">Request ID</span>
+                <code class="error-page__request-id-value">@RequestId</code>
+                <button class="error-page__copy-btn"
+                        onclick="navigator.clipboard.writeText('@RequestId'); this.classList.add('copied'); setTimeout(() => this.classList.remove('copied'), 2000);"
+                        title="Copy Request ID">
+                    <RadzenIcon Icon="@IconNames.ContentCopy" class="error-page__copy-icon" />
+                    <RadzenIcon Icon="@IconNames.CheckCircle" class="error-page__check-icon" />
+                </button>
             </div>
         }
 
-        <div class="ep-actions">
-            <a class="ep-btn ep-btn-primary" href="/">
-                <span class="material-icons">home</span> Return to Home
+        <div class="error-page__divider"></div>
+
+        <div class="error-page__actions">
+            <a class="error-page__btn error-page__btn--primary" href="/">
+                <RadzenIcon Icon="@IconNames.Home" />
+                Return to Home
             </a>
-            <a class="ep-btn ep-btn-outline" href="javascript:history.back()">
-                <span class="material-icons">arrow_back</span> Go Back
+            <a class="error-page__btn error-page__btn--ghost" href="javascript:history.back()">
+                <RadzenIcon Icon="@IconNames.ArrowBack" />
+                Go Back
             </a>
         </div>
-
     </div>
 </div>
-
-<style>
-    .ep-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 70vh;
-        padding: 2rem;
-    }
-
-    .ep-card {
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 3rem 2.5rem;
-        max-width: 460px;
-        width: 100%;
-        text-align: center;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-    }
-
-    .ep-icon {
-        font-size: 56px;
-        color: #ef4444;
-        margin-bottom: 1rem;
-        display: block;
-    }
-
-    .ep-title {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #111827;
-        margin: 0 0 0.5rem;
-    }
-
-    .ep-subtitle {
-        font-size: 0.9rem;
-        color: #6b7280;
-        line-height: 1.6;
-        margin: 0 0 1.5rem;
-    }
-
-    .ep-request-id {
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        border-radius: 8px;
-        padding: 0.55rem 1rem;
-        font-size: 0.82rem;
-        color: #374151;
-        margin-bottom: 1.5rem;
-        word-break: break-all;
-    }
-
-    .ep-request-id code {
-        color: #dc2626;
-        font-family: 'Consolas', monospace;
-    }
-
-    .ep-actions {
-        display: flex;
-        gap: 0.75rem;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .ep-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 0.5rem 1.25rem;
-        border-radius: 8px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-        border: none;
-        transition: opacity 0.15s;
-    }
-
-    .ep-btn .material-icons { font-size: 16px; }
-    .ep-btn:hover { opacity: 0.85; }
-
-    .ep-btn-primary {
-        background: #16a34a;
-        color: #fff;
-    }
-
-    .ep-btn-outline {
-        background: transparent;
-        color: #374151;
-        border: 1px solid #d1d5db;
-    }
-</style>
 
 @code {
     [CascadingParameter]
