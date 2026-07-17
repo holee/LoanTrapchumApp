@@ -1,0 +1,43 @@
+﻿@page "/App/Loans/Managers"
+@using TrapchumApp.Components.Comps.ModernTables
+
+<h3>IndexPage</h3>
+
+<ModernTable TItem="ManagerItem" Items="_managers"
+             Loading="false"
+             OnRowClicked="OnManagerClicked">
+    <Columns>
+        <ModernTableColumn TItem="ManagerItem" Title="Name" Property="Name" Sortable="true" />
+        <ModernTableColumn TItem="ManagerItem" Title="Branch" Property="Branch" Sortable="true" />
+        <ModernTableColumn TItem="ManagerItem" Title="Email" Property="Email" />
+        <ModernTableColumn TItem="ManagerItem" Title="Status" Sortable="true" TextAlign="center">
+            <Template Context="manager">
+                <span class="badge @(manager.IsActive ? "bg-success" : "bg-secondary")">
+                    @(manager.IsActive ? "Active" : "Inactive")
+                </span>
+            </Template>
+        </ModernTableColumn>
+    </Columns>
+</ModernTable>
+
+@code {
+    private List<ManagerItem> _managers = new()
+    {
+        new ManagerItem { Name = "John Doe", Branch = "Head Office", Email = "john.doe@example.com", IsActive = true },
+        new ManagerItem { Name = "Jane Smith", Branch = "Downtown Branch", Email = "jane.smith@example.com", IsActive = true },
+        new ManagerItem { Name = "Ali Hassan", Branch = "Riverside Branch", Email = "ali.hassan@example.com", IsActive = false },
+    };
+
+    private void OnManagerClicked(ManagerItem manager)
+    {
+        // Handle row click, e.g. navigate to manager details page
+    }
+
+    private class ManagerItem
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Branch { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+    }
+}

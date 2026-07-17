@@ -1,6 +1,5 @@
 ﻿using Applications.Bases;
 using Applications.Commons.ExceptionHandlers;
-using Applications.Commons.Messages.LoanDisbursements;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.Customers.Response;
@@ -25,7 +24,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using static Dapper.SqlMapper;
-using Applications.Bases;
 
 namespace Infrastructures.Implements;
 
@@ -158,9 +156,10 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
 
             int dayDiff = existingLoan.CreatedDt.DaysUntil(DateTimeOffset.UtcNow);
 
-            if (dayDiff > 1 || existingLoan.AllowEdit == false)
+            if (dayDiff > 1 || existingLoan.AllowEdit == true)
             {
-                throw new UpdateException("Loan disbursement cannot be edited after 1 day or if editing is not allowed.");
+                //Loan disbursement cannot be edited after 1 day or if editing is not allowed.
+                throw new UpdateException("កម្ចីមិនអាចកែប្រែបានបន្ទាប់ពី 1 ថ្ងៃ ឬបើការកែប្រែមិនត្រូវបានអនុញ្ញាត។");
             }
 
             existingLoan.Installments = req.Installments;
@@ -177,6 +176,10 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
             existingLoan.PeriodName = req.PeriodName;
             existingLoan.Principle = req.Principle;
             existingLoan.Remark = req.Remark;
+            existingLoan.AllowEdit = false;
+            existingLoan.AllowDelete = false;
+            existingLoan.RequestEdit = false;
+            existingLoan.RequestDelete = false;
             context.LoanSchedules.RemoveRange(existingLoan.LoanSchedules!);
             existingLoan.LoanSchedules = req.LoanSchedules;
             await context.SaveChangesAsync(cancellation);
@@ -719,6 +722,7 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
         if (start.HasValue)
         {
             var filterTo = to ?? DateTime.Now;
+
             queries = queries.Where(x => x.RegisterDate >= start && x.RegisterDate <= filterTo);
         }
 
@@ -726,6 +730,7 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
         {
 
             string[] props = ["CustomerName", "AgentName", "Phone", "AltName"];
+
             queries = queries.StartWiths(param.Filter, props);
         }
 
@@ -830,8 +835,26 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
                                     .ThenInclude(x => x.LoanDescriptions)
                                 .Include(x => x.LoanRequest)
                                     .ThenInclude(x => x.CoPawnRequests)
+                                .Include(x => x.LoanRequest)
+                                    .ThenInclude(x => x.LoanDocuments)
+                                .Include(x => x.LoanRequest)
+                                    .ThenInclude(x => x.CollateralLinesLink)
+                                        .ThenInclude(x => x.CollateralLine)
+                                .Include(x => x.LoanRequest)
+                                    .ThenInclude(x => x.GuarantorsLink)
+                                        .ThenInclude(x => x.Guarantor)
+                                .Include(x => x.LoanRequest)
+                                    .ThenInclude(x => x.Customer)
+                                .AsSplitQuery()
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync(x => x.LoanId == loanId && x.BranchRefId == branchId, cancellation);
+        if (loan is null)
+        {
+
+            logger.LogWarning("No loan disbursement found for LoanId: {LoanId} and BranchId: {BranchId}", loanId, branchId);
+
+            throw new NotFoundException($"No loan disbursement found for LoanId: {loanId} and BranchId: {branchId}");
+        }
 
         return loan;
     }

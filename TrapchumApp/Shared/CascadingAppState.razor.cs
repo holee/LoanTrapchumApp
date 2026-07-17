@@ -1,4 +1,5 @@
-﻿using Applications.Commons.Authorizations.Rquirements;
+﻿using Applications.Commons.Authorizations.Handlers;
+using Applications.Commons.Authorizations.Rquirements;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
 using Applications.Features.Loans.Dtos.Responses;
@@ -48,6 +49,43 @@ namespace TrapchumApp.Shared
 
         private bool _manageDisbursement;
 
+
+        /// <summary>
+        /// For BM,CEO to approve and edit loan disbursement
+        /// </summary>
+
+        private bool _canApproveEditLoanRequest;
+
+        public bool CanApproveEditLoanRequest
+        {
+            get { return _canApproveEditLoanRequest; }
+            set { _canApproveEditLoanRequest = value; StateHasChanged(); }
+        }
+
+        internal async Task CanApproveRequestEditLoan(LoanDisbursment? resource)
+        {
+            if (resource is null)  
+            {
+                _canApproveEditLoanRequest = false;
+
+                return;
+            }
+
+            var user = (await AuthenticationState).User;
+
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                var result = await _authorizeService.AuthorizeAsync(user, resource, new CanApprovedEditLoanRequestRequirement());
+
+                _canApproveEditLoanRequest = result.Succeeded;
+            }
+
+
+        }
+
+        /// <summary>
+        /// For BM,CEO to edit loan disbursement
+        /// </summary>
         private bool _isAllowEditLoan = false;
 
         public bool IsAllowEditLoan
@@ -61,7 +99,7 @@ namespace TrapchumApp.Shared
             }
         }
 
-        internal async Task IsAllowEditLoanDisbursment(LoanDisbursment? resource) 
+        internal async Task IsAllowEditLoanDisbursment(LoanDisbursment? resource)
         {
             if (resource is null)
             {
@@ -74,9 +112,9 @@ namespace TrapchumApp.Shared
 
             if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                var result = await _authorizeService.AuthorizeAsync(user, resource, new AllowApproveDeleteLoanRequirement());
+                var result = await _authorizeService.AuthorizeAsync(user, resource, new IsAllowEditLoanRequirement());
 
-                _isAllowEditLoan = result.Succeeded; 
+                _isAllowEditLoan = result.Succeeded;
             }
 
         }
@@ -122,14 +160,14 @@ namespace TrapchumApp.Shared
         /// <summary>
         /// For Account, Chief Account, Teller to edit loan disbursement
         /// </summary>
-        private bool _canEditLoan;
+        private bool _canRequestEditLoan;
 
         public bool CanRequestEditLoan
         {
-            get { return _canEditLoan; }
+            get { return _canRequestEditLoan; }
             set
             {
-                _canEditLoan = value;
+                _canRequestEditLoan = value;
 
                 StateHasChanged();
             }
@@ -139,7 +177,7 @@ namespace TrapchumApp.Shared
         {
             if (resource is null)
             {
-                _canEditLoan = false;
+                _canRequestEditLoan = false;
 
                 return;
             }
@@ -150,7 +188,7 @@ namespace TrapchumApp.Shared
             {
                 var result = await _authorizeService.AuthorizeAsync(user, resource, new CanRequestEditLoanDisbursementRequirement());
 
-                _canEditLoan = result.Succeeded;
+                _canRequestEditLoan = result.Succeeded;
             }
 
 

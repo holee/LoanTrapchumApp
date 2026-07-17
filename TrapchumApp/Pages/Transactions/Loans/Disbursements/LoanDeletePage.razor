@@ -264,90 +264,10 @@ else
                 <LoanRequestDocument Documents="@req.Documents.ToList()" ShowUpload="false" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="តារាងសងប្រាក់" Icon="@IconNames​.Schedule">
-                <RadzenCard Variant="Variant.Flat" class="rz-my-2 rz-background-color-base-100">
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
-                                 class="rz-mb-3 rz-pb-2" style="border-bottom:2px solid var(--rz-success);">
-                        <RadzenIcon Icon="@IconNames.CalendarMonth" style="color:var(--rz-primary);font-size:1.1rem;" />
-                        <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:700;color:var(--rz-primary);">តារាងបង់ប្រាក់</RadzenText>
-                        <RadzenBadge BadgeStyle="BadgeStyle.Info"
-                                     Text="@($"{_model!.LoanSchedules?.Count ?? 0} ជួរ")"
-                                     Style="font-size:0.65rem;margin-left:auto;" />
-                    </RadzenStack>
-
-                    <RadzenDataGrid Data="@_model!.LoanSchedules"
-                                    TItem="LoanScheduleDtoCreate"
-                                    Density="Density.Compact"
-                                    AllowAlternatingRows="false"
-                                    GridLines="DataGridGridLines.Both"
-                                    Responsive="true"
-                                    RowRender="@OnRowRender"
-                                    RowSelect="@OnRowSelected"
-                                    Style="border-radius:0.5rem;overflow:hidden;">
-                        <Columns>
-                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.InstallmentNo))"
-                                                  Title="#" Width="2.5rem"
-                                                  TextAlign="TextAlign.Center" Sortable="false">
-                                <Template Context="s">
-                                    <RadzenBadge BadgeStyle="BadgeStyle.Light"
-                                                 Text="@s.InstallmentNo?.ToString()"
-                                                 Style="font-size:0.65rem;min-width:1.5rem;" />
-                                </Template>
-                            </RadzenDataGridColumn>
-
-                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.PaymentDate))"
-                                                  Title="ថ្ងៃបង់ប្រាក់" Width="5.5rem" Sortable="false">
-                                <Template Context="s">@s.PaymentDate.DayFirst()</Template>
-                                <FooterTemplate><strong>សរុប</strong></FooterTemplate>
-                            </RadzenDataGridColumn>
-
-                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.TotalDay))"
-                                                  Title="ថ្ងៃ" Width="3.5rem"
-                                                  TextAlign="TextAlign.Center" Sortable="false">
-                                <Template Context="s">@s.TotalDay</Template>
-                                <FooterTemplate><strong>@(_model!.LoanSchedules?.Sum(x => x.TotalDay))</strong></FooterTemplate>
-                            </RadzenDataGridColumn>
-
-                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.Principal))"
-                                                  Title="ប្រាក់ដើម" Width="6rem"
-                                                  TextAlign="TextAlign.Right" Sortable="false">
-                                <Template Context="s">@s.Principal.As(_model?.CurrencyId)</Template>
-                                <FooterTemplate><strong>@(_model!.LoanSchedules?.Sum(x => x.Principal).As(_model?.CurrencyId))</strong></FooterTemplate>
-                            </RadzenDataGridColumn>
-
-                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.Interest))"
-                                                  Title="ការប្រាក់" Width="6rem"
-                                                  TextAlign="TextAlign.Right" Sortable="false">
-                                <Template Context="s">@s.Interest.As(_model?.CurrencyId)</Template>
-                                <FooterTemplate><strong>@(_model!.LoanSchedules?.Sum(x => x.Interest).As(_model?.CurrencyId))</strong></FooterTemplate>
-                            </RadzenDataGridColumn>
-
-                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.CollectionFee))"
-                                                  Title="ប្រាក់ប្រមូលសេវា" Width="6.5rem"
-                                                  TextAlign="TextAlign.Right" Sortable="false">
-                                <Template Context="s">@s.CollectionFee.As(_model?.CurrencyId)</Template>
-                                <FooterTemplate><strong>@(_model!.LoanSchedules?.Sum(x => x.CollectionFee).As(_model?.CurrencyId))</strong></FooterTemplate>
-                            </RadzenDataGridColumn>
-
-                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.TotalPay))"
-                                                  Title="បង់សរុប" Width="6rem"
-                                                  TextAlign="TextAlign.Right" Sortable="false">
-                                <Template Context="s">
-                                    <strong>@s.TotalPay.As(_model?.CurrencyId)</strong>
-                                </Template>
-                                <FooterTemplate>
-                                    <strong style="color:var(--rz-primary);">@(_model!.LoanSchedules?.Sum(x => x.TotalPay).As(_model?.CurrencyId))</strong>
-                                </FooterTemplate>
-                            </RadzenDataGridColumn>
-
-                            <RadzenDataGridColumn Property="@(nameof(LoanScheduleDtoCreate.LoanOutstanding))"
-                                                  Title="នៅសល់" Width="6.5rem"
-                                                  TextAlign="TextAlign.Right" Sortable="false">
-                                <Template Context="s">@s.LoanOutstanding.As(_model?.CurrencyId)</Template>
-                            </RadzenDataGridColumn>
-                        </Columns>
-                    </RadzenDataGrid>
-
-                </RadzenCard>
+                <LoanScheduleGrid Data="@_model!.LoanSchedules"
+                                  CurrencyId="@_model?.CurrencyId"
+                                  RowSelect="@OnRowSelected" />
+           
             </RadzenTabsItem>
             <RadzenTabsItem Text="កំណត់សម្គាល់" Icon="@IconNames.Comment">
                 <LoanRequestNotes Data="@req.Descriptions" />

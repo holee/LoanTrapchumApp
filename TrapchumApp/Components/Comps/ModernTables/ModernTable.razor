@@ -34,6 +34,13 @@
         </div>
     }
 
+    @if (Loading)
+    {
+        <div class="modern-table-progress">
+            <div class="modern-table-progress-indeterminate"></div>
+        </div>
+    }
+
     <div class="modern-table-wrapper">
         <table class="modern-table">
             <thead>
@@ -58,7 +65,18 @@
                 </tr>
             </thead>
             <tbody>
-                @if (FilteredItems.Any())
+                @if (Loading)
+                {
+                    <tr class="no-hover">
+                        <td colspan="@_columns.Count" class="loading-state">
+                            <div class="loading-content">
+                                <span class="loading-spinner"></span>
+                                <p>@LoadingText</p>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                else if (FilteredItems.Any())
                 {
                     @foreach (var item in PagedItems)
                     {
@@ -142,6 +160,8 @@
     [Parameter] public int PageSize { get; set; } = 10;
     [Parameter] public int[] PageSizeOptions { get; set; } = new[] { 5, 10, 25, 50, 100 };
     [Parameter] public EventCallback<TItem> OnRowClicked { get; set; }
+    [Parameter] public bool Loading { get; set; }
+    [Parameter] public string LoadingText { get; set; } = "Loading items...";
 
     private List<ModernTableColumn<TItem>> _columns = new();
     private string _searchTerm = "";

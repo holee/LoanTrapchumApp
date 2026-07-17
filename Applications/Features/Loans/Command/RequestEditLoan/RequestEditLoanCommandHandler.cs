@@ -9,7 +9,7 @@ public sealed class RequestEditLoanCommandHandler(ILoanService loanService)
     {
         try
         {
-           return  await loanService.ApproveEditLoanRequestAsync(request.Request,cancellationToken);
+           return  await loanService.RequestEditLoanAsync(request.Request,cancellationToken);
         }
         catch (Exception e)
         {

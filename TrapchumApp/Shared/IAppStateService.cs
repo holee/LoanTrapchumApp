@@ -23,4 +23,5 @@ public interface IAppStateService
     bool AllowApproveDelete { get; set; }
     bool CanRequestDeleteLoan { get; set; }
     bool CanRequestEditLoan { get; set; }
+    bool CanApproveEditLoanRequest { get; set; }
 }

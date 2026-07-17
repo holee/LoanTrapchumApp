@@ -407,6 +407,7 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
                             .AnyAsync(x => (x.IdCard == idCard && (string.IsNullOrEmpty(x.CustomerId) || x.CustomerId != customerId)), cancellation);
 
     }
+   
     private async Task<long> GetMaxSequenceNumber(DataContext context)
     {
         var maxSequence = await context.EntityNames

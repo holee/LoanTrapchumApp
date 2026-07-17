@@ -52,6 +52,7 @@ public partial class ManageRolePermission
     private async Task GetPermissions()
     {
        Tracker.Show();
+
         var rsp = await _mediator.Send(new GetPermissionsByRoleQuery(Id));
 
         if (rsp.IsError)
@@ -80,6 +81,8 @@ public partial class ManageRolePermission
         groups.Add("All");
 
         Tracker.Hide();
+
+        StateHasChanged();
     }
 
 

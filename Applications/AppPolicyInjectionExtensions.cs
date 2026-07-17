@@ -121,7 +121,7 @@ namespace Applications
                 services.AddScoped<IAuthorizationHandler, CanRequestDeleteLoanHandler>();
                 services.AddScoped<IAuthorizationHandler, CanRequestEditLoanHandler>();
                 services.AddScoped<IAuthorizationHandler, IsAllowEditLoanHandler>();
-
+                services.AddScoped<IAuthorizationHandler, CanApprovedEditLoanRequestHandler>();
             }
 
 

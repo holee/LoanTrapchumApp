@@ -29,9 +29,9 @@ public class EditLoanDisbursmentValidator : AbstractValidator<LoanDtoCreate>
 
         RuleFor(c => c.StartDate).Cascade(CascadeMode.Stop)
                                     .NotNull()
-                                        .WithMessage("Please select start date.")
-                                    .GreaterThanOrEqualTo(DateTime.Today)
-                                        .WithMessage("Start date must be today or a future date.");
+                                        .WithMessage("Please select start date.");
+                                    //.GreaterThanOrEqualTo(DateTime.Today)
+                                    //    .WithMessage("Start date must be today or a future date.");
 
         RuleFor(c => c.FirstPaymentDate).Cascade(CascadeMode.Stop)
                                     .NotNull()

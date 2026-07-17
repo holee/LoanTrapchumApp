@@ -254,37 +254,38 @@ else
                         </RadzenColumn>
                     </RadzenRow>
                     <AppActions>
-                        @if (resource is not null && BState.CanRequestEditLoan)
+                        @if (resource is { RequestEdit: false, AllowEdit: false } && BState.CanRequestEditLoan)
                         {
                             <SaveButton IsBusy="@isWaiting"
                                         BusyText="រង់ចាំ...."
                                         ButtonType="ButtonType.Button"
                                         OnClick="@HandleRequestEditLoan"
-                                        Title="ស្នើរសុំកែប្រែ"/>
+                                        Title="ស្នើរសុំកែប្រែ" />
                         }
-                        @if (resource is not null && BState.IsAllowEditLoan)
+                        @if (resource is { AllowEdit: true, RequestEdit: true } && BState.IsAllowEditLoan)
                         {
                             <SaveButton IsBusy="@isWaiting"
                                         BusyText="រង់ចាំ...."
-                                        Title="បញ្ចេញប្រាក់"/>
+                                        Title="បញ្ចេញប្រាក់" />
+                            <RadzenButton Icon="@IconNames.Preview"
+                                          Click="@PrintPreview"
+                                          Size="@Styles.DefaultSize"
+                                          Text="បោះពុម្ភសាកល្បង" />
+
                         }
-                        @if (resource is not null && BState.AllowApproveDelete)
+                        @if (resource is { RequestEdit: true, AllowEdit: false } && BState.CanApproveEditLoanRequest)
                         {
                             <SaveButton IsBusy="@isWaiting"
                                         BusyText="រង់ចាំ...."
                                         ButtonType="ButtonType.Button"
-                                        OnClick="@HandleApproveDelete"
-                                        Title="អនុញ្ញាតិអោយកែ"/>
+                                        OnClick="@HandleApproveEditLoanRequest"
+                                        Title="អនុញ្ញាតិអោយកែ" />
                         }
-                        <RadzenButton Icon="@IconNames.Preview"
-                                      Click="@PrintPreview"
-                                      Size="@Styles.DefaultSize"
-                                      Text="បោះពុម្ភសាកល្បង"/>
 
                         <RadzenLink Icon="@IconNames.ArrowCircleLeft"
                                     IconColor="@Colors.Danger"
                                     Path="@_navService.PreviousUrl"
-                                    Text="ត្រឡប់ក្រោយ"/>
+                                    Text="ត្រឡប់ក្រោយ" />
                     </AppActions>
 
                 </EditForm>
@@ -295,9 +296,15 @@ else
                 <LoanCoPawns Customers="_model!.CoPawCustomers" />
                 <LoanRequestDocument Documents="@req.Documents.ToList()" ShowUpload="false" />
             </RadzenTabsItem>
+            <RadzenTabsItem Text="តារាងសងប្រាក់" Icon="@IconNames.Schedule">
+                <LoanScheduleGrid Data="@_model!.LoanSchedules"
+                                  CurrencyId="@_model?.CurrencyId"
+                                  RowSelect="@OnRowSelected" />
+            </RadzenTabsItem>
             <RadzenTabsItem Text="កំណត់សម្គាល់" Icon="@IconNames.Comment">
                 <LoanRequestNotes Data="@req.Descriptions" />
             </RadzenTabsItem>
+           
             @foreach (var tab in _tabs)
             {
                 <RadzenTabsItem Text="@tab.Title" Icon="@tab.Icon" @key="@tab.Key">
@@ -312,24 +319,24 @@ else
         </Tabs>
     </RadzenTabs>
 
-    @* ── Action Toolbar ── *@
-
 }
 
 @code {
+
+    void OnRowSelected(Applications.Features.Loans.Dtos.Requests.LoanScheduleDtoCreate arg)
+    {
+
+    }
+
     void SelectedChargeModeChanged(object? e)
     {
         if (e is not null)
         {
             var selectedValue = (Items)e;
-
-            //model.CollectionFeeModeName = selectedValue.Label;
         }
         else
         {
-            _model.CollectionFeeModeId = 1;
-
-            //model.CollectionFeeModeName = "Flat";
+            _model?.CollectionFeeModeId = 1;
         }
     }
 
@@ -337,15 +344,13 @@ else
     {
         var selectedValue = (Items)e;
 
-        // model.RepaymentMode = selectedValue.Label;
-
         if (selectedValue.Value == 1)
         {
-            _model.PayEvery = 4;
+            _model?.PayEvery = 4;
         }
         else
         {
-            _model.PayEvery = 1;
+            _model?.PayEvery = 1;
         }
     }
 }

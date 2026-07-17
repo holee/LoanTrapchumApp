@@ -382,11 +382,12 @@ public sealed class RoleRepository(
         return await GetPermissionsByRoleInternalAsync(roleId, AppPermissions.AllPermissions, p => p.Module);
     }
 
-    private async Task<ErrorOr<RolePermissions>> GetPermissionsByRoleInternalAsync(
-        string roleId, IEnumerable<dynamic> allPermissions, Func<dynamic, string> groupSelector)
+    private async Task<ErrorOr<RolePermissions>> GetPermissionsByRoleInternalAsync(string roleId,
+        IEnumerable<dynamic> allPermissions,
+        Func<dynamic, string> groupSelector)
     {
-        var roleInDb = await roleManager.FindByIdAsync(roleId);
-
+        await using var context = await contextFactory.CreateDbContextAsync();
+        var roleInDb = await context.Roles.FirstOrDefaultAsync(r => r.Id == roleId);
         if (roleInDb is null)
             return Error.NotFound("Role.NotFound", "Role not found in the system.");
 

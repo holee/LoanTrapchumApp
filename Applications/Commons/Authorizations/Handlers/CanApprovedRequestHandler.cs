@@ -22,7 +22,7 @@ public sealed class CanApprovedRequestHandler : AuthorizationHandler<CanApproved
         AppRoles.Dbm,
     ];
 
-    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, 
+    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context,
          CanApprovedRequestRequirement requirement,
         (VLoanRequests Request, VUserLoanSizes UserLoanSize) resource)
     {

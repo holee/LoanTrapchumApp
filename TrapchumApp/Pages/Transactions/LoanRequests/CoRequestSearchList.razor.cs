@@ -40,7 +40,7 @@ public partial class CoRequestSearchList
     // ── Data loading ─────────────────────────────────────────────────────
     private async Task LoadCustomerAsync()
     {
-        var param = new QueryParam(0, pageSize, nameof(VCustomerList.AltName), false, false, _filterText);
+        var param = new QueryParam(0, pageSize, nameof(VCustomerList.ModifiedDT), false, false, _filterText);
 
         var command = new GetCustomerAsPagingQuery(BranchId, null, null, param, false);
 

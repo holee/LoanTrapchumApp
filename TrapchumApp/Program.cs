@@ -3,6 +3,7 @@ using Applications.Calculations;
 using Domains.Models.Identity;
 using Infrastructures;
 using Infrastructures.DependencyInjects;
+using Infrastructures.Middlewares;
 using Mapster;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Http.Features;
@@ -63,6 +64,7 @@ builder.Services.AddSingleton<UserServices>();
 builder.Services.AddSingleton<BranchService>();
 builder.Services.AddSingleton<CurrencyServices>();
 builder.Services.AddScoped<AppSettingService>();
+builder.Services.AddScoped<ManagerRedirectMiddleware>();
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 104857600; // 100 MB
@@ -100,6 +102,8 @@ else
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
+
+app.UseMiddleware<ManagerRedirectMiddleware>();
 
 app.UseStaticFiles();
 

@@ -27,4 +27,5 @@ public sealed class AppStateService : IAppStateService
     public bool AllowApproveDelete { get; set; }
     public bool CanRequestDeleteLoan { get; set; }
     public bool CanRequestEditLoan { get; set; }
+    public bool CanApproveEditLoanRequest { get; set; }
 }

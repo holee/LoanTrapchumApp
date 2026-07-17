@@ -2,6 +2,8 @@ using Applications.Exceptions;
 using Applications.Features.Customers.Response;
 using Applications.Features.Holidays.Dtos;
 using Applications.Features.LoanRequests.Queryies.GetApprovedLoanRequest;
+using Applications.Features.Loans.Command.ApproveDeleteReuquest;
+using Applications.Features.Loans.Command.ApproveEditLoanRequest;
 using Applications.Features.Loans.Command.CreateLoan;
 using Applications.Features.Loans.Command.EditLoanDisbursment;
 using Applications.Features.Loans.Command.RequestEditLoan;
@@ -32,7 +34,7 @@ public partial class LoanEditPage
 
     [PersistentState] public LoanDtoCreate? _model { get; set; }
 
-    private const int FixedTabCount = 3;
+    private const int FixedTabCount = 4;
 
     private int selectedTabIndex;
 
@@ -101,6 +103,13 @@ public partial class LoanEditPage
             }
         }
 
+        await GetLoan();
+
+        IsLoading = false;
+    }
+
+    private async Task GetLoan()
+    {
         var command = new GetLoanByIdQuery(LoanId, BranchId);
 
         var result = await mediator.Send(command);
@@ -108,11 +117,12 @@ public partial class LoanEditPage
         if (result.IsSuccess())
         {
             resource = result.Value;
+
+            await BState.CanApproveRequestEditLoan(resource);
+
+            await BState.IsAllowEditLoanDisbursment(resource);
         }
-
-        IsLoading = false;
     }
-
 
     private async Task GetHolidays(int? installment = 12)
     {
@@ -266,8 +276,9 @@ public partial class LoanEditPage
 
             if (!rsp.IsSuccess())
             {
-                _toastService.ShowError(rsp.GetMessage());
+                //_toastService.ShowError(rsp.GetMessage());
 
+                await Swal.ErrorAsync("Error", rsp.GetMessage());
 
                 isWaiting = false;
 
@@ -402,23 +413,45 @@ public partial class LoanEditPage
 
         if (confirm == MsgBoxResult.No) return;
 
-        var command = new RequestEditLoanCommand(new RequestDeleteDtoCreate(LoanRequestId, BranchId, memo));
+        var command = new RequestEditLoanCommand(new RequestDeleteDtoCreate(LoanId, BranchId, memo));
 
         var rsp = await mediator.Send(command);
 
         if (rsp.IsSuccess())
         {
+
+            _toastService.ShowSuccess("ស្នើសុំកែប្រែការស្នើសុំឥណទានបានផ្ញើរទៅអ្នកគ្រប់គ្រងដោយជោគជ័យ។");
+
             StateHasChanged();
+        }
+        else
+        {
+            _toastService.ShowError(rsp.GetMessage());
         }
     }
 
-    private async Task HandleApproveDelete()
+    private async Task HandleApproveEditLoanRequest()
     {
-        var confirm = await MsgBox.ConfirmAsync("", "Approve");
+        var confirm = await MsgBox.ConfirmAsync("តើអ្នកពិតជាចង់អនុម័តស្នើសុំកែប្រែការស្នើសុំឥណទាននេះ?", "បញ្ជាក់");
 
         if (confirm == MsgBoxResult.No) return;
 
-        var command = new ApprovedRequest();
+        var command = new ApproveEditLoanRequestCommand(new RequestDeleteDtoCreate(LoanId, BranchId, memo));
 
+        var rsp = await mediator.Send(command);
+
+        if (rsp.IsSuccess())
+        {
+
+            _toastService.ShowSuccess("ស្នើសុំកែប្រែការស្នើសុំឥណទានត្រូវបានអនុម័តដោយជោគជ័យ។");
+
+            await GetLoan();
+
+            StateHasChanged();
+        }
+        else
+        {
+            _toastService.ShowError(rsp.GetMessage());
+        }
     }
 }

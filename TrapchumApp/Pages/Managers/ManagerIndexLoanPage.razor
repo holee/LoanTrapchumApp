@@ -370,9 +370,11 @@
                             Text="Export Loan to Pdf" />
             <RadzenMenuItem Icon="delete"
                             Path="@loanDelete"
+                            Visible="@(p.RequestDelete==true)"
                             Text="Request Delete"></RadzenMenuItem>
             <RadzenMenuItem Icon="edit"
                             Path="@loanEdit"
+                            Visible="@(p.RequestEdit==true)"
                             Text="Request Edit"></RadzenMenuItem>
         </RadzenMenu>
     );
