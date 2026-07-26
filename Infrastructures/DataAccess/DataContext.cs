@@ -215,6 +215,7 @@ namespace Infrastructures.DataAccess
         public DbSet<LoanDisbursment> LoanDisbursementRequests => Set<LoanDisbursment>();
         public DbSet<LoanRequest> LoanRequests => Set<LoanRequest>();
         public DbSet<CoPawnCustomer> CoLoanRequests => Set<CoPawnCustomer>();
+        public DbSet<Area> Areas => Set<Area>();
         public DbSet<LtLocation> Locations => Set<LtLocation>();
         public DbSet<LoanDocuments> LoanDocuments => Set<LoanDocuments>();
         public DbSet<LoanDescriptions> LoanDescriptions => Set<LoanDescriptions>();

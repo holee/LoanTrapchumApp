@@ -2,10 +2,8 @@ using Applications.Commons.Extensions;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.LoanPayments.Command.RecievePayment;
 using Applications.Features.LoanPayments.Requests;
-using Applications.Features.Settings.UseCases;
 using Applications.Features.Transactions.LoanTransactions;
 using Domains.Models.Identity;
-using Microsoft.JSInterop;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 
@@ -22,10 +20,20 @@ public partial class PaymentSideBars
     bool isBusy = false;
 
     EditForm? editForm;
-    void CloseModal()
+    async Task CloseModal()
     {
-        DialogService.CloseSide(false);
+        var confirm = await MsgBox.ConfirmAsync("អ្នកលោកអ្នកពិជាចង់បិទទំព័រនេះ?ការផ្លាស់ប្ដូរដែលមិនបានរក្សាទុកនឹងត្រូវបាត់បង់។", "បញ្ជាក់");
+
+        if (confirm == MsgBoxResult.Yes)
+        {
+            DialogService.CloseSide(false);
+
+            return;
+        }
+
+        return;
     }
+
     string? UserId = string.Empty;
 
     protected override async Task OnInitializedAsync()
@@ -115,11 +123,10 @@ public partial class PaymentSideBars
 
 
 
-    async Task OnSaveChanges()
+    async Task HandleSaveChanges()
     {
 
-        if (editForm?.EditContext?.Validate() == false)
-            return;
+        if (editForm?.EditContext?.Validate() == false) return;
 
         try
         {

@@ -2,6 +2,7 @@
 using Applications.Features.Addresses.Dto;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
+using Domains.Models;
 using Domains.Models.Addresses;
 using ErrorOr;
 
@@ -74,4 +75,9 @@ public interface IAddressService
     Task<ErrorOr<CityDto>> UpdateCity(City city, CancellationToken cancellation = default);
     Task<PageMetaData<CountryDto>> GetCountries(int? countryId, QueryParam param, CancellationToken cancellation = default);
     Task<PageMetaData<CityDto>> GetCities(int? cityId, QueryParam param, CancellationToken cancellation = default);
+    Task<PageMetaData<AreaDto>> GetAreasAsync(long? id, QueryParam param, CancellationToken cancellation = default);
+    Task<AreaDto> GetAreaAsync(long? id, CancellationToken cancellation = default);
+    Task<ErrorOr<string>> DeleteCityAsync(int? id, CancellationToken cancellation = default);
+    Task<AreaDto?> AddOrUpdateAreasAsync(Area area, CancellationToken cancellation = default);
+    Task<bool> DeleteAreasAsync(long? id, CancellationToken cancellation = default);
 }

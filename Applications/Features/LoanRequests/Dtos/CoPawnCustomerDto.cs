@@ -14,6 +14,7 @@ public sealed class CoPawnCustomerDto
     public string? LoanId { get; set; } = string.Empty;
     public bool? Status { get; set; } = true;
     public string? CustomerName { get; set; } = string.Empty;
+    [NotMapped] public string? Gender { get; set; } = string.Empty;
     public string? CustomerPhone { get; set; } = string.Empty;
     public string? CustomerAddress { get; set; } = string.Empty;
     public string? CustomerIdCard { get; set; } = string.Empty;

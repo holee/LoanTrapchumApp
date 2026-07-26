@@ -1,0 +1,499 @@
+@using Applications.Features.Addresses.Dto
+@using Applications.Features.Addresses.Queries.GetCommunes
+@using Applications.Features.Addresses.Queries.GetDistricts
+@using Applications.Features.Addresses.Queries.GetProvinces
+@using Applications.Features.Addresses.Queries.GetVillages
+
+<RadzenCard class="area-create-card">
+    <RadzenStack Gap="1.5rem" Orientation="Orientation.Vertical">
+        <!-- Header Section -->
+        <RadzenStack Gap="0.5rem" Orientation="Orientation.Vertical">
+            <RadzenText TextStyle="TextStyle.H5" class="area-title">
+                <RadzenIcon Icon="location_on" class="area-header-icon" /> Select Your Area
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Caption" class="area-subtitle">
+                Choose your location by selecting province, district, commune, and village
+            </RadzenText>
+        </RadzenStack>
+
+        <!-- Breadcrumb/Progress Indicator -->
+        <RadzenStack Gap="0.5rem" Orientation="Orientation.Horizontal" class="area-breadcrumb" JustifyContent="JustifyContent.Start" AlignItems="AlignItems.Center">
+            <span class="breadcrumb-item @(model.ProvinceId.HasValue ? "breadcrumb-active" : "")">
+                <RadzenIcon Icon="domain" class="breadcrumb-icon" /> Province
+            </span>
+            <span class="breadcrumb-divider">→</span>
+            <span class="breadcrumb-item @(model.DistrictId.HasValue ? "breadcrumb-active" : "")">
+                <RadzenIcon Icon="map" class="breadcrumb-icon" /> District
+            </span>
+            <span class="breadcrumb-divider">→</span>
+            <span class="breadcrumb-item @(model.CommuneId.HasValue ? "breadcrumb-active" : "")">
+                <RadzenIcon Icon="home" class="breadcrumb-icon" /> Commune
+            </span>
+            <span class="breadcrumb-divider">→</span>
+            <span class="breadcrumb-item @(model.VillageId.HasValue ? "breadcrumb-active" : "")">
+                <RadzenIcon Icon="public" class="breadcrumb-icon" /> Village
+            </span>
+        </RadzenStack>
+
+        <!-- Form -->
+        <RadzenTemplateForm TItem="AreaDtoCreate" Data="@model" Submit="@HandleFormSubmit">
+            <RadzenStack Gap="1.5rem" Orientation="Orientation.Vertical">
+                <!-- Province Field -->
+                <div class="form-field-wrapper">
+                    <div class="form-field-header">
+                        <RadzenIcon Icon="domain" class="form-field-icon primary-icon" />
+                        <RadzenText TextStyle="TextStyle.Subtitle2" class="form-field-label">Province<span class="required-asterisk">*</span></RadzenText>
+                    </div>
+                    <RadzenFormField Text="" Variant="Variant.Outlined" Style="width:100%;" class="custom-form-field">
+                        <RadzenDropDown 
+                            AllowFiltering="true"
+                            AllowClear="true"
+                            Name="ProvinceRefId"
+                            Style="width: 100%;"
+                            Data="provinces"
+                            @bind-Value="model.ProvinceId"
+                            Change="@(args => OnProvinceChanged((int?)args))"
+                            TextProperty="@nameof(ProvinceDto.ProInKhmer)"
+                            ValueProperty="@nameof(ProvinceDto.ProvinceId)"
+                            FilterOperator="StringFilterOperator.Contains"
+                            Placeholder="Select your province...">
+                        </RadzenDropDown>
+                        <RadzenRequiredValidator Component="ProvinceRefId" Text="Province is required" />
+                    </RadzenFormField>
+                </div>
+
+                <!-- District Field -->
+                <div class="form-field-wrapper">
+                    <div class="form-field-header">
+                        <RadzenIcon Icon="map" class="@($"form-field-icon {(!model.ProvinceId.HasValue ? "disabled-icon" : "")}")" />
+                        <RadzenText TextStyle="TextStyle.Subtitle2" class="form-field-label">District<span class="required-asterisk">*</span></RadzenText>
+                    </div>
+                    <RadzenFormField Text="" Variant="Variant.Outlined" Style="width:100%;" class="custom-form-field">
+                        <RadzenDropDown 
+                            AllowFiltering="true"
+                            AllowClear="true"
+                            Name="DistrictRefId"
+                            Style="width: 100%;"
+                            Data="districts"
+                            Disabled="@(!model.ProvinceId.HasValue)"
+                            @bind-Value="model.DistrictId"
+                            Change="@(args => OnDistrictChanged((int?)args))"
+                            TextProperty="@nameof(DistrictDto.DisInKhmer)"
+                            ValueProperty="@nameof(DistrictDto.DistrictId)"
+                            FilterOperator="StringFilterOperator.Contains"
+                            Placeholder="@(!model.ProvinceId.HasValue ? "Select province first..." : "Select your district...")">
+                        </RadzenDropDown>
+                        <RadzenRequiredValidator Component="DistrictRefId" Text="District is required" />
+                    </RadzenFormField>
+                </div>
+
+                <!-- Commune Field -->
+                <div class="form-field-wrapper">
+                    <div class="form-field-header">
+                        <RadzenIcon Icon="home" class="@($"form-field-icon {(!model.DistrictId.HasValue ? "disabled-icon" : "")}")" />
+                        <RadzenText TextStyle="TextStyle.Subtitle2" class="form-field-label">Commune<span class="required-asterisk">*</span></RadzenText>
+                    </div>
+                    <RadzenFormField Text="" Variant="Variant.Outlined" Style="width:100%;" class="custom-form-field">
+                        <RadzenDropDown 
+                            AllowFiltering="true"
+                            AllowClear="true"
+                            Name="CommuneRefId"
+                            Style="width: 100%;"
+                            Data="communelist"
+                            Disabled="@(!model.DistrictId.HasValue)"
+                            @bind-Value="model.CommuneId"
+                            Change="@(args => OnCommuneChanged((int?)args))"
+                            TextProperty="@nameof(CommuneDto.ComInKhmer)"
+                            ValueProperty="@nameof(CommuneDto.CommuneId)"
+                            FilterOperator="StringFilterOperator.Contains"
+                            Placeholder="@(!model.DistrictId.HasValue ? "Select district first..." : "Select your commune...")">
+                        </RadzenDropDown>
+                        <RadzenRequiredValidator Component="CommuneRefId" Text="Commune is required" />
+                    </RadzenFormField>
+                </div>
+
+                <!-- Village Field -->
+                <div class="form-field-wrapper">
+                    <div class="form-field-header">
+                        <RadzenIcon Icon="public" class="@($"form-field-icon {(!model.CommuneId.HasValue ? "disabled-icon" : "")}")" />
+                        <RadzenText TextStyle="TextStyle.Subtitle2" class="form-field-label">Village<span class="required-asterisk">*</span></RadzenText>
+                    </div>
+                    <RadzenFormField Text="" Variant="Variant.Outlined" Style="width:100%;" class="custom-form-field">
+                        <RadzenDropDown 
+                            AllowFiltering="true"
+                            AllowClear="true"
+                            Name="VillageRefId"
+                            Style="width: 100%;"
+                            Data="villages"
+                            Disabled="@(!model.CommuneId.HasValue)"
+                            @bind-Value="model.VillageId"
+                            TextProperty="@nameof(VillageDto.VilInKhmer)"
+                            ValueProperty="@nameof(VillageDto.VillageId)"
+                            FilterOperator="StringFilterOperator.Contains"
+                            Placeholder="@(!model.CommuneId.HasValue ? "Select commune first..." : "Select your village...")">
+                        </RadzenDropDown>
+                        <RadzenRequiredValidator Component="VillageRefId" Text="Village is required" />
+                    </RadzenFormField>
+                </div>
+
+                <!-- Current Selection Summary -->
+                @if (model.ProvinceId.HasValue || model.DistrictId.HasValue || model.CommuneId.HasValue || model.VillageId.HasValue)
+                {
+                    <RadzenAlert AlertStyle="AlertStyle.Info" class="selection-summary" Variant="Variant.Flat" ShowIcon="false">
+                        <RadzenStack Gap="0.25rem" Orientation="Orientation.Vertical">
+                            <RadzenText TextStyle="TextStyle.Subtitle2" class="summary-title">📍 Current Selection</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body2" class="summary-text">
+                                @GetSelectionSummary()
+                            </RadzenText>
+                        </RadzenStack>
+                    </RadzenAlert>
+                }
+            </RadzenStack>
+
+            <!-- Action Buttons -->
+            <RadzenStack Orientation="Orientation.Horizontal" class="action-buttons"
+                         JustifyContent="JustifyContent.End" Gap="0.75rem">
+                <RadzenButton ButtonType="ButtonType.Submit"
+                              Text="Save"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Icon="check_circle"
+                              Class="save-button"></RadzenButton>
+                <RadzenButton Click="@(() => DialogService!.Close(false))"
+                              Variant="Variant.Flat"
+                              Text="Cancel"
+                              Icon="close"
+                              ButtonStyle="ButtonStyle.Light" 
+                              Class="cancel-button" />
+            </RadzenStack>
+        </RadzenTemplateForm>
+    </RadzenStack>
+</RadzenCard>
+
+<style>
+    .area-create-card {
+        padding: 2rem;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 252, 255, 0.98) 100%);
+        border: 1px solid rgba(33, 150, 243, 0.1);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+        transition: all 0.3s ease;
+    }
+
+    .area-create-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    .area-title {
+        font-weight: 600;
+        color: #1976d2;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+    }
+
+    .area-header-icon {
+        font-size: 28px;
+        color: #2196f3;
+    }
+
+    .area-subtitle {
+        color: #666;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .area-breadcrumb {
+        padding: 0.75rem 1rem;
+        background: linear-gradient(90deg, rgba(33, 150, 243, 0.04) 0%, rgba(76, 175, 80, 0.04) 100%);
+        border-radius: 8px;
+        border-left: 3px solid #2196f3;
+        overflow-x: auto;
+    }
+
+    .breadcrumb-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        background: white;
+        color: #999;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+
+    .breadcrumb-item.breadcrumb-active {
+        background: rgba(33, 150, 243, 0.1);
+        color: #1976d2;
+        font-weight: 500;
+    }
+
+    .breadcrumb-divider {
+        color: #ddd;
+        margin: 0 0.25rem;
+        font-size: 0.75rem;
+    }
+
+    .breadcrumb-icon {
+        font-size: 1rem;
+    }
+
+    .form-field-wrapper {
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e8e8e8;
+        transition: all 0.2s ease;
+    }
+
+    .form-field-wrapper:hover {
+        border-color: #2196f3;
+        box-shadow: 0 2px 6px rgba(33, 150, 243, 0.1);
+    }
+
+    .form-field-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .form-field-icon {
+        font-size: 1.25rem;
+        color: #2196f3;
+        transition: all 0.2s ease;
+    }
+
+    .form-field-icon.primary-icon {
+        background: rgba(33, 150, 243, 0.1);
+        padding: 0.5rem;
+        border-radius: 6px;
+    }
+
+    .form-field-icon.disabled-icon {
+        color: #ccc;
+        opacity: 0.5;
+    }
+
+    .form-field-label {
+        font-weight: 500;
+        color: #333;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .required-asterisk {
+        color: #f44336;
+        font-weight: bold;
+    }
+
+    .custom-form-field {
+        margin: 0;
+    }
+
+    .selection-summary {
+        background: linear-gradient(135deg, rgba(33, 150, 243, 0.08) 0%, rgba(76, 175, 80, 0.08) 100%);
+        border-left: 4px solid #2196f3;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+    }
+
+    .summary-title {
+        color: #1976d2;
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .summary-text {
+        color: #555;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .action-buttons {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e8e8e8;
+    }
+
+    .save-button {
+        min-width: 120px;
+        transition: all 0.2s ease;
+    }
+
+    .save-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+    }
+
+    .cancel-button {
+        min-width: 100px;
+    }
+
+    @@media (max-width: 576px) {
+        .area-create-card {
+            padding: 1.5rem;
+        }
+
+        .area-title {
+            font-size: 1.25rem;
+        }
+
+        .area-breadcrumb {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .form-field-wrapper {
+            padding: 0.75rem;
+        }
+
+        .form-field-header {
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .breadcrumb-divider {
+            display: none;
+        }
+
+        .action-buttons {
+            flex-direction: column-reverse;
+            gap: 0.5rem;
+        }
+
+        .save-button,
+        .cancel-button {
+            width: 100%;
+        }
+    }
+
+    .form-field-wrapper {
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .selection-summary {
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+@code {
+    private AreaDtoCreate model = new AreaDtoCreate();
+    protected IEnumerable<ProvinceDto> provinces = [];
+    protected IEnumerable<CommuneDto> communelist = [];
+    protected IEnumerable<DistrictDto> districts = [];
+    private IEnumerable<VillageDto> villages = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetProvinces();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task GetProvinces()
+    {
+        var query = new GetProvincesQuery(0, new());
+        var rsp = await mediator.Send(query);
+        provinces = rsp.Items;
+    }
+
+    private async Task GetDistricts(int? provinceId)
+    {
+        var query = new GetDistrictsQuery(provinceId ?? 0, 0, new());
+        var rsp = await mediator.Send(query);
+        districts = rsp.Items;
+    }
+
+    private async Task GetCommunes(int? districtId)
+    {
+        var query = new GetCommunesQuery(districtId ?? 0, 0, new());
+        var rsp = await mediator.Send(query);
+        communelist = rsp.Items;
+    }
+
+    private async Task GetVillages(int? communeId)
+    {
+        var query = new GetVillagesQuery(communeId ?? 0, 0, new());
+        var rsp = await mediator.Send(query);
+        villages = rsp.Items;
+    }
+
+    private async Task OnProvinceChanged(int? provinceId)
+    {
+        districts = [];
+        if (provinceId.HasValue)
+        {
+            await GetDistricts(provinceId);
+            model.DistrictId = districts.FirstOrDefault()?.DistrictId;
+            model.CommuneId = null;
+            model.VillageId = null;
+            communelist = [];
+            villages = [];
+        }
+    }
+
+    private async Task OnDistrictChanged(int? districtId)
+    {
+        communelist = [];
+        if (districtId.HasValue)
+        {
+            await GetCommunes(districtId);
+            model.CommuneId = communelist.FirstOrDefault()?.CommuneId;
+            model.VillageId = null;
+            villages = [];
+        }
+    }
+
+    private async Task OnCommuneChanged(int? communeId)
+    {
+        villages = [];
+        if (communeId.HasValue)
+        {
+            await GetVillages(communeId);
+            model.VillageId = villages.FirstOrDefault()?.VillageId;
+        }
+    }
+
+    private void HandleFormSubmit()
+    {
+        throw new NotImplementedException();
+    }
+
+    private string GetSelectionSummary()
+    {
+        var parts = new List<string>();
+
+        var selectedProvince = provinces.FirstOrDefault(p => p.ProvinceId == model.ProvinceId)?.ProInKhmer;
+        if (!string.IsNullOrEmpty(selectedProvince))
+            parts.Add(selectedProvince);
+
+        var selectedDistrict = districts.FirstOrDefault(d => d.DistrictId == model.DistrictId)?.DisInKhmer;
+        if (!string.IsNullOrEmpty(selectedDistrict))
+            parts.Add(selectedDistrict);
+
+        var selectedCommune = communelist.FirstOrDefault(c => c.CommuneId == model.CommuneId)?.ComInKhmer;
+        if (!string.IsNullOrEmpty(selectedCommune))
+            parts.Add(selectedCommune);
+
+        var selectedVillage = villages.FirstOrDefault(v => v.VillageId == model.VillageId)?.VilInKhmer;
+        if (!string.IsNullOrEmpty(selectedVillage))
+            parts.Add(selectedVillage);
+
+        return string.Join(" → ", parts);
+    }
+}

@@ -1,9 +1,11 @@
 using Applications.Commons;
+using Applications.Exceptions;
 using Applications.Extensions;
 using Applications.Features.Addresses.Dto;
 using Applications.Interfaces.Addresses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
+using Domains.Models;
 using Domains.Models.Addresses;
 using ErrorOr;
 using Infrastructures.DataAccess;
@@ -878,6 +880,134 @@ public sealed class AddressRepository : IAddressService
         }
     }
 
+    public async Task<ErrorOr<string>> DeleteCityAsync(int? id, CancellationToken cancellation = default)
+    {
+        try
+        {
+            _logger.LogInformation("Deleting city record.");
+            await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+            var result = await context.Cities.FirstOrDefaultAsync(x => x.Id == id, cancellation);
+            if (result is null) return Error.NotFound(description: "No City Found.");
+            context.Cities.Remove(result);
+            await context.SaveChangesAsync(cancellation);
+            return "City was deleted.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting city.");
+            return Error.Unexpected(description: ex.Message);
+        }
+    }
+
+
+    /// <summary>
+    /// Get Areas with optional filtering and pagination.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="param"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    public async Task<PageMetaData<AreaDto>> GetAreasAsync(long? id, QueryParam param, CancellationToken cancellation = default)
+    {
+        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var queries = context.Set<AreaDto>().WhereIf(id.HasValue && id > 0, x => x.Id == id);
+
+        var filter = param.Filter?.Trim();
+
+        if (string.IsNullOrEmpty(filter))
+        {
+            return await queries.AsNoTracking()
+                                .ProjectToType<AreaDto>()
+                                .ToPagedAsync(param.Page, param.Take, cancellation);
+        }
+
+
+        if (!string.IsNullOrEmpty(param.FilterColumn))
+        {
+            queries = queries.StartWith(filter, param.FilterColumn.Trim());
+        }
+        else if (AllowedAreaFilter.Contains(param.FilterColumn))
+        {
+            queries = queries.StartWiths(filter, AllowedAreaFilter.ToArray());
+        }
+
+        return await queries.AsNoTracking()
+                            .ToPagedAsync(param.Page, param.Take, cancellation);
+    }
+
+    public async Task<AreaDto> GetAreaAsync(long? id, CancellationToken cancellation = default)
+    {
+        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var area = await context.Set<AreaDto>()
+                             .AsNoTracking()
+                             .FirstOrDefaultAsync(x => x.Id == id, cancellation);
+
+        if (area == null)
+        {
+            throw new NotFoundExceptions("Area not found.");
+        }
+
+        return area;
+
+    }
+
+
+    public async Task<AreaDto?> AddOrUpdateAreasAsync(Area area, CancellationToken cancellation = default)
+    {
+        ArgumentNullException.ThrowIfNull(area);
+
+        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+        if (area.Id <= 0)
+        {
+            await context.Areas.AddAsync(area, cancellation);
+        }
+        else
+        {
+            context.Areas.Update(area);
+        }
+
+        await context.SaveChangesAsync(cancellation);
+
+        var savedArea = await context.Set<AreaDto>()
+                                     .AsNoTracking()
+                                     .FirstOrDefaultAsync(x => x.Id == area.Id, cancellation);
+
+        return savedArea ?? throw new NotFoundExceptions("Area not found after save.");
+    }
+
+
+    public async Task<bool> DeleteAreasAsync(long? id, CancellationToken cancellation = default)
+    {
+        ArgumentNullException.ThrowIfNull(id);
+
+        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var area = await context.Areas.FirstOrDefaultAsync(x => x.Id == id, cancellation);
+
+        if (area == null)
+        {
+            throw new NotFoundExceptions("Area not found.");
+        }
+
+        context.Areas.Remove(area);
+
+        var affectedRows = await context.SaveChangesAsync(cancellation);
+
+        return affectedRows > 0;
+    }
+
+
+
+
+    /// <summary>
+    /// private methods
+    /// </summary>
+    /// <param name="param"></param>
+    /// <param name="queries"></param>
+    /// <returns></returns>
     private static IQueryable<City> ApplyFilter(QueryParam param, IQueryable<City> queries)
     {
         var filter = param.Filter?.Trim();
@@ -941,6 +1071,14 @@ public sealed class AddressRepository : IAddressService
         nameof(CityDto.Id)
     };
 
+    private static readonly HashSet<string> AllowedAreaFilter = new(StringComparer.OrdinalIgnoreCase)
+    {
+        nameof(AreaDto.Code),
+        nameof(AreaDto.Srok),
+        nameof(AreaDto.Khum),
+        nameof(AreaDto.Phum),
+        nameof(AreaDto.Khet)
+    };
 
     private static IQueryable<Country> ApplyFilter(QueryParam param, IQueryable<Country> queries)
     {

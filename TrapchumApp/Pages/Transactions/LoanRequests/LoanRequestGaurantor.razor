@@ -1,46 +1,75 @@
 ﻿@using Applications.Responses.ViewModels.Loans.Requests
 
-<div class="guarantor-card">
-    <div class="guarantor-card-header">
-        <span class="header-title">
+<style>
+    .guarantor-grid .rz-column-title,
+    .guarantor-grid .rz-sortable-column .rz-column-title,
+    .guarantor-grid .kh-header {
+        font-family: kh_siemreap, "Khmer OS Siemreap", sans-serif;
+    }
+
+    .guarantor-grid .kh-header {
+        font-size: 0.85rem;
+    }
+</style>
+
+<div class="guarantor-card rz-shadow-3" style="border-radius:0.75rem;overflow:hidden;background:var(--rz-base-200);">
+
+    <RadzenStack Style="padding:0.6rem 1rem;background:var(--rz-primary);color:#fff;"
+                 JustifyContent="JustifyContent.SpaceBetween"
+                 Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
             <RadzenIcon Icon="group" Style="font-size:1.2rem;" />
-            Guarantors Information
+            <RadzenText TextStyle="TextStyle.Subtitle1"
+                        Style="margin:0;font-weight:600;color:#fff;">
+                Guarantors Information
+            </RadzenText>
             @if (Guarantors?.Any() == true)
             {
-                <span class="badge-count">@Guarantors.Count()</span>
+                <RadzenBadge BadgeStyle="BadgeStyle.Light"
+                             Text="@($"{Guarantors.Count()} item{(Guarantors.Count() == 1 ? "" : "s")}")"
+                             Style="font-size:0.7rem;" />
             }
-        </span>
-        @if (ShowAdd && ShowCommand)
-        {
-            <RadzenButton Text="Add Guarantor"
-                          Icon="person_add"
-                          Click="@ClickedAdd"
-                          Size="ButtonSize.Small"
-                          ButtonType="ButtonType.Button"
-                          Variant="Variant.Outlined"
-                          Style="color:#fff;border-color:rgba(255,255,255,.55);font-weight:500;" />
-        }
-    </div>
+        </RadzenStack>
+        <RadzenStack AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.End"
+                     Orientation="Orientation.Horizontal" Gap="0.4rem">
+            @if (ShowAdd && ShowCommand)
+            {
+                <RadzenButton Text="Add"
+                              Icon="person_add"
+                              ButtonStyle="ButtonStyle.Light"
+                              Variant="Variant.Outlined"
+                              Size="ButtonSize.Small"
+                              Click="@ClickedAdd"
+                              ButtonType="ButtonType.Button"
+                              Style="color:#fff;border-color:rgba(255,255,255,0.6);font-size:0.8rem;" />
+            }
+        </RadzenStack>
+    </RadzenStack>
 
-    <div class="guarantor-card-body">
-        @if (SearchBoxTemplate is not null)
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 Gap="0.5rem">
+        @if (ShowCommand && SearchBoxTemplate is not null)
         {
-            <div class="guarantor-toolbar">
-                <div class="search-slot">
-                    @SearchBoxTemplate
-                </div>
-            </div>
+            <div style="min-width:12rem;">@SearchBoxTemplate</div>
         }
+    </RadzenStack>
+
+    <div style="padding:0.5rem 0.75rem 0.75rem;">
 
         <RadzenDataGrid Data="Guarantors"
-                        GridLines="DataGridGridLines.Horizontal"
+                        GridLines="DataGridGridLines.Both"
+                        Responsive
                         TItem="VLoanRequestGuarantor"
                         Density="Density.Compact"
                         @ref="gridGuarantors"
                         PagerHorizontalAlign="HorizontalAlign.Right"
                         EmptyText="No guarantors added yet."
                         RowRender="@OnRowRender"
-                        Style="min-height:14rem;height:14rem;max-height:14rem;border-radius:8px;overflow:hidden;">
+                        class="guarantor-grid"
+                        Style="min-height:14rem;height:14rem;max-height:14rem;border-radius:0.5rem;overflow:hidden;">
             <Columns>
                 <RadzenDataGridColumn Context="g"
                                       Property="@(nameof(VLoanRequestGuarantor.GuarantorId))"
@@ -49,19 +78,22 @@
                                       Sortable="false"
                                       TextAlign="TextAlign.Center">
                     <HeaderTemplate>
-                        <span style="color:var(--rz-text-tertiary-color);font-size:.75rem;">#</span>
+                        <span class="kh-header">#</span>
                     </HeaderTemplate>
                     <Template>
-                        <span style="color:var(--rz-text-tertiary-color);font-size:.8rem;">@g.RowIndex</span>
+                        <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@g.RowIndex.ToString()" Style="font-size:0.7rem;padding:0.1rem 0.4rem;" />
                     </Template>
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn Width="16rem"
                                       Property="@(nameof(VLoanRequestGuarantor.GuarantorName))"
-                                      Title="Name"
+                                      Title="ឈ្មោះ"
                                       Sortable="false">
                     <HeaderTemplate>
-                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Name</span>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="person" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ឈ្មោះ</span>
+                        </RadzenStack>
                     </HeaderTemplate>
                     <Template Context="g">
                         <div class="guarantor-name-cell">
@@ -75,10 +107,13 @@
 
                 <RadzenDataGridColumn Width="10rem"
                                       Property="@(nameof(VLoanRequestGuarantor.Phone))"
-                                      Title="Phone"
+                                      Title="លេខទូរស័ព្ទ"
                                       Sortable="false">
                     <HeaderTemplate>
-                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Phone</span>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="phone" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">លេខទូរស័ព្ទ</span>
+                        </RadzenStack>
                     </HeaderTemplate>
                     <Template Context="g">
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
@@ -88,9 +123,12 @@
                     </Template>
                 </RadzenDataGridColumn>
 
-                <RadzenDataGridColumn Context="g" Title="Address" Sortable="false">
+                <RadzenDataGridColumn Context="g" Title="អាសយដ្ឋាន" Sortable="false">
                     <HeaderTemplate>
-                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Address</span>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="location_on" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">អាសយដ្ឋាន</span>
+                        </RadzenStack>
                     </HeaderTemplate>
                     <Template>
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
@@ -105,10 +143,10 @@
                     <RadzenDataGridColumn Context="g"
                                           TextAlign="TextAlign.Center"
                                           Width="4.5rem"
-                                          Title="Action"
+                                          Title="សកម្មភាព"
                                           Sortable="false">
                         <HeaderTemplate>
-                            <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Action</span>
+                            <span class="kh-header" style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">សកម្មភាព</span>
                         </HeaderTemplate>
                         <Template>
                             <RadzenButton Icon="delete_outline"

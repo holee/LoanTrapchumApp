@@ -197,6 +197,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                     CustomerId = customer.CustomerId,
                     CustomerPhone = customer.Phone,
                     CustomerAddress = customer.ToString(),
+                    Gender = customer.Salutation,
                     CustomerName = customer.AltName,
                     BranchId = BranchId ?? 0
                 });
@@ -229,6 +230,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                 CustomerPhone = args.Phone,
                 CustomerName = args.AltName,
                 CustomerAddress = args.ToString(),
+                Gender = args.Salutation,
                 BranchId = BranchId ?? 0
             };
 

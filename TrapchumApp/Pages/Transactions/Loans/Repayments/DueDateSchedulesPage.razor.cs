@@ -184,8 +184,6 @@ public partial class DueDateSchedulesPage
         else
         {
 
-            _toastService.ShowInfo("Receive cancelled.");
-
             SetDefaultValue();
         }
 

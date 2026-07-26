@@ -15,21 +15,27 @@
         <RadzenButton Text="@buttonText"
                       Size="ButtonSize.ExtraSmall"
                       Click="@Toggle"
-                      Variant="Variant.Outlined"
+                      Variant="Variant.Flat"
                       ButtonStyle="ButtonStyle.Primary"
                       Icon="@IconNames.Info" />
         <RadzenButton Size="ButtonSize.ExtraSmall"
                       Click="@DownLoadScheduleAsExcel"
                       ButtonStyle="ButtonStyle.Success"
-                      Variant="Variant.Outlined"
+                      Variant="Variant.Flat"
                       Icon="file_download"
                       Text="Excel" />
         <RadzenButton Click="@DownLoadScheduleAsPdf"
                       Size="ButtonSize.ExtraSmall"
                       ButtonStyle="ButtonStyle.Danger"
-                      Variant="Variant.Outlined"
+                      Variant="Variant.Flat"
                       Text="PDF"
                       Icon="picture_as_pdf" />
+        <RadzenButton Click="@HandlePayOf"
+                      Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Variant="Variant.Flat"
+                      Text="Pay off"
+                      Icon="@IconNames.Paid" />
     </RadzenStack>
 </RadzenStack>
 
@@ -38,7 +44,7 @@
 {
     <RadzenCard Variant="Variant.Outlined"
                 Style="border-radius:0.875rem;overflow:hidden;padding:0;
-                       box-shadow:0 1px 6px rgba(0,0,0,.07);margin-bottom:0.75rem;">
+        box-shadow:0 1px 6px rgba(0,0,0,.07);margin-bottom:0.75rem;">
         <RadzenTabs RenderMode="TabRenderMode.Server">
             <Tabs>
 
@@ -193,5 +199,10 @@
     void Toggle()
     {
         _showCustomer = !_showCustomer;
+    }
+
+    private async Task HandlePayOf()
+    {
+        await Swal.SuccessAsync("Info", "Not Implement yet...");
     }
 }

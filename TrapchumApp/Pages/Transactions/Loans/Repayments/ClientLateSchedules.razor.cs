@@ -1,3 +1,4 @@
+using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Identity;
@@ -5,11 +6,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 
 public partial class ClientLateSchedules
 {
-    private readonly ILoanScheduleServiceImpl _scheduleService;
-    public ClientLateSchedules(ILoanScheduleServiceImpl schedulesService)
-    {
-        _scheduleService = schedulesService;
-    }
     [Parameter, EditorRequired] public int BranchId { get; set; } = 0;
     [Parameter] public EventCallback<int> GetCounts { get; set; }
     [Parameter] public EventCallback<VSchedule?> GetScheduleChanged { get; set; }
@@ -37,7 +33,7 @@ public partial class ClientLateSchedules
     bool sortDescending = false;
 
     private string? _userId { get; set; } = string.Empty;
-    
+
     void GetPaymentSchedules(VSchedule p)
     {
         ContextMenuService.Close();
@@ -52,7 +48,7 @@ public partial class ClientLateSchedules
 
     }
 
-    async Task ShowLateSchedules(VSchedule? p) 
+    async Task ShowLateSchedules(VSchedule? p)
     {
         ContextMenuService.Close();
 
@@ -84,7 +80,7 @@ public partial class ClientLateSchedules
     }
     async Task GetCount()
     {
-        await GetCounts.InvokeAsync(counts); 
+        await GetCounts.InvokeAsync(counts);
     }
 
     async void SelectedDateChanged()
@@ -99,7 +95,7 @@ public partial class ClientLateSchedules
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, false, sortDescending, filterText);
 
-            var responseData = await _scheduleService.GetLoanSchedulesByPaymentDateAsync(BranchId, paymentDate, true, true, param);
+            var responseData = await mediator.Send(new GetLoanSchedulesByPaymentDateQuery(BranchId, paymentDate, true, true, param));
 
             LatePaymentSchedules = responseData.Items;
 
@@ -143,6 +139,11 @@ public partial class ClientLateSchedules
 
     private void RowRenderChanged(DataGridCellRenderEventArgs<VSchedule> args)
     {
+        if (args.Data is null)
+        {
+            return;
+        }
+
         switch (args.Data.DayArrea)
         {
             case >= 1 and <= 7:

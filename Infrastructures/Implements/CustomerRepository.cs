@@ -27,12 +27,39 @@ namespace Infrastructures.Implements;
 public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory dapperFactory, ILogger<CustomerRepository> logger) : ICustomerService
 {
 
+    public async Task<Pager<VCustomerList>> GetCoPawnCustomersAsync(int? branchId, string? userId, string? customerId, QueryParam param, bool isLoanActiveOnly = false, CancellationToken cancellation = default)
+    {
+        await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var queries = BuildCustomerQueries(cxt, branchId, userId, isLoanActiveOnly ? true : null);
+
+        if (!string.IsNullOrEmpty(customerId))
+        {
+            queries = queries.Where(x => x.CustomerId == customerId);
+        }
+
+        queries = ApplyFiltering(queries, param);
+
+        queries = ApplyOrdering(queries, param);
+
+        var countTask = await queries.CountAsync(cancellation);
+
+        var dataTask = await queries
+            .Skip(param.Page)
+            .Take(param.Take)
+            .ToListAsync(cancellation);
+
+        return new Pager<VCustomerList>(dataTask, countTask);
+
+    }
+
+
 
     public async Task<Pager<VCustomerList>> GetCustomersAsync(int? branchId, string? userId, string? customerId, QueryParam param, bool isLoanActiveOnly = false, CancellationToken cancellation = default)
     {
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
 
-        var queries = BuildCustomerQueriesAsync(cxt, branchId, userId, isLoanActiveOnly, cancellation);
+        var queries = BuildCustomerQueries(cxt, branchId, userId, isLoanActiveOnly);
 
         if (!string.IsNullOrEmpty(customerId))
         {
@@ -290,7 +317,7 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
             cxt.EntityNames.Update(model);
 
-           
+
 
             var entry = cxt.Entry(model);
 
@@ -407,7 +434,7 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
                             .AnyAsync(x => (x.IdCard == idCard && (string.IsNullOrEmpty(x.CustomerId) || x.CustomerId != customerId)), cancellation);
 
     }
-   
+
     private async Task<long> GetMaxSequenceNumber(DataContext context)
     {
         var maxSequence = await context.EntityNames
@@ -543,6 +570,7 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
             FullName = x.FullName,
             AltName = x.AltName,
             Phone = x.Phone,
+            Salutation = x.Salutation,
             EmailAddress = x.EmailAddress,
             IsLoanActive = x.IsLoanActive,
             IsActive = x.IsActive,
@@ -557,19 +585,13 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
         };
     }
 
-    private IQueryable<VCustomerList> BuildCustomerQueriesAsync(DataContext cxt, int? branchId, string? userId, bool activeLoanOnly = false, CancellationToken cancellation = default)
-    {
-        return GetCustomersByBranchOrUserAsync(cxt, branchId, userId, activeLoanOnly, cancellation);
-    }
-
-    private IQueryable<VCustomerList> GetCustomersByBranchOrUserAsync(DataContext cxt, int? branchId, string? userId, bool activeLoanOnly = false, CancellationToken cancellation = default)
+    private IQueryable<VCustomerList> BuildCustomerQueries(DataContext cxt, int? branchId, string? userId, bool? activeLoanOnly = null)
     {
         return cxt.Set<VCustomerDetails>()
-                                .WhereIf(branchId > 0, x => x.BranchId == branchId)
-                                .WhereIf(!string.IsNullOrEmpty(userId), x => x.CreatedBy == userId)
-                                .WhereIf(activeLoanOnly, x => x.IsLoanActive == true)
-                                .Select(ProjectToCustomerList())
-                                .AsQueryable();
+                  .WhereIf(branchId > 0, x => x.BranchId == branchId)
+                  .WhereIf(!string.IsNullOrEmpty(userId), x => x.CreatedBy == userId)
+                  .WhereIf(activeLoanOnly.HasValue, x => x.IsLoanActive == activeLoanOnly)
+                  .Select(ProjectToCustomerList());
     }
 
     private async Task<ErrorOr<VCustomerList>> GetCustomerListByIdAsync(string? customerId, CancellationToken cancellationToken = default)

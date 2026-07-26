@@ -30,7 +30,7 @@ public static class PaginationExtensions
     public static async Task<PageMetaData<T>> ToPagedAsync<T>(this IQueryable<T> query, int page, int pageSize,
       CancellationToken cancellationToken = default)
     {
-        if (page <= 0)
+        if (page < 0)
             throw new ArgumentOutOfRangeException(nameof(page));
 
         if (pageSize < 0)
@@ -52,7 +52,7 @@ public static class PaginationExtensions
         }
 
         var items = await query
-            .Skip((page - 1) * pageSize)
+            .Skip((page == 0 ? 1 : page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 

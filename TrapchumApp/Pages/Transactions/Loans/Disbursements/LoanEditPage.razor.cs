@@ -422,6 +422,8 @@ public partial class LoanEditPage
 
             _toastService.ShowSuccess("ស្នើសុំកែប្រែការស្នើសុំឥណទានបានផ្ញើរទៅអ្នកគ្រប់គ្រងដោយជោគជ័យ។");
 
+            await GetLoan();
+
             StateHasChanged();
         }
         else

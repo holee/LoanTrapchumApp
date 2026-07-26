@@ -26,19 +26,6 @@ public partial class SchedulesPage
 
     private IEnumerable<VSchedule> schedules = [];
 
-    private readonly ILoanServiceImpl _loanService;
-
-    private readonly ILoanScheduleServiceImpl _scheduleService;
-
-    public SchedulesPage(ILoanServiceImpl loanService, ILoanScheduleServiceImpl loanScheduleService)
-    {
-        _loanService = loanService;
-
-        _scheduleService = loanScheduleService;
-
-    }
-
-
     private string? _userId = string.Empty;
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 

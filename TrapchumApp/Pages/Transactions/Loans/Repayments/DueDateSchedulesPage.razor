@@ -1,10 +1,7 @@
 @using Applications.Features.LoanPayments.Requests
 @using TrapchumApp.Pages.Transactions.RecievePayements
-
 <PageTitle>Due Date Schedules</PageTitle>
-
 <RadzenStack Gap="0" class="rz-background-color-base-100" style="min-height:100%;">
-
     <RadzenCard class="rz-border-radius-0 rz-shadow-1 rz-py-2 rz-px-4 rz-mb-0"
                 style="border-bottom: 2px solid var(--rz-primary);">
         <RadzenStack Orientation="Orientation.Horizontal"
@@ -28,6 +25,15 @@
                 </RadzenFormField>
             </RadzenStack>
         </RadzenStack>
+    </RadzenCard>
+    <RadzenCard Variant="Variant.Outlined" class="rz-p-3 rz-border-radius-2">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem" class="rz-mb-2">
+            <RadzenIcon Icon="receipt_long" style="color:var(--rz-primary);" />
+            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:600;">
+                តារាងសងប្រាក់
+            </RadzenText>
+        </RadzenStack>
+        <PaymentScedule SelectedSchedule="@SelectedSchedule" />
     </RadzenCard>
     <RadzenCard class="rz-border-radius-0 rz-shadow-0 rz-mt-0 rz-p-3">
         <RadzenDataGrid TItem="VSchedule"
@@ -199,18 +205,7 @@
             </Columns>
         </RadzenDataGrid>
     </RadzenCard>
-
     <RadzenStack Gap="0.75rem" class="rz-px-3 rz-pb-3">
-        <RadzenCard Variant="Variant.Outlined" class="rz-p-3 rz-border-radius-2">
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem" class="rz-mb-2">
-                <RadzenIcon Icon="receipt_long" style="color:var(--rz-primary);" />
-                <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:600;">
-                    តារាងសងប្រាក់
-                </RadzenText>
-            </RadzenStack>
-            <PaymentScedule SelectedSchedule="@SelectedSchedule" />
-        </RadzenCard>
-
         <RadzenCard Variant="Variant.Outlined" class="rz-p-3 rz-border-radius-2">
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem" class="rz-mb-3">
                 <RadzenIcon Icon="payments" style="color:var(--rz-success);" />

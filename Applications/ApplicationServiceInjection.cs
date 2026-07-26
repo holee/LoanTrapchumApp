@@ -35,6 +35,7 @@ using Applications.Features.Loans.Command.EditLoanDisbursment;
 using Applications.Features.Loans.Command.RequestDelete;
 using Applications.Features.Loans.Command.RequestEditLoan;
 using Applications.Features.Loans.Command.WidrawCollateral;
+using Applications.Features.Loans.Queries.GetLateSchedules;
 using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Queries.GetLoanDetailsById;
 using Applications.Features.Loans.Queries.GetLoanForEdit;
@@ -79,16 +80,18 @@ public static class ApplicationServiceInjection
         ///Reports Services
         services.AddScoped<IRequestHandler<PrintLoanScheduleDetailsQuery, ErrorOr<RptScheduleDetails?>>, PrintLoanScheduleDetailsQueryHandler>();
         services.AddScoped<IRequestHandler<PrintLoanScheduleDetailsByGroupQuery, ErrorOr<RptScheduleDetails?>>, PrintLoanScheduleDetailsByGroupQueryHandler>();
-
-
-
-
+        services.AddScoped<IRequestHandler<GetLateSchedulesQuery, Pager<VSchedule>>, GetLateSchedulesQueryHandler>();
         services.AddScoped<IRequestHandler<PassRequestCommand, ErrorOr<RequestResult>>, PassRequestCommandHandler>();
         services.AddScoped<IRequestHandler<RequestDeleteCommand, ErrorOr<DeleteResult>>, RequestDeleteCommandHandler>();
         services.AddScoped<IRequestHandler<ApproveDeleteRequestCommand, ErrorOr<DisburseResult>>, ApproveDeleteRequestCommandHandler>();
         services.AddScoped<IRequestHandler<ApproveEditLoanRequestCommand, ErrorOr<AppResult>>, ApproveEditLoanRequestCommandHandler>();
         services.AddScoped<IRequestHandler<RequestEditLoanCommand, ErrorOr<AppResult>>, RequestEditLoanCommandHandler>();
 
+        services.AddScoped<IRequestHandler<GetAreaByIdQuery, ErrorOr<AreaDto>>, GetAreaByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetAreasQuery, PageMetaData<AreaDto>>, GetAreasQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateAreaCommand, ErrorOr<AreaDto?>>, CreateAreaCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateAreaCommand, ErrorOr<AreaDto?>>, UpdateAreaCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteAreaCommand, ErrorOr<bool>>, DeleteAreaCommandHandler>();
 
         //Locations Services
         services.AddScoped<IRequestHandler<GetLocationsAsPagingQuery, Pager<LocationDto>>, GetLocationsAsPagingQueryHandler>();
@@ -148,12 +151,12 @@ public static class ApplicationServiceInjection
 
         services.AddScoped<IRequestHandler<GetPaidScheduleQuery, ErrorOr<IEnumerable<VSchedule>>>, GetPaidScheduleQueryHandler>();
         services.AddScoped<IRequestHandler<GetScheduleByIdQuery, ErrorOr<VSchedule>>, GetScheduleByIdQueryHandler>();
-       // services.AddScoped<IRequestHandler<GetScheduleByIdQuery, ErrorOr<VSchedule>>, GetScheduleByIdQueryHandler>();
+        // services.AddScoped<IRequestHandler<GetScheduleByIdQuery, ErrorOr<VSchedule>>, GetScheduleByIdQueryHandler>();
         services.AddScoped<IRequestHandler<PayOffCommand, ErrorOr<PayOffResult>>, PayOffCommandHandler>();
 
         services.AddScoped<IRequestHandler<SaveLoanRequestByManagerCommand, ErrorOr<RequestResult>>, SaveLoanRequestByManagerCommandHandler>();
         services.AddScoped<IRequestHandler<GetScheduleDetailByIdQuery, ErrorOr<ScheduleDetailsDto>>, GetScheduleDetailByIdQueryHandler>();
-        
+
         services.AddScoped<IRequestHandler<GetDueScheduleByLoanIdQuery, Pager<VSchedule>>, GetDueScheduleByLoanIdQueryHandler>();
         services.AddScoped<IRequestHandler<ActivateOrDeactivateHolidayCommand, ErrorOr<HolidayDto>>, ActivateOrDeactivateHolidayCommandHandler>();
         services.AddScoped<IRequestHandler<GetHolidayByDateQuery, IEnumerable<HolidayDto>>, GetHolidayByDateQueryHandler>();
@@ -253,14 +256,11 @@ public static class ApplicationServiceInjection
         services.AddScoped<IForiegnCurrencyExchangeImpl, ForiegnCurrencyExchange>();
         services.AddScoped<IJournalServiceImpl, JournalService>();
         services.AddScoped<ILedgerServiceImpl, LedgerService>();
-        //services.AddScoped<ILoanServiceImpl, LoanService>();
-        services.AddScoped<ILoanScheduleServiceImpl, LoanScheduleService>();
         services.AddScoped<ILoanCategoryServiceImpl, LoanCategoryService>();
         services.AddScoped<ILoanProductServiceImpl, LoanProductService>();
         services.AddScoped<ILoanReportServiceImpl, LoanReportServiceImpl>();
         services.AddScoped<INationalityServiceImpl, NationalityService>();
         services.AddScoped<IOtherNameServiceImpl, OtherNameService>();
-       // services.AddScoped<IPrintPdfServiceImpl, PrintPdfServiceImpl>();
         services.AddScoped<IGuarantorServiceImpl, GuarantorService>();
         services.AddScoped<ISpotRateServiceImpl, SpotRateService>();
         services.AddScoped<ISettingServiceImpl, SettingService>();

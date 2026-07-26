@@ -61,8 +61,7 @@
     </RadzenRow>
 
     <EditForm Model="LoanRepayment" @ref="@editForm">
-        <FluentValidationValidator DisableAssemblyScanning="true" />
-
+       <FluentValidator  />
         <RadzenStack Gap="0.75rem" class="rz-px-3 rz-pt-2 rz-pb-3">
 
             <RadzenFormField Text="Receipt No" AllowFloatingLabel="true" class="@Styles.W100">
@@ -178,7 +177,7 @@
                                   Text="Receive Payment"
                                   IsBusy="isBusy"
                                   BusyText="Processing..."
-                                  Click="@OnSaveChanges" />
+                                  Click="@HandleSaveChanges" />
                 </RadzenStack>
             </RadzenStack>
 

@@ -15,6 +15,38 @@
         border-radius: var(--rz-border-radius);
         z-index: 1000;
     }
+
+    .loan-state {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 999px;
+        border: 1px solid transparent;
+    }
+
+        .loan-state.active {
+            color: #15803d;
+            background-color: rgba(22, 163, 74, 0.12);
+            border-color: rgba(22, 163, 74, 0.28);
+        }
+
+        .loan-state.inactive {
+            color: #b91c1c;
+            background-color: rgba(220, 38, 38, 0.12);
+            border-color: rgba(220, 38, 38, 0.28);
+        }
+
+    .co-request-grid .rz-column-title,
+    .co-request-grid .rz-sortable-column .rz-column-title,
+    .co-request-grid .kh-header {
+        font-family: kh_siemreap, "Khmer OS Siemreap", sans-serif;
+    }
+
+    .co-request-grid .kh-header {
+        font-size: 0.85rem;
+    }
 </style>
 
 <RadzenStack Orientation="Orientation.Horizontal"
@@ -25,8 +57,8 @@
                    @onkeydown="@OnKeyDown"
                    @onclick="@OpenPopup"
                    Style="width:30rem;"
-                   Placeholder="Search guarantor by name or phone..."/>
-  
+                   Placeholder="Search guarantor by name or phone..." />
+
 </RadzenStack>
 <Popup @ref="@_coRequestPopup"
        id="coLoanRequestPopup"
@@ -52,7 +84,8 @@
                         @bind-Value="@_selectedCustomers"
                         RowDoubleClick="@(args => GetSelectedCustomer(args.Data))"
                         RowRender="@OnRowRender"
-                        Style="height:290px;width:100%;">
+                        class="co-request-grid"
+                        Style="height:290px;width:100%;border-radius:0.5rem;overflow:hidden;">
             <EmptyTemplate>
                 <RadzenStack AlignItems="AlignItems.Center" class="rz-p-2" Gap="4px">
                     <RadzenIcon Icon="search_off" Style="font-size:2rem;color:var(--rz-text-disabled-color);" />
@@ -66,14 +99,23 @@
                                       TextAlign="TextAlign.Center"
                                       Property="@nameof(VCustomerList.CustomerId)"
                                       Context="g">
+                    <HeaderTemplate>
+                        <span class="kh-header">#</span>
+                    </HeaderTemplate>
                     <Template>
-                          @g.RowIndex
+                        <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@g.RowIndex.ToString()" Style="font-size:0.7rem;padding:0.1rem 0.4rem;" />
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="##" Width="3rem" Sortable="false"
+                <RadzenDataGridColumn Title="ជ្រើស" Width="3rem" Sortable="false"
                                       TextAlign="TextAlign.Center"
                                       Property="@nameof(VCustomerList.CustomerId)"
                                       Context="g">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.2rem">
+                            <RadzenIcon Icon="check_box" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ជ្រើស</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
                     <Template>
                         <RadzenCheckBox TValue="bool"
                                         TriState="false"
@@ -82,14 +124,58 @@
                                         Change="@(_ => OnRowSelectLimited(g))" />
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Property="@nameof(VCustomerList.AltName)" Title="ឈ្មោះ" />
+                <RadzenDataGridColumn Property="@nameof(VCustomerList.AltName)" Title="ឈ្មោះ">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="person" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ឈ្មោះ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
                 <RadzenDataGridColumn Property="@nameof(VCustomerList.IdCard)"
                                       Title="លេខអត្តសញ្ញាណប័ណ្ណ" Width="8rem"
-                                      TextAlign="TextAlign.Center" />
+                                      Visible="false"
+                                      TextAlign="TextAlign.Center">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="badge" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">លេខអត្តសញ្ញាណប័ណ្ណ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
                 <RadzenDataGridColumn Property="@nameof(VCustomerList.Phone)"
-                                      Title="ទូរស័ព្ទ" Width="8rem" />
+                                      Title="ទូរស័ព្ទ" Width="8rem">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="phone" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ទូរស័ព្ទ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VCustomerList.IsLoanActive)"
+                                      Title="ស្ថានភាព" Width="6rem"
+                                      TextAlign="TextAlign.Center">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="flag" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ស្ថានភាព</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template>
+                        <span class="loan-state @(context.IsLoanActive ? "active" : "inactive")"
+                              title="@(context.IsLoanActive ? "Active" : "Inactive")">
+                            <RadzenIcon Icon="@(context.IsLoanActive ? "check" : "close")" Style="font-size:0.95rem;" />
+                        </span>
+                    </Template>
+                </RadzenDataGridColumn>
                 <RadzenDataGridColumn Property="@nameof(VCustomerList.CustomerId)" Title="អាសយដ្ឋាន"
                                       Width="10rem">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="location_on" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">អាសយដ្ឋាន</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
                     <Template>
                         @context.ToString()
                     </Template>

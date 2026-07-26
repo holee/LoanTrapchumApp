@@ -10,12 +10,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
     public partial class ClientDuePayTab
     {
-        private readonly ILoanScheduleServiceImpl _scheduleService;
-        public ClientDuePayTab(ILoanScheduleServiceImpl loanScheduleService, ILoanServiceImpl loanService)
-        {
-            _scheduleService = loanScheduleService;
-        }
-
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public EventCallback<int> GetCounts { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;

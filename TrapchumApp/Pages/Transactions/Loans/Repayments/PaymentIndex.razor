@@ -5,136 +5,62 @@
 @using TrapchumApp.Helpers.Options
 @using TrapchumApp.Pages.Lists
 @using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate
-@using Applications.Features.Loans.Services
-<PageTitle>Payments</PageTitle>
+<PageTitle>Payment Schedules</PageTitle>
 
-<style>
-    .summary-card {
-        border-radius: 12px;
-        padding: 1rem 1.25rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        min-width: 0;
-    }
-
-        .summary-card .s-label {
-            font-size: 0.72rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            opacity: 0.72;
-        }
-
-        .summary-card .s-value {
-            font-size: 1.25rem;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .summary-card .s-icon,
-        .summary-card .s-icon .rzi {
-            font-size: 1.5rem !important;
-            opacity: 0.55;
-        }
-
-    .sc-principle {
-        background: linear-gradient(135deg,#e3f2fd,#bbdefb);
-        color: #1565c0;
-    }
-
-    .sc-interest {
-        background: linear-gradient(135deg,#e8f5e9,#c8e6c9);
-        color: #2e7d32;
-    }
-
-    .sc-paid {
-        background: linear-gradient(135deg,#ede7f6,#d1c4e9);
-        color: #4527a0;
-    }
-
-    .sc-penalty {
-        background: linear-gradient(135deg,#fff3e0,#ffe0b2);
-        color: #e65100;
-    }
-
-    .sc-total {
-        background: linear-gradient(135deg,#e0f7fa,#b2ebf2);
-        color: #006064;
-    }
-
-    .schedule-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.75rem;
-    }
-
-        .schedule-header h5 {
-            margin: 0;
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--rz-text-title-color);
-        }
-</style>
-@if (_selectedIndex == 0)
-{
-    <RadzenFieldset AllowCollapse="true" Collapsed="false" Text="Payment Details">
-        @foreach (var grp in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
-        {
-            var currLabel = grp.Key == 2 ? "USD $" : "KHR ៛";
-            <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.35rem;">
-                <RadzenIcon Icon="currency_exchange" Style="font-size:0.9rem;color:var(--rz-primary);" />
-                <span style="font-size:0.78rem;font-weight:700;color:var(--rz-primary);text-transform:uppercase;letter-spacing:0.05em;">@currLabel</span>
-                <hr style="flex:1;margin:0;border-color:var(--rz-border-disabled-color);" />
+<RadzenFieldset AllowCollapse="true" Collapsed="true" Text="Payment Details">
+    @foreach (var grp in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+    {
+        var currLabel = grp.Key == 2 ? "USD $" : "KHR ៛";
+        <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.35rem;">
+            <RadzenIcon Icon="currency_exchange" Style="font-size:0.9rem;color:var(--rz-primary);" />
+            <span style="font-size:0.78rem;font-weight:700;color:var(--rz-primary);text-transform:uppercase;letter-spacing:0.05em;">@currLabel</span>
+            <hr style="flex:1;margin:0;border-color:var(--rz-border-disabled-color);" />
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:0.85rem;">
+            <div class="summary-card sc-principle">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <span class="s-label">Principle</span>
+                    <RadzenIcon Icon="account_balance_wallet" class="s-icon" />
+                </RadzenStack>
+                <span class="s-value">@grp.Sum(x => x.Principle ?? 0).ToString("N2")</span>
+                <span style="font-size:0.72rem;opacity:0.65;">Total due principle</span>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:0.85rem;">
-                <div class="summary-card sc-principle">
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                        <span class="s-label">Principle</span>
-                        <RadzenIcon Icon="account_balance_wallet" class="s-icon" />
-                    </RadzenStack>
-                    <span class="s-value">@grp.Sum(x => x.Principle ?? 0).ToString("N2")</span>
-                    <span style="font-size:0.72rem;opacity:0.65;">Total due principle</span>
-                </div>
-                <div class="summary-card sc-interest">
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                        <span class="s-label">Interest</span>
-                        <RadzenIcon Icon="percent" class="s-icon" />
-                    </RadzenStack>
-                    <span class="s-value">@grp.Sum(x => x.Interest ?? 0).ToString("N2")</span>
-                    <span style="font-size:0.72rem;opacity:0.65;">Total due interest</span>
-                </div>
-                <div class="summary-card sc-paid">
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                        <span class="s-label">Paid Principle</span>
-                        <RadzenIcon Icon="check_circle" class="s-icon" />
-                    </RadzenStack>
-                    <span class="s-value">@grp.Sum(x => x.PaidPrinciple ?? 0).ToString("N2")</span>
-                    <span style="font-size:0.72rem;opacity:0.65;">Amount already paid</span>
-                </div>
-                <div class="summary-card sc-penalty">
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                        <span class="s-label">Penalty</span>
-                        <RadzenIcon Icon="warning" class="s-icon" />
-                    </RadzenStack>
-                    <span class="s-value">@grp.Sum(x => x.PenaltyAmount ?? 0).ToString("N2")</span>
-                    <span style="font-size:0.72rem;opacity:0.65;">Late payment charges</span>
-                </div>
-                <div class="summary-card sc-total">
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                        <span class="s-label">Total Pay</span>
-                        <RadzenIcon Icon="payments" class="s-icon" />
-                    </RadzenStack>
-                    <span class="s-value">@grp.Sum(x => x.TotalPay ?? 0).ToString("N2")</span>
-                    <span style="font-size:0.72rem;opacity:0.65;">Grand total payable</span>
-                </div>
+            <div class="summary-card sc-interest">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <span class="s-label">Interest</span>
+                    <RadzenIcon Icon="percent" class="s-icon" />
+                </RadzenStack>
+                <span class="s-value">@grp.Sum(x => x.Interest ?? 0).ToString("N2")</span>
+                <span style="font-size:0.72rem;opacity:0.65;">Total due interest</span>
             </div>
-        }
-    </RadzenFieldset>
-}
+            <div class="summary-card sc-paid">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <span class="s-label">Paid Principle</span>
+                    <RadzenIcon Icon="check_circle" class="s-icon" />
+                </RadzenStack>
+                <span class="s-value">@grp.Sum(x => x.PaidPrinciple ?? 0).ToString("N2")</span>
+                <span style="font-size:0.72rem;opacity:0.65;">Amount already paid</span>
+            </div>
+            <div class="summary-card sc-penalty">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <span class="s-label">Penalty</span>
+                    <RadzenIcon Icon="warning" class="s-icon" />
+                </RadzenStack>
+                <span class="s-value">@grp.Sum(x => x.PenaltyAmount ?? 0).ToString("N2")</span>
+                <span style="font-size:0.72rem;opacity:0.65;">Late payment charges</span>
+            </div>
+            <div class="summary-card sc-total">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <span class="s-label">Total Pay</span>
+                    <RadzenIcon Icon="payments" class="s-icon" />
+                </RadzenStack>
+                <span class="s-value">@grp.Sum(x => x.TotalPay ?? 0).ToString("N2")</span>
+                <span style="font-size:0.72rem;opacity:0.65;">Grand total payable</span>
+            </div>
+        </div>
+    }
+</RadzenFieldset>
+
 <RadzenTabs RenderMode="TabRenderMode.Client" SelectedIndex="@_selectedIndex" @ref="@refTabs">
     <Tabs>
         <RadzenTabsItem Icon="@IconNames.List">
@@ -680,49 +606,38 @@
 
 
 
+    // @if (bState.CanRecievePayment)
+    // {
+    //     <RadzenMenuItem Icon="@IconNames.MoneyBag"
+    //                     Visible="!p.IsPaid"
+    //                     Click="() => ShowPaymentOnTab(p)"
+    //                     Text="Receive Payment" />
+    // }
     void AllTabShowContextMenu(MouseEventArgs args, VSchedule? p)
     {
-        if (p is not null)
-        {
+        if (p is null) return;
 
-            recievePaymentUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
+        recievePaymentUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
 
-            payOffUrl = $"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
-        }
+        //payOffUrl = $"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
+
+        string getLoanDetailsUrl = $"/App/Loan/{p.LoanId}/Branches/{p.BranchId}/Currencies/{p.CurrencyId}";
+
 
         ContextMenuService.Open(args, ds => @<AuthorizeView>
             <Authorized>
-                @if (p is not null)
-                {
-                    <RadzenMenu Style="font-size:0.8rem;">
-
-                        <RadzenMenuItem Icon="@IconNames.MoneyBag"
-                                        Disabled="@(!p.IsPaid && bState.CanRecievePayment)"
-                                        Path="@recievePaymentUrl"
-                                        Text="Receive Payment" />
-
-                        @if (bState.CanRecievePayment && ShowOnTab)
-                        {
-                            <RadzenMenuItem Icon="@IconNames.MoneyBag"
-                                            Visible="!p.IsPaid"
-                                            Click="() => ShowPaymentOnTab(p)"
-                                            Text="Receive Payment" />
-                        }
-
-
-                        @if (bState.CanPayOff)
-                        {
-                            <RadzenMenuItem Icon="@IconNames.Paid"
-                                            Path="@payOffUrl"
-                                            Text="Pay Off" />
-                        }
-
-
-                        <RadzenMenuItem Icon="@IconNames.Info"
-                                        Click="() => GetCustomerLateSchedules(p)"
-                                        Text="Show Late Schedule Details" />
-                    </RadzenMenu>
-                }
+                <RadzenMenu Style="font-size:0.8rem;">
+                    <RadzenMenuItem Icon="@IconNames.MoneyBag"
+                                    Disabled="@(!p.IsPaid && !bState.CanRecievePayment)"
+                                    Path="@recievePaymentUrl"
+                                    Text="Receive Payment" />
+                    <RadzenMenuItem Icon="@IconNames.Paid"
+                                    Path="@getLoanDetailsUrl"
+                                    Text="Schedule Details" />
+                    <RadzenMenuItem Icon="@IconNames.Info"
+                                    Click="() => GetCustomerLateSchedules(p)"
+                                    Text="Show Late Schedule Details" />
+                </RadzenMenu>
             </Authorized>
         </AuthorizeView>
 );
@@ -776,7 +691,6 @@
                 case 1: _ = AllTab_ShowRecievePayment(p); break;
                 case 4: _ = AllTab_ShowLateDetails(p); break;
                 case 5: AllTab_ShowCollectionPayment(p); break;
-
             }
         }
     });

@@ -22,6 +22,9 @@ public sealed class VGuarantor
 
     [NotMapped]
     public bool Selected { get; set; } = false;
+   
+    [NotMapped]
+    public int RowIndex { get; set; } = 0;
     [NotMapped] public ICollection<VLoanGuarantors> LoanGuarantors { get; set; } = [];
     [NotMapped] public ICollection<VGuarantorsLoanRequest> LoanRequests { get; set; } = [];
     [NotMapped] public ICollection<VGuarantorLoan> GuarantorLoans { get; set; } = [];

@@ -73,7 +73,7 @@
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
                         <RadzenIcon Icon="category"
                                     Style="font-size:0.9rem;color:var(--rz-primary);" />
-                        <span>Collateral</span>
+                        <span>ទ្រព្យបញ្ជាំ</span>
                     </RadzenStack>
                 </HeaderTemplate>
                 <Template>
@@ -87,19 +87,19 @@
                 <HeaderTemplate>
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
                         <RadzenIcon Icon="label" Style="font-size:0.9rem;color:var(--rz-primary);" />
-                        <span>Type</span>
+                        <span>ប្រភេទ</span>
                     </RadzenStack>
                 </HeaderTemplate>
                 <Template>@c.TypeName</Template>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn Title="Owner"
+            <RadzenDataGridColumn Title="ម្ចាស់ទ្រព្យ"
                                   Property="@(nameof(VLoanRequestCollateralLines.OwnerName))"
                                   Context="c">
                 <HeaderTemplate>
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
                         <RadzenIcon Icon="person" Style="font-size:0.9rem;color:var(--rz-primary);" />
-                        <span>Owner</span>
+                        <span>ម្ចាស់ទ្រព្យ</span>
                     </RadzenStack>
                 </HeaderTemplate>
                 <Template>@c.OwnerName</Template>
@@ -107,6 +107,7 @@
 
             <RadzenDataGridColumn Title="Qty"
                                   Width="4rem"
+                                  Visible="false"
                                   TextAlign="TextAlign.Center"
                                   Property="@(nameof(VLoanRequestCollateralLines.Quantity))"
                                   Context="c">
@@ -118,7 +119,7 @@
             </RadzenDataGridColumn>
 
             <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                                  Title="📈 Market Price"
+                                  Title="📈 តំលៃទីផ្សារ"
                                   Property="@(nameof(VLoanRequestCollateralLines.MarketPrice))"
                                   Context="c">
                 <Template>
@@ -129,7 +130,7 @@
                 </FooterTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                                  Title="🔥 Hot Price"
+                                  Title="🔥 តំលៃលក់បន្ទាន់"
                                   Property="@(nameof(VLoanRequestCollateralLines.HotPrice))"
                                   Context="c">
                 <Template>
@@ -140,7 +141,7 @@
                 </FooterTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                                  Title="🔨 Pawn Price"
+                                  Title="🔨 តំលៃបញ្ចាំ"
                                   Property="@(nameof(VLoanRequestCollateralLines.PawnPrice))"
                                   Context="c">
                 <Template>

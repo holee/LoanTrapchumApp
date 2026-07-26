@@ -41,7 +41,7 @@
         }
     </RadzenStack>
     <div style="padding:0.5rem 0.75rem 0.75rem;">
-        <RadzenDataGrid GridLines="DataGridGridLines.Horizontal"
+        <RadzenDataGrid GridLines="DataGridGridLines.Both"
                         Responsive
                         TItem="CoPawnCustomerDto"
                         Density="Density.Compact"
@@ -67,6 +67,7 @@
 
                 <RadzenDataGridColumn Title="ឈ្មោះ"
                                       Property="@(nameof(CoPawnCustomerDto.CustomerName))"
+                                      Width="10rem"
                                       Context="c">
                     <HeaderTemplate>
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
@@ -76,6 +77,20 @@
                     </HeaderTemplate>
                     <Template>
                         <span style="font-weight:500;">@c.CustomerName</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="ភេទ"
+                                      Property="@(nameof(CoPawnCustomerDto.Gender))"
+                                      Width="8rem"
+                                      Context="c">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="phone" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span>ភេទ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template>
+                        <span style="font-family:kh_siemreap;font-size:0.85rem;">@c.Gender</span>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="លេខទូរស័ព្ទ"
@@ -94,7 +109,7 @@
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="អត្តសញ្ណាណប័ណ្ណ"
                                       Property="@(nameof(CoPawnCustomerDto.CustomerIdCard))"
-                                      Width="8rem"
+                                      Width="10rem"
                                       Context="c">
                     <HeaderTemplate>
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
