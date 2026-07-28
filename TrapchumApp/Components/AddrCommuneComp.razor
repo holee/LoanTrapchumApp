@@ -1,0 +1,75 @@
+﻿@using System.Linq.Expressions
+@using Applications.Features.Addresses.Dto
+@using Applications.Features.Addresses.Queries.GetCommunes
+@using Applications.Features.Addresses.Queries.GetVillages
+<RadzenDropDown AllowFiltering="false"
+                AllowClear="false"
+                Name="@Name"
+                Style="width: 100%;"
+                Data="communelist"
+                Disabled="@(!DistrictId.HasValue)"
+                TValue="int?"
+                Value="@Value"
+                ValueChanged="@ValueChanged"
+                ValueExpression="@ValueExpression"
+                Change="@(args => OnCommuneChanged((int?)args))"
+                TextProperty="@nameof(CommuneDto.ComInKhmer)"
+                ValueProperty="@nameof(CommuneDto.CommuneId)"
+                FilterOperator="StringFilterOperator.Contains"
+                Placeholder="@(!DistrictId.HasValue ? "Select district first..." : "Select your commune...")">
+</RadzenDropDown>
+
+@code {
+
+    [Parameter] public int? Value { get; set; }
+    [Parameter] public string? Name { get; set; } = "CommuneRefId"; 
+    [Parameter] public int? DistrictId { get; set; }
+    [Parameter] public EventCallback<int?> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<int?>>? ValueExpression { get; set; }
+
+    protected IEnumerable<CommuneDto> communelist = [];
+
+    protected IEnumerable<DistrictDto> districts = [];
+
+    private IEnumerable<VillageDto> villages = [];
+
+    private async Task GetVillages(int? communeId)
+    {
+        var query = new GetVillagesQuery(communeId ?? 0, 0, new());
+
+        var rsp = await mediator.Send(query);
+
+        villages = rsp.Items;
+    }
+
+    private async Task OnCommuneChanged(int? communeId)
+    {
+        villages = [];
+
+        if (communeId.HasValue)
+        {
+            await GetVillages(communeId);
+
+            Value = communeId;
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (DistrictId.HasValue && DistrictId > 0)
+        {
+            await GetCommunes(DistrictId);
+        }
+        await base.OnParametersSetAsync();
+    }
+
+
+    private async Task GetCommunes(int? districtId)
+    {
+        var query = new GetCommunesQuery(districtId ?? 0, 0, new());
+
+        var rsp = await mediator.Send(query);
+
+        communelist = rsp.Items;
+    }
+}

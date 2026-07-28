@@ -151,7 +151,7 @@ namespace TrapchumApp.Pages.Lists.Departments
 
             (pageIndex, pageSize, sortField, sortDescending) = args.Page();
 
-            var filterColumns = args.GetFilterValue(nameof(VDepartment.DepartmentName), nameof(VDepartment.Description));
+            var filterColumns = args.FilterValue(nameof(VDepartment.DepartmentName), nameof(VDepartment.Description));
 
             var filterString = filterColumns ?? string.Empty;
 

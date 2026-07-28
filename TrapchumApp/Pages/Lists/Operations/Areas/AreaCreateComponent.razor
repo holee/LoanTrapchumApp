@@ -1,0 +1,246 @@
+@using Applications.Features.Addresses.Command.CreateArea
+@using Applications.Features.Addresses.Dto
+@using Applications.Features.Addresses.Queries.GetCommunes
+@using Applications.Features.Addresses.Queries.GetDistricts
+@using Applications.Features.Addresses.Queries.GetProvinces
+@using Applications.Features.Addresses.Queries.GetVillages
+
+<RadzenCard class="area-create-card">
+    <RadzenStack Gap="1.5rem" Orientation="Orientation.Vertical">
+        <RadzenTemplateForm TItem="AreaDtoCreate" Data="@model" Submit="@HandleFormSubmit">
+            <RadzenStack Gap="1.5rem" Orientation="Orientation.Vertical">
+                <RadzenFormField Text="ខេត្រ/ក្រុង" Variant="Variant.Outlined" Style="width:100%;" class="custom-form-field">
+                    <Start>
+                        <RadzenIcon Icon="domain" class="form-field-icon primary-icon" />
+                    </Start>
+                    <ChildContent>
+
+                        <AddrProvinceComp @bind-Value="model.ProvinceId" />
+
+                        @* <RadzenDropDown AllowFiltering="false"
+                                        AllowClear="false"
+                                        Name="ProvinceRefId"
+                                        Style="width: 100%;"
+                                        Data="provinces"
+                                        @bind-Value="model.ProvinceId"
+                                        Change="@(args => OnProvinceChanged((int?)args))"
+                                        TextProperty="@nameof(ProvinceDto.ProInKhmer)"
+                                        ValueProperty="@nameof(ProvinceDto.ProvinceId)"
+                                        FilterOperator="StringFilterOperator.Contains"
+                                        Placeholder="Select your province...">
+                        </RadzenDropDown> *@
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="ProvinceRefId" Text="Province is required" />
+                    </Helper>
+
+                </RadzenFormField>
+
+                <RadzenFormField Text="ស្រុក/ខ័ណ្ឌ" Variant="Variant.Outlined" Style="width:100%;" class="custom-form-field">
+                    <Start>
+                        <RadzenIcon Icon="map" class="@($"form-field-icon {(!model.ProvinceId.HasValue ? "disabled-icon" : "")}")" />
+                    </Start>
+                    <ChildContent>
+                        <AddrDistrictComp ProvinceId="@model.ProvinceId"
+                                          @bind-Value="model.DistrictId" />
+                        @* <RadzenDropDown AllowFiltering="true"
+                                        AllowClear="true"
+                                        Name="DistrictRefId"
+                                        Style="width: 100%;"
+                                        Data="districts"
+                                        Disabled="@(!model.ProvinceId.HasValue)"
+                                        @bind-Value="model.DistrictId"
+                                        Change="@(args => OnDistrictChanged((int?)args))"
+                                        TextProperty="@nameof(DistrictDto.DisInKhmer)"
+                                        ValueProperty="@nameof(DistrictDto.DistrictId)"
+                                        FilterOperator="StringFilterOperator.Contains"
+                                        Placeholder="@(!model.ProvinceId.HasValue ? "Select province first..." : "Select your district...")">
+                        </RadzenDropDown> *@
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="DistrictRefId" Text="District is required" />
+                    </Helper>
+                </RadzenFormField>
+                <RadzenFormField Text="ឃុំ/សង្កាត់" Variant="Variant.Outlined" Style="width:100%;" class="custom-form-field">
+                    <Start>
+                        <RadzenIcon Icon="home" class="@($"form-field-icon {(!model.DistrictId.HasValue ? "disabled-icon" : "")}")" />
+                    </Start>
+                    <ChildContent>
+                        <AddrCommuneComp DistrictId="@model.DistrictId"
+                                         @bind-Value="model.CommuneId" />
+                        @* <RadzenDropDown AllowFiltering="true"
+                                        AllowClear="true"
+                                        Name="CommuneRefId"
+                                        Style="width: 100%;"
+                                        Data="communelist"
+                                        Disabled="@(!model.DistrictId.HasValue)"
+                                        @bind-Value="model.CommuneId"
+                                        Change="@(args => OnCommuneChanged((int?)args))"
+                                        TextProperty="@nameof(CommuneDto.ComInKhmer)"
+                                        ValueProperty="@nameof(CommuneDto.CommuneId)"
+                                        FilterOperator="StringFilterOperator.Contains"
+                                        Placeholder="@(!model.DistrictId.HasValue ? "Select district first..." : "Select your commune...")">
+                        </RadzenDropDown> *@
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="CommuneRefId" Text="Commune is required" />
+                    </Helper>
+                </RadzenFormField>
+                <RadzenFormField Text="ភូមិ" Variant="Variant.Outlined" Style="width:100%;" class="custom-form-field">
+                    <Start>
+                        <RadzenIcon Icon="public" class="@($"form-field-icon {(!model.CommuneId.HasValue ? "disabled-icon" : "")}")" />
+                    </Start>
+                    <ChildContent>
+                        <AddrVillageComp @bind-Value="model.VillageId" />
+                        <RadzenDropDown AllowFiltering="true"
+                                        AllowClear="true"
+                                        Name="VillageRefId"
+                                        Style="width: 100%;"
+                                        Data="villages"
+                                        Disabled="@(!model.CommuneId.HasValue)"
+                                        @bind-Value="model.VillageId"
+                                        TextProperty="@nameof(VillageDto.VilInKhmer)"
+                                        ValueProperty="@nameof(VillageDto.VillageId)"
+                                        FilterOperator="StringFilterOperator.Contains"
+                                        Placeholder="@(!model.CommuneId.HasValue ? "Select commune first..." : "Select your village...")">
+                        </RadzenDropDown>
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="VillageRefId" Text="Village is required" />
+                    </Helper>
+                </RadzenFormField>
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" class="action-buttons"
+                         JustifyContent="JustifyContent.End" Gap="0.75rem">
+                <RadzenButton ButtonType="ButtonType.Submit"
+                              Text="Save"
+                              ButtonStyle="ButtonStyle.Success"
+                              Icon="check_circle"
+                              Size="ButtonSize.ExtraSmall"
+                              Class="save-button"></RadzenButton>
+                <RadzenButton Click="@(() => DialogService!.Close(false))"
+                              Variant="Variant.Flat"
+                              Text="Cancel"
+                              Icon="close"
+                              Size="ButtonSize.ExtraSmall"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Class="cancel-button" />
+            </RadzenStack>
+        </RadzenTemplateForm>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    private AreaDtoCreate model = new AreaDtoCreate();
+    protected IEnumerable<ProvinceDto> provinces = [];
+    protected IEnumerable<CommuneDto> communelist = [];
+    protected IEnumerable<DistrictDto> districts = [];
+    private IEnumerable<VillageDto> villages = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetProvinces();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task GetProvinces()
+    {
+        var query = new GetProvincesQuery(0, new());
+        var rsp = await mediator.Send(query);
+        provinces = rsp.Items;
+    }
+
+    private async Task GetDistricts(int? provinceId)
+    {
+        var query = new GetDistrictsQuery(provinceId ?? 0, 0, new());
+        var rsp = await mediator.Send(query);
+        districts = rsp.Items;
+    }
+
+    private async Task GetCommunes(int? districtId)
+    {
+        var query = new GetCommunesQuery(districtId ?? 0, 0, new());
+        var rsp = await mediator.Send(query);
+        communelist = rsp.Items;
+    }
+
+    private async Task GetVillages(int? communeId)
+    {
+        var query = new GetVillagesQuery(communeId ?? 0, 0, new());
+        var rsp = await mediator.Send(query);
+        villages = rsp.Items;
+    }
+
+    private async Task OnProvinceChanged(int? provinceId)
+    {
+        districts = [];
+        if (provinceId.HasValue)
+        {
+            await GetDistricts(provinceId);
+            model.DistrictId = districts.FirstOrDefault()?.DistrictId;
+            model.CommuneId = null;
+            model.VillageId = null;
+            communelist = [];
+            villages = [];
+        }
+    }
+
+    private async Task OnDistrictChanged(int? districtId)
+    {
+        communelist = [];
+        if (districtId.HasValue)
+        {
+            await GetCommunes(districtId);
+            model.CommuneId = communelist.FirstOrDefault()?.CommuneId;
+            model.VillageId = null;
+            villages = [];
+        }
+    }
+
+    private async Task OnCommuneChanged(int? communeId)
+    {
+        villages = [];
+        if (communeId.HasValue)
+        {
+            await GetVillages(communeId);
+            model.VillageId = villages.FirstOrDefault()?.VillageId;
+        }
+    }
+
+    private async Task HandleFormSubmit()
+    {
+        var command = new CreateAreaCommand(model);
+
+        var result = await mediator.Send(command);
+
+        if (result.IsSuccess())
+        {
+            DialogService.Close(result.Value);
+        }
+
+    }
+
+    private string GetSelectionSummary()
+    {
+        var parts = new List<string>();
+
+        var selectedProvince = provinces.FirstOrDefault(p => p.ProvinceId == model.ProvinceId)?.ProInKhmer;
+        if (!string.IsNullOrEmpty(selectedProvince))
+            parts.Add(selectedProvince);
+
+        var selectedDistrict = districts.FirstOrDefault(d => d.DistrictId == model.DistrictId)?.DisInKhmer;
+        if (!string.IsNullOrEmpty(selectedDistrict))
+            parts.Add(selectedDistrict);
+
+        var selectedCommune = communelist.FirstOrDefault(c => c.CommuneId == model.CommuneId)?.ComInKhmer;
+        if (!string.IsNullOrEmpty(selectedCommune))
+            parts.Add(selectedCommune);
+
+        var selectedVillage = villages.FirstOrDefault(v => v.VillageId == model.VillageId)?.VilInKhmer;
+        if (!string.IsNullOrEmpty(selectedVillage))
+            parts.Add(selectedVillage);
+
+        return string.Join(" → ", parts);
+    }
+}

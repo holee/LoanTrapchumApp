@@ -10,6 +10,6 @@ public sealed class AreaConfiguration : IBaseEntityTypeConfigurations<Area>
     {
         builder.ToTable("lt_areas");
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
-        builder.Property(x => x.Code).HasMaxLength(50);
+        builder.Property(x => x.AreaCode).HasMaxLength(50);
     }
 }

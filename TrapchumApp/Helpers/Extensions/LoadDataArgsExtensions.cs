@@ -3,34 +3,65 @@
     public static class LoadDataArgsExtensions
     {
 
-        public static (string, bool) PageInfo(this LoadDataArgs args, string? sortColumns = null)
+        public static (string, bool) PageInfo(this LoadDataArgs args, string? sortColumn = null)
         {
-            if (args.Sorts!.Any())
-            {
-                var sortField = args.Sorts!.FirstOrDefault()?.Property ?? "Id";
+            sortColumn ??= "Id";
 
-                var sortDescending = args.Sorts!.FirstOrDefault()?.SortOrder == SortOrder.Ascending;
+            var sortDescriptor = args.Sorts?.FirstOrDefault();
+
+            if (sortDescriptor is not null)
+            {
+
+                var sortField = sortDescriptor?.Property ?? sortColumn;
+
+                var sortDescending = sortDescriptor?.SortOrder == SortOrder.Descending;
 
                 return (sortField, sortDescending);
 
             }
 
-            return (sortColumns ?? "", false);
+            return (sortColumn, false);
         }
 
+        public static (string SortField, string FilterProperty, bool IsDescending) GetInfo(this LoadDataArgs args, string? sortColumn = null)
+        {
+            sortColumn ??= string.Empty;
 
-        public static (string FilterProperty, T? FilterValue) DataArgs<T>(this LoadDataArgs args)
+            var sortDescriptor = args.Sorts?.FirstOrDefault();
+
+            if (sortDescriptor is not null)
+            {
+
+                var sortField = sortDescriptor?.Property ?? sortColumn;
+
+                var filterProperty = sortDescriptor?.Property ?? string.Empty;
+
+                var sortDescending = sortDescriptor?.SortOrder == SortOrder.Descending;
+
+                return (sortField, filterProperty, sortDescending);
+
+            }
+
+            return (sortColumn, string.Empty, false);
+        }
+
+        public static (string FilterProperty, T? FilterValue) FilterBy<T>(this LoadDataArgs args)
         {
 
-            if (!args.Filters!.Any()) return (string.Empty, default(T));
+            if (args.Filters is null || !args.Filters.Any()) return (string.Empty, default(T));
 
-            var filterDescriptor = args.Filters?.FirstOrDefault();
+            var filterDescriptor = args.Filters.FirstOrDefault();
 
-            var filterProperty = filterDescriptor?.Property;
+            var filterProperty = filterDescriptor?.Property ?? string.Empty;
 
-            var filterValue = filterDescriptor?.FilterValue;
+            if (filterDescriptor?.FilterValue is null)
+            {
+                return (filterProperty, default(T));
+            }
 
-            return (filterProperty ?? string.Empty, (T?)filterValue);
+            var filterValue = (T)Convert.ChangeType(filterDescriptor.FilterValue, typeof(T));
+
+            return (filterProperty, filterValue);
 
         }
 
@@ -48,7 +79,7 @@
             return (T)Convert.ChangeType(value, typeof(T));
         }
 
-        public static string? GetFilterValue(this LoadDataArgs e, params string[] properties)
+        public static string? FilterValue(this LoadDataArgs e, params string[] properties)
         {
             return e?.Filters?
                     .FirstOrDefault(f => properties.Contains(f.Property))
@@ -56,7 +87,7 @@
                     .ToString();
         }
 
-
+        public static string? Value(this LoadDataArgs e) => e?.Filters?.FirstOrDefault()?.FilterValue?.ToString() ?? string.Empty;
 
         public static (int Skip, int Take, string SortField, bool SortDescending) Page(this LoadDataArgs args, string? sortColumns = null)
         {
@@ -68,7 +99,7 @@
             {
                 var sortField = args.Sorts!.FirstOrDefault()?.Property ?? "Id";
 
-                var sortDescending = args.Sorts!.FirstOrDefault()?.SortOrder == SortOrder.Ascending;
+                var sortDescending = args.Sorts!.FirstOrDefault()?.SortOrder == SortOrder.Descending;
 
                 return (skip, take, sortField, sortDescending);
 
@@ -83,13 +114,13 @@
 
             int take = args.Top ?? 15;
 
-            var filterValue = args.GetFilterValue(properties) ?? string.Empty;
+            var filterValue = args.FilterValue(properties) ?? string.Empty;
 
             if (args.Sorts!.Any())
             {
                 var sortField = args.Sorts!.FirstOrDefault()?.Property ?? "Id";
 
-                var sortDescending = args.Sorts!.FirstOrDefault()?.SortOrder == SortOrder.Ascending;
+                var sortDescending = args.Sorts!.FirstOrDefault()?.SortOrder == SortOrder.Descending;
 
                 return (skip, take, sortField, sortDescending, filterValue);
 

@@ -1,0 +1,68 @@
+﻿@using System.Linq.Expressions
+@using Applications.Features.Addresses.Dto
+@using Applications.Features.Addresses.Queries.GetDistricts
+@using Applications.Features.Addresses.Queries.GetProvinces
+<RadzenDropDown AllowFiltering="false"
+                AllowClear="false"
+                Name="@Name"
+                Style="width: 100%;"
+                Data="provinces"
+                Value="@Value"
+                TValue="int?"
+                ValueChanged="@ValueChanged"
+                ValueExpression="@ValueExpression"
+                Change="@(args => OnProvinceChanged((int?)args))"
+                TextProperty="@nameof(ProvinceDto.ProInKhmer)"
+                ValueProperty="@nameof(ProvinceDto.ProvinceId)"
+                FilterOperator="StringFilterOperator.Contains"
+                Placeholder="Select your province...">
+</RadzenDropDown>
+@code {
+    protected IEnumerable<ProvinceDto> provinces = [];
+    private IEnumerable<DistrictDto> districts = [];
+    [Parameter] public int? Value { get; set; }
+    [Parameter] public string? Name { get; set; }="ProvinceId";
+    [Parameter] public EventCallback<int?> OnGetDistrictEvent { get; set; }
+    [Parameter] public EventCallback<int?> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<int?>>? ValueExpression { get; set; }
+    override protected async Task OnInitializedAsync()
+    {
+        await GetProvinces();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task OnProvinceChanged(int? provinceId)
+    {
+        districts = [];
+
+        if (provinceId.HasValue)
+        {
+            //await GetDistricts(provinceId);
+
+            await OnGetDistrictEvent.InvokeAsync(provinceId);
+
+            Value = provinceId;
+        }
+    }
+
+    private async Task GetDistricts(int? provinceId)
+    {
+        var query = new GetDistrictsQuery(provinceId ?? 0, 0, new());
+
+        var rsp = await mediator.Send(query);
+
+        districts = rsp.Items;
+    }
+
+    private async Task GetProvinces()
+    {
+        var query = new GetProvincesQuery(0, new());
+
+        var rsp = await mediator.Send(query);
+
+        provinces = rsp.Items;
+    }
+
+   
+}

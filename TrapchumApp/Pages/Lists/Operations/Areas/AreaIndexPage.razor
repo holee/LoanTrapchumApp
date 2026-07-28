@@ -15,7 +15,7 @@
     </GridToolbar>
 
     <RadzenDataGrid TItem="AreaDto"
-                    Data="Areas"
+                    Data="@Areas"
                     Responsive="true"
                     Density="Density.Compact"
                     AllowPaging="true"
@@ -70,11 +70,23 @@
 
 @code {
     public IEnumerable<AreaDto>? Areas { get; set; }
-    private string? searchText;
+    private string? searchText = string.Empty;
     private int pageSize = 15;
     private int pageIndex = 0;
     private int counts = 0;
     private bool isLoading;
+    private bool _isDescending = false;
+    private string _sortColumn = nameof(AreaDto.Id);
+    private string? _filterColumn = null;
+
+    private readonly string[] _fieldProps = [
+        nameof(AreaDto.Code),
+        nameof(AreaDto.AreaName),
+        nameof(AreaDto.Khet),
+        nameof(AreaDto.Srok),
+        nameof(AreaDto.Khum),
+        nameof(AreaDto.Phum)
+    ];
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,8 +105,26 @@
 
     private async Task LoadAreaData(LoadDataArgs args)
     {
+        pageIndex = args.Skip / args.Top ?? 0;
+
+        pageSize = args.Top ?? pageSize;
+
+        (_sortColumn, _filterColumn, _isDescending) = args.GetInfo(nameof(AreaDto.Id));
+
+        if (!string.IsNullOrEmpty(_filterColumn) && _fieldProps.Contains(_filterColumn))
+        {
+            searchText = args.FilterValue(_filterColumn);
+        }
+        else
+        {
+            searchText = args.Value();
+        }
+
         await LoadAreas();
     }
+
+
+
 
     private async Task LoadAreas()
     {
@@ -102,7 +132,7 @@
 
         try
         {
-            var param = new QueryParam(pageIndex, pageSize, nameof(AreaDto.Id), searchText);
+            var param = new QueryParam(pageIndex, pageSize, searchText, _sortColumn, _filterColumn, false, _isDescending);
 
             var query = new GetAreasQuery(0, param);
 
@@ -168,18 +198,18 @@
 
     private void ShowCreate()
     {
-        DialogService.OpenAsync<AreaCreateComponent>("Create Area", 
+        DialogService.OpenAsync<AreaCreateComponent>("Create Area",
         new Dictionary<string, object?>
         {
-            
+
         },
         new DialogOptions
         {
             Width = "500px",
             Height = "auto",
-            Resizable = true,
+            Resizable = false,
             Draggable = true,
-        }); 
+        });
     }
 
     private void Edit(long id)

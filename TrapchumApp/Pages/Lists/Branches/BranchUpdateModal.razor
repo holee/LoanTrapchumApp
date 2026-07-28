@@ -32,25 +32,40 @@
                 <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
                     <RadzenColumn Size="9">
                         <div class="branch-field-group">
-                            <RadzenStack Gap="0.85rem">
-                                <RadzenStack Gap="0.35rem">
+                            <RadzenRow Gap="0.35rem">
+                                <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
                                     <RadzenLabel Text="Branch Name *" class="branch-form-label" />
                                     <RadzenTextBox Name="BranchName"
                                                    @bind-Value="model.BranchName"
                                                    Placeholder="Enter branch name..."
                                                    Style="width:100%" />
                                     <ValidationMessage For="@(() => model.BranchName)" />
-                                </RadzenStack>
-
-                                <RadzenStack Gap="0.35rem">
+                                </RadzenColumn>
+                                <RadzenColumn Size="6" SizeSM="12" SizeMD="6">
                                     <RadzenLabel Text="Branch Code *" class="branch-form-label" />
-                                    <RadzenTextBox Name="Description"
-                                                   @bind-Value="model.Description"
+                                    <RadzenTextBox Name="BranchCode"
+                                                   @bind-Value="model.BranchCode"
                                                    Placeholder="Enter branch code..."
                                                    Style="width:100%" />
-                                    <ValidationMessage For="@(() => model.Description)" />
-                                </RadzenStack>
-                            </RadzenStack>
+                                    <ValidationMessage For="@(() => model.BranchCode)" />
+                                </RadzenColumn>
+                                <RadzenColumn Size="6" SizeSM="12" SizeMD="6">
+                                    <RadzenLabel Text="Phone Number *" class="branch-form-label" />
+                                    <RadzenTextBox Name="PhoneNumber"
+                                                   @bind-Value="model.PhoneNumber"
+                                                   Placeholder="Enter phone number..."
+                                                   Style="width:100%" />
+                                    <ValidationMessage For="@(() => model.PhoneNumber)" />
+                                </RadzenColumn>
+                                <RadzenColumn Size="6" SizeSM="12" SizeMD="6">
+                                    <RadzenLabel Text="Zone *" class="branch-form-label" />
+                                    <RadzenTextBox Name="Zone"
+                                                   @bind-Value="model.Zone"
+                                                   Placeholder="Enter zone..."
+                                                   Style="width:100%" />
+                                    <ValidationMessage For="@(() => model.Zone)" />
+                                </RadzenColumn>
+                            </RadzenRow>
                             <div class="branch-status-toggle">
                                 <RadzenLabel Text="Status" class="branch-form-label" />
                                 <div class="branch-status-toggle-row">
@@ -293,7 +308,7 @@
 
     private async Task Close()
     {
-        if(PageType == PageType.Tab)
+        if (PageType == PageType.Tab)
         {
             await OnClose.InvokeAsync();
         }

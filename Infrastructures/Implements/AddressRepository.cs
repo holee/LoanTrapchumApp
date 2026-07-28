@@ -918,7 +918,6 @@ public sealed class AddressRepository : IAddressService
         if (string.IsNullOrEmpty(filter))
         {
             return await queries.AsNoTracking()
-                                .ProjectToType<AreaDto>()
                                 .ToPagedAsync(param.Page, param.Take, cancellation);
         }
 

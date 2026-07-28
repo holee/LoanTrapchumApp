@@ -492,7 +492,7 @@ public partial class EmployeesIndex(ILogger<EmployeesIndex> logger)
             (sortField, sortDescending) = e.PageInfo(nameof(VEmployeeList.FirstName));
         }
 
-        var filterValue =e.GetFilterValue(nameof(VEmployeeList.Phone),
+        var filterValue =e.FilterValue(nameof(VEmployeeList.Phone),
                                            nameof(VEmployeeList.EmailAddress),
                                            nameof(VEmployeeList.DepartmentName),
                                            nameof(VEmployeeList.Occupation),

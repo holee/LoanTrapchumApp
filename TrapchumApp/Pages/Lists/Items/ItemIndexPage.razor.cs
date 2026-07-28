@@ -119,7 +119,7 @@ public partial class ItemIndexPage
             sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
         }
 
-        var filterColumns = args.GetFilterValue(nameof(ItemDto.ItemName), nameof(ItemDto.Description));
+        var filterColumns = args.FilterValue(nameof(ItemDto.ItemName), nameof(ItemDto.Description));
         var filterString = filterColumns ?? searchText;
 
         await GetItems(filterString);

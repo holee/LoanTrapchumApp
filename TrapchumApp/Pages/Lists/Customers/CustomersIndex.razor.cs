@@ -466,6 +466,8 @@ namespace TrapchumApp.Pages.Lists.Customers
                 sortDescending = args.Sorts!.First().SortOrder == SortOrder.Descending;
             }
 
+            var filterProp = args.Filters?.FirstOrDefault()?.Property;
+
             var filterColumn = args.Filters?.FirstOrDefault(f => f.Property == nameof(VCustomerDetails.FullName) ||
                                                             f.Property == nameof(VCustomerDetails.AltName) ||
                                                            f.Property == nameof(VCustomerDetails.CustomerId) ||

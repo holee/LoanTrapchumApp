@@ -50,8 +50,7 @@ public static class InfrastructureServiceInjection
         });
 
 
-        services.AddScoped<Seeds.DatabaseSeeder>();
-
+     
 
         services.AddAuthentication(options =>
         {
@@ -79,6 +78,10 @@ public static class InfrastructureServiceInjection
             options.SlidingExpiration = true;
             //options.AccessDeniedPath = new PathString("/app/access-denied");
         });
+
+
+        services.AddScoped<Seeds.DatabaseSeeder>();
+
 
         services.AddHttpContextAccessor();
         services.AddSingleton<AuditingSaveChangesInterceptor>();
