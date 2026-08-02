@@ -18,11 +18,11 @@ public interface IOtherNameService
     Task<ErrorOr<VOtherNames>> UpdateStatusAsync(string? othernameId, CancellationToken cancellation = default);
     Task<ErrorOr<VOtherNames>> UpdateStatusAsync(string? othernameId, bool state, CancellationToken cancellation = default);
     Task<ErrorOr<EntityNames>> GetByIdAsync(string? id, CancellationToken cancellation = default);
-    Task<ErrorOr<T>> GetDetailAsync<T>(string? id, CancellationToken cancellation = default) where T : class;
+    Task<ErrorOr<VOtherNames>> GetDetailAsync(string? id, CancellationToken cancellation = default);
     Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, string type, CancellationToken cancellation = default);
     Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, CancellationToken cancellation = default);
-    Task<IEnumerable<T>> GetNameListsAsync<T>(string? nameId, QueryParam param, CancellationToken cancellation = default) where T : class, new();
-    Task<Pager<T>> GetNameAsync<T>(string? nameId, QueryParam param, CancellationToken cancellation = default) where T : class, new();
+    Task<IEnumerable<VOtherNames>> GetNameListsAsync(string? nameId, QueryParam param, CancellationToken cancellation = default);
+    Task<Pager<VOtherNames>> GetNameAsync(string? nameId, QueryParam param, CancellationToken cancellation = default);
     Task<ErrorOr<bool>> ConvertToCustomerAsync(string? id, Customer customer, CancellationToken cancellation = default);
     Task<ErrorOr<bool>> ConvertToVendorAsync(string? id, Vendor vendor, CancellationToken cancellation = default);
     Task<ErrorOr<bool>> ConvertToEmployeeAsync(string? id, Employee employee, CancellationToken cancellation = default);

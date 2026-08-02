@@ -1,18 +1,23 @@
+using Applications.Commons.Messages;
 using Applications.Features.Addresses.Dto;
 using Applications.Features.Branches.Command.CreateBranch;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Currencies.Dto;
 using Applications.Interfaces.Banks;
-using Domains.Models.Addresses;
 using Mapster;
 using TrapchumApp.Helpers.Validations;
-
+using Applications.Features.Banks.Queries.GetBanks;
+using Applications.Features.Addresses.Queries.GetDistricts;
+using Applications.Features.Addresses.Queries.GetCommunes;
+using Applications.Features.Addresses.Queries.GetVillages;
+using Applications.Features.Addresses.Queries.GetProvinces;
 namespace TrapchumApp.Pages.Lists.Branches;
 
 public partial class BranchCreateModal(ILogger<BranchCreateModal> logger)
 {
     [Parameter] public PageType PageType { get; set; } = PageType.Tab;
     [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<VBranch> OnCreated { get; set; }
 
     private BranchDtoCreate model = new();
     [Inject] IBankService bankService { get; set; } = default!;
@@ -21,7 +26,7 @@ public partial class BranchCreateModal(ILogger<BranchCreateModal> logger)
     protected IEnumerable<DistrictDto> districtList = [];
     protected IEnumerable<VillageDto> villageList = [];
     protected IEnumerable<BankResponse> bankList = [];
-    protected IEnumerable<Country> Countries = [];
+    protected IEnumerable<CountryDto> Countries = [];
     protected IEnumerable<string> strCountries = [];
 
     protected IEnumerable<string> Cities = [];
@@ -37,33 +42,20 @@ public partial class BranchCreateModal(ILogger<BranchCreateModal> logger)
 
         model.ImagePath ??= tempPath;
 
-        var rsp = await _addressService!.GetCountries(105);
+        var result = await mediator.Send(new GetProvincesQuery(null, new QueryParam(0, 25)));
 
-        if (!rsp.IsError)
+        provinceList = result.Items;
+
+        var results = await mediator.Send(new GetBanksQuery(null, new QueryParam()));
+
+        if (results.Items.Any())
         {
-            Countries = rsp.Value;
+            bankList = results.Items.Adapt<IEnumerable<BankResponse>>();
         }
 
-        provinceList = await _addressService.GetsProvinces(string.Empty);
-
-        await GetCities();
-
-        var results = await bankService!.GetAllAsync();
-
-        if (results.Any())
-        {
-            bankList = results.Adapt<IEnumerable<BankResponse>>();
-        }
         await base.OnInitializedAsync();
     }
 
-
-    async Task GetCities(string? filter = null)
-    {
-        Cities = await _addressService.GetCities(filter);
-
-        filteredItems = Cities;
-    }
     async Task OnSubmit()
     {
 
@@ -77,35 +69,38 @@ public partial class BranchCreateModal(ILogger<BranchCreateModal> logger)
 
         if (response.IsSuccess())
         {
-            NotificationService.Notify(NotificationSeverity.Success, "New Branch", "Branch created successfully!");
 
-            DialogService.Close(true);
+            _toastService.ShowSuccess(BranchMessage.BranchCreated);
+
+            if (PageType == PageType.Tab)
+            {
+                await OnCreated.InvokeAsync(response.Value);
+            }
+            else
+            {
+                DialogService.Close(true);
+            }
+
+
         }
         else
         {
             editContext.ApplyValidationSummary<BranchDtoCreate>(response.GetMessage());
         }
     }
-    protected async Task AddCity()
-    {
-        var city = new CityDtoCreate { CityName = searchText };
 
-        var message = await _addressService.AddCity(city);
-
-        if (!message.IsError)
-        {
-            await GetCities();
-
-            StateHasChanged();
-        }
-    }
     async void SelectProvince(object e)
     {
         if (e is not null)
         {
             var id = ((ProvinceDto)e).ProvinceId;
-            districtList = await _addressService.GetDistrictsByProvinceId(id);
+
+            var result = await mediator.Send(new GetDistrictsQuery(id, null, new QueryParam(0, 30)));
+
+            districtList = result.Items;
+
             model.ProDescription = ((ProvinceDto)e).ProDescription;
+
             model.ProInKhmer = ((ProvinceDto)e).ProInKhmer;
         }
         StateHasChanged();
@@ -117,8 +112,12 @@ public partial class BranchCreateModal(ILogger<BranchCreateModal> logger)
         {
             var id = ((DistrictDto)e).DistrictId;
 
-            communeList = await _addressService!.GetCommunesByDistrictId(id);
+            var result = await mediator.Send(new GetCommunesQuery(id, null, new QueryParam(0, 30)));
+
+            communeList = result.Items;
+
             model.DisDescription = ((DistrictDto)e).DisDescription;
+
             model.DisInKhmer = ((DistrictDto)e).DisInKhmer;
         }
         else
@@ -132,15 +131,15 @@ public partial class BranchCreateModal(ILogger<BranchCreateModal> logger)
         if (e is not null)
         {
             var id = ((CommuneDto)e).CommuneId;
-            villageList = await _addressService!.GetVillagesByCommuneId(id);
+
+            var result = await mediator.Send(new GetVillagesQuery(id, null, new QueryParam(0, 30)));
+
+            villageList = result.Items;
+
             model.ComDescription = ((CommuneDto)e).ComDescription;
+
             model.ComInKhmer = ((CommuneDto)e).ComInKhmer;
         }
-        else
-        {
-            villageList = [];
-        }
-        StateHasChanged();
     }
 
     void SelectVillage(object e)
@@ -160,7 +159,7 @@ public partial class BranchCreateModal(ILogger<BranchCreateModal> logger)
         {
             await OnClose.InvokeAsync();
         }
-        else if(PageType == PageType.Dialog)
+        else if (PageType == PageType.Dialog)
         {
             DialogService.Close(false);
         }

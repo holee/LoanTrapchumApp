@@ -1,6 +1,7 @@
 ﻿using Applications.Features.Transactions.Journals;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
+using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
 using Applications.Services.Transactions.Journals;
 using Microsoft.JSInterop;
@@ -168,7 +169,7 @@ public partial class JournalEntryRowCreate(ILedgerServiceImpl ledgerService,
         }
     }
 
-    VNameList? _nameList;
+    VOtherNames? _nameList;
     bool isDataLoaded = false;
     int pageIndex = 0;
     int pageSize = 10;
@@ -193,7 +194,7 @@ public partial class JournalEntryRowCreate(ILedgerServiceImpl ledgerService,
 
         var param = new QueryParam(pageIndex, pageSize, sortColumn, true, false, searchText);
 
-        var pager = await nameService.GetNameAsync<VNameList>(id, param);
+        var pager = await nameService.GetNameAsync(id, param);
 
         NameLists = pager.Items;
 
@@ -204,7 +205,7 @@ public partial class JournalEntryRowCreate(ILedgerServiceImpl ledgerService,
         StateHasChanged();
     }
 
-    IEnumerable<VNameList> NameLists = [];
+    IEnumerable<VOtherNames> NameLists = [];
 
     protected async Task<bool> ValidateNameType(JournalLineDtoCreate journalLine)
     {

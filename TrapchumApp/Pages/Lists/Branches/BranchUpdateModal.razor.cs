@@ -34,7 +34,7 @@ namespace TrapchumApp.Pages.Lists.Branches
 
                 var command = new GetUpdateBranchQuery(Id);
 
-                var result = await mediator.Send(command);  //_branchService!.GetUpdateBranchById(Id);
+                var result = await mediator.Send(command);
 
                 if (result.IsError)
                 {

@@ -1,43 +1,54 @@
-﻿@using Applications.Features.Departments.Dto
-<RadzenStack Gap="1rem" Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
+﻿@using Applications.Features.Branches.Dtos
+@using Applications.Features.Departments.Dto
+<div class="p-3">
     <RadzenTemplateForm TItem="DepartmentDtoUpdate" Data=@model Submit=@Update>
-        <RadzenStack>
-            <RadzenRow>
-                <RadzenColumn Size="12">
-                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
-                        <RadzenFormField Text="Department Name*" Variant="Variant.Flat" Style="width:100%">
-                            <RadzenTextBox Name="DepartmentName" @bind-Value="model.DepartmentName" Style="width:100%" />
-                            <RadzenRequiredValidator Component="DepartmentName" Text="Department name is required" Style="position: absolute" />
-                        </RadzenFormField>
-                    </RadzenColumn>
+        <RadzenStack Gap="1rem">
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Department Name*" Variant="Variant.Outlined" Style="width:100%">
+                        <RadzenTextBox Name="DepartmentName" @bind-Value="model.DepartmentName" Style="width:100%" />
+                        <RadzenRequiredValidator Component="DepartmentName" Text="Department name is required" Style="position: absolute" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Branch Name*" Variant="Variant.Outlined" Style="width:100%">
+                        <ChildContent>
+                            <RadzenDropDown Name="BranchId"
+                                            @bind-Value="model.BranchId"
+                                            Data="@vBranches"
+                                            ValueProperty="@nameof(VBranch.BranchId)"
+                                            TextProperty="@nameof(VBranch.BranchName)"
+                                            AllowFiltering="true"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            Style="width:100%">
+                            </RadzenDropDown>
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="BranchId" Text="Branch is required" Style="position: absolute" />
+                        </Helper>
+                    </RadzenFormField>
                 </RadzenColumn>
             </RadzenRow>
-            <RadzenRow>
+            <RadzenRow Gap="1rem">
                 <RadzenColumn Size="12">
-                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
-                        <RadzenFormField Text="Description" Variant="Variant.Flat" Style="width:100%;margin-top:10px">
-                            <RadzenTextBox Name="Description" @bind-Value="model.Description" Style="width:100%" />
-
-                        </RadzenFormField>
-                    </RadzenColumn>
+                    <RadzenFormField Text="Description" Variant="Variant.Outlined" Style="width:100%">
+                        <RadzenTextBox Name="Description" @bind-Value="model.Description" Style="width:100%" />
+                    </RadzenFormField>
                 </RadzenColumn>
-
             </RadzenRow>
         </RadzenStack>
-        <RadzenStack Orientation="Orientation.Horizontal" class="mt-2" JustifyContent="JustifyContent.End" Gap="0.5rem">
-            <RadzenButton ButtonType="ButtonType.Submit"
-                          Text="Save"
-                          ButtonStyle="ButtonStyle.Primary"
-                          Size="ButtonSize.Small"
-                          Icon="save"></RadzenButton>
+        <RadzenStack Orientation="Orientation.Horizontal" class="rz-mt-4" JustifyContent="JustifyContent.End" Gap="0.5rem">
             <RadzenButton Click="@((args) => DialogService!.Close(true))"
-                          Variant="Variant.Text"
                           Text="Close"
                           Icon="cancel"
-                          Size="ButtonSize.Small"
-                          ButtonStyle="ButtonStyle.Secondary" />
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Danger" />
+            <RadzenButton ButtonType="ButtonType.Submit"
+                          Text="Save"
+                          ButtonStyle="ButtonStyle.Success"
+                          Size="ButtonSize.ExtraSmall"
+                          Icon="save"></RadzenButton>
         </RadzenStack>
     </RadzenTemplateForm>
-</RadzenStack>
-
+</div>
 

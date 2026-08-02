@@ -14,21 +14,7 @@
                         <RadzenIcon Icon="domain" class="form-field-icon primary-icon" />
                     </Start>
                     <ChildContent>
-
-                        <AddrProvinceComp @bind-Value="model.ProvinceId" />
-
-                        @* <RadzenDropDown AllowFiltering="false"
-                                        AllowClear="false"
-                                        Name="ProvinceRefId"
-                                        Style="width: 100%;"
-                                        Data="provinces"
-                                        @bind-Value="model.ProvinceId"
-                                        Change="@(args => OnProvinceChanged((int?)args))"
-                                        TextProperty="@nameof(ProvinceDto.ProInKhmer)"
-                                        ValueProperty="@nameof(ProvinceDto.ProvinceId)"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        Placeholder="Select your province...">
-                        </RadzenDropDown> *@
+                        <AddrProvinceComp @bind-Value="model.ProvinceId" Name="ProvinceRefId" />
                     </ChildContent>
                     <Helper>
                         <RadzenRequiredValidator Component="ProvinceRefId" Text="Province is required" />
@@ -42,20 +28,8 @@
                     </Start>
                     <ChildContent>
                         <AddrDistrictComp ProvinceId="@model.ProvinceId"
-                                          @bind-Value="model.DistrictId" />
-                        @* <RadzenDropDown AllowFiltering="true"
-                                        AllowClear="true"
-                                        Name="DistrictRefId"
-                                        Style="width: 100%;"
-                                        Data="districts"
-                                        Disabled="@(!model.ProvinceId.HasValue)"
-                                        @bind-Value="model.DistrictId"
-                                        Change="@(args => OnDistrictChanged((int?)args))"
-                                        TextProperty="@nameof(DistrictDto.DisInKhmer)"
-                                        ValueProperty="@nameof(DistrictDto.DistrictId)"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        Placeholder="@(!model.ProvinceId.HasValue ? "Select province first..." : "Select your district...")">
-                        </RadzenDropDown> *@
+                                          @bind-Value="model.DistrictId"
+                                          Name="DistrictRefId" />
                     </ChildContent>
                     <Helper>
                         <RadzenRequiredValidator Component="DistrictRefId" Text="District is required" />
@@ -67,20 +41,8 @@
                     </Start>
                     <ChildContent>
                         <AddrCommuneComp DistrictId="@model.DistrictId"
+                                         Name="CommuneRefId"
                                          @bind-Value="model.CommuneId" />
-                        @* <RadzenDropDown AllowFiltering="true"
-                                        AllowClear="true"
-                                        Name="CommuneRefId"
-                                        Style="width: 100%;"
-                                        Data="communelist"
-                                        Disabled="@(!model.DistrictId.HasValue)"
-                                        @bind-Value="model.CommuneId"
-                                        Change="@(args => OnCommuneChanged((int?)args))"
-                                        TextProperty="@nameof(CommuneDto.ComInKhmer)"
-                                        ValueProperty="@nameof(CommuneDto.CommuneId)"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        Placeholder="@(!model.DistrictId.HasValue ? "Select district first..." : "Select your commune...")">
-                        </RadzenDropDown> *@
                     </ChildContent>
                     <Helper>
                         <RadzenRequiredValidator Component="CommuneRefId" Text="Commune is required" />
@@ -91,26 +53,16 @@
                         <RadzenIcon Icon="public" class="@($"form-field-icon {(!model.CommuneId.HasValue ? "disabled-icon" : "")}")" />
                     </Start>
                     <ChildContent>
-                        <AddrVillageComp @bind-Value="model.VillageId" />
-                        <RadzenDropDown AllowFiltering="true"
-                                        AllowClear="true"
-                                        Name="VillageRefId"
-                                        Style="width: 100%;"
-                                        Data="villages"
-                                        Disabled="@(!model.CommuneId.HasValue)"
-                                        @bind-Value="model.VillageId"
-                                        TextProperty="@nameof(VillageDto.VilInKhmer)"
-                                        ValueProperty="@nameof(VillageDto.VillageId)"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        Placeholder="@(!model.CommuneId.HasValue ? "Select commune first..." : "Select your village...")">
-                        </RadzenDropDown>
+                        <AddrVillageComp CommuneId="@model.CommuneId"
+                                         Name="VillageRefId"
+                                         @bind-Value="model.VillageId" />
                     </ChildContent>
                     <Helper>
                         <RadzenRequiredValidator Component="VillageRefId" Text="Village is required" />
                     </Helper>
                 </RadzenFormField>
             </RadzenStack>
-            <RadzenStack Orientation="Orientation.Horizontal" class="action-buttons"
+            <RadzenStack Orientation="Orientation.Horizontal" class="action-buttons rz-mt-2"
                          JustifyContent="JustifyContent.End" Gap="0.75rem">
                 <RadzenButton ButtonType="ButtonType.Submit"
                               Text="Save"

@@ -431,9 +431,29 @@ public static class EfSearchExtensions
             ? propertyName
             : null;
 
+    /// <summary>
+    /// Orders the query by the given column name (via <see cref="EF.Property{TProperty}"/>) when it maps
+    /// to a valid property on <typeparamref name="T"/>; otherwise falls back to <paramref name="defaultKeySelector"/>.
+    /// </summary>
+    public static IOrderedQueryable<T> OrderByColumn<T>(
+        this IQueryable<T> source,
+        string? sortColumn,
+        bool sortDescending,
+        Expression<Func<T, object?>> defaultKeySelector)
+    {
+        var column = typeof(T).MapField(sortColumn);
 
+        if (string.IsNullOrEmpty(column))
+        {
+            return sortDescending
+                ? source.OrderByDescending(defaultKeySelector)
+                : source.OrderBy(defaultKeySelector);
+        }
 
-
+        return sortDescending
+            ? source.OrderByDescending(x => EF.Property<object>(x!, column))
+            : source.OrderBy(x => EF.Property<object>(x!, column));
+    }
 }
 
 

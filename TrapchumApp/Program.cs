@@ -6,6 +6,7 @@ using Infrastructures.DependencyInjects;
 using Infrastructures.Middlewares;
 using Mapster;
 using Microsoft.AspNetCore.Components.Server;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
@@ -23,6 +24,7 @@ builder.Services.AddRadzenComponents();
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorTemplating();
 builder.Services.AddAuthorization();
+builder.Services.AddHealthChecks();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<NavigationService>();
@@ -80,6 +82,8 @@ builder.Services.Configure<CircuitOptions>(options =>
     options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(30);
 });
 
+
+
 var app = builder.Build();
 
 await app.SeedSystemData();
@@ -91,13 +95,11 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-
-    app.UseDeveloperExceptionPage(); // temporary for troubleshooting
-
-    //app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
 
     app.UseHsts();
 }
+
 
 app.UseHttpsRedirection();
 
@@ -113,6 +115,8 @@ app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.MapControllers();
 
+app.MapHealthChecks("/health/live").AllowAnonymous();
+
 await app.MapAdditionalIdentityEndpoints();
 
 app.MapUploadFileEndpoints();
@@ -120,3 +124,28 @@ app.MapUploadFileEndpoints();
 app.MapHub<AppNotificationHub>("/hubs/notifications");
 
 app.Run();
+
+
+//builder.Services.ConfigureApplicationCookie(options =>
+//{
+//    options.Cookie.HttpOnly = true;
+//    options.Cookie.SameSite = SameSiteMode.Lax;
+//    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+//});
+
+// Only forwarded by a reverse proxy that has been explicitly configured as trusted.
+//builder.Services.Configure<ForwardedHeadersOptions>(options =>
+//{
+//    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+//});
+
+//app.UseForwardedHeaders();
+
+//app.Use(async (context, next) =>
+//{
+//    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+//    context.Response.Headers.Append("X-Frame-Options", "DENY");
+//    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+//    context.Response.Headers.Append("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+//    await next();
+//});

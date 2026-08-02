@@ -23,7 +23,6 @@
                 @ref="@gridRef"
                 TItem="OccupationDto"
                 LoadData="@LoadOccupation"
-                IsLoading="@Tracker.IsLoading"
                 Count="@_counts"
                 PageSize="@pageSize"
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
@@ -113,13 +112,11 @@
 
         (sortField, sortDescending) = args.PageInfo();
 
-        var filterColumn = args.Filters?
-                                .FirstOrDefault(prop => prop.Property == nameof(OccupationDto.OccupationTitle) ||
-                                                        prop.Property == nameof(OccupationDto.Khmer) ||
-                                                        prop.Property == nameof(OccupationDto.TypeOf)
-                                    )?.FilterValue!.ToString() ?? string.Empty;
+        string[] props = [nameof(OccupationDto.OccupationTitle), nameof(OccupationDto.Khmer), nameof(OccupationDto.TypeOf)];
 
-        _filter = filterColumn ?? string.Empty;
+        var filterValue = args.FilterValue(props);
+
+        _filter = filterValue ?? string.Empty;
 
         await GetOccupations(_filter);
     }
@@ -149,7 +146,7 @@
     {
         var dia = await DialogService.OpenAsync<OccupationEdit>(
             "Edit Occupation",
-            new Dictionary<string, object> { { nameof(OccupationEdit.Id), item.OccupationId } });
+            new Dictionary<string, object?> { { nameof(OccupationEdit.Id), item.OccupationId } });
 
         if (dia is OccupationDto updated && updated is not null)
         {
@@ -159,9 +156,8 @@
 
     async Task ViewDetail(OccupationDto item)
     {
-        await DialogService.OpenAsync<OccupationDetail>(
-            "Occupation Details",
-            new Dictionary<string, object> { { nameof(OccupationDetail.Id), item.OccupationId } });
+        await DialogService.OpenAsync<OccupationDetail>("Occupation Details",
+            new Dictionary<string, object?> { { nameof(OccupationDetail.Id), item.OccupationId } });
 
         await GetOccupations(_filter);
     }

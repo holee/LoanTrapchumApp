@@ -37,9 +37,8 @@
                     <RadzenButton Size="ButtonSize.Small"
                                   ButtonStyle="ButtonStyle.Primary"
                                   Icon="@IconNames.Add"
-                                  Text="New Request"
-                                  NavigatePath="@createRequestUrl"
-                                  class="rz-border-radius-2" />
+                                  Click="@CreateNewRequest"
+                                  Text="New Request" />
                 </Authorized>
             </AuthorizeView>
         </RadzenStack>
@@ -249,7 +248,7 @@
 
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
 
-           
+
             <RadzenMenuItem Path="@requestNowUrl"
                             Icon="@IconNames.SendMoney"
                             Disabled="!bState.CanRequest"
@@ -266,14 +265,14 @@
                             Text="Review Request"
                             Value="@Request.CustomerId" />
 
-            
+
             <RadzenMenuItem Path="@checkloanRequestUrl"
                             Icon="@IconNames.Info"
                             Disabled="!bState.CanApproved"
                             Text="Approved Now"
                             Value="@Request.CustomerId" />
 
-         
+
             <RadzenMenuItem Visible="@bState.CanDisbursed"
                             Path="@disburseRequestLoanUrl"
                             Icon="@IconNames.Info"
@@ -410,6 +409,9 @@
     }
 
 
-
+    private void CreateNewRequest()
+    {
+        NavigationManager.NavigateTo($"/app/loans/requests/{BranchId}/branches/create-new-request");
+    }
 }
 

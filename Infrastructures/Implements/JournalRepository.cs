@@ -20,7 +20,9 @@ using System.Data;
 
 namespace Infrastructures.Implements;
 
-public sealed class JournalRepository(DataContext context, ILogger<JournalRepository> logger, IDbContextFactory<DataContext> dbContextFactory,
+public sealed class JournalRepository(DataContext context,
+    ILogger<JournalRepository> logger,
+    IDbContextFactory<DataContext> dbContextFactory,
     IDapperConnectionFactory dapperConnectionFactory)
     : IJournalService
 {
@@ -335,27 +337,28 @@ public sealed class JournalRepository(DataContext context, ILogger<JournalReposi
         };
     }
 
-    public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId, QueryParam param)
+    public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId, QueryParam param, CancellationToken cancellation = default)
     {
-        await using var dataContext = await dbContextFactory.CreateDbContextAsync();
+        await using var dataContext = await dbContextFactory.CreateDbContextAsync(cancellation);
         IQueryable<JournalEntryVm> queries = dataContext.VJournals
+            .AsNoTracking()
             .Where(x => x.BranchId == branchId)
             .WhereIf(!string.IsNullOrWhiteSpace(param.Filter), x =>
                 EF.Functions.Like(x.ReferrenceNum!, $"%{param.Filter}%") ||
                 EF.Functions.Like(x.JournalType!, $"%{param.Filter}%") ||
                 EF.Functions.Like(x.TransactionTypeName!, $"%{param.Filter}%") ||
-                EF.Functions.Like(x.TransactionDate!.ToString(), $"%{param.Filter}%"))
-            .OrderByDescending(x => x.ModiFiedDT);
-        if (param.SortDescending)
-        {
-            queries = queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
-        }
+                EF.Functions.Like(x.TransactionDate!.ToString(), $"%{param.Filter}%"));
 
-        var pageCount = await queries.CountAsync();
+        queries = !string.IsNullOrWhiteSpace(param.SortColumn)
+            ? param.SortDescending
+                ? queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn))
+                : queries.OrderBy(x => EF.Property<object>(x, param.SortColumn))
+            : queries.OrderByDescending(x => x.ModiFiedDT);
+
+        var pageCount = await queries.CountAsync(cancellation);
 
         var pageItems = await queries.Skip(param.Page).Take(param.Take)
-            .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync(cancellation);
 
         return new Pager<JournalEntryVm>
         {
@@ -364,7 +367,7 @@ public sealed class JournalRepository(DataContext context, ILogger<JournalReposi
         };
     }
 
-    public async Task<IEnumerable<Domains.Models.Journals.JournalEntry>> GetJournalsAsync(string? journalId, string? q = null)
+    public async Task<IEnumerable<JournalEntry>> GetJournalsAsync(string? journalId, string? q = null)
     {
         var queries = context.JournalEntries
                              .Include(x => x.JournalEntryLines)
@@ -456,7 +459,7 @@ public sealed class JournalRepository(DataContext context, ILogger<JournalReposi
             : (ErrorOr<JournalEntryVm>)item2;
     }
 
-    public async Task<Domains.Models.Journals.JournalEntry?> GetJournalByIdAsync(string? id)
+    public async Task<JournalEntry?> GetJournalByIdAsync(string? id)
     {
         var journal = context.JournalEntries
             .Where(x => x.JournalEntryId == id)
@@ -465,7 +468,7 @@ public sealed class JournalRepository(DataContext context, ILogger<JournalReposi
     }
 
 
-    public async Task<Domains.Models.Journals.JournalEntry?> GetJournalByIdAsync(string? journalEntryId, CancellationToken cancellation = default)
+    public async Task<JournalEntry?> GetJournalByIdAsync(string? journalEntryId, CancellationToken cancellation = default)
     {
         var foundItem = await context.JournalEntries
                                 .Include(a => a.JournalEntryLines)
@@ -475,7 +478,7 @@ public sealed class JournalRepository(DataContext context, ILogger<JournalReposi
     }
 
 
-    public async Task<Applications.Features.Journals.Dtos.JournalEntryDto?> GetJournalDetailByIdAsync(string? journalEntryId, CancellationToken cancellation = default)
+    public async Task<JournalEntryDto?> GetJournalDetailByIdAsync(string? journalEntryId, CancellationToken cancellation = default)
     {
         using var db = await dapperConnectionFactory.CreateConnectionAsync(cancellation);
 
@@ -514,6 +517,10 @@ public sealed class JournalRepository(DataContext context, ILogger<JournalReposi
 
     public async Task<IEnumerable<JournalType>> GetJournalTypesAsync(string? expression = null)
     {
+
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+
         IQueryable<JournalType> journalTypes = context.JournalTypes;
         if (!string.IsNullOrEmpty(expression))
         {
@@ -523,6 +530,46 @@ public sealed class JournalRepository(DataContext context, ILogger<JournalReposi
         }
 
         return await journalTypes.AsNoTracking().ToListAsync() ?? Enumerable.Empty<JournalType>();
+    }
+
+    public async Task<PageMetaData<JournalType>> GetJournalTypes(int? journalTypeId, QueryParam query, CancellationToken cancellation = default)
+    {
+
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var queries = context.JournalTypes
+                                  .WhereIf(journalTypeId.HasValue && journalTypeId > 0, x => x.Id == journalTypeId);
+
+        var expression = query.Filter?.Trim();
+
+        if (!string.IsNullOrEmpty(expression)) 
+        {
+            string prop = typeof(JournalType).MapField(query.FilterColumn);
+
+            if (!string.IsNullOrEmpty(prop))
+            {
+                queries = queries.StartWith(expression, prop);
+            }
+            else
+            {
+                string[] props = { nameof(JournalType.Code), nameof(JournalType.Description) };
+
+                queries = queries.StartWiths(expression, props);
+            }
+        }
+        if(query.SortColumn.IsNotNullOrEmpty())
+        {
+            queries = query.SortDescending
+                ? queries.OrderByDescending(x => EF.Property<object>(x, query.SortColumn))
+                : queries.OrderBy(x => EF.Property<object>(x, query.SortColumn));
+        }
+        else
+        {
+            queries = queries.OrderBy(x => x.Code)
+                             .ThenBy(x => x.Description);
+        }
+
+        return await queries.ToPagedAsync(query.Page, query.Take, cancellation);
     }
 
     public async Task<Pager<JournalTypeDto>> GetJournalTypesAsync(int? journalTypeId, QueryParam param, CancellationToken cancellation = default)

@@ -45,14 +45,16 @@ public static class PaginationExtensions
             return new PageMetaData<T>
             {
                 Items = allItems,
-                Page = 1,
+                Page = 0,
                 PageSize = totalCount,
                 TotalCount = totalCount
             };
         }
 
+        var skip = page == 0 ? 0 : checked((page - 1) * pageSize);
+
         var items = await query
-            .Skip((page == 0 ? 1 : page - 1) * pageSize)
+            .Skip(skip)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 

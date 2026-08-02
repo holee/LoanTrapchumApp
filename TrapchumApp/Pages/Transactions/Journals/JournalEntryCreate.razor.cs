@@ -9,6 +9,7 @@ using Applications.Features.Transactions.Journals;
 using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Features.Journals.Command.CreateJournal;
 using Applications.Features.Currencies.Dto;
+using Applications.Responses.ViewModels.OtherNames;
 
 namespace TrapchumApp.Pages.Transactions.Journals;
 
@@ -22,7 +23,7 @@ public partial class JournalEntryCreate(
     private IEnumerable<CurrencyDto>? _currencies = [];
     private IEnumerable<JournalTypeDto>? _journalTypes = [];
     protected IEnumerable<VLedger>? Ledgers = [];
-    protected IEnumerable<VNameList> NameLists = [];
+    protected IEnumerable<VOtherNames> NameLists = [];
     private bool _isMessage;
     private string _messageAlert = "";
     private string _titleMessage = "";
@@ -51,11 +52,13 @@ public partial class JournalEntryCreate(
             InitializeLines();
 
             await LoadRelatedData();
+
             await GetLedgerByCurrency((int)CurrenciesType.KHR);
 
             _selectedCurrencyId = (int)CurrenciesType.KHR;
 
             await GetNameLists(null);
+
             await base.OnInitializedAsync();
         }
         catch (Exception ex)
@@ -76,10 +79,13 @@ public partial class JournalEntryCreate(
     private async Task LoadRelatedData()
     {
         var command = new GetCurrenciesQuery(0, new QueryParam(0, 0));
+
         var rsp = await mediator.Send(command);
+
         _currencies = rsp.Items.Maps<CurrencyDto>();
 
         var journalTypes = await journalService.GetJournalTypesAsync(null);
+
         if (journalTypes.Any())
         {
             _journalTypes = journalTypes.Maps<JournalTypeDto>();
@@ -91,6 +97,7 @@ public partial class JournalEntryCreate(
         try
         {
             var res = await ledgerService.GetLedgersAsync(0, currencyId, searchText);
+
             if (res.IsSuccess())
             {
                 Ledgers = res.Value;
@@ -127,7 +134,7 @@ public partial class JournalEntryCreate(
         {
             var param = new QueryParam(1, 10, string.Empty, true, false, searchText);
 
-            NameLists = await nameService.GetNameLists<VNameList>(id, param);
+           NameLists = await nameService.GetNameLists(id, param);
 
             StateHasChanged();
         }
@@ -222,9 +229,11 @@ public partial class JournalEntryCreate(
     private void AutoBalanceLine(JournalLineDtoCreate row)
     {
         row.Credit = null;
+
         row.Debit = null;
 
         var otherDebit = JournalLines.Where(x => x != row).Sum(x => x.Debit ?? 0);
+
         var otherCredit = JournalLines.Where(x => x != row).Sum(x => x.Credit ?? 0);
 
         if (otherDebit > otherCredit)
@@ -387,15 +396,19 @@ public partial class JournalEntryCreate(
                 return (false, accApCount);
             }
 
-            VNameList? nameItem = null;
+            VOtherNames? nameItem = null;
+
             await GetNameLists(journalLine.EntityNameRefId);
+
             if (NameLists.Any())
             {
                 nameItem = NameLists.FirstOrDefault();
+
                 journalLine.EntityName = nameItem?.FullName;
             }
 
             var resp = await ledgerService!.FindLedgerByIdAsync(journalLine.LedgerRefId);
+
             if (resp.IsSuccess())
             {
                 var ledger = resp.Value;

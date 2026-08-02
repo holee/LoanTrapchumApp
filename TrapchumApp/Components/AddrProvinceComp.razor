@@ -21,7 +21,7 @@
     protected IEnumerable<ProvinceDto> provinces = [];
     private IEnumerable<DistrictDto> districts = [];
     [Parameter] public int? Value { get; set; }
-    [Parameter] public string? Name { get; set; }="ProvinceId";
+    [Parameter] public string? Name { get; set; } = "ProvinceId";
     [Parameter] public EventCallback<int?> OnGetDistrictEvent { get; set; }
     [Parameter] public EventCallback<int?> ValueChanged { get; set; }
     [Parameter] public Expression<Func<int?>>? ValueExpression { get; set; }
@@ -38,10 +38,7 @@
 
         if (provinceId.HasValue)
         {
-            //await GetDistricts(provinceId);
-
             await OnGetDistrictEvent.InvokeAsync(provinceId);
-
             Value = provinceId;
         }
     }

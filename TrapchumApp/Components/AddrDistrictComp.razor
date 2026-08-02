@@ -3,9 +3,9 @@
 @using Applications.Features.Addresses.Dto
 @using Applications.Features.Addresses.Queries.GetCommunes
 @using Applications.Features.Addresses.Queries.GetDistricts
-<RadzenDropDown AllowFiltering="true"
-AllowClear="true"
-                Name="DistrictRefId"
+<RadzenDropDown AllowFiltering="false"
+                AllowClear="false"
+                Name="@Name"
                 Style="width: 100%;"
                 Data="@districts"
                 Disabled="@(!ProvinceId.HasValue)"
@@ -26,6 +26,7 @@ AllowClear="true"
     [Parameter] public EventCallback<int?> OnGetCommuneEvent { get; set; }
     [Parameter] public EventCallback<int?> ValueChanged { get; set; }
     [Parameter] public Expression<Func<int?>>? ValueExpression { get; set; }
+    [Parameter] public string? Name { get; set; } = "DistrictRefId";
     private IEnumerable<DistrictDto> districts = [];
     private IEnumerable<CommuneDto> communelist = [];
     private async Task OnDistrictChanged(int? districtId)
@@ -52,7 +53,7 @@ AllowClear="true"
 
     protected override async Task OnParametersSetAsync()
     {
-        if(ProvinceId.HasValue && ProvinceId> 0)
+        if (ProvinceId.HasValue && ProvinceId > 0)
         {
             await GetDistricts(ProvinceId);
         }

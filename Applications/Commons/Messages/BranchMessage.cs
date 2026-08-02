@@ -2,11 +2,10 @@
 {
     public static class BranchMessage
     {
-        public const string BranchCreated = "Branch created successfully.";
-        public const string BranchUpdated = "Branch updated successfully.";
-        public const string BranchDeleted = "Branch deleted successfully.";
-        public const string BranchNotFound = "Branch not found.";
-        public const string BranchFetchError = "An error occurred while fetching branches.";
-
+        public const string BranchCreated = "សាខាត្រូវបានបង្កើតដោយជោគជ័យ។";
+        public const string BranchUpdated = "សាខាត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ។";
+        public const string BranchDeleted = "សាខាត្រូវបានលុបដោយជោគជ័យ។";
+        public const string BranchNotFound = "សាចាដែលអ្នកកំពុងរកមិនមានក្នុងប្រព័ន្ធទេ.";
+        public const string BranchFetchError = "មានកំហុសកើតឡើងខណៈពេលទាញយកសាខា.";
     }
 }

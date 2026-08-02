@@ -30,7 +30,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         private bool includeInactive = false;
 
-        private string filterText = string.Empty;
+        private string? filterText = string.Empty;
 
         private int counts = 0;
 
@@ -47,6 +47,16 @@ namespace TrapchumApp.Pages.Lists.Customers
         private string? _userId = string.Empty;
 
         private string? _lastRowId = string.Empty;
+
+
+        private readonly string[] filterableProperties = new[]
+        {
+            nameof(VCustomerDetails.FullName),
+            nameof(VCustomerDetails.AltName),
+            nameof(VCustomerDetails.CustomerId),
+            nameof(VCustomerDetails.Phone)
+        };
+
         protected override async Task OnInitializedAsync()
         {
             var authState = await AuthenticationState;
@@ -459,24 +469,23 @@ namespace TrapchumApp.Pages.Lists.Customers
         {
             pageIndex = args.Skip ?? 0;
 
-            if (args.Sorts!.Any())
-            {
-                sortField = args.Sorts!.First().Property!;
+            pageSize = args.Top ?? pageSize;
 
-                sortDescending = args.Sorts!.First().SortOrder == SortOrder.Descending;
+            var sort = args.Sorts?.FirstOrDefault();
+
+            if (!string.IsNullOrWhiteSpace(sort?.Property))
+            {
+                sortField = sort.Property;
+
+                sortDescending = sort.SortOrder == SortOrder.Descending;
             }
 
-            var filterProp = args.Filters?.FirstOrDefault()?.Property;
-
-            var filterColumn = args.Filters?.FirstOrDefault(f => f.Property == nameof(VCustomerDetails.FullName) ||
-                                                            f.Property == nameof(VCustomerDetails.AltName) ||
-                                                           f.Property == nameof(VCustomerDetails.CustomerId) ||
-                                                           f.Property == nameof(VCustomerDetails.Phone))?.FilterValue?.ToString();
-
-            filterText = filterColumn ?? string.Empty;
+            filterText = args.FilterValue(filterableProperties);
 
             await FilterCustomers(selectedValue);
         }
+
+
 
         private async Task FilterCustomers(int? value)
         {

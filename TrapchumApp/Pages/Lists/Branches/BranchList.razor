@@ -27,7 +27,7 @@
                         </AuthorizeView>
                     </LeftChildren>
                     <RightChildren>
-                        <div class="ml-2 branch-filter-toggle">
+                        <div class="branch-filter-toggle ml-2">
                             <RadzenCheckBox TValue="bool" @bind-Value="@InActive" Change="ex => OnIncludeInactive(ex)" Name="InActive" />
                             <RadzenLabel Text="Include inactive" Component="InActive" Style="margin-left:6px; vertical-align: middle;" />
                         </div>
@@ -73,7 +73,7 @@
                         </RadzenDataGridColumn>
 
                         <RadzenDataGridColumn Width="20rem"
-                                              Title="Branch"
+                                              Title="ឈ្មោះសាខា"
                                               Property="@nameof(VBranch.BranchName)"
                                               Context="b">
                             <Template>
@@ -95,12 +95,17 @@
                             </Template>
                         </RadzenDataGridColumn>
 
-                        <RadzenDataGridColumn Title="Branch Code"
+                        <RadzenDataGridColumn Title="លេខកូដសាខា"
+                                              Sortable="false"
+                                              Filterable="false"
+                                              Property="@nameof(VBranch.BranchCode)" />
+
+                        <RadzenDataGridColumn Title="ពិពណ៌នា"
                                               Sortable="false"
                                               Filterable="false"
                                               Property="@nameof(VBranch.Description)" />
 
-                        <RadzenDataGridColumn Title="Address"
+                        <RadzenDataGridColumn Title="អាសយដ្ឋាន"
                                               Sortable="false"
                                               Filterable="false"
                                               Context="b">
@@ -110,25 +115,24 @@
                         </RadzenDataGridColumn>
 
                         <RadzenDataGridColumn Width="7rem"
-                                              Title="Status"
+                                              Title="ស្ថានភាព"
                                               TextAlign="TextAlign.Center"
                                               Filterable="false"
                                               Property="@nameof(VBranch.IsActive)"
                                               Sortable="false"
                                               Context="c">
                             <Template>
-                                <RadzenBadge Text="@(c.IsActive == true ? "Active" : "Inactive")"
-                                             BadgeStyle="@(c.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
-                                             Shade="Shade.Light"
-                                             IsPill="true"
-                                             class="branch-status-badge" />
+                                <span class="branch-status-badge @(c.IsActive == true ? "is-active" : "is-inactive")">
+                                    <span class="branch-status-dot"></span>
+                                    @(c.IsActive == true ? "សកម្ម" : "មិនសកម្ម")
+                                </span>
                             </Template>
                         </RadzenDataGridColumn>
 
                         <AuthorizeView>
                             <Authorized>
                                 <RadzenDataGridColumn Width="5rem"
-                                                      Title="Actions"
+                                                      Title="សកម្មភាព"
                                                       Filterable="false"
                                                       Sortable="false"
                                                       Pickable="false"
@@ -222,6 +226,7 @@
     private void OnRowDoubleClick(DataGridRowMouseEventArgs<VBranch> args)
     {
         if (args.Data is null) return;
+
         AddDetailsTab(args.Data);
     }
 
@@ -238,18 +243,21 @@
         {
             builder.OpenComponent(0, typeof(BranchCreatePage));
 
-            builder.AddAttribute(1, "OnClose", EventCallback.Factory.Create(this, () =>
+            builder.AddAttribute(2, "OnClose", EventCallback.Factory.Create(this, () =>
             {
                 CloseTab(newTabId);
             }));
 
-            builder.AddAttribute(2, "OnCreated", EventCallback.Factory.Create(this, async (VBranch branch) =>
+            builder.AddAttribute(4, "OnCreated", EventCallback.Factory.Create(this, async (VBranch branch) =>
             {
-                CloseTab(newTabId);
                 await GetBranches(searchText);
+
+                CloseTab(newTabId);
+
             }));
 
             builder.SetKey(newTabId);
+
             builder.CloseComponent();
         };
 
@@ -450,6 +458,53 @@
     }
 
     .branch-status-badge {
-        min-width: 72px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 84px;
+        justify-content: center;
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        line-height: 1;
+        border: 1px solid transparent;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+        .branch-status-badge:hover {
+            transform: translateY(-1px);
+        }
+
+        .branch-status-badge.is-active {
+            color: #067647;
+            background: linear-gradient(180deg, #ecfdf5 0%, #d3f8e5 100%);
+            border-color: #a7f0cb;
+            box-shadow: 0 1px 2px rgba(6, 118, 71, 0.12);
+        }
+
+        .branch-status-badge.is-inactive {
+            color: #b42318;
+            background: linear-gradient(180deg, #fef3f2 0%, #fee4e2 100%);
+            border-color: #fecdca;
+            box-shadow: 0 1px 2px rgba(180, 35, 24, 0.1);
+        }
+
+    .branch-status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .branch-status-badge.is-active .branch-status-dot {
+        background: #12b76a;
+        box-shadow: 0 0 0 2px rgba(18, 183, 106, 0.25);
+    }
+
+    .branch-status-badge.is-inactive .branch-status-dot {
+        background: #f04438;
+        box-shadow: 0 0 0 2px rgba(240, 68, 56, 0.2);
     }
 </style>

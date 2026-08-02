@@ -135,7 +135,6 @@
   <ItemGroup>
     <Folder Include="Commons\Messages\Journals\" />
     <Folder Include="Commons\Messages\Leadgers\" />
-    <Folder Include="Features\Addresses\Queries\GetCountries\" />
     <Folder Include="Features\CashManagements\Validations\" />
     <Folder Include="Features\CashManagements\Requests\" />
     <Folder Include="Features\CreditAgents\UseCases\" />

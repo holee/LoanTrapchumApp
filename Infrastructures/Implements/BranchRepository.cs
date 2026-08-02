@@ -1,4 +1,5 @@
 ﻿using Applications.Bases;
+using Applications.Commons.ExceptionHandlers;
 using Applications.Commons.Extensions.QueryableExtensions;
 using Applications.Commons.Messages;
 using Applications.Extensions;
@@ -33,26 +34,31 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
         {
             logger.LogInformation("Try to create new brnach with Name:{0}", branch.BranchName);
 
-            if (await IsBranchExist(null, branch.BranchName))
+            await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+            if (await IsBranchExist(null, branch.BranchName, context, cancellation))
             {
-                return ErrorOr.Error.Conflict("Branch Name is already exist.");
+                return Error.Conflict("Branch Name is already exist.");
             }
 
-            await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+            if (await IsBranchCodeExist(null, branch.BranchCode, context, cancellation))
+            {
+                return Error.Conflict("Branch Code is already exist.");
+            }
 
             context.Branches.Add(branch);
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellation);
 
             var created = await context.VBranchs
                                         .AsNoTracking()
-                                        .FirstOrDefaultAsync(x => x.BranchId == branch.BranchId);
+                                        .FirstOrDefaultAsync(x => x.BranchId == branch.BranchId, cancellation);
 
             if (created is null)
             {
                 logger.LogError("No branch was found with name:{0}", created!.BranchName);
 
-                return ErrorOr.Error.NotFound("Could not created branch...!");
+                return Error.NotFound("Could not created branch...!");
             }
 
             logger.LogInformation($"New branch was Created with name {0} successfully", created.BranchName);
@@ -72,7 +78,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
 
             if (await IsBranchUsed(id))
             {
-                return DeleteResult.InUse("This branch is used in other module, you can't delete it.");
+                return DeleteResult.InUse("សាខានេះត្រូវបានប្រើនៅក្នុងម៉ូឌុលផ្សេងទៀត អ្នកមិនអាចលុបវាបានទេ។");
             }
 
             await using var context = await contextFactory.CreateDbContextAsync(cancellation);
@@ -81,14 +87,14 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
 
             if (branch is null)
             {
-                return Error.NotFound("There is no branch found.");
+                return DeleteResult.NotFound("រកមិនឃើញសាខាដែលត្រូវលុប់ទេ.");
             }
 
             context.Branches.Remove(branch);
 
             await context.SaveChangesAsync(cancellation);
 
-            return DeleteResult.Success("Branch deleted successfully.");
+            return DeleteResult.Success("សាខាត្រូវបានលុបដោយជោគជ័យ។");
         }
         catch (Exception ex)
         {
@@ -102,13 +108,24 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
+
+            if (await IsBranchExist(branch.BranchId, branch.BranchName, context, cancellation))
+            {
+                throw new ConflictException("ឈ្មោះសាខាមានប្រើប្រាស់រួចហើយ.");
+            }
+
+            if (await IsBranchCodeExist(branch.BranchId, branch.BranchCode, context, cancellation))
+            {
+                throw new ConflictException("ឈ្មោះសាខាមានប្រើប្រាស់រួចហើយ.");
+            }
+
             var existingBranch = await context.Branches
                                             .FirstOrDefaultAsync(x => x.BranchId == branch.BranchId &&
-                                          x.EditSeq == branch.EditSeq);
+                                          x.EditSeq == branch.EditSeq, cancellation);
 
             if (existingBranch is null)
             {
-                return Error.Failure("One branch was updated Or Branch was chnaged by someone");
+                throw new ConflictException("សាខាមួយត្រូវបានធ្វើបច្ចុប្បន្នភាព ឬសាខាត្រូវបានផ្លាស់ប្តូរដោយអ្នកផ្សេង");
             }
 
             branch.EditSeq = existingBranch.EditSeq + 1;
@@ -117,8 +134,8 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
 
             await context.SaveChangesAsync(cancellation);
 
-
             var updatedBranch = await context.VBranchs
+                                            .IgnoreQueryFilters()
                                             .AsNoTracking()
                                             .FirstOrDefaultAsync(x => x.BranchId == branch.BranchId, cancellation);
 
@@ -128,7 +145,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
         }
         catch (Exception ex)
         {
-            return Error.Unexpected("Server.Error", ex.InnerException!.Message);
+            return Error.Unexpected("Server.Error", ex.InnerException?.Message ?? ex.Message);
         }
     }
 
@@ -138,7 +155,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
         {
             await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-            var existingBranch = await context.Branches.FindAsync(branchId);
+            var existingBranch = await context.Branches.FindAsync([branchId], cancellation);
 
             if (existingBranch is null)
             {
@@ -149,7 +166,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
 
             existingBranch.ModifiedDt = DateTime.Now;
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellation);
 
             var updatedBranch = await GetBranchDetailsById(branchId, cancellation);
 
@@ -159,7 +176,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
         }
         catch (Exception ex)
         {
-            return Error.Unexpected("ServerError", ex.InnerException!.Message);
+            return Error.Unexpected("ServerError", ex.InnerException?.Message ?? ex.Message);
         }
     }
 
@@ -197,7 +214,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
 
         if (branch is null)
         {
-            return Error.NotFound(BranchMessage.BranchNotFound);
+            throw new NotFoundException(BranchMessage.BranchNotFound);
         }
 
         return branch;
@@ -224,29 +241,6 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
         return new Pager<VBranch>(items, counts);
     }
 
-    public async Task<Pager<VBranch>> GetBranchesAsync(int? branchId, QueryParam param, CancellationToken cancellation = default, params string[] columns)
-    {
-
-        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
-
-        IQueryable<VBranch> queries = ApplyFilters(param, context);
-
-        queries = ApplySorts(param, queries);
-
-        int counts = queries.Count();
-
-        if (param.Take > 0)
-        {
-            queries = queries.Skip(param.Page).Take(param.Take);
-        }
-
-        var items = await queries
-                            .AsNoTracking()
-                            .ProjectTo<VBranch>(columns)
-                            .ToListAsync(cancellation);
-
-        return new Pager<VBranch>(items, counts);
-    }
 
     public async Task<ErrorOr<IEnumerable<VBranch>>> GetBranchesByUser(string? userId, int? branchId, CancellationToken cancellation = default)
     {
@@ -442,25 +436,64 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-        var existings = await context.VBranchs
-                                    .Where(x => x.BranchName == branchName &&
-                                            (!branchId.HasValue || x.BranchId != branchId))
-                                    .AsNoTracking()
-                                    .ToListAsync(cancellation);
+        return await IsBranchExist(branchId, branchName, context, cancellation);
+    }
 
-        return existings.Any();
+    private static Task<bool> IsBranchExist(int? branchId, string branchName, DataContext context, CancellationToken cancellation = default)
+    {
+        return context.VBranchs
+                    .AsNoTracking()
+                    .AnyAsync(x => x.BranchName == branchName &&
+                            (!branchId.HasValue || x.BranchId != branchId), cancellation);
+    }
+
+    private async Task<bool> IsBranchCodeExist(int? branchId, string branchCode, CancellationToken cancellation = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        return await IsBranchCodeExist(branchId, branchCode, context, cancellation);
+    }
+
+    private static Task<bool> IsBranchCodeExist(int? branchId, string branchCode, DataContext context, CancellationToken cancellation = default)
+    {
+        return context.VBranchs
+                    .AsNoTracking()
+                    .AnyAsync(x => x.BranchCode == branchCode &&
+                            (!branchId.HasValue || x.BranchId != branchId), cancellation);
     }
 
     private async Task<bool> IsBranchUsed(int? branchId, CancellationToken cancellation = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-        var existings = await context.VBranchs
-                                    .Where(x => x.BranchId == branchId && x.Used == true)
-                                    .AsNoTracking()
-                                    .ToListAsync(cancellation);
+        return await context.VBranchs
+                    .AsNoTracking()
+                    .AnyAsync(x => x.BranchId == branchId && x.Used == true, cancellation);
+    }
 
-        return existings.Any();
+
+    public async Task<Pager<VBranch>> GetBranchesAsync(int? branchId, QueryParam param, CancellationToken cancellation = default, params string[] columns)
+    {
+
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        IQueryable<VBranch> queries = ApplyFilters(param, context);
+
+        queries = ApplySorts(param, queries);
+
+        int counts = queries.Count();
+
+        if (param.Take > 0)
+        {
+            queries = queries.Skip(param.Page).Take(param.Take);
+        }
+
+        var items = await queries
+                            .AsNoTracking()
+                            .ProjectTo<VBranch>(columns)
+                            .ToListAsync(cancellation);
+
+        return new Pager<VBranch>(items, counts);
     }
 
 }

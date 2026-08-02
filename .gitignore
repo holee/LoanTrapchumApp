@@ -13,6 +13,10 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# Local and production secrets must be supplied by environment variables, a secret store, or user secrets.
+appsettings.Production.json
+appsettings.*.local.json
+
 # Mono auto generated files
 mono_crash.*
 

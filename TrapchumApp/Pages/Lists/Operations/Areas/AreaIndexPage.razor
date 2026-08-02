@@ -31,17 +31,18 @@
                     CellContextMenu="ShowCellContextMenu"
                     IsLoading="@isLoading"
                     Style="min-height:75dvh;"
+                    RowRender="@OnRowRender"
                     PageSizeOptions="@StorageConstant.PageSizeOptions">
         <Columns>
             <RadzenDataGridColumn TItem="AreaDto" Width="5rem" Title="#" Sortable="false" Filterable="false">
                 <Template Context="c">@c.RowIndex</Template>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="AreaDto" Property="@nameof(AreaDto.Code)" Title="Code" Width="8rem" />
-            <RadzenDataGridColumn TItem="AreaDto" Property="@nameof(AreaDto.AreaName)" Title="ឈ្មោះតំបន់" Width="14rem" />
-            <RadzenDataGridColumn TItem="AreaDto" Property="@nameof(AreaDto.Khet)" Title="ខេត្រ/ក្រុង" />
-            <RadzenDataGridColumn TItem="AreaDto" Property="@nameof(AreaDto.Srok)" Title="ស្រុក/ខណ្ឌ" />
-            <RadzenDataGridColumn TItem="AreaDto" Property="@nameof(AreaDto.Khum)" Title="ឃុំ/សង្កាត់" />
             <RadzenDataGridColumn TItem="AreaDto" Property="@nameof(AreaDto.Phum)" Title="ភូមិ" />
+            <RadzenDataGridColumn TItem="AreaDto" Property="@nameof(AreaDto.Khum)" Title="ឃុំ/សង្កាត់" />
+            <RadzenDataGridColumn TItem="AreaDto" Property="@nameof(AreaDto.Srok)" Title="ស្រុក/ខណ្ឌ" />
+            <RadzenDataGridColumn TItem="AreaDto" Property="@nameof(AreaDto.Khet)" Title="ខេត្រ/ក្រុង" />
+            <RadzenDataGridColumn TItem="AreaDto" Property="@nameof(AreaDto.AreaName)" Title="ឈ្មោះតំបន់" Width="14rem" />
             <RadzenDataGridColumn TItem="AreaDto" Title="Actions" Width="5rem" Filterable="false" Sortable="false">
                 <Template Context="c">
                     <RadzenButton Size="ButtonSize.ExtraSmall"
@@ -51,14 +52,6 @@
                 </Template>
             </RadzenDataGridColumn>
         </Columns>
-
-        <LoadingTemplate>
-            <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate"
-                                       ShowValue="false"
-                                       Value="100"
-                                       ProgressBarStyle="ProgressBarStyle.Primary" />
-        </LoadingTemplate>
-
         <EmptyTemplate>
             <RadzenStack AlignItems="AlignItems.Center" Gap="4px" class="p-4">
                 <RadzenIcon Icon="location_off" Style="font-size: 2rem;" class="rz-color-base-500" />
@@ -105,20 +98,10 @@
 
     private async Task LoadAreaData(LoadDataArgs args)
     {
-        pageIndex = args.Skip / args.Top ?? 0;
 
-        pageSize = args.Top ?? pageSize;
+        (_sortColumn, _filterColumn, _isDescending, pageIndex, pageSize) = args.GetInfo(nameof(AreaDto.Id));
 
-        (_sortColumn, _filterColumn, _isDescending) = args.GetInfo(nameof(AreaDto.Id));
-
-        if (!string.IsNullOrEmpty(_filterColumn) && _fieldProps.Contains(_filterColumn))
-        {
-            searchText = args.FilterValue(_filterColumn);
-        }
-        else
-        {
-            searchText = args.Value();
-        }
+        searchText = args.FilterValue(_fieldProps);
 
         await LoadAreas();
     }
@@ -229,5 +212,12 @@
         {
             NotificationService.Notify(NotificationSeverity.Info, "Area deletion is not implemented yet.");
         }
+    }
+
+    private void OnRowRender(RowRenderEventArgs<AreaDto> args)
+    {
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
     }
 }

@@ -15,9 +15,8 @@ public partial class LateScheduleDetail
     [Parameter] public string? LoanId { get; set; }
     [Parameter] public int BranchId { get; set; }
     [Parameter] public EventCallback Close { get; set; }
-    [Parameter] public DateTime? PaymentDate { get; set; } = DateTime.Now;
-    [CascadingParameter]
-    Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [Parameter,SupplyParameterFromQuery] public DateTime? PaymentDate { get; set; } = DateTime.Now;
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     IEnumerable<VSchedule> LateSchedules { get; set; } = [];
     bool allowRowSelectOnRowClick = true;
     RadzenDataGrid<VSchedule> grid = default!;

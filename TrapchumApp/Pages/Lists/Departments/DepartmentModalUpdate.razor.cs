@@ -1,3 +1,5 @@
+using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Departments.Commands.EditDepartment;
 using Applications.Features.Departments.Dto;
 using Applications.Features.Departments.Queries.GetDepartmentById;
@@ -14,6 +16,7 @@ namespace TrapchumApp.Pages.Lists.Departments
 
         private readonly IDepartmentService _depService;
 
+        private IEnumerable<VBranch> vBranches = [];
         public DepartmentModalUpdate(IDepartmentService departmentService)
         {
             _depService = departmentService;
@@ -65,19 +68,9 @@ namespace TrapchumApp.Pages.Lists.Departments
         {
             try
             {
+                await GetDepartmentById();
 
-                var command = new GetDepartmentById(Id, 0);
-
-                var rsp = await mediator.Send(command);
-
-                if (rsp.IsSuccess())
-                {
-                    model = rsp.Value.Adapt<DepartmentDtoUpdate>();
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Error, "Department", rsp.GetMessage());
-                }
+                await GetBranches();
 
             }
             catch (Exception ex)
@@ -88,5 +81,29 @@ namespace TrapchumApp.Pages.Lists.Departments
             await base.OnInitializedAsync();
         }
 
+        private async Task GetDepartmentById()
+        {
+            var command = new GetDepartmentById(Id, 0);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
+            {
+                model = rsp.Value.Adapt<DepartmentDtoUpdate>();
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Department", rsp.GetMessage());
+            }
+        }
+
+        private async Task GetBranches()
+        {
+            var crsp = new GetBranchAsPagingQuery(0, new QueryParam(0, 25));
+
+            var rsp = await mediator.Send(crsp);
+
+            vBranches = rsp.Items;
+        }
     }
 }

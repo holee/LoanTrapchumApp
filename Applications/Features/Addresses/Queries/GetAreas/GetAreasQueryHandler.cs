@@ -1,5 +1,3 @@
-using Applications.Commons;
-using Applications.Features.Addresses.Dto;
 using Applications.Interfaces.Addresses;
 
 namespace Applications.Features.Addresses.Queries.GetAreas;

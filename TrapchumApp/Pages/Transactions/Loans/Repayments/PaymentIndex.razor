@@ -604,25 +604,13 @@
                                                               Schedule="@p" />);
     }
 
-
-
-    // @if (bState.CanRecievePayment)
-    // {
-    //     <RadzenMenuItem Icon="@IconNames.MoneyBag"
-    //                     Visible="!p.IsPaid"
-    //                     Click="() => ShowPaymentOnTab(p)"
-    //                     Text="Receive Payment" />
-    // }
     void AllTabShowContextMenu(MouseEventArgs args, VSchedule? p)
     {
         if (p is null) return;
 
         recievePaymentUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
 
-        //payOffUrl = $"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
-
         string getLoanDetailsUrl = $"/App/Loan/{p.LoanId}/Branches/{p.BranchId}/Currencies/{p.CurrencyId}";
-
 
         ContextMenuService.Open(args, ds => @<AuthorizeView>
             <Authorized>
@@ -663,17 +651,24 @@
         StateHasChanged();
     }
 
-    async Task AllTab_ShowRecievePayment(VSchedule p)
+    async Task AllTab_ShowRecievePayment(VSchedule? p)
     {
         ContextMenuService.Close();
-        ShowPaymentSchedule(p);
-        StateHasChanged();
+
+        if (p is null) return;
+
+        string recievePaymentUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
+
+        NavigationManager.NavigateTo(recievePaymentUrl);
+
     }
 
     void AllTab_ContextMenuClick(DataGridCellMouseEventArgs<VSchedule> args)
     {
         if (args?.Data is null) return;
+
         var p = args.Data;
+
         ContextMenuService.Open(args, new List<ContextMenuItem>
         {
             new ContextMenuItem { Text = "Receive Payment",      Value = "1", Icon = "payments" },
@@ -684,13 +679,20 @@
         }, e =>
     {
         ContextMenuService.Close();
+
         if (int.TryParse(e.Value?.ToString(), out var id))
         {
+            string paymentDate =string.Format("{0:yyyy-MM-dd}", p.PaymentDate);
+            string getLoanDetailsUrl = $"/App/Loan/{p.LoanId}/Branches/{p.BranchId}/Currencies/{p.CurrencyId}";
+            string recievePaymentUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
+            string multiUrl = $"/app/loans/{p.LoanId}/collection-repayment/{p.BranchId}/Branches?creditAgentId={p.CreditAgentId}&currencyId={p.CurrencyId}";
+            string lateScheduleUrl = $"/app/loans/{p.LoanId}/late-schedules/{p.BranchId}/Branches?PaymentDate={paymentDate}";
             switch (id)
             {
-                case 1: _ = AllTab_ShowRecievePayment(p); break;
-                case 4: _ = AllTab_ShowLateDetails(p); break;
-                case 5: AllTab_ShowCollectionPayment(p); break;
+                case 1: NavigationManager.NavigateTo(recievePaymentUrl); break;
+                case 3: NavigationManager.NavigateTo(getLoanDetailsUrl); break;
+                case 4: NavigationManager.NavigateTo(lateScheduleUrl); break;
+                case 5: NavigationManager.NavigateTo(multiUrl); break;
             }
         }
     });
@@ -706,10 +708,7 @@
 
         if (p is null) return;
 
-        //var multiUrl = $"/app/loans/{p.LoanId}/collection-repayment-schedules/{p.BranchId}/Branches?creditAgentId={p.CreditAgentId}&currencyId={p.CurrencyId}";
-
         var multiUrl = $"/app/loans/{p.LoanId}/collection-repayment/{p.BranchId}/Branches?creditAgentId={p.CreditAgentId}&currencyId={p.CurrencyId}";
-
 
         NavigationManager.NavigateTo(multiUrl);
 

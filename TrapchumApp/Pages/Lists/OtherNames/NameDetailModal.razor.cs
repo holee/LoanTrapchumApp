@@ -36,7 +36,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
         async Task GetDeatilsName(string? id)
         {
-            var rsp = await _otherNameService.GetDetailAsync<VOtherNames>(id);
+            var rsp = await _otherNameService.GetDetailAsync(id);
 
             if (rsp.IsSuccess)
             {

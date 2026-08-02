@@ -23,12 +23,12 @@ namespace Applications.Services.Lists
         Task<Result<string>> CreateGaurantorAsync(EntityNamesCreate othername);
         Task<Result<string>> DeleteAsync(string? othernameId);
         Task<Result<EntityNames>> GetByIdAsync(string? id); 
-        Task<Result<T>> GetDetailAsync<T>(string? id) where T : class;
+        Task<Result<VOtherNames>> GetDetailAsync(string? id);
         Task<Result<EntityNamesCreate>> GetEditNameByIdAsync(string? id);
-        Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam q) where T : class, new();
+        Task<IEnumerable<VOtherNames>> GetNameLists(string? nameId, QueryParam q);
         Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, CancellationToken cancellation = default);
         Task<Result<VOtherNames>> UpdateStatusAsync(string? id, bool state);
-        Task<Pager<T>> GetNameAsync<T>(string? nameId, QueryParam q, CancellationToken cancellation = default) where T : class, new();
+        Task<Pager<VOtherNames>> GetNameAsync(string? nameId, QueryParam q, CancellationToken cancellation = default);
     }
 
     public sealed class OtherNameService(IOtherNameService oName) : IOtherNameServiceImpl
@@ -104,22 +104,22 @@ namespace Applications.Services.Lists
             return Result.Success(model);
         }
 
-        public async Task<Result<T>> GetDetailAsync<T>(string? id) where T : class
+        public async Task<Result<VOtherNames>> GetDetailAsync(string? id)
         {
-            var result = await oName.GetDetailAsync<T>(id);
+            var result = await oName.GetDetailAsync(id);
             return result.IsError
-                ? Result.Failure<T>(ErrorResponse.NotFound(result.FirstError.Description))
+                ? Result.Failure<VOtherNames>(ErrorResponse.NotFound(result.FirstError.Description))
                 : Result.Success(result.Value);
         }
 
         public async Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, CancellationToken cancellation = default)
             => await oName.GetNamesAsync(q, cancellation);
 
-        public async Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam q) where T : class, new()
-            => await oName.GetNameListsAsync<T>(nameId, q);
+        public async Task<IEnumerable<VOtherNames>> GetNameLists(string? nameId, QueryParam q)
+            => await oName.GetNameListsAsync(nameId, q);
 
-        public async Task<Pager<T>> GetNameAsync<T>(string? nameId, QueryParam q, CancellationToken cancellation = default) where T : class, new()
-            => await oName.GetNameAsync<T>(nameId, q, cancellation);
+        public async Task<Pager<VOtherNames>> GetNameAsync(string? nameId, QueryParam q, CancellationToken cancellation = default)
+            => await oName.GetNameAsync(nameId, q, cancellation);
 
         public async Task<Result<string>> UpdateAsync(EntityNamesCreate othername)
         {

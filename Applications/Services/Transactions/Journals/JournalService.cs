@@ -52,9 +52,9 @@ public sealed class JournalService(IJournalService jService) : IJournalServiceIm
         return await jService.GetJournalTypesAsync(expression);
     }
 
-    public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId, QueryParam param)
+    public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId, QueryParam param, CancellationToken cancellation = default)
     {
-        return await jService.GetJournalsAsync(branchId, param);
+        return await jService.GetJournalsAsync(branchId, param, cancellation);
     }
 
     public async Task<IEnumerable<VNameList>> GetNamesList(long? id = 0, int takeRows = 0, string? q = null)

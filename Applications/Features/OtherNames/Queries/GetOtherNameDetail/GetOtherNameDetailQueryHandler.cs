@@ -3,11 +3,10 @@ using ErrorOr;
 
 namespace Applications.Features.OtherNames.Queries.GetOtherNameDetail;
 
-public sealed class GetOtherNameDetailQueryHandler<T>(IOtherNameService otherNameService)
-    : IRequestHandler<GetOtherNameDetailQuery<T>, ErrorOr<T>> where T : class
+public sealed class GetOtherNameDetailQueryHandler(IOtherNameService otherNameService) : IRequestHandler<GetOtherNameDetailQuery, ErrorOr<VOtherNames>>
 {
-    public async Task<ErrorOr<T>> Handle(GetOtherNameDetailQuery<T> request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<VOtherNames>> Handle(GetOtherNameDetailQuery request, CancellationToken cancellationToken)
     {
-        return await otherNameService.GetDetailAsync<T>(request.Id, cancellationToken);
+        return await otherNameService.GetDetailAsync(request.Id, cancellationToken);
     }
 }

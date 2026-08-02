@@ -20,9 +20,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements;
 
-public sealed class OtherNameRepository(
-    IDbContextFactory<DataContext> dbContextFactory,
-    ILogger<OtherNameRepository> logger) : IOtherNameService
+public sealed class OtherNameRepository(IDbContextFactory<DataContext> dbContextFactory,ILogger<OtherNameRepository> logger) : IOtherNameService
 {
     public async Task<ErrorOr<VOtherNames>> CreateAsync(EntityNames othername, CancellationToken cancellation = default)
     {
@@ -217,7 +215,7 @@ public sealed class OtherNameRepository(
         return entity;
     }
 
-    public async Task<ErrorOr<T>> GetDetailAsync<T>(string? id, CancellationToken cancellation = default) where T : class
+    public async Task<ErrorOr<VOtherNames>> GetDetailAsync(string? id, CancellationToken cancellation = default)
     {
 
         logger.LogInformation("Retrieving details for other name with ID {Id}.", id);
@@ -226,7 +224,6 @@ public sealed class OtherNameRepository(
 
         var item = await context.Database
                                     .SqlQuery<VOtherNames>($"SELECT * FROM VNames WHERE Id={id}")
-                                    .ProjectToType<T>()
                                     .AsNoTracking()
                                     .FirstOrDefaultAsync(cancellation);
 
@@ -298,7 +295,7 @@ public sealed class OtherNameRepository(
         return PagerExtensions.Create(items, counts);
     }
 
-    public async Task<IEnumerable<T>> GetNameListsAsync<T>(string? nameId, QueryParam param, CancellationToken cancellation = default) where T : class, new()
+    public async Task<IEnumerable<VOtherNames>> GetNameListsAsync(string? nameId, QueryParam param, CancellationToken cancellation = default)
     {
 
         logger.LogInformation("Retrieving name lists with filter {Filter} and name ID {NameId}.", param.Filter, nameId);
@@ -320,10 +317,10 @@ public sealed class OtherNameRepository(
                 .ThenByDescending(x => x.LastName);
         }
 
-        return await queries.ProjectToType<T>().AsNoTracking().ToListAsync(cancellation);
+        return await queries.ProjectToType<VOtherNames>().AsNoTracking().ToListAsync(cancellation);
     }
 
-    public async Task<Pager<T>> GetNameAsync<T>(string? nameId, QueryParam param, CancellationToken cancellation = default) where T : class, new()
+    public async Task<Pager<VOtherNames>> GetNameAsync(string? nameId, QueryParam param, CancellationToken cancellation = default)
     {
 
         logger.LogInformation("Retrieving names with filter {Filter} and name ID {NameId}.", param.Filter, nameId);
@@ -348,8 +345,8 @@ public sealed class OtherNameRepository(
                 .ThenByDescending(x => x.LastName);
         }
 
-        var items = await queries.ProjectToType<T>().AsNoTracking().ToListAsync(cancellation);
-        return new Pager<T>(items, counts);
+        var items = await queries.ProjectToType<VOtherNames>().AsNoTracking().ToListAsync(cancellation);
+        return new Pager<VOtherNames>(items, counts);
     }
 
     public async Task<ErrorOr<bool>> ConvertToCustomerAsync(string? id, Customer customer, CancellationToken cancellation = default)

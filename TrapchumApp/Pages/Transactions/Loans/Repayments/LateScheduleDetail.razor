@@ -1,3 +1,4 @@
+@page "/app/loans/{LoanId}/late-schedules/{BranchId:int?}/Branches"
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
 
 <div class="late-schedule-container">
@@ -209,7 +210,7 @@
                      AlignItems="AlignItems.Center"
                      JustifyContent="JustifyContent.End"
                      Gap="0.75rem">
-            <RadzenButton Size="ButtonSize.Small"
+            <RadzenButton Size="ButtonSize.ExtraSmall"
                           ButtonStyle="ButtonStyle.Success"
                           Click="@RecievePayments"
                           Text="Receive Payment"
@@ -221,6 +222,10 @@
                           Text="Close"
                           Icon="@IconNames.Cancel"
                           Style="min-width:6rem;" />
+            <RadzenLink Path="@_navService.PreviousUrl"
+                        Text="Back"
+                        Icon="@IconNames.ArrowBack"
+                        Style="min-width:6rem;" />
         </RadzenStack>
     </RadzenCard>
 
@@ -251,9 +256,9 @@
         transition: box-shadow 0.15s;
     }
 
-    .summary-card:hover {
-        box-shadow: 0 2px 12px rgba(0,0,0,0.10);
-    }
+        .summary-card:hover {
+            box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+        }
 
     .summary-card--highlight {
         border-left: 3px solid var(--rz-primary) !important;

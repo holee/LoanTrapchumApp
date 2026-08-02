@@ -72,7 +72,7 @@
 
 .branch-field-group {
     display: grid;
-    gap: 1rem;
+    gap: 0.38rem;
     height: 100%;
     padding: 1rem;
     border-radius: 0.9rem;

@@ -277,8 +277,8 @@ namespace Applications.Extensions.Maths
             return currencyId switch
             {
                 1 => string.Format(UserCulture(CurrenciesType.KHR), "{0:C}", d),
-                2 => string.Format(UserCulture(CurrenciesType.Usd), "{0:C}", d),
-                _ => string.Format(UserCulture(CurrenciesType.Usd), "{0:C}", d),
+                2 => string.Format(UserCulture(CurrenciesType.USD), "{0:C}", d),
+                _ => string.Format(UserCulture(CurrenciesType.USD), "{0:C}", d),
             };
         }
 
@@ -292,7 +292,7 @@ namespace Applications.Extensions.Maths
             return currencyId switch
             {
                 1 => string.Format(UserCulture(CurrenciesType.KHR), "{0:C}", d),
-                2 => string.Format(UserCulture(CurrenciesType.Usd), "{0:C}", d),
+                2 => string.Format(UserCulture(CurrenciesType.USD), "{0:C}", d),
                 _ => string.Format(UserCulture(CurrenciesType.KHR), "{0:C}", d),
             };
         }
@@ -301,7 +301,7 @@ namespace Applications.Extensions.Maths
             return type switch
             {
                 CurrenciesType.KHR => new CultureInfo("km-KH"),
-                CurrenciesType.Usd => new CultureInfo("en-US"),
+                CurrenciesType.USD => new CultureInfo("en-US"),
                 CurrenciesType.Euro => new CultureInfo("en-GB"),
                 CurrenciesType.China => new CultureInfo("zh-CN"),
                 CurrenciesType.Thai => new CultureInfo("th-TH"),

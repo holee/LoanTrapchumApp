@@ -1,13 +1,14 @@
-﻿using Domains.Models.Currencies;
+﻿using Applications.Features.Banks.Dtos;
+using Domains.Models.Currencies;
 
 namespace Applications.Interfaces.Banks
 {
     public interface IBankService
     {
-        Task<IEnumerable<Bank?>> GetAllAsync(string? q=null);
-        Task<Bank?> GetByIdAsync(int id);
-        Task<bool> CreateAsync(Bank bank);
-        Task<bool> UpdateAsync(int id, Bank bank);
-        Task<bool> DeleteAsync(int id);
+        Task<PageMetaData<BankDto>> GetAllAsync(int? bankId, QueryParam query, CancellationToken cancellation = default);
+        Task<Bank?> GetByIdAsync(int? id, CancellationToken cancellation = default);
+        Task<BankDto?> UpdateAsync(int? id, Bank bank, CancellationToken cancellationToken = default);
+        Task<bool> DeleteAsync(int? id, CancellationToken cancellation = default);
+        Task<BankDto> CreateAsync(Bank bank, CancellationToken cancellation = default);
     }
 }

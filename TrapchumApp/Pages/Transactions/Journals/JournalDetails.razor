@@ -1,71 +1,127 @@
 ﻿@using Applications.Responses.ViewModels.Journals
 <PageTitle>Journal Details</PageTitle>
-<RadzenFieldset>
-    <HeaderTemplate>
-        <RadzenStack Orientation="Orientation.Horizontal">
-            <RadzenIcon Icon="info"/>
-            <strong>Journal Details</strong>
-        </RadzenStack> 
-    </HeaderTemplate>
-    <ChildContent>
-        <table class="table table-bordered table-sm">
-            <tr>
-                <th class="w-25">Referrence #</th>
-                <td>@JournalEntry?.ReferrenceNum</td>
-            </tr>
-            <tr>
-                <th>Journal Date</th>
-                <td>@JournalEntry?.JournalDate.DayFirst() </td>
-            </tr>
-            <tr>
-                <th>Journal Type</th>
-                <td>@JournalEntry?.JournalType</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>@JournalEntry?.Description</td>
-            </tr>
-        </table>
 
-    </ChildContent>
-</RadzenFieldset>
+<div class="jd-page">
 
-<RadzenDataGrid GridLines="DataGridGridLines.Both"
-                Density="Density.Compact"
-                AllowAlternatingRows="true"
-                AllowFiltering="false"
-                AllowSorting="false"
-                ColumnWidth="15rem"
-                RowSelect="RowSelecting"
-                TItem="JournalEntryLineVm"
-                Data="@_journalEntryLines">
-    <Columns>
-        <RadzenDataGridColumn Width="6rem" Property="LedgerName" Context="j" Title="#" Sortable="false">
-            <Template>
-                @(_journalEntryLines.Index())
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn Width="10rem" Property="LedgerName" Title="Account" Sortable="false"/>
-        <RadzenDataGridColumn Width="8rem" Property="Debit" Title="Debit" TextAlign="TextAlign.Right" Sortable="false"/>
-        <RadzenDataGridColumn Width="8rem" Property="Credit" Title="Credit" TextAlign="TextAlign.Right"
-                              Sortable="false"/>
-        <RadzenDataGridColumn Width="8rem" Property="Amount" Title="Amount" TextAlign="TextAlign.Right" Sortable="false"
-                              Context="journal">
-            <Template>
-                @(Math.Abs(journal.Amount))
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="JournalLineDesc" Title="Description" Sortable="false"/>
-    </Columns>
-</RadzenDataGrid>
-<RadzenStack Orientation="Orientation.Horizontal"
-             class="rz-my-2"
-             AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-    <RadzenButton Icon="close"
-                  Click="@ClosedTabEvent"
-                  ButtonStyle="ButtonStyle.Danger"
-                  Size="ButtonSize.Small"
-                  Text="Close"/>
-</RadzenStack>
+    <div class="jd-header">
+        <div class="jd-header-icon">
+            <RadzenIcon Icon="receipt_long" Style="font-size:1.2rem;"/>
+        </div>
+        <div>
+            <h2>Journal Details</h2>
+            <p>@(JournalEntry?.ReferrenceNum ?? "—")</p>
+        </div>
+        @{
+            var isBalanced = JournalEntry is not null && JournalEntry.TotalDr == JournalEntry.TotalCr;
+        }
+        @if (isBalanced)
+        {
+            <span class="jd-balance-badge ok" style="margin-left:auto;">
+                <RadzenIcon Icon="check_circle" Style="font-size:0.9rem;"/> Balanced
+            </span>
+        }
+        else
+        {
+            <span class="jd-balance-badge error" style="margin-left:auto;">
+                <RadzenIcon Icon="error" Style="font-size:0.9rem;"/> Out of Balance
+            </span>
+        }
+    </div>
 
- 
+    <div class="jd-card">
+        <div class="jd-card-title">
+            <RadzenIcon Icon="info" CssClass="rzi"/>
+            Entry Information
+        </div>
+        <div class="jd-info-grid">
+            <div>
+                <div class="jd-info-label">Reference #</div>
+                <div class="jd-info-value">@(JournalEntry?.ReferrenceNum ?? "—")</div>
+            </div>
+            <div>
+                <div class="jd-info-label">Journal Date</div>
+                <div class="jd-info-value">@Applications.Extensions.DateTimeExtensions.DayFirst(JournalEntry?.JournalDate)</div>
+            </div>
+            <div>
+                <div class="jd-info-label">Journal Type</div>
+                <div class="jd-info-value">@(JournalEntry?.JournalType ?? "—")</div>
+            </div>
+            <div>
+                <div class="jd-info-label">Description</div>
+                <div class="jd-info-value">@(JournalEntry?.Description ?? "—")</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="jd-card">
+        <div class="jd-card-title">
+            <RadzenIcon Icon="list_alt" CssClass="rzi"/>
+            Journal Lines
+        </div>
+        <RadzenDataGrid GridLines="DataGridGridLines.Both"
+                        Density="Density.Compact"
+                        AllowAlternatingRows="true"
+                        AllowFiltering="false"
+                        AllowSorting="false"
+                        RowSelect="RowSelecting"
+                        TItem="JournalEntryLineVm"
+                        Data="@_journalEntryLines">
+            <Columns>
+                <RadzenDataGridColumn Width="4rem" Context="j" Title="#" Sortable="false" TextAlign="TextAlign.Center">
+                    <Template>
+                        <span class="jd-line-num">@(_journalEntryLines.ToList().IndexOf(j) + 1)</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="LedgerName" Title="Account" Sortable="false"/>
+                <RadzenDataGridColumn Width="9rem" Property="Debit" Title="Debit" TextAlign="TextAlign.Right" Sortable="false">
+                    <Template Context="j">
+                        @if (j.Debit is > 0)
+                        {
+                            @j.Debit.Format(JournalEntry?.CurrencyId)
+                        }
+                        else
+                        {
+                            <span class="rz-color-secondary-light">—</span>
+                        }
+                    </Template>
+                    <FooterTemplate>
+                        <strong>@(_journalEntryLines.Sum(x => x.Debit ?? 0).Format(JournalEntry?.CurrencyId))</strong>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Width="9rem" Property="Credit" Title="Credit" TextAlign="TextAlign.Right" Sortable="false">
+                    <Template Context="j">
+                        @if (j.Credit is > 0)
+                        {
+                            @j.Credit.Format(JournalEntry?.CurrencyId)
+                        }
+                        else
+                        {
+                            <span class="rz-color-secondary-light">—</span>
+                        }
+                    </Template>
+                    <FooterTemplate>
+                        <strong>@(_journalEntryLines.Sum(x => x.Credit ?? 0).Format(JournalEntry?.CurrencyId))</strong>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Width="9rem" Property="Amount" Title="Amount" TextAlign="TextAlign.Right" Sortable="false"
+                                      Context="journal">
+                    <Template>
+                        @Math.Abs(journal.Amount).Format(JournalEntry?.CurrencyId)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="JournalLineDesc" Title="Description" Sortable="false"/>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 class="rz-my-2"
+                 AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+        <RadzenButton Icon="close"
+                      Click="@ClosedTabEvent"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="ButtonSize.Small"
+                      Text="Close"/>
+    </RadzenStack>
+
+</div>

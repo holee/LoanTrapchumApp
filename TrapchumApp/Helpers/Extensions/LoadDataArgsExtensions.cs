@@ -23,9 +23,18 @@
             return (sortColumn, false);
         }
 
-        public static (string SortField, string FilterProperty, bool IsDescending) GetInfo(this LoadDataArgs args, string? sortColumn = null)
+        public static (string SortField,
+            string FilterProperty,
+            bool IsDescending,
+            int PageIndex,
+            int PageSize) GetInfo(this LoadDataArgs args, string? sortColumn = null)
         {
+
             sortColumn ??= string.Empty;
+
+            int pageIndex = args.Skip ?? 0;
+
+            int pageSize = args.Top ?? 15;
 
             var sortDescriptor = args.Sorts?.FirstOrDefault();
 
@@ -38,11 +47,11 @@
 
                 var sortDescending = sortDescriptor?.SortOrder == SortOrder.Descending;
 
-                return (sortField, filterProperty, sortDescending);
+                return (sortField, filterProperty, sortDescending, pageIndex, pageSize);
 
             }
 
-            return (sortColumn, string.Empty, false);
+            return (sortColumn, string.Empty, false, pageIndex, pageSize);
         }
 
         public static (string FilterProperty, T? FilterValue) FilterBy<T>(this LoadDataArgs args)
@@ -81,10 +90,19 @@
 
         public static string? FilterValue(this LoadDataArgs e, params string[] properties)
         {
-            return e?.Filters?
-                    .FirstOrDefault(f => properties.Contains(f.Property))
-                    ?.FilterValue?
-                    .ToString();
+
+            return e.Filters?
+                     .FirstOrDefault(filter =>
+                         properties.Contains(filter.Property) &&
+                         filter.FilterValue is not null)
+                     ?.FilterValue?
+                     .ToString()?
+                     .Trim() ?? string.Empty;
+
+            //return e?.Filters?
+            //        .FirstOrDefault(f => properties.Contains(f.Property))
+            //        ?.FilterValue?
+            //        .ToString();
         }
 
         public static string? Value(this LoadDataArgs e) => e?.Filters?.FirstOrDefault()?.FilterValue?.ToString() ?? string.Empty;

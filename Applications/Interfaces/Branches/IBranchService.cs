@@ -19,7 +19,7 @@ namespace Applications.Interfaces.Branches
         Task<ErrorOr<IEnumerable<ApprovedUser>>> GetApprovedUser(int? branchId, string? filter, CancellationToken cancellation = default);
         Task<VBranch?> GetBranchDetailsById(int? branchId, Expression<Func<VBranch, object>> selector, CancellationToken cancellation = default);
         Task<VBranch?> GetBranchDetailsById(int? branchId, CancellationToken cancellation = default, params string[] columns);
-        Task<Pager<VBranch>> GetBranchesAsync(int? branchId, QueryParam param, CancellationToken cancellation = default, params string[] columns);
+        //Task<Pager<VBranch>> GetBranchesAsync(int? branchId, QueryParam param, CancellationToken cancellation = default, params string[] columns);
         Task<ErrorOr<BranchStatus>> GetBranchStatus(string? userId, CancellationToken cancellation = default);
         Task<ErrorOr<VBranch>> GetBranchByUser(string? userId, CancellationToken cancellation = default);
     }

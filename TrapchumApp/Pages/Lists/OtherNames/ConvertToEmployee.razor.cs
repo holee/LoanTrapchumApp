@@ -58,7 +58,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         {
             try
             {
-                var rsp = await _nameService.GetDetailAsync<VOtherNames>(id);
+                var rsp = await _nameService.GetDetailAsync(id);
 
                 if (rsp.IsSuccess)
                 {

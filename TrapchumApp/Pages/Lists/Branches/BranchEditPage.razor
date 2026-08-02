@@ -2,7 +2,10 @@
 @using Applications.Features.Branches.Dtos
 
 <RadzenCard class="branch-page-wrapper">
-    <BranchUpdateModal Id="@BranchIdParam" @ref="updateModalRef" OnClose="@Close" PageType="PageType.Tab" />
+    <BranchUpdateModal Id="@BranchIdParam"
+                       @ref="updateModalRef"
+                       OnClose="@Close"
+                       PageType="PageType.Tab" />
 </RadzenCard>
 
 @code {

@@ -295,6 +295,32 @@ public sealed class AddressRepository : IAddressService
     }
 
 
+
+
+
+    //public async Task<PageMetaData<CountryDto>> GetCountries(int? countryId, QueryParam query, CancellationToken cancellation = default)
+    //{
+
+    //    await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+    //    var queries = context.Countries.WhereIf(countryId.HasValue && countryId > 0, x => x.CountryId == countryId);
+
+    //    queries = ApplyFilter(query, queries);
+
+
+    //    if (!string.IsNullOrEmpty(searchText))
+    //    {
+    //        queries = queries.Where(x =>
+    //            x.DesInKhmer != null &&
+    //            x.DesInKhmer.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase) ||
+    //            x.CountryName != null &&
+    //            x.CountryName.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase));
+    //    }
+
+    //    return await queries.AsNoTracking().ToListAsync();
+    //}
+
+
     public async Task<IEnumerable<string>> GetCities(string? searchText = null)
     {
 

@@ -1,6 +1,6 @@
 ﻿namespace Applications.Responses.ViewModels.OtherNames;
 
-public sealed class VOtherNames  
+public sealed class VOtherNames
 {
     public string? Id { get; set; }
     public string? FirstName { get; set; }
@@ -25,5 +25,21 @@ public sealed class VOtherNames
     public override string ToString()
     {
         return $"{City} {ProInKhmer} {DisInKhmer} {ComInKhmer} {VilInKhmer}";
+    }
+
+    public string? FullName
+    {
+        get
+        {
+            var names = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(FirstName)) names.Add(FirstName);
+
+            if (!string.IsNullOrWhiteSpace(MiddleName)) names.Add(MiddleName);
+
+            if (!string.IsNullOrWhiteSpace(LastName)) names.Add(LastName);
+
+            return string.Join(" ", names);
+        }
     }
 }

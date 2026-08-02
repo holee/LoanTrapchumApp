@@ -13,7 +13,7 @@ internal static class MapAdditinalEndpoints
     {
         ArgumentNullException.ThrowIfNull(endpoints);
 
-        var uploadGroup = endpoints.MapGroup("/Upload");
+        var uploadGroup = endpoints.MapGroup("/Upload").RequireAuthorization();
 
         uploadGroup.MapPost("/File", async (IFormFile file,
             IMediator mediator,
@@ -75,7 +75,7 @@ internal static class MapAdditinalEndpoints
                     detail: $"Error uploading file: {ex.Message}",
                     statusCode: 500);
             }
-        }).DisableAntiforgery();
+        });
 
 
         uploadGroup.MapPost("/Files", async (IFormFileCollection files,
@@ -147,7 +147,7 @@ internal static class MapAdditinalEndpoints
 
                 return Results.Problem(detail: $"Error uploading file: {ex.Message}", statusCode: 500);
             }
-        }).DisableAntiforgery();
+        });
 
 
         uploadGroup.MapPost("/Customers/Profiles", async (IFormFile file,

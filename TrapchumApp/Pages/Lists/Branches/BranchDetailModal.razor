@@ -26,7 +26,28 @@
 
                     <div class="branch-detail-field">
                         <div class="branch-detail-label">Branch Code</div>
-                        <div class="branch-detail-value">@branch?.Description</div>
+                        <div class="branch-detail-value">@branch?.BranchCode</div>
+                    </div>
+
+                    <div class="branch-detail-divider"></div>
+
+                    <div class="branch-detail-field">
+                        <div class="branch-detail-label">Bank</div>
+                        <div class="branch-detail-value">@branch?.BankName</div>
+                    </div>
+
+                    <div class="branch-detail-divider"></div>
+
+                    <div class="branch-detail-field">
+                        <div class="branch-detail-label">Status</div>
+                        <div class="branch-detail-value">
+                            <RadzenBadge Text="@(branch?.IsActive == true ? "Active" : "Inactive")"
+                                         BadgeStyle="@(branch?.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)" />
+                            @if (branch?.IsHeadOffice == true)
+                            {
+                                <RadzenBadge Text="Head Office" BadgeStyle="BadgeStyle.Info" class="rz-ms-2" />
+                            }
+                        </div>
                     </div>
                 </div>
 
@@ -35,6 +56,23 @@
                         <RadzenImage Path="@(string.IsNullOrWhiteSpace(branch?.ImagePath) ? "/assets/logo/tch_Logo.png" : branch.ImagePath)"
                                      Style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
                     </div>
+                </div>
+            </div>
+
+            <div class="branch-detail-address-grid">
+                <div class="branch-detail-field">
+                    <div class="branch-detail-label">Phone Number</div>
+                    <div class="branch-detail-value">@branch?.PhoneNumber</div>
+                </div>
+
+                <div class="branch-detail-field">
+                    <div class="branch-detail-label">Zone</div>
+                    <div class="branch-detail-value">@branch?.Zone</div>
+                </div>
+
+                <div class="branch-detail-field">
+                    <div class="branch-detail-label">Description</div>
+                    <div class="branch-detail-value">@branch?.Description</div>
                 </div>
             </div>
         </div>

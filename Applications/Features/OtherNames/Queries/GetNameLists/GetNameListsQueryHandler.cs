@@ -2,11 +2,10 @@ using Applications.Interfaces.Lists;
 
 namespace Applications.Features.OtherNames.Queries.GetNameLists;
 
-public sealed class GetNameListsQueryHandler<T>(IOtherNameService otherNameService)
-    : IRequestHandler<GetNameListsQuery<T>, IEnumerable<T>> where T : class, new()
+public sealed class GetNameListsQueryHandler(IOtherNameService otherNameService) : IRequestHandler<GetNameListsQuery, IEnumerable<VOtherNames>>
 {
-    public async Task<IEnumerable<T>> Handle(GetNameListsQuery<T> request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<VOtherNames>> Handle(GetNameListsQuery request, CancellationToken cancellationToken)
     {
-        return await otherNameService.GetNameListsAsync<T>(request.NameId, request.Param, cancellationToken);
+        return await otherNameService.GetNameListsAsync(request.NameId, request.Param, cancellationToken);
     }
 }

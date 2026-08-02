@@ -34,6 +34,7 @@
 		<Content Remove="Pages\Managers\ManagerRequestIndexPage.razor" />
 		<Content Remove="Pages\Transactions\Exchanges\ExchangesPopup.razor" />
 		<Content Remove="Pages\Transactions\Exchanges\ExchangesSidebar.razor" />
+		<Content Remove="Pages\Transactions\LoanRequests\LoanRequestCreateNoCustomer.razor" />
 		<Content Remove="Pages\Transactions\Loans\Disbursements\LoanCollaterals.razor" />
 		<Content Remove="Pages\Transactions\Loans\Disbursements\LoanDcuments.razor" />
 		<Content Remove="Pages\Transactions\Loans\Disbursements\LoanDeletePage.razor" />
@@ -206,6 +207,7 @@
 		<AdditionalFiles Include="Pages\Transactions\Ledgers\CreateLedgerModal.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Ledgers\EditLedgerModal.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Ledgers\LedgerIndexPage.razor" />
+		<AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestCreateNoCustomer.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanDeletePage.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanEditPage.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanCollaterals.razor" />

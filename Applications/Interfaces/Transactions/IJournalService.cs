@@ -21,7 +21,7 @@ public interface IJournalService
     Task<IEnumerable<JournalEntry>> GetJournalsAsync(string? journalId, string? q = null);
     Task<IEnumerable<VNameList>> GetNameLists(long? id = 0, int takeRows = 0, string? q = null);
     Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam param) where T : class, new();
-    Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId, QueryParam param);
+    Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId, QueryParam param, CancellationToken cancellation = default);
     Task<ErrorOr<string>> CreateJournalAsync(LoanTransaction model, CancellationToken cancellation = default);
     Task<ErrorOr<string>> UpdateJournalAsync(LoanTransaction tranx, CancellationToken cancellation = default);
     Task<Pager<JournalTypeDto>> GetJournalTypesAsync(int? journalTypeId, QueryParam param, CancellationToken cancellation = default);

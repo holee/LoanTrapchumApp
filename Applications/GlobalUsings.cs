@@ -1,18 +1,119 @@
-﻿global using Applications.Bases;
+// ═══════════════════════════════════════════════════════════════════
+// Framework & Third-Party
+// ═══════════════════════════════════════════════════════════════════
+global using FluentValidation;
+global using Microsoft.Extensions.DependencyInjection;
+
+// ═══════════════════════════════════════════════════════════════════
+// Applications — Core / Base
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Bases;
+global using Applications.Commons;
+global using Applications.Responses;
+global using Applications.Responses.Paginations;
+global using Applications.Utils;
+
+// ═══════════════════════════════════════════════════════════════════
+// Applications — Services (UI-consumed façades)
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Services.Files;
+global using Applications.Services.Identity;
+global using Applications.Services.Lists;
+global using Applications.Services.Loans;
+global using Applications.Services.Reports;
+global using Applications.Services.Transactions.Branches;
+global using Applications.Services.Transactions.Currencies;
+global using Applications.Services.Transactions.Journals;
+
+// ═══════════════════════════════════════════════════════════════════
+// Applications — Interfaces
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Interfaces.Loans;
+
+// ═══════════════════════════════════════════════════════════════════
+// Applications — Responses / ViewModels
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Responses.ViewModels.Auths;
+global using Applications.Responses.ViewModels.Customers;
+global using Applications.Responses.ViewModels.Employees;
+global using Applications.Responses.ViewModels.Loans.Requests;
+global using Applications.Responses.ViewModels.Loans.Schedules;
+global using Applications.Responses.ViewModels.OtherNames;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Activities
+// ═══════════════════════════════════════════════════════════════════
 global using Applications.Features.Activities.ActitvityQuery.GetActivitiesQuery;
 global using Applications.Features.Activities.ActitvityQuery.GetActivityByCustomer;
 global using Applications.Features.Activities.ActitvityQuery.GetActivityById;
 global using Applications.Features.Activities.Command.CreateActivity;
 global using Applications.Features.Activities.Command.DeleteActivity;
 global using Applications.Features.Activities.Command.EditActivity;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Additional Informations (Occupations, Nationalities, Salutations)
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.AdditionalInformations.Command.CreateOccupation;
+global using Applications.Features.AdditionalInformations.Command.CreateSalutation;
+global using Applications.Features.AdditionalInformations.Command.UpdateOccupation;
+global using Applications.Features.AdditionalInformations.Dto;
+global using Applications.Features.AdditionalInformations.Queries.GetNationalities;
+global using Applications.Features.AdditionalInformations.Queries.GetOccupations;
+global using Applications.Features.AdditionalInformations.Queries.GetSalutaions;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Addresses
+// ═══════════════════════════════════════════════════════════════════
 global using Applications.Features.Addresses.Command.CreateArea;
-global using Applications.Features.Addresses.Command.UpdateArea;
+global using Applications.Features.Addresses.Command.CreateCity;
 global using Applications.Features.Addresses.Command.DeleteArea;
-global using Applications.Features.Addresses.Queries.GetAreas;
-global using Applications.Features.Addresses.Queries.GetAreaById;
+global using Applications.Features.Addresses.Command.UpdateArea;
+global using Applications.Features.Addresses.Command.UpdateCity;
+global using Applications.Features.Addresses.Dto;
 global using Applications.Features.Addresses.Interfaces;
+global using Applications.Features.Addresses.Queries.GetAreaById;
+global using Applications.Features.Addresses.Queries.GetAreas;
+global using Applications.Features.Addresses.Queries.GetCities;
+global using Applications.Features.Addresses.Queries.GetCommunes;
+global using Applications.Features.Addresses.Queries.GetDistricts;
+global using Applications.Features.Addresses.Queries.GetProvinces;
+global using Applications.Features.Addresses.Queries.GetVillages;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Banks
+// ═══════════════════════════════════════════════════════════════════
 global using Applications.Features.Banks;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Branches
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.Branches.Command.CloseBranch;
+global using Applications.Features.Branches.Command.CreateBranch;
+global using Applications.Features.Branches.Command.DeleteBranch;
+global using Applications.Features.Branches.Command.EditBranch;
+global using Applications.Features.Branches.Command.OpenBranch;
+global using Applications.Features.Branches.Dtos;
+global using Applications.Features.Branches.Queries.GetBranchAsPaging;
+global using Applications.Features.Branches.Queries.GetBranchById;
+global using Applications.Features.Branches.Queries.GetBranchByUser;
+global using Applications.Features.Branches.Queries.GetBranchDetailsById;
+global using Applications.Features.Branches.Queries.GetBranchForVault;
+global using Applications.Features.Branches.Queries.GetBranchsByUser;
+global using Applications.Features.Branches.Queries.GetBranchState;
+global using Applications.Features.Branches.Queries.GetCashVaultBalance;
+global using Applications.Features.Branches.Queries.GetUpdateBranch;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Cash Managements
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.CashManagements.Command.CreateCashVaultIn;
+global using Applications.Features.CashManagements.Command.CreateCashVaultOut;
 global using Applications.Features.CashManagements.Interfaces;
+global using Applications.Features.CashManagements.Responses;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Collaterals
+// ═══════════════════════════════════════════════════════════════════
 global using Applications.Features.Collaterals.Commands.AddOrUpdateCollaterals;
 global using Applications.Features.Collaterals.Commands.CreateCollateralLines;
 global using Applications.Features.Collaterals.Commands.DeleteCollateralLines;
@@ -22,11 +123,91 @@ global using Applications.Features.Collaterals.Queries.GetCollateralLineByCollat
 global using Applications.Features.Collaterals.Queries.GetCollateralLineById;
 global using Applications.Features.Collaterals.Queries.GetCollateralLineDetails;
 global using Applications.Features.Collaterals.Queries.GetCollateralLinesAsPaging;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Currencies
+// ═══════════════════════════════════════════════════════════════════
 global using Applications.Features.Currencies;
+global using Applications.Features.Currencies.Command;
+global using Applications.Features.Currencies.Command.AddCurrencyNote;
+global using Applications.Features.Currencies.Command.EditMoneyExchange;
+global using Applications.Features.Currencies.Dto;
+global using Applications.Features.Currencies.Queries.GetCashVault;
+global using Applications.Features.Currencies.Queries.GetCurrencies;
+global using Applications.Features.Currencies.Queries.GetCurrencyById;
+global using Applications.Features.Currencies.Queries.GetCurrencyCounter;
+global using Applications.Features.Currencies.Queries.GetCurrencyDetails;
+global using Applications.Features.Currencies.Queries.GetCurrencyNotes;
+global using Applications.Features.Currencies.Queries.GetEditMoneyExchange;
+global using Applications.Features.Currencies.Responses;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Customers
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.Customers.Commands.CreateCustomer;
+global using Applications.Features.Customers.Commands.DeactivateCustomer;
+global using Applications.Features.Customers.Commands.DeleteCustomer;
+global using Applications.Features.Customers.Commands.EditCustomer;
+global using Applications.Features.Customers.Dto;
 global using Applications.Features.Customers.Interfaces;
+global using Applications.Features.Customers.Queries.GetActiveLoanCustomer;
 global using Applications.Features.Customers.Queries.GetCustomerAsPaging;
+global using Applications.Features.Customers.Queries.GetCustomerById;
+global using Applications.Features.Customers.Queries.GetCustomerCollateralLine;
+global using Applications.Features.Customers.Queries.GetCustomerDetailById;
+global using Applications.Features.Customers.Queries.GetLoanByCustomerId;
+global using Applications.Features.Customers.Queries.GetRequestByCustomerId;
+global using Applications.Features.Customers.Queries.GetUpdateCustomerById;
 global using Applications.Features.Customers.Response;
 global using Applications.Features.Customers.UseCases;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Dashboard
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.Dashbaord.Accountants.Dtos;
+global using Applications.Features.Dashbaord.Accountants.Queries.GetDbAccountLoanSummaery;
+global using Applications.Features.Dashbaord.Accountants.Queries.GetDbApprovedLoanRequest;
+global using Applications.Features.Dashbaord.CreditOfficers.Dtos;
+global using Applications.Features.Dashbaord.CreditOfficers.Queries.GetDbCreditOfficeLoanSummary;
+global using Applications.Features.Dashbaord.CreditOfficers.Queries.GetNumberLoanRequest;
+global using Applications.Features.Dashbaord.Managers.Dto;
+global using Applications.Features.Dashbaord.Managers.Queries.GetDbManagerLoanSummary;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Departments
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.Departments.Commands.ChangeDepartmentState;
+global using Applications.Features.Departments.Commands.CreateDepartment;
+global using Applications.Features.Departments.Commands.DeleteDepartment;
+global using Applications.Features.Departments.Commands.EditDepartment;
+global using Applications.Features.Departments.Dto;
+global using Applications.Features.Departments.Queries.GetDepartmentAsPaging;
+global using Applications.Features.Departments.Queries.GetDepartmentById;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Documents
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.Documents.Command.AddDocument;
+global using Applications.Features.Documents.Command.AddDocuments;
+global using Applications.Features.Documents.Command.DeleteDocument;
+global using Applications.Features.Documents.Dto;
+global using Applications.Features.Documents.Queries.GetDocumentById;
+global using Applications.Features.Documents.Queries.GetDocuments;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Employees
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.Employees.Commands.ChangeEmployeeState;
+global using Applications.Features.Employees.Commands.CreateEmployee;
+global using Applications.Features.Employees.Commands.EditEmployee;
+global using Applications.Features.Employees.Dto;
+global using Applications.Features.Employees.Queries.GetEditEmployee;
+global using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
+global using Applications.Features.Employees.Queries.GetEmployeeById;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Expenses
+// ═══════════════════════════════════════════════════════════════════
 global using Applications.Features.Expenses.CreateExpenseCommands;
 global using Applications.Features.Expenses.CreateExpensesCommands;
 global using Applications.Features.Expenses.DeleteExpenseCommand;
@@ -35,13 +216,45 @@ global using Applications.Features.Expenses.EditExpenseCommands;
 global using Applications.Features.Expenses.EditExpensesCommands;
 global using Applications.Features.Expenses.Queries.GetExpenseByCustomerId;
 global using Applications.Features.Expenses.Queries.GetExpenseById;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Guarantor
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.Guarantor.Command.CreateGuarantor;
+global using Applications.Features.Guarantor.Command.UpdateGuarantor;
+global using Applications.Features.Guarantor.Dtos;
+global using Applications.Features.Guarantor.Queries.GetGuarantorById;
+global using Applications.Features.Guarantor.Queries.GetGuarantorDetailById;
+global using Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
+global using Applications.Features.Guarantor.Queries.GetUpdateGuarantorById;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Holidays
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.Holidays.Command.ActivateOrDeactivate;
+global using Applications.Features.Holidays.Command.CreateHoliday;
 global using Applications.Features.Holidays.Command.CreateHolidays;
 global using Applications.Features.Holidays.Command.DeleteHoliday;
+global using Applications.Features.Holidays.Queries.GetActiveHolidays;
+global using Applications.Features.Holidays.Queries.GetHolidayByDate;
+global using Applications.Features.Holidays.Queries.GetHolidayById;
 global using Applications.Features.Holidays.Queries.GetHolidays;
+global using Applications.Features.Holidays.Queries.GetHolidaysAsPaging;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Identity
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.Identity.Queries.GetUserDetailById;
+global using Applications.Features.Identity.Roles.Queries.GetRoles;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Incomes
+// ═══════════════════════════════════════════════════════════════════
 global using Applications.Features.Incomes.Command.CreateIncome;
 global using Applications.Features.Incomes.Command.CreateIncomeExpenseSource;
 global using Applications.Features.Incomes.Command.CreateIncomes;
 global using Applications.Features.Incomes.Command.DeleteIncome;
+global using Applications.Features.Incomes.Command.DeleteIncomeExpense;
 global using Applications.Features.Incomes.Command.EditIncome;
 global using Applications.Features.Incomes.Command.EditIncomeExpenseSource;
 global using Applications.Features.Incomes.Command.GetEditIncomeExpenseSource;
@@ -51,8 +264,51 @@ global using Applications.Features.Incomes.Queries.GetEditIncomeExpenseSource;
 global using Applications.Features.Incomes.Queries.GetIncomeByCustomerId;
 global using Applications.Features.Incomes.Queries.GetIncomeById;
 global using Applications.Features.Incomes.Queries.GetIncomeExpense;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Journals
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.Journals.Command.CreateJournal;
+global using Applications.Features.Journals.Dtos;
+global using Applications.Features.Journals.Queries.GetJournalById;
+global using Applications.Features.Journals.Queries.GetJournalEntryDetailById;
+global using Applications.Features.Journals.Queries.GetJournalTypes;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Ledgers
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.Ledgers.Commands.ChangeLedgerStatus;
+global using Applications.Features.Ledgers.Commands.CreateOrUpdateLedger;
+global using Applications.Features.Ledgers.Commands.DeleteLedger;
+global using Applications.Features.Ledgers.Queries.GetLedgerById;
+global using Applications.Features.Ledgers.Queries.GetLedgers;
+global using Applications.Features.Ledgers.Queries.GetLedgerTypeById;
+global using Applications.Features.Ledgers.Queries.GetLedgerTypes;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Loan Payments
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.LoanPayments.Command.PayOff;
+global using Applications.Features.LoanPayments.Command.RecievePayment;
+global using Applications.Features.LoanPayments.Dtos;
 global using Applications.Features.LoanPayments.Interfaces;
+global using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
+global using Applications.Features.LoanPayments.Queries.GetPaidSchedule;
 global using Applications.Features.LoanPayments.UseCases;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Loan Purposes
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.LoanPurposes;
+global using Applications.Features.LoanPurposes.Commands.CreateLoanPurpose;
+global using Applications.Features.LoanPurposes.Commands.DeleteLoanPurpose;
+global using Applications.Features.LoanPurposes.Commands.UpdateLoanPurpose;
+global using Applications.Features.LoanPurposes.Queries.GetLoanPurposeById;
+global using Applications.Features.LoanPurposes.Queries.GetLoanPurposes;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Loan Requests
+// ═══════════════════════════════════════════════════════════════════
 global using Applications.Features.LoanRequests.Command.AddDescription;
 global using Applications.Features.LoanRequests.Command.AddLoanRequestCollateral;
 global using Applications.Features.LoanRequests.Command.AddLoanRequestDescription;
@@ -67,191 +323,88 @@ global using Applications.Features.LoanRequests.Command.DeleteLoanRequestGuarant
 global using Applications.Features.LoanRequests.Command.DenyLoanRequest;
 global using Applications.Features.LoanRequests.Command.IsCustomerBusy;
 global using Applications.Features.LoanRequests.Command.RecheckedLoanRequest;
+global using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
 global using Applications.Features.LoanRequests.Command.SaveLoanRequest;
+global using Applications.Features.LoanRequests.Command.SaveLoanRequests;
 global using Applications.Features.LoanRequests.Command.VerifiedLoanRequest;
+global using Applications.Features.LoanRequests.Queryies.GetApprovedLoanRequest;
 global using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
+global using Applications.Features.LoanRequests.Queryies.GetLoanRequestBy;
 global using Applications.Features.LoanRequests.Queryies.GetLoanRequestById;
 global using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
+global using Applications.Features.LoanRequests.Queryies.GetLoanRequestsDocuments;
 global using Applications.Features.LoanRequests.Queryies.GetLoanRequestsWithCanDisburse;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Loans
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.Loans.Command.CloseLoanDisbursment;
+global using Applications.Features.Loans.Command.CreateLoan;
+global using Applications.Features.Loans.Command.SaveLoanDisbursemenent;
+global using Applications.Features.Loans.Dtos;
+global using Applications.Features.Loans.Dtos.Responses;
+global using Applications.Features.Loans.Queries.GetLoanByBranchId;
+global using Applications.Features.Loans.Queries.GetLoanCollaterals;
 global using Applications.Features.Loans.Queries.GetLoanRelatedCollaterals;
 global using Applications.Features.Loans.Queries.GetLoanRelatedDocuments;
 global using Applications.Features.Loans.Queries.GetLoanRelatedGuarantors;
+global using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate;
+global using Applications.Features.Loans.Queries.GetLoanWithScedules;
 global using Applications.Features.Loans.Services;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Notifications
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.Notifications.Command.CreateNotification;
+global using Applications.Features.Notifications.Dto;
+global using Applications.Features.Notifications.Queries.GetNotification;
+global using Applications.Features.Notifications.Queries.GetUnreadNotifications;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Notes
+// ═══════════════════════════════════════════════════════════════════
 global using Applications.Features.Notes.Command.CreateNote;
 global using Applications.Features.Notes.Command.DeleteNote;
 global using Applications.Features.Notes.Command.EditNote;
 global using Applications.Features.Notes.Queries.GetNoteByCustomerId;
 global using Applications.Features.Notes.Queries.GetNoteById;
-global using Applications.Features.Settings.UseCases;
-global using Applications.Responses.Paginations;
-global using Applications.Responses.ViewModels.Customers;
-global using Applications.Responses.ViewModels.Loans.Requests;
-global using Applications.Services.Files;
-global using Applications.Services.Identity;
-global using Applications.Services.Lists;
-global using Applications.Services.Loans;
-global using Applications.Services.Reports;
-global using Applications.Services.Transactions.Branches;
-global using Applications.Services.Transactions.Currencies;
-global using Applications.Services.Transactions.Journals;
-global using Applications.Utils;
-global using Domains.Models.Lists;
-global using FluentValidation;
-global using Microsoft.Extensions.DependencyInjection;
-global using Applications.Interfaces.Loans;
-global using Applications.Features.Branches.Command.CloseBranch;
-global using Applications.Features.Branches.Command.CreateBranch;
-global using Applications.Features.Branches.Command.DeleteBranch;
-global using Applications.Features.Branches.Command.EditBranch;
-global using Applications.Features.Branches.Command.OpenBranch;
-global using Applications.Features.Branches.Dtos;
-global using Applications.Features.Branches.Queries.GetBranchAsPaging;
-global using Applications.Features.Branches.Queries.GetBranchById;
-global using Applications.Features.Branches.Queries.GetBranchByUser;
-global using Applications.Features.Branches.Queries.GetBranchDetailsById;
-global using Applications.Features.Branches.Queries.GetBranchForVault;
-global using Applications.Features.Branches.Queries.GetBranchState;
-global using Applications.Features.Branches.Queries.GetCashVaultBalance;
-global using Applications.Features.Branches.Queries.GetUpdateBranch;
-global using Applications.Features.CashManagements.Responses;
-global using Applications.Features.Currencies.Command;
-global using Applications.Features.Currencies.Command.AddCurrencyNote;
-global using Applications.Features.Currencies.Command.EditMoneyExchange;
-global using Applications.Features.Currencies.Dto;
-global using Applications.Features.Currencies.Queries.GetCashVault;
-global using Applications.Features.Currencies.Queries.GetCurrencies;
-global using Applications.Features.Currencies.Queries.GetCurrencyCounter;
-global using Applications.Features.Currencies.Queries.GetCurrencyDetails;
-global using Applications.Features.Currencies.Queries.GetCurrencyNotes;
-global using Applications.Features.Currencies.Queries.GetEditMoneyExchange;
-global using Applications.Features.Currencies.Responses;
-global using Applications.Features.Departments.Commands.ChangeDepartmentState;
-global using Applications.Features.Departments.Commands.CreateDepartment;
-global using Applications.Features.Departments.Commands.DeleteDepartment;
-global using Applications.Features.Departments.Commands.EditDepartment;
-global using Applications.Features.Departments.Dto;
-global using Applications.Features.Departments.Queries.GetDepartmentAsPaging;
-global using Applications.Features.Departments.Queries.GetDepartmentById;
-global using Applications.Features.Employees.Commands.ChangeEmployeeState;
-global using Applications.Features.Employees.Commands.CreateEmployee;
-global using Applications.Features.Employees.Commands.EditEmployee;
-global using Applications.Features.Employees.Dto;
-global using Applications.Features.Employees.Queries.GetEditEmployee;
-global using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
-global using Applications.Features.Employees.Queries.GetEmployeeById;
-global using Applications.Features.Guarantor.Command.CreateGuarantor;
-global using Applications.Features.Guarantor.Dtos;
-global using Applications.Features.Holidays.Queries.GetHolidaysAsPaging;
-global using Applications.Features.Journals.Command.CreateJournal;
-global using Applications.Features.Journals.Dtos;
-global using Applications.Features.Journals.Queries.GetJournalById;
-global using Applications.Features.Journals.Queries.GetJournalEntryDetailById;
-global using Applications.Features.Journals.Queries.GetJournalTypes;
-global using Applications.Features.LoanPayments.Command.RecievePayment;
-global using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
-global using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
-global using Applications.Features.LoanRequests.Queryies.GetApprovedLoanRequest;
-global using Applications.Features.LoanRequests.Queryies.GetLoanRequestBy;
-global using Applications.Features.LoanRequests.Queryies.GetLoanRequestsDocuments;
-global using Applications.Features.Loans.Command.CloseLoanDisbursment;
-global using Applications.Features.Loans.Command.CreateLoan;
-global using Applications.Features.Loans.Queries.GetLoanByBranchId;
-global using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate;
-global using Applications.Features.Loans.Queries.GetLoanWithScedules;
-global using Applications.Features.Notifications.Command.CreateNotification;
-global using Applications.Features.Notifications.Dto;
-global using Applications.Features.Notifications.Queries.GetNotification;
-global using Applications.Features.Notifications.Queries.GetUnreadNotifications;
-global using Applications.Responses;
-global using Applications.Responses.ViewModels.Employees;
-global using Applications.Responses.ViewModels.Loans.Schedules;
-global using Domains.Models.Currencies;
-global using Domains.Models.Journals;
-global using Applications.Commons;
-global using Applications.Features.Addresses.Command.CreateCity;
-global using Applications.Features.Addresses.Command.UpdateCity; 
-global using Applications.Features.Addresses.Dto;
-global using Applications.Features.Addresses.Queries.GetCities;
-global using Applications.Features.Addresses.Queries.GetCommunes;
-global using Applications.Features.Addresses.Queries.GetDistricts;
-global using Applications.Features.Addresses.Queries.GetProvinces;
-global using Applications.Features.Addresses.Queries.GetVillages;
-global using Applications.Features.Branches.Queries.GetBranchsByUser;
-global using Applications.Features.CashManagements.Command.CreateCashVaultIn;
-global using Applications.Features.CashManagements.Command.CreateCashVaultOut;
-global using Applications.Features.Currencies.Queries.GetCurrencyById;
-global using Applications.Features.Dashbaord.Accountants.Dtos;
-global using Applications.Features.Dashbaord.Accountants.Queries.GetDbAccountLoanSummaery;
-global using Applications.Features.Dashbaord.Accountants.Queries.GetDbApprovedLoanRequest;
-global using Applications.Features.Dashbaord.CreditOfficers.Dtos;
-global using Applications.Features.Dashbaord.CreditOfficers.Queries.GetDbCreditOfficeLoanSummary;
-global using Applications.Features.Dashbaord.CreditOfficers.Queries.GetNumberLoanRequest;
-global using Applications.Features.Dashbaord.Managers.Dto;
-global using Applications.Features.Dashbaord.Managers.Queries.GetDbManagerLoanSummary;
-global using Applications.Features.Identity.Queries.GetUserDetailById;
-global using Applications.Features.Identity.Roles.Queries.GetRoles;
-global using Applications.Features.Schedules.GetLoanScheduleBySchedule;
-global using Applications.Features.Schedules.GetLoanWithSchedule;
-global using Applications.Responses.ViewModels.Auths;
-global using Applications.Features.AdditionalInformations.Command.CreateOccupation;
-global using Applications.Features.AdditionalInformations.Command.CreateSalutation;
-global using Applications.Features.AdditionalInformations.Command.UpdateOccupation;
-global using Applications.Features.AdditionalInformations.Dto;
-global using Applications.Features.AdditionalInformations.Queries.GetNationalities;
-global using Applications.Features.AdditionalInformations.Queries.GetOccupations;
-global using Applications.Features.Customers.Commands.CreateCustomer;
-global using Applications.Features.Customers.Commands.DeactivateCustomer;
-global using Applications.Features.Customers.Commands.DeleteCustomer;
-global using Applications.Features.Customers.Commands.EditCustomer;
-global using Applications.Features.Customers.Dto;
-global using Applications.Features.Customers.Queries.GetActiveLoanCustomer;
-global using Applications.Features.Customers.Queries.GetCustomerById;
-global using Applications.Features.Customers.Queries.GetCustomerCollateralLine;
-global using Applications.Features.Customers.Queries.GetCustomerDetailById;
-global using Applications.Features.Customers.Queries.GetLoanByCustomerId;
-global using Applications.Features.Customers.Queries.GetRequestByCustomerId;
-global using Applications.Features.Customers.Queries.GetUpdateCustomerById;
-global using Applications.Features.Documents.Command.AddDocument;
-global using Applications.Features.Documents.Command.AddDocuments;
-global using Applications.Features.Documents.Command.DeleteDocument;
-global using Applications.Features.Documents.Dto;
-global using Applications.Features.Documents.Queries.GetDocumentById;
-global using Applications.Features.Documents.Queries.GetDocuments;
-global using Applications.Features.Guarantor.Command.UpdateGuarantor;
-global using Applications.Features.Guarantor.Queries.GetGuarantorById;
-global using Applications.Features.Guarantor.Queries.GetGuarantorDetailById;
-global using Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
-global using Applications.Features.Guarantor.Queries.GetUpdateGuarantorById;
-global using Applications.Features.Holidays.Command.ActivateOrDeactivate;
-global using Applications.Features.Holidays.Command.CreateHoliday;
-global using Applications.Features.Holidays.Queries.GetActiveHolidays;
-global using Applications.Features.Holidays.Queries.GetHolidayByDate;
-global using Applications.Features.Holidays.Queries.GetHolidayById;
-global using Applications.Features.Identity.Command.CreateNewUser;
-global using Applications.Features.Incomes.Command.DeleteIncomeExpense;
-global using Applications.Features.LoanPayments.Command.PayOff;
-global using Applications.Features.LoanPayments.Dtos;
-global using Applications.Features.LoanPayments.Queries.GetPaidSchedule;
-global using Applications.Features.LoanPurposes;
-global using Applications.Features.LoanPurposes.Commands.CreateLoanPurpose;
-global using Applications.Features.LoanPurposes.Commands.DeleteLoanPurpose;
-global using Applications.Features.LoanPurposes.Commands.UpdateLoanPurpose;
-global using Applications.Features.LoanPurposes.Queries.GetLoanPurposeById;
-global using Applications.Features.LoanPurposes.Queries.GetLoanPurposes;
-global using Applications.Features.LoanRequests.Command.SaveLoanRequests;
-global using Applications.Features.Loans.Command.SaveLoanDisbursemenent;
-global using Applications.Features.Loans.Dtos;
-global using Applications.Features.Loans.Dtos.Responses;
-global using Applications.Features.Loans.Queries.GetLoanCollaterals;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — OtherNames
+// ═══════════════════════════════════════════════════════════════════
+global using Applications.Features.OtherNames.Commands.ConvertToCustomer;
+global using Applications.Features.OtherNames.Commands.ConvertToEmployee;
+global using Applications.Features.OtherNames.Commands.ConvertToVendor;
+global using Applications.Features.OtherNames.Commands.CreateGuarantor;
+global using Applications.Features.OtherNames.Commands.CreateOtherName;
+global using Applications.Features.OtherNames.Commands.DeleteOtherName;
+global using Applications.Features.OtherNames.Commands.UpdateOtherName;
+global using Applications.Features.OtherNames.Commands.UpdateOtherNameStatus;
+global using Applications.Features.OtherNames.Queries.GetOtherNameById;
+global using Applications.Features.OtherNames.Queries.GetOtherNamesAsPaging;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Periods
+// ═══════════════════════════════════════════════════════════════════
 global using Applications.Features.Periods.Commands.CreatePeriod;
 global using Applications.Features.Periods.Commands.DeletePeriod;
 global using Applications.Features.Periods.Commands.UpdatePeriod;
 global using Applications.Features.Periods.Dto;
 global using Applications.Features.Periods.Queries.GetPeriods;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Schedules
+// ═══════════════════════════════════════════════════════════════════
 global using Applications.Features.Schedules.Dto;
+global using Applications.Features.Schedules.GetLoanScheduleBySchedule;
+global using Applications.Features.Schedules.GetLoanWithSchedule;
 global using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 global using Applications.Features.Schedules.Queries.GetScheduleById;
 global using Applications.Features.Schedules.Queries.GetScheduleDetailById;
+
+// ═══════════════════════════════════════════════════════════════════
+// Features — Settings
+// ═══════════════════════════════════════════════════════════════════
 global using Applications.Features.Settings.Commands.AppSettings.CreateAppSetting;
 global using Applications.Features.Settings.Commands.AppSettings.DeleteAppSetting;
 global using Applications.Features.Settings.Commands.AppSettings.UpdateAppSetting;
@@ -265,22 +418,11 @@ global using Applications.Features.Settings.Queries.AppSettings.GetAppSettings;
 global using Applications.Features.Settings.Queries.CollateralSubTypes.GetCollateralSubTypes;
 global using Applications.Features.Settings.Queries.UserLoanSizes.GetUserLoanSizeById;
 global using Applications.Features.Settings.Queries.UserLoanSizes.GetUserLoanSizes;
-global using Applications.Features.AdditionalInformations.Queries.GetSalutaions;
-global using Applications.Features.Ledgers.Commands.CreateOrUpdateLedger;
-global using Applications.Features.Ledgers.Commands.DeleteLedger;
-global using Applications.Features.Ledgers.Commands.ChangeLedgerStatus;
-global using Applications.Features.Ledgers.Queries.GetLedgerById;
-global using Applications.Features.Ledgers.Queries.GetLedgers;
-global using Applications.Features.Ledgers.Queries.GetLedgerTypes;
-global using Applications.Features.Ledgers.Queries.GetLedgerTypeById;
-global using Applications.Features.OtherNames.Commands.CreateOtherName;
-global using Applications.Features.OtherNames.Commands.CreateGuarantor;
-global using Applications.Features.OtherNames.Commands.UpdateOtherName;
-global using Applications.Features.OtherNames.Commands.DeleteOtherName;
-global using Applications.Features.OtherNames.Commands.UpdateOtherNameStatus;
-global using Applications.Features.OtherNames.Commands.ConvertToCustomer;
-global using Applications.Features.OtherNames.Commands.ConvertToVendor;
-global using Applications.Features.OtherNames.Commands.ConvertToEmployee;
-global using Applications.Features.OtherNames.Queries.GetOtherNameById;
-global using Applications.Features.OtherNames.Queries.GetOtherNamesAsPaging;
-global using Applications.Responses.ViewModels.OtherNames;
+global using Applications.Features.Settings.UseCases;
+
+// ═══════════════════════════════════════════════════════════════════
+// Domains
+// ═══════════════════════════════════════════════════════════════════
+global using Domains.Models.Currencies;
+global using Domains.Models.Journals;
+global using Domains.Models.Lists;

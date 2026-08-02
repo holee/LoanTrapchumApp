@@ -13,7 +13,7 @@ public interface IJournalServiceImpl
     Task<Pager<JournalEntryVm>> GetJournalsAsync(int pageIndex, int pageSize, string sortColumn, bool sortDescending = false, string? q = null);
     Task<IEnumerable<Domains.Models.Journals.JournalEntry>> GetJournalsAsync(string? journalId, string? q = null);
     Task<IEnumerable<VNameList>> GetNamesList(long? id = 0, int takeRows = 0, string? q = null);
-    Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId, QueryParam param);
+    Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId, QueryParam param, CancellationToken cancellation = default);
     Task<ErrorOr<JournalEntryVm>> GetJournalByIdAsync(string? id, bool include);
     Task<ErrorOr<string>> CreateJournalAsync(JournalTransactionDtoCreate req, CancellationToken cancellation = default);
 }
