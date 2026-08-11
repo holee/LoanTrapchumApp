@@ -1,36 +1,190 @@
-﻿legend.currency-information{
-    width: inherit; /* Or auto */
-    padding: 0 10px; /* To give a bit of padding on the left and right */
-    border-bottom: none;
+﻿.currency-details-page {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
 }
 
-fieldset.currency-information {
-    margin-top:1rem !important;
-    border: 1px groove #ddd !important;
-    padding: 0 1.4em 1.4em 1.4em !important;
-    margin: 0 0 1.5em 0 !important;
-    -webkit-box-shadow: 0px 0px 0px 0px #000;
-    box-shadow: 0px 0px 0px 0px #000;
+.cd-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    border: 1px solid #edf0f3;
+    overflow: hidden;
 }
 
-/*thead > tr {
-    background-color: aquamarine;
+.cd-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #edf0f3;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
 }
 
-tbody > tr {
-    background-color: #c9c9c9;
+.cd-header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cd-header-title h5 {
+    margin: 0;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.cd-header-subtitle {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.cd-header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.cd-close-btn {
+    border-radius: 8px !important;
+}
+
+.cd-info-card {
+    padding: 20px;
+}
+
+.cd-field-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 6px;
+}
+
+.cd-input ::deep textarea,
+.cd-input ::deep input {
+    border-radius: 8px !important;
+}
+
+.cd-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.cd-badge-icon {
+    font-size: 16px !important;
+    width: 16px;
+    height: 16px;
+}
+
+.cd-badge-success {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.cd-badge-muted {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.cd-badge-primary {
+    background: #eef2ff;
+    color: #4338ca;
+}
+
+.cd-badge-light {
+    background: #f9fafb;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.cd-table-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-bottom: 1px solid #edf0f3;
+    color: #1f2937;
+}
+
+.cd-table-header-icon {
+    color: #6366f1;
+}
+
+.cd-table-wrapper {
+    overflow-x: auto;
+}
+
+.cd-table {
+    width: 100%;
+    margin: 0;
+}
+
+.cd-table thead th {
+    background: #f9fafb;
+    color: #6b7280;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 12px 16px;
+    border-bottom: 1px solid #edf0f3;
+}
+
+.cd-table tbody td {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.cd-table tbody tr {
     cursor: pointer;
+    transition: background-color 0.15s ease;
 }
 
-tr.highlight-siblings {
-    background-color: green;
-}
-*/
-tr.highlight{
-    background-color: red !important;
-    color: white !important;
+.cd-table tbody tr:hover {
+    background-color: #f9fafb;
 }
 
-table{
-    background-color:aquamarine !important;
+.cd-table tbody tr.cd-row-selected {
+    background-color: #ecfdf5;
+}
+
+.cd-empty-row {
+    text-align: center;
+    color: #9ca3af;
+    padding: 40px 16px !important;
+}
+
+.cd-empty-icon {
+    font-size: 32px !important;
+    width: 32px;
+    height: 32px;
+    margin-bottom: 8px;
+    color: #d1d5db;
+}
+
+.cd-alert-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 0.9rem;
 }

@@ -30,16 +30,24 @@
                     <RadzenIcon Icon="search" />
                 </Start>
                 <ChildContent>
-                    <RadzenTextBox Value="@Value"
-                                   ValueExpression="@ValueExpression"
-                                   Change="@Changed"
-                                   @oninput="@OnTextChanged"
-                                   class="w-100"
-                                   id="@Id"
-                                   @key="@Id"
-                                   Name="@Name"
-                                   Placeholder="@Placeholder"
-                                   ValueChanged="@ValueChanged" />
+                    @if (ChildContent is not null)
+                    {
+                        @ChildContent
+                    }
+                    else
+                    {
+                        <RadzenTextBox Value="@Value"
+                                       ValueExpression="@ValueExpression"
+                                       Change="@Changed"
+                                       @oninput="@OnTextChanged"
+                                       class="w-100"
+                                       id="@Id"
+                                       @key="@Id"
+                                       Name="@Name"
+                                       Placeholder="@Placeholder"
+                                       ValueChanged="@ValueChanged" />
+                    }
+
                 </ChildContent>
             </RadzenFormField>
         </RadzenStack>
@@ -65,6 +73,8 @@
     [Parameter] public string ShowCommandIcon { get; set; } = IconNames.Add;
     [Parameter] public EventCallback AddClick { get; set; } = default!;
     [Parameter] public bool ShowSearchBox { get; set; } = true;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
     async Task OnTextChanged(ChangeEventArgs e)
     {
         Value = e.Value?.ToString() ?? string.Empty;

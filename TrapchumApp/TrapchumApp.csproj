@@ -79,7 +79,6 @@
 	<ItemGroup>
 		<AdditionalFiles Include="Pages\Currencies\CurrenciesIndex.razor" />
 		<AdditionalFiles Include="Pages\Currencies\CurrencyDetials.razor" />
-		<AdditionalFiles Include="Pages\Currencies\CurrencyModalCreate.razor" />
 		<AdditionalFiles Include="Pages\Currencies\CurrenyTableRow.razor" />
 		<AdditionalFiles Include="Pages\Currencies\ExchangeModalCurrency.razor" />
 		<AdditionalFiles Include="Pages\Currencies\NoteCreate.razor" />
@@ -259,7 +258,7 @@
 		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentLines.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentSideBars.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentMultiples.razor" />
-		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentScedule.razor" />
+		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentSchedule.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PayOffModal.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PayOffs.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Loans\Repayments\RecievePaymentPage.razor" />

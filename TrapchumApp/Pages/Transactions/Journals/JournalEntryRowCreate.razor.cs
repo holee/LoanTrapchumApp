@@ -1,4 +1,4 @@
-﻿using Applications.Features.Transactions.Journals;
+﻿using Applications.Features.Journals.Dtos;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
 using Applications.Responses.ViewModels.OtherNames;

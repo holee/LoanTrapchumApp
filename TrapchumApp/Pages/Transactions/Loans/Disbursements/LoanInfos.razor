@@ -36,6 +36,49 @@
                       Variant="Variant.Flat"
                       Text="Pay off"
                       Icon="@IconNames.Paid" />
+        @if (AppState.CanRequestEditLoan)
+        {
+            <RadzenButton Click="@HandlePayOf"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Warning"
+                          Variant="Variant.Flat"
+                          Text="Request Edit"
+                          Visible="@(LoanSchedule?.RequestEdit == false)"
+                          Icon="@IconNames.RequestApprove" />
+        }
+        @if (AppState.CanRequestDeleteLoan)
+        {
+            <RadzenButton Click="@HandlePayOf"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Warning"
+                          Variant="Variant.Flat"
+                          Text="Request Delete"
+                          Visible="@(LoanSchedule?.RequestDelete == false)"
+                          Icon="@IconNames.RequestApprove" />
+
+        }
+
+        
+        @if (AppState.AllowDeleteLoan)
+        {
+            <RadzenButton Click="@HandlePayOf"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Variant="Variant.Flat"
+                          Visible="@(LoanSchedule?.AllowDelete == true)"
+                          Text="Delete"
+                          Icon="@IconNames.Delete" />
+        }
+        @if (AppState.IsAllowEditLoan)
+        {
+            <RadzenButton Click="@HandlePayOf"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Secondary"
+                          Variant="Variant.Flat"
+                          Text="Edit"
+                          Visible="@(LoanSchedule?.AllowEdit == true)"
+                          Icon="@IconNames.Edit" />
+        }
     </RadzenStack>
 </RadzenStack>
 

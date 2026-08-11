@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════════
    BlabSelect2 – pixel-accurate Select2 4.1 default theme
+   with Small / Default / Large size variants
    Source reference: select2.org / select2 4.1.0-rc.0
    ═══════════════════════════════════════════════════════════ */
 
@@ -26,7 +27,12 @@
     cursor: pointer;
     height: 28px;
     user-select: none;
-    transition: none;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.blab-select2__control:focus-within {
+    border-color: #5897fb;
+    box-shadow: 0 0 0 1px rgba(88, 151, 251, 0.25);
 }
 
 .blab-select2--multiple .blab-select2__control {
@@ -95,6 +101,7 @@
     border-width: 5px 4px 0 4px;
     height: 0;
     width: 0;
+    transition: transform 0.15s ease;
 }
 
 .blab-select2--open .blab-select2__arrow b {
@@ -113,6 +120,7 @@
     align-items: center;
     padding: 0 4px;
     color: #999;
+    transition: color 0.1s;
 }
 
 .blab-select2__clear:hover {
@@ -179,6 +187,7 @@
     display: flex;
     align-items: center;
     line-height: 1;
+    transition: background-color 0.1s, color 0.1s;
 }
 
 .blab-select2__tag-remove:hover {
@@ -247,6 +256,7 @@
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
     box-sizing: border-box;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* ── Results list ────────────────────────────────────────── */
@@ -269,6 +279,7 @@
     font-size: 14px;
     line-height: 1.28;
     color: #444;
+    transition: background-color 0.08s ease;
 }
 
 .blab-select2__option--highlighted {
@@ -280,10 +291,39 @@
     background-color: #ddd;
 }
 
+.blab-select2__option--disabled {
+    color: #999;
+    cursor: not-allowed;
+    background-color: transparent;
+}
+
+.blab-select2__option--disabled:hover,
+.blab-select2__option--disabled.blab-select2__option--highlighted {
+    background-color: transparent;
+    color: #999;
+}
+
 .blab-select2__option-check {
     margin-left: 6px;
     font-size: 11px;
     flex-shrink: 0;
+}
+
+/* ── Opt-group headers ──────────────────────────────────── */
+.blab-select2__group {
+    padding: 6px 6px 4px;
+    font-weight: 700;
+    font-size: 12px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    cursor: default;
+    user-select: none;
+    border-top: 1px solid #eee;
+}
+
+.blab-select2__group:first-child {
+    border-top: none;
 }
 
 /* ── Messages ────────────────────────────────────────────── */
@@ -292,6 +332,11 @@
     color: #999;
     font-size: 13px;
     text-align: center;
+}
+
+.blab-select2__message--warning {
+    color: #d48806;
+    background-color: #fffbe6;
 }
 
 .blab-select2__loading {
@@ -319,3 +364,316 @@
 }
 
 
+/* ═══════════════════════════════════════════════════════════
+   SIZE VARIANT: SMALL  (.blab-select2--sm)
+   ═══════════════════════════════════════════════════════════ */
+
+.blab-select2--sm {
+    font-size: 12px;
+}
+
+.blab-select2--sm .blab-select2__control {
+    height: 24px;
+    border-radius: 3px;
+}
+
+.blab-select2--sm.blab-select2--multiple .blab-select2__control {
+    min-height: 24px;
+}
+
+.blab-select2--sm.blab-select2--open .blab-select2__control {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.blab-select2--sm .blab-select2__rendered {
+    padding-left: 6px;
+    padding-right: 16px;
+    line-height: 22px;
+    font-size: 12px;
+}
+
+.blab-select2--sm .blab-select2__placeholder {
+    font-size: 12px;
+}
+
+.blab-select2--sm .blab-select2__arrow {
+    height: 22px;
+    width: 16px;
+}
+
+.blab-select2--sm .blab-select2__arrow b {
+    border-width: 4px 3px 0 3px;
+}
+
+.blab-select2--sm.blab-select2--open .blab-select2__arrow b {
+    border-width: 0 3px 4px 3px;
+}
+
+.blab-select2--sm .blab-select2__clear {
+    height: 22px;
+    font-size: 0.85em;
+    padding: 0 3px;
+}
+
+/* Tags – small */
+.blab-select2--sm .blab-select2__tags {
+    padding: 0 3px 3px 0;
+}
+
+.blab-select2--sm .blab-select2__tag {
+    font-size: 11px;
+    line-height: 1.4;
+    margin-left: 3px;
+    margin-top: 3px;
+    padding-left: 16px;
+    border-radius: 3px;
+}
+
+.blab-select2--sm .blab-select2__tag-text {
+    padding-left: 1px;
+    padding-right: 4px;
+}
+
+.blab-select2--sm .blab-select2__tag-remove {
+    padding: 0 3px;
+    font-size: 0.85em;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+/* Search – small */
+.blab-select2--sm .blab-select2__search-container {
+    padding: 3px;
+}
+
+.blab-select2--sm .blab-select2__search {
+    padding: 3px;
+    font-size: 12px;
+}
+
+.blab-select2--sm .blab-select2__search--inline {
+    height: 14px;
+    line-height: 14px;
+    font-size: 12px;
+    margin-top: 3px;
+    margin-left: 3px;
+    min-width: 3em;
+    flex: 1 0 3em;
+}
+
+/* Dropdown – small */
+.blab-select2--sm .blab-select2__dropdown {
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+/* Options – small */
+.blab-select2--sm .blab-select2__option {
+    padding: 4px 6px;
+    font-size: 12px;
+}
+
+.blab-select2--sm .blab-select2__option-check {
+    font-size: 10px;
+    margin-left: 4px;
+}
+
+/* Group header – small */
+.blab-select2--sm .blab-select2__group {
+    padding: 4px 6px 3px;
+    font-size: 10px;
+}
+
+/* Messages – small */
+.blab-select2--sm .blab-select2__message {
+    padding: 4px;
+    font-size: 11px;
+}
+
+.blab-select2--sm .blab-select2__spinner {
+    width: 12px;
+    height: 12px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   SIZE VARIANT: LARGE  (.blab-select2--lg)
+   ═══════════════════════════════════════════════════════════ */
+
+.blab-select2--lg {
+    font-size: 16px;
+}
+
+.blab-select2--lg .blab-select2__control {
+    height: 38px;
+    border-radius: 5px;
+}
+
+.blab-select2--lg.blab-select2--multiple .blab-select2__control {
+    min-height: 38px;
+}
+
+.blab-select2--lg.blab-select2--open .blab-select2__control {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.blab-select2--lg .blab-select2__rendered {
+    padding-left: 10px;
+    padding-right: 24px;
+    line-height: 36px;
+    font-size: 16px;
+}
+
+.blab-select2--lg .blab-select2__placeholder {
+    font-size: 16px;
+}
+
+.blab-select2--lg .blab-select2__arrow {
+    height: 36px;
+    width: 24px;
+}
+
+.blab-select2--lg .blab-select2__arrow b {
+    border-width: 6px 5px 0 5px;
+}
+
+.blab-select2--lg.blab-select2--open .blab-select2__arrow b {
+    border-width: 0 5px 6px 5px;
+}
+
+.blab-select2--lg .blab-select2__clear {
+    height: 36px;
+    font-size: 1.15em;
+    padding: 0 5px;
+}
+
+/* Tags – large */
+.blab-select2--lg .blab-select2__tags {
+    padding: 0 6px 6px 0;
+}
+
+.blab-select2--lg .blab-select2__tag {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-left: 6px;
+    margin-top: 6px;
+    padding-left: 24px;
+    border-radius: 5px;
+}
+
+.blab-select2--lg .blab-select2__tag-text {
+    padding-left: 3px;
+    padding-right: 6px;
+}
+
+.blab-select2--lg .blab-select2__tag-remove {
+    padding: 0 5px;
+    font-size: 1.1em;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+/* Search – large */
+.blab-select2--lg .blab-select2__search-container {
+    padding: 6px;
+}
+
+.blab-select2--lg .blab-select2__search {
+    padding: 6px;
+    font-size: 16px;
+}
+
+.blab-select2--lg .blab-select2__search--inline {
+    height: 22px;
+    line-height: 22px;
+    font-size: 16px;
+    margin-top: 6px;
+    margin-left: 6px;
+    min-width: 5em;
+    flex: 1 0 5em;
+}
+
+/* Dropdown – large */
+.blab-select2--lg .blab-select2__dropdown {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+/* Options – large */
+.blab-select2--lg .blab-select2__option {
+    padding: 8px 10px;
+    font-size: 16px;
+}
+
+.blab-select2--lg .blab-select2__option-check {
+    font-size: 13px;
+    margin-left: 8px;
+}
+
+/* Group header – large */
+.blab-select2--lg .blab-select2__group {
+    padding: 8px 10px 5px;
+    font-size: 13px;
+}
+
+/* Messages – large */
+.blab-select2--lg .blab-select2__message {
+    padding: 8px;
+    font-size: 15px;
+}
+
+.blab-select2--lg .blab-select2__spinner {
+    width: 16px;
+    height: 16px;
+    border-width: 2.5px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   RTL SUPPORT  (.blab-select2--rtl)
+   ═══════════════════════════════════════════════════════════ */
+
+.blab-select2--rtl .blab-select2__rendered {
+    padding-left: 20px;
+    padding-right: 8px;
+}
+
+.blab-select2--rtl .blab-select2__tags {
+    padding: 0 0 5px 5px;
+}
+
+.blab-select2--rtl .blab-select2__tag {
+    margin-left: 0;
+    margin-right: 5px;
+    padding-left: 0;
+    padding-right: 20px;
+}
+
+.blab-select2--rtl .blab-select2__tag-text {
+    padding-left: 5px;
+    padding-right: 2px;
+}
+
+.blab-select2--rtl .blab-select2__tag-remove {
+    left: auto;
+    right: 0;
+    border-right: none;
+    border-left: 1px solid #aaa;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.blab-select2--rtl .blab-select2__search--inline {
+    margin-left: 0;
+    margin-right: 5px;
+}
+
+.blab-select2--rtl .blab-select2__option-check {
+    margin-left: 0;
+    margin-right: 6px;
+    order: -1;
+}

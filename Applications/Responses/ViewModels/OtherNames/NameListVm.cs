@@ -29,17 +29,9 @@ public sealed class NameListVm
     public DateTime? ModifiedDt { get; set; }
     public string? CountryName { get; set; } = string.Empty;
     public string? City { get; set; } = string.Empty;
-    //public int? ProvinceRefId { get; set; }
-    //public string? ProDescription { get; set; } = string.Empty;
     public string? ProInKhmer { get; set; } = string.Empty;
-    //public int? DistrictRefId { get; set; }
-    //public string? DisDescription { get; set; } = string.Empty;
     public string? DisInKhmer { get; set; } = string.Empty;
-    //public int? CommuneRefId { get; set; }
-    //public string? ComDescription { get; set; } = string.Empty;
     public string? ComInKhmer { get; set; } = string.Empty;
-    //public int? VillageRefId { get; set; }
-    //public string? VillDescription { get; set; } = string.Empty;
     public string? VilInKhmer { get; set; } = string.Empty;
     public string? Description { get; set; } = string.Empty;
 }

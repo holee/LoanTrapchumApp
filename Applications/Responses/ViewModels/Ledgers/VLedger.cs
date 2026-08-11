@@ -14,7 +14,6 @@ public sealed class VLedger
     public int? LedgerTypeId { get; set; }
     public string? LedgerTypeCode { get; set; }
     public bool? IsActive { get; set; }
-
     public int? CurrencyId { get; set; } 
     public string? CurrencyCode { get; set; }
 }

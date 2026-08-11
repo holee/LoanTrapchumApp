@@ -26,5 +26,6 @@ public interface IOtherNameService
     Task<ErrorOr<bool>> ConvertToCustomerAsync(string? id, Customer customer, CancellationToken cancellation = default);
     Task<ErrorOr<bool>> ConvertToVendorAsync(string? id, Vendor vendor, CancellationToken cancellation = default);
     Task<ErrorOr<bool>> ConvertToEmployeeAsync(string? id, Employee employee, CancellationToken cancellation = default);
+    Task<PageMetaData<VOtherNames>> GetNameListsAsync(string? nameId, QueryParam param, CancellationToken cancellation = default, params string[] columns);
 }
 

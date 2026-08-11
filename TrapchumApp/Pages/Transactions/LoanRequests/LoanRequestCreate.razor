@@ -3,6 +3,32 @@
 @using Applications.Features.Collaterals.Dtos
 @attribute [MustHasPermission(Resources.LoanRequest, Actions.Create)]
 <PageTitle>Create New</PageTitle>
+<style>
+    .co-customer-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.85rem;
+        margin-bottom: 0.75rem;
+        background: var(--rz-base-100);
+        border: 1px solid var(--rz-base-300);
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: var(--rz-text-color);
+        font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif;
+        cursor: pointer;
+        user-select: none;
+    }
+</style>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+    <label class="co-customer-toggle">
+        <RadzenCheckBox Change="@OnCheckchanged"
+                        TValue="bool"
+                        @bind-Value="_isHasCoCustomer" />
+        <span>មានអ្នកខ្ចីរួម (Co-Customer)</span>
+    </label>
+</RadzenStack>
 <EditForm Model="model" @ref="editForm">
     <Blazilla.FluentValidator />
     <input type="hidden" @bind="model.CreditAgentRefId" />
@@ -28,21 +54,6 @@
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenCard>
-                </RadzenStepsItem>
-                <RadzenStepsItem Text="អ្នករួមខ្ខី">
-                    <CoRequestCustomerBox Customers="@CoCustomers"
-                                          ShowCommand="true"
-                                          ShowAdd="true"
-                                          @ref="CoCustomerRef"
-                                          Remove="@RemoveCoCustomer"
-                                          Add="@AddCoCustomer"
-                                          ShowRemove="true">
-                        <SearchBoxTemplate>
-                            <CoRequestSearchList BranchId="@BranchId"
-                                                 OnSelected="@OnSelectedCoCustomer"
-                                                 OnSelecteds="@OnSelectedCoCustomers" />
-                        </SearchBoxTemplate>
-                    </CoRequestCustomerBox>
                 </RadzenStepsItem>
                 <RadzenStepsItem Text="ទ្រព្យសម្បត្តិបញ្ចាំ">
                     <LoanRequestCollaterals CustomerId="@CustomerId"
@@ -87,6 +98,21 @@
                                      ShowAdditionalInfo="true"
                                      GetIncomeOrExpense="OnGetIncomeOrExpense" />
                 </RadzenStepsItem>
+                <RadzenStepsItem Text="អ្នករួមខ្ខី" Visible="@_isHasCoCustomer">
+                    <CoRequestCustomerBox Customers="@CoCustomers"
+                                          ShowCommand="true"
+                                          ShowAdd="true"
+                                          @ref="CoCustomerRef"
+                                          Remove="@RemoveCoCustomer"
+                                          Add="@AddCoCustomer"
+                                          ShowRemove="true">
+                        <SearchBoxTemplate>
+                            <CoRequestSearchList BranchId="@BranchId"
+                                                 OnSelected="@OnSelectedCoCustomer"
+                                                 OnSelecteds="@OnSelectedCoCustomers" />
+                        </SearchBoxTemplate>
+                    </CoRequestCustomerBox>
+                </RadzenStepsItem>
             </Steps>
         </RadzenSteps>
     </RadzenCard>
@@ -114,3 +140,10 @@
     </RadzenStack>
 </EditForm>
 
+@code {
+    private bool _isHasCoCustomer = false;
+    private void OnCheckchanged(bool arg)
+    {
+        _isHasCoCustomer = arg;
+    }
+}

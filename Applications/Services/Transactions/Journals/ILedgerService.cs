@@ -10,14 +10,14 @@ namespace Applications.Services.Transactions.Journals;
 
 public interface ILedgerServiceImpl
 {
-    Task<ErrorOr<string>> ChangeLedgerStatus(LedgerChangeStatus req);
-    Task<ErrorOr<string>> CreateOrUpdateLedger(Ledger entity);
-    Task<ErrorOr<string>> DeleteLedger(int? id);
+    //Task<ErrorOr<string>> ChangeLedgerStatus(LedgerChangeStatus req);
+    //Task<ErrorOr<string>> CreateOrUpdateLedger(Ledger entity);
+    //Task<ErrorOr<string>> DeleteLedger(int? id);
     Task<ErrorOr<Ledger>> FindLedgerByIdAsync(int? ledgerId);
-    Task<ErrorOr<LedgerType>> FindLedgerTypeById(int? ledgerId);
-    Task<ErrorOr<IEnumerable<LedgerType>>> FindLedgerTypes(int? ledgerTypeId = 0, string? q = null);
-    Task<ErrorOr<IEnumerable<VLedger>>> GetLedgersAsync(int? ledgerId = 0, int? currencyId = 1, string? q = null);
-    Task<Pager<VLedger>> GetLedgersAsync(int? pageIndex, int? pageSize, string sortColumn, bool sortDescending = false, int currencyId = 1, bool includeInactive = false, string? q = null);
+    //Task<ErrorOr<LedgerType>> FindLedgerTypeById(int? ledgerId);
+    //Task<ErrorOr<IEnumerable<LedgerType>>> FindLedgerTypes(int? ledgerTypeId = 0, string? q = null);
+   // Task<ErrorOr<IEnumerable<VLedger>>> GetLedgersAsync(int? ledgerId = 0, int? currencyId = 1, string? q = null);
+    //Task<Pager<VLedger>> GetLedgersAsync(int? pageIndex, int? pageSize, string sortColumn, bool sortDescending = false, int currencyId = 1, bool includeInactive = false, string? q = null);
 }
 
 public sealed class LedgerService(ILedgerService ledgService) : ILedgerServiceImpl
@@ -42,23 +42,25 @@ public sealed class LedgerService(ILedgerService ledgService) : ILedgerServiceIm
         return await ledgService.GetLedgerByIdAsync(ledgerId);
     }
 
-    public async Task<ErrorOr<LedgerType>> FindLedgerTypeById(int? ledgerId)
-    {
-        return await ledgService.GetLedgerTypeById(ledgerId);
-    }
+    //public async Task<ErrorOr<LedgerType>> FindLedgerTypeById(int? ledgerId)
+    //{
+    //    return await ledgService.GetLedgerTypeById(ledgerId);
+    //}
 
-    public async Task<ErrorOr<IEnumerable<LedgerType>>> FindLedgerTypes(int? ledgerTypeId = 0, string? q = null)
-    {
-        return await ledgService.FindLedgerTypes(ledgerTypeId, q);
-    }
+    //public async Task<ErrorOr<IEnumerable<LedgerType>>> FindLedgerTypes(int? ledgerTypeId = 0, string? q = null)
+    //{
+    //    return await ledgService.FindLedgerTypes(ledgerTypeId, q);
+    //}
 
-    public async Task<ErrorOr<IEnumerable<VLedger>>> GetLedgersAsync(int? ledgerId = 0, int? currencyId = 1, string? q = null)
-    {
-        return await ledgService.GetLedgersAsync(ledgerId, currencyId, q);
-    }
+    //public async Task<ErrorOr<IEnumerable<VLedger>>> GetLedgersAsync(int? ledgerId = 0, int? currencyId = 1, string? q = null)
+    //{
+    //    return await ledgService.GetLedgersAsync(ledgerId, currencyId, q);
+    //}
 
-    public async Task<Pager<VLedger>> GetLedgersAsync(int? pageIndex, int? pageSize, string sortColumn, bool sortDescending = false, int currencyId = 1, bool includeInactive = false, string? q = null)
-    {
-        return await ledgService.GetLedgersAsync(pageIndex, pageSize, sortColumn, sortDescending, currencyId, includeInactive, q);
-    }
+    //public async Task<Pager<VLedger>> GetLedgersAsync(int? pageIndex, int? pageSize, string sortColumn, bool sortDescending = false, int currencyId = 1, bool includeInactive = false, string? q = null)
+    //{
+    //    return await ledgService.GetLedgersAsync(pageIndex, pageSize, sortColumn, sortDescending, currencyId, includeInactive, q);
+    //}
+
+
 }

@@ -1,4 +1,5 @@
 ﻿using Applications.Commons;
+using Applications.Commons.ExceptionHandlers;
 using Applications.Commons.Mappers;
 using Applications.Extensions;
 using Applications.Features.Journals.Dtos;
@@ -167,81 +168,64 @@ public sealed class JournalRepository(DataContext context,
         try
         {
             await using var dataContext = await dbContextFactory.CreateDbContextAsync();
+
             var insertedEntity = dataContext.Add(model).Entity;
+
             await dataContext.SaveChangesAsync();
+
             return insertedEntity;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, ex.Message);
+
             return Error.Unexpected(description: ex.Message);
         }
     }
 
 
-    public async Task<ErrorOr<JournalEntry>> CreateJournalAsync(JournalEntry model)
-    {
-        logger.LogInformation(@"=======================Attempt to create Journal=========================");
-
-        await using var dataContext = await dbContextFactory.CreateDbContextAsync();
-
-        try
-        {
-            var addedEntity = dataContext.JournalEntries.Add(model).Entity;
-
-            await dataContext.SaveChangesAsync();
-
-            return model;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError("Error Server: " + ex, ex.Message);
-            return Error.Unexpected(description: $"Error Server: {ex.Message}");
-        }
-    }
-
-
-    public async Task<ErrorOr<string>> CreateJournalAsync(LoanTransaction model, CancellationToken cancellation = default)
-    {
-        logger.LogInformation(@"=======================Attempt to create Journal=========================");
-
-        await using var dataContext = await dbContextFactory.CreateDbContextAsync(cancellation);
-
-        try
-        {
-
-            dataContext.LoanTransaction.Add(model);
-
-            await dataContext.SaveChangesAsync(cancellation);
-
-            return Messages.DataCreated;
-        }
-        catch (DbUpdateException ex)
-        {
-            logger.LogError("Error Server: " + ex, ex.Message);
-            return Error.Unexpected(description: $"Error Server: {ex.InnerException?.Message}");
-        }
-    }
-
+   
 
     public async Task<ErrorOr<JournalEntry?>> CreateAsync(LoanTransaction model, CancellationToken cancellation = default)
     {
-        logger.LogInformation("Attempt to create Journal");
+        if (model is null)
+        {
+            return Error.Validation(description: "Loan transaction is required.");
+        }
 
-        await using var dataContext = await dbContextFactory.CreateDbContextAsync(cancellation);
+        if (model.JournalEntry is null)
+        {
+            return Error.Validation(description: "Journal entry is required.");
+        }
+
+        logger.LogInformation("Attempt to create journal for transaction {TransactionId}.", model.TransactionsId);
 
         try
         {
-            var addedModel = dataContext.LoanTransaction.Add(model).Entity;
+            await using var dataContext = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            await dataContext.LoanTransaction.AddAsync(model, cancellation);
 
             await dataContext.SaveChangesAsync(cancellation);
 
-            return addedModel.JournalEntry;
+            var createdJournal = await dataContext.JournalEntries
+                .Include(x => x.JournalEntryLines)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.TransactionsRefId == model.TransactionsId, cancellation);
+
+            return createdJournal is null
+                ? Error.NotFound(description: "Journal was created but could not be retrieved.")
+                : createdJournal;
         }
         catch (DbUpdateException ex)
         {
-            logger.LogError("Error Server: " + ex, ex.Message);
-            return Error.Unexpected(description: $"Error Server: {ex.InnerException?.Message}");
+            logger.LogError(ex, "Failed to create journal for transaction {TransactionId}.", model.TransactionsId);
+            return Error.Conflict(description: ex.InnerException?.Message ?? ex.Message);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "Unexpected error while creating journal for transaction {TransactionId}.", model.TransactionsId);
+            return Error.Unexpected(description: ex.Message);
         }
     }
 
@@ -313,29 +297,11 @@ public sealed class JournalRepository(DataContext context,
         catch (Exception ex)
         {
             await context.Database.RollbackTransactionAsync();
+
             return Error.Unexpected(description: ex.Message);
         }
     }
 
-    public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int pageIndex, int pageSize,
-        string sortColumn, bool sortDescending = false, string? q = null)
-    {
-        await using var dataContext = await dbContextFactory.CreateDbContextAsync();
-        IQueryable<JournalEntryVm> queries = dataContext.VJournals
-            .WhereIf(!string.IsNullOrWhiteSpace(q), x => EF.Functions.Like(x.ReferrenceNum!, $"%{q}%") ||
-                                                         EF.Functions.Like(x.JournalType!, $"%{q}%") ||
-                                                         EF.Functions.Like(x.TransactionTypeName!, $"%{q}%") ||
-                                                         EF.Functions.Like(x.TransactionDate!.ToString(), $"%{q}%"))
-            .OrderByDescendingIf(sortDescending, x => EF.Property<object>(x, sortColumn));
-        var pageCount = await queries.CountAsync();
-        var pageItems = queries.Skip(pageIndex).Take(pageSize).ToList();
-
-        return new Pager<JournalEntryVm>
-        {
-            Count = pageCount,
-            Items = pageItems
-        };
-    }
 
     public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId, QueryParam param, CancellationToken cancellation = default)
     {
@@ -410,6 +376,7 @@ public sealed class JournalRepository(DataContext context,
 
     public async Task<ErrorOr<JournalEntryVm>> GetJournalByIdAsync(string? journalId, bool include)
     {
+
         if (journalId.IsNotNullOrEmpty())
         {
             return Error.NotFound(description: $"There is no journal with this id:{journalId}.");
@@ -418,9 +385,13 @@ public sealed class JournalRepository(DataContext context,
         using var db = dapperConnectionFactory.CreateConnection();
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
         var parameters = new DynamicParameters();
+
         parameters.Add("@JounrnalEntryId", journalId);
+
         parameters.Add("@Include", include);
+
         if (!include)
         {
             var existingJournal =
@@ -434,6 +405,7 @@ public sealed class JournalRepository(DataContext context,
         }
 
         var lookup = new Dictionary<string, JournalEntryVm>();
+
         var items = await db.QueryAsync<JournalEntryVm, JournalEntryLineVm, JournalEntryVm>("spGetJournalEntries",
             (journal, line) =>
             {
@@ -459,6 +431,55 @@ public sealed class JournalRepository(DataContext context,
             : (ErrorOr<JournalEntryVm>)item2;
     }
 
+
+    public async Task<JournalEntryDto?> GetJournalByIdAsync(string? journalId, bool include, CancellationToken cancellation = default)
+    {
+
+        ArgumentException.ThrowIfNullOrEmpty(journalId);
+
+        using var db = await dapperConnectionFactory.CreateConnectionAsync(cancellation);
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("@JournalEntryId", journalId);
+
+        parameters.Add("@Include", include);
+
+        var command = new CommandDefinition(
+            "spGetJournalEntries",
+            parameters,
+            commandType: CommandType.StoredProcedure,
+            cancellationToken: cancellation);
+
+        if (!include)
+        {
+            var existingJournal = await db.QueryFirstOrDefaultAsync<JournalEntryDto>(command);
+
+            if (existingJournal is null)
+            {
+                throw new NotFoundException("No Journal Entry found.");
+            }
+
+            return existingJournal;
+        }
+
+        var multi = await db.QueryMultipleAsync(command);
+
+        var existingMain = await multi.ReadFirstOrDefaultAsync<JournalEntryDto>();
+
+        if (existingMain is null)
+        {
+            throw new NotFoundException($"{nameof(existingMain)} is null");
+        }
+
+        var entryLines = await multi.ReadAsync<JournalEntryLineDto>();
+
+        existingMain.JournalEntryLines = entryLines.ToList();
+
+        return existingMain;
+    }
+
+
     public async Task<JournalEntry?> GetJournalByIdAsync(string? id)
     {
         var journal = context.JournalEntries
@@ -470,6 +491,8 @@ public sealed class JournalRepository(DataContext context,
 
     public async Task<JournalEntry?> GetJournalByIdAsync(string? journalEntryId, CancellationToken cancellation = default)
     {
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
         var foundItem = await context.JournalEntries
                                 .Include(a => a.JournalEntryLines)
                                 .AsNoTracking()
@@ -477,6 +500,26 @@ public sealed class JournalRepository(DataContext context,
         return foundItem;
     }
 
+    public async Task<LoanTransaction?> GetJournalById(string? tranxId, CancellationToken cancellation = default)
+    {
+
+        ArgumentNullException.ThrowIfNullOrEmpty(tranxId, nameof(tranxId));
+
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var foundItem = await context.LoanTransaction
+                                .Include(x => x.JournalEntry)
+                                .ThenInclude(a => a.JournalEntryLines)
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(x => x.TransactionsId == tranxId, cancellation);
+
+        if (foundItem == null)
+        {
+            throw new NotFoundException($"No LoanTransaction found with TransactionsId: {tranxId}");
+        }
+
+        return foundItem;
+    }
 
     public async Task<JournalEntryDto?> GetJournalDetailByIdAsync(string? journalEntryId, CancellationToken cancellation = default)
     {
@@ -486,10 +529,10 @@ public sealed class JournalRepository(DataContext context,
 
         parameters.Add("@JournalEntryId", journalEntryId); // ✅ fixed typo
 
-        var journalDictionary = new Dictionary<string, Applications.Features.Journals.Dtos.JournalEntryDto>();
+        var journalDictionary = new Dictionary<string, JournalEntryDto>();
 
         var result = await db.QueryAsync(
-            "spGetJournalEntryDetailsById", (Applications.Features.Journals.Dtos.JournalEntryDto journal, JournalEntryLineDto line) =>
+            "spGetJournalEntryDetailsById", (JournalEntryDto journal, JournalEntryLineDto line) =>
             {
                 if (!journalDictionary.TryGetValue(journal.JournalEntryId!, out var existingJournal))
                 {
@@ -520,7 +563,6 @@ public sealed class JournalRepository(DataContext context,
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-
         IQueryable<JournalType> journalTypes = context.JournalTypes;
         if (!string.IsNullOrEmpty(expression))
         {
@@ -542,7 +584,7 @@ public sealed class JournalRepository(DataContext context,
 
         var expression = query.Filter?.Trim();
 
-        if (!string.IsNullOrEmpty(expression)) 
+        if (!string.IsNullOrEmpty(expression))
         {
             string prop = typeof(JournalType).MapField(query.FilterColumn);
 
@@ -557,7 +599,7 @@ public sealed class JournalRepository(DataContext context,
                 queries = queries.StartWiths(expression, props);
             }
         }
-        if(query.SortColumn.IsNotNullOrEmpty())
+        if (query.SortColumn.IsNotNullOrEmpty())
         {
             queries = query.SortDescending
                 ? queries.OrderByDescending(x => EF.Property<object>(x, query.SortColumn))
@@ -597,7 +639,6 @@ public sealed class JournalRepository(DataContext context,
 
         return PagerExtensions.Create(items, counts);
     }
-
 
     public async Task<IEnumerable<VNameList>> GetNameLists(long? id = 0, int takeRows = 0, string? q = null)
     {
@@ -652,7 +693,7 @@ public sealed class JournalRepository(DataContext context,
 
 
 
-    private static IQueryable<Applications.Features.Journals.Dtos.JournalEntryDto> ApplyFilter(QueryParam param, IQueryable<Applications.Features.Journals.Dtos.JournalEntryDto> queries)
+    private static IQueryable<JournalEntryDto> ApplyFilter(QueryParam param, IQueryable<JournalEntryDto> queries)
     {
         var filter = param.Filter?.Trim().ToLower();
 
@@ -736,6 +777,73 @@ public sealed class JournalRepository(DataContext context,
     }
 
 }
+
+
+
+//public async Task<ErrorOr<LoanTransaction>> CreateAsync(LoanTransaction model, CancellationToken cancellation = default)
+//{
+//    logger.LogInformation("Attempt to create Journal");
+//    try
+//    {
+//        await using var dataContext = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+//        var insertedEntity = dataContext.Add(model).Entity;
+
+//        await dataContext.SaveChangesAsync();
+
+//        return insertedEntity;
+//    }
+//    catch (Exception ex)
+//    {
+//        logger.LogError(ex, ex.Message);
+
+//        return Error.Unexpected(description: ex.Message);
+//    }
+//}
+
+
+//public async Task<ErrorOr<JournalEntry>> CreateJournalAsync(JournalEntry model)
+//{
+//    logger.LogInformation(@"=======================Attempt to create Journal=========================");
+
+//    await using var dataContext = await dbContextFactory.CreateDbContextAsync();
+
+//    try
+//    {
+//        var addedEntity = dataContext.JournalEntries.Add(model).Entity;
+
+//        await dataContext.SaveChangesAsync();
+
+//        return model;
+//    }
+//    catch (Exception ex)
+//    {
+//        logger.LogError("Error Server: " + ex, ex.Message);
+//        return Error.Unexpected(description: $"Error Server: {ex.Message}");
+//    }
+//}
+
+
+//public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int pageIndex, int pageSize,
+//    string sortColumn, bool sortDescending = false, string? q = null)
+//{
+//    await using var dataContext = await dbContextFactory.CreateDbContextAsync();
+//    IQueryable<JournalEntryVm> queries = dataContext.VJournals
+//        .WhereIf(!string.IsNullOrWhiteSpace(q), x => EF.Functions.Like(x.ReferrenceNum!, $"%{q}%") ||
+//                                                     EF.Functions.Like(x.JournalType!, $"%{q}%") ||
+//                                                     EF.Functions.Like(x.TransactionTypeName!, $"%{q}%") ||
+//                                                     EF.Functions.Like(x.TransactionDate!.ToString(), $"%{q}%"))
+//        .OrderByDescendingIf(sortDescending, x => EF.Property<object>(x, sortColumn));
+//    var pageCount = await queries.CountAsync();
+//    var pageItems = queries.Skip(pageIndex).Take(pageSize).ToList();
+
+//    return new Pager<JournalEntryVm>
+//    {
+//        Count = pageCount,
+//        Items = pageItems
+//    };
+//}
+
 
 //public async Task<JournalEntry?> FindJournal(Expression<Func<JournalEntry, bool>> expression, params String[] includes)
 //{

@@ -42,17 +42,9 @@ namespace TrapchumApp.Pages.Transactions.Journals
         private readonly SemaphoreSlim _loadLock = new(1, 1);
         private string? _selectedJournalId;
         string? UserId = string.Empty;
+       
         async Task ShowCreatedTab()
         {
-            //if (!showCreateTab)
-            //{
-            //    showCreateTab = true;
-            //    selectedIndex = 1;
-            //    return;
-            //}
-
-            //selectedIndex = 0;
-
             var options = new DialogOptions
             {
                 Width = "100vw",
@@ -74,6 +66,30 @@ namespace TrapchumApp.Pages.Transactions.Journals
 
         }
 
+
+        async Task ShowEditTab() 
+        {
+            var options = new DialogOptions
+            {
+                Width = "100vw",
+                Height = "100vh"
+            };
+
+            var parameters = new Dictionary<string, object?>
+            {
+                {"BranchId",BranchId },
+                {"UserId",UserId }
+            };
+
+            var dia = await DialogService.OpenAsync<JournalEntryUpdatePage>("Jorunal Entry", parameters, options);
+
+            if (dia is bool succes && succes)
+            {
+                await GetJournals(SearchText);
+            }
+
+        }
+
         void CloseCreateTab()
         {
             showCreateTab = !showCreateTab;
@@ -81,22 +97,8 @@ namespace TrapchumApp.Pages.Transactions.Journals
             selectedIndex = 0;
         }
 
-        void CloseDetailTab()
-        {
-            showDetailTab = !showDetailTab;
-            indexCounts.Remove("detail");
-            selectedIndex = 0;
-        }
-
         void RowSelecting()
         {
-        }
-
-        async void ChangedPageSize(int page)
-        {
-            pageSize = page;
-            Console.WriteLine(page);
-            await GetJournals();
         }
 
         protected override async Task OnInitializedAsync()
@@ -192,7 +194,9 @@ namespace TrapchumApp.Pages.Transactions.Journals
         void CloseDetailJournal(int e)
         {
             IsEnableDetail = false;
+
             selectedIndex = e;
+            
             StateHasChanged();
         }
 

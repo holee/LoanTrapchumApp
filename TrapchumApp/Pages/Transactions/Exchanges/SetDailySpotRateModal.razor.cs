@@ -1,30 +1,19 @@
+using Applications.Features.Currencies.Command.SetSpotRates;
 using Applications.Features.Currencies.Dto;
+using Applications.Features.Currencies.Queries.GetCurrenciesForSetSpotRates;
 using Applications.Features.Currencies.Responses;
-using Applications.Interfaces.Transactions;
-using Domains.Models.Currencies;
-using Mapster;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {
-    public partial class SetDailySpotRateModal
+    public partial class SetDailySpotRateModal(ILogger<SetDailySpotRateModal> logger)
     {
-        private readonly ILogger<SetDailySpotRateModal> _logger;
-
-        private readonly ISpotRateService _spotRateService;
-
-        public SetDailySpotRateModal(ILogger<SetDailySpotRateModal> logger, ISpotRateService spotRateService)
-        {
-            _logger = logger;
-            _spotRateService = spotRateService;
-        }
-
         private IEnumerable<VCurrenciesList>? Currencies = new List<VCurrenciesList>();
 
-        private List<CurrencyDtoCreateSpotRate> model = new List<CurrencyDtoCreateSpotRate>();
+        private List<CurrencySpotRateDtoCreate> model = new List<CurrencySpotRateDtoCreate>();
 
-        private int pageIndex = 1;
+        private int pageIndex = 0;
 
-        private int pageSize = 10;
+        private int pageSize = 15;
 
         private bool includeInactive = false;
 
@@ -33,18 +22,19 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         protected override async Task OnInitializedAsync()
         {
 
-            _logger.LogInformation("Getting...");
+            logger.LogInformation("Getting...");
 
             try
             {
-                var result = await _spotRateService.GetCurrenciesForSetSpotRate();
 
-                Currencies = result.Any() ? result : [];
+                var result = await mediator.Send(new GetCurrenciesForSetSpotRatesQuery(includeInactive, new QueryParam(pageIndex, pageSize)));
+
+                Currencies = result.Items;
 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, ex);
+                logger.LogError(ex.Message, ex);
             }
             await base.OnInitializedAsync();
         }
@@ -52,7 +42,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
         async Task SetSpotRate()
         {
-            model = Currencies!.Select(x => new CurrencyDtoCreateSpotRate
+            model = Currencies!.Select(x => new CurrencySpotRateDtoCreate
             {
                 CurrencyRefId = x.CurrencyId,
                 SpotRate = x.SpotRate,
@@ -60,23 +50,23 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 SellingRate = x.SellingRate,
                 TransactionDate = reqDate
             }).ToList();
+
             var intervalDay = DateTime.UtcNow.Subtract(reqDate).Days;
+
             if (intervalDay != 0)
             {
                 return;
             }
 
-            var req = model.Adapt<List<CurrencySpotRate>>();
-
-            var setSpotRate = await _spotRateService.SetSpotRates(req);
+            var setSpotRate = await mediator.Send(new SetSpotRatesCommand(model));
 
             if (setSpotRate.IsSuccess)
             {
-
+                _toastService.ShowSuccess("Spot Rate has been set successfully.", "Success");
             }
             else
             {
-
+                _toastService.ShowError(setSpotRate.GetMessage(), "Error");
             }
 
         }

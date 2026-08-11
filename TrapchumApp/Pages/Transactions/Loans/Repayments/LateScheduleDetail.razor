@@ -1,5 +1,4 @@
 @page "/app/loans/{LoanId}/late-schedules/{BranchId:int?}/Branches"
-@using TrapchumApp.Pages.Transactions.Loans.Disbursements
 
 <div class="late-schedule-container">
 
@@ -24,7 +23,6 @@
                          Text="@($"As of {PaymentDate:dd MMM yyyy}")"
                          Shade="Shade.Light" />
         </RadzenStack>
-        <LoanInfos BranchId="@BranchId" LoanId="@LoanId" />
     </RadzenCard>
 
     @* Summary Cards *@

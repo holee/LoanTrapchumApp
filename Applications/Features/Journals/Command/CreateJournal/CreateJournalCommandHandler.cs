@@ -1,6 +1,5 @@
 ﻿using Applications.Commons.Mappers;
 using Applications.Interfaces.Transactions;
-using Domains.Models.Journals;
 using ErrorOr;
 
 namespace Applications.Features.Journals.Command.CreateJournal;

@@ -11,22 +11,3 @@ public sealed record PageMetaData<T> : ICollectionResponse<T>
     public bool HasNextPage => Page < TotalPages;
    
 }
-
-
-//public static async Task<PaginationResult<T>> CreateAsync(IQueryable<T> query, int page, int pageSize)
-//{
-//    int totalCount = await query.CountAsync();
-
-//    List<T> items = await query
-//                            .Skip((page - 1) * pageSize)
-//                            .Take(pageSize)
-//                            .ToListAsync();
-
-//    return new PaginationResult<T>
-//    {
-//        Items = items,
-//        Page = page,
-//        PageSize = pageSize,
-//        TotalCount = totalCount
-//    };
-//}

@@ -1,5 +1,6 @@
 ﻿@page "/app/loans/requests/{branchId:int}/branches/create-new-request"
 @using Applications.Features.Collaterals.Dtos
+@using Applications.Features.Customers.Dto
 @using Applications.Features.Customers.Queries.GetCustomerAsPaging
 @using Applications.Features.Customers.Response
 @using Applications.Features.LoanPayments.Requests
@@ -14,8 +15,73 @@
 @using Applications.Features.Settings.Queries.GetLoanCategories
 @using Applications.Responses.Loans.Disbursements
 @using Applications.Responses.ViewModels.Loans.Requests
+@using TrapchumApp.Pages.Lists
+@using TrapchumApp.Pages.Lists.Customers
 @attribute [MustHasPermission(Resources.LoanRequest, Actions.Create)]
 <PageTitle>Create New</PageTitle>
+<style>
+    .loan-form {
+        font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif;
+    }
+
+    .form-section {
+        padding: 0.75rem 0;
+    }
+
+        .form-section + .form-section {
+            border-top: 1px solid var(--rz-base-200);
+        }
+
+    .form-section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--rz-text-color);
+        margin-bottom: 0.75rem;
+    }
+
+        .form-section-title .rzi {
+            font-size: 1rem;
+            color: var(--rz-primary);
+        }
+
+    .field-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--rz-text-secondary-color);
+        margin-bottom: 0.2rem;
+        font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif;
+    }
+
+    .co-customer-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.85rem;
+        margin-bottom: 0.75rem;
+        background: var(--rz-base-100);
+        border: 1px solid var(--rz-base-300);
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: var(--rz-text-color);
+        font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif;
+        cursor: pointer;
+        user-select: none;
+    }
+
+</style>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+    <label class="co-customer-toggle">
+        <RadzenCheckBox Change="@OnCheckchanged"
+                        TValue="bool"
+                        @bind-Value="_isHasCoCustomer" />
+        <span>មានអ្នកខ្ចីរួម (Co-Customer)</span>
+    </label>
+</RadzenStack>
 <EditForm Model="model" @ref="editForm">
     <Blazilla.FluentValidator />
     <input type="hidden" @bind="model.CreditAgentRefId" />
@@ -25,14 +91,12 @@
             <Steps>
                 <RadzenStepsItem Text="សំណើរ">
                     <RadzenCard class="rz-shadow-0 rz-mt-2 rz-background-color-base-200">
-                        <LoanRequestInfo CustomerId="@_customerId" BranchId="@BranchId" Model="@model" />
                         <div class="loan-form">
                             <div class="form-section">
                                 <div class="form-section-title">
                                     <RadzenIcon Icon="@IconNames.Customers" />
                                     <span>អតិថិជន និង ចំនួនទឹកប្រាក់</span>
                                 </div>
-
                                 <RadzenRow Gap="0.75rem" RowGap="0.75rem">
                                     <RadzenColumn SizeSM="12" SizeMD="5">
                                         <RadzenFormField Text="អតិថិជន" class="rz-w-100">
@@ -42,11 +106,15 @@
                                                                         TextProperty="@nameof(VCustomerList.AltName)"
                                                                         Density="Density.Compact"
                                                                         AllowFiltering="true"
-                                                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                                                         Style="width:100%;"
                                                                         GridLines="DataGridGridLines.Both"
                                                                         LoadData="@OnLoadData"
+                                                                        ShowSearch="false"
+                                                                        ShowAdd="true"
+                                                                        Add="@AddNewCustomer"
                                                                         SelectedItemChanged="@OnSelectedItemChanged"
+                                                                        ShowPagingSummary="true"
+                                                                        PageSize="15"
                                                                         @bind-Value="@model.CustomerRefId">
                                                     <Columns>
                                                         <RadzenDropDownDataGridColumn Property="@nameof(VCustomerList.AltName)"
@@ -54,6 +122,17 @@
                                                                                       Title="ឈ្មោះ" />
                                                         <RadzenDropDownDataGridColumn Property="@nameof(VCustomerList.Phone)"
                                                                                       Title="ទូរស័ព្ទ" />
+                                                        <RadzenDropDownDataGridColumn Width="7rem"
+                                                                                      TextAlign="TextAlign.Center"
+                                                                                      Property="@nameof(VCustomerList.IsLoanActive)"
+                                                                                      Title="ស្ថានភាព">
+                                                            <Template Context="c">
+
+                                                                <RadzenIcon IconStyle="IconStyle.Success"
+                                                                            Icon="@IconNames.CheckCircle"
+                                                                            Style="font-size:1rem" />
+                                                            </Template>
+                                                        </RadzenDropDownDataGridColumn>
                                                     </Columns>
                                                 </RadzenDropDownDataGrid>
                                             </ChildContent>
@@ -324,7 +403,7 @@
                                      ShowAdditionalInfo="true"
                                      GetIncomeOrExpense="OnGetIncomeOrExpense" />
                 </RadzenStepsItem>
-                <RadzenStepsItem Text="អ្នករួមខ្ខី">
+                <RadzenStepsItem Text="អ្នករួមខ្ខី" Visible="@_isHasCoCustomer">
                     <CoRequestCustomerBox Customers="@CoCustomers"
                                           ShowCommand="true"
                                           ShowAdd="true"
@@ -366,11 +445,8 @@
     </RadzenStack>
 </EditForm>
 @code {
-    [Parameter] public string? UserId { get; set; }
-    [Parameter] public string? CustomerId { get; set; }
     [Parameter] public EventCallback<string?> SelectCustomer { get; set; }
-    [Parameter] public string? LoanRequestId { get; set; }
-
+    private bool _isHasCoCustomer = false;
     private IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
 
     private IEnumerable<VUserLoanSizes> AprovedUsers = [];
@@ -415,28 +491,6 @@
     string? filterText = "";
     private List<LoanPurposeDto> _loanPurposes = [];
 
-    // protected override async Task OnInitializedAsync()
-    // {
-
-    //     await GetApprovedUser(BranchId, null, null);
-    //     if (string.IsNullOrEmpty(model.AprovedUserId))
-    //     {
-          //  model.AprovedUserId = defaultUserId;
-    //     }
-
-    //     if (CustomerId.IsNotNullOrEmpty() || model.CustomerRefId.IsNotNullOrEmpty())
-    //     {
-    //         model.CustomerRefId = CustomerId;
-
-    //         await GetCustomers(CustomerId);
-
-    //         model.FullName = Customers.FirstOrDefault(x => x.CustomerId == CustomerId)?.AltName ?? string.Empty;
-    //     }
-
-
-    //     await base.OnInitializedAsync();
-    // }
-
     private async Task GetLoanCategories()
     {
         var cat = await mediator.Send(new GetLoanCategoriesQuery(null, null)); //loanSettingService.GetLoanCategories();
@@ -475,7 +529,7 @@
 
     private async Task GetCustomers(string? customerId, int take = 25, string? filter = null)
     {
-        var queryParam = new QueryParam(0, take);
+        var queryParam = new QueryParam(0, take, null, false, false, filter);
 
         var command = new GetCustomerAsPagingQuery(null, null, customerId, queryParam);
 
@@ -605,7 +659,7 @@
 
     private async Task OnLoadData(LoadDataArgs args)
     {
-        await GetCustomers();
+        await GetCustomers(args.Filter);
     }
 
     private void OnSelectedItemChanged(object? arg)
@@ -618,5 +672,48 @@
 
             model.FullName = ((VCustomerList)arg)?.AltName ?? string.Empty;
         }
+    }
+
+    private void AddNewCustomer()
+    {
+        var option = new DialogOptions()
+        {
+            Width = "100vw",
+            Height = "100vh",
+            CloseDialogOnEsc = false,
+            AutoFocusFirstElement = false
+        };
+
+        var parameters = new Dictionary<string, object?>()
+        {
+            { "PageType", PageType.Dialog },
+            { "BranchId", BranchId },
+            { "CustomerModel", new EntityCustomerCreate() },
+            { "UpdateState", EventCallback.Factory.Create(this, async (VCustomerList cust) =>
+                {
+                    if (!string.IsNullOrEmpty(cust.CustomerId))
+                    {
+                        model.CustomerRefId = cust.CustomerId;
+
+                        model.FullName = cust?.AltName ?? string.Empty;
+
+                        if (cust is not null && _customers.All(c => c.CustomerId != cust.CustomerId))
+                        {
+                            _customers = _customers.Prepend(cust);
+                        }
+
+                        StateHasChanged();
+                    }
+                })
+            }
+        };
+
+        DialogService.Open<CustomerCreatePage>("Create New Customer", parameters, option);
+
+    }
+
+    private void OnCheckchanged(bool arg)
+    {
+        _isHasCoCustomer = arg;
     }
 }

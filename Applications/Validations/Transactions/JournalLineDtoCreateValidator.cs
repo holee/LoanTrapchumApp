@@ -1,5 +1,4 @@
-﻿using Applications.Features.Transactions.Journals;
-namespace Applications.Validations.Transactions
+﻿namespace Applications.Validations.Transactions
 {
     public class JournalLineDtoCreateValidator : AbstractValidator<JournalLineDtoCreate> 
     {

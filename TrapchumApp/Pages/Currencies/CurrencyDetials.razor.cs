@@ -1,136 +1,143 @@
 using Applications.Features.Currencies;
+using Applications.Features.Currencies.Command.SetSpotRate;
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencyDetails;
-using Applications.Interfaces.Currencies;
-using Applications.Interfaces.Transactions;
-using Domains.Models.Currencies;
+using Applications.Features.Currencies.Queries.GetSpotRates;
 using Mapster;
 
-namespace TrapchumApp.Pages.Currencies
+namespace TrapchumApp.Pages.Currencies;
+
+public partial class CurrencyDetials
 {
-    public partial class CurrencyDetials
+    [Parameter] public int Id { get; set; }
+
+    private CurrencyDto _currency = new();
+
+    private CurrencySpotRateDtoCreate SpotRateDtoCreate = new();
+
+    private IEnumerable<CurrencyDtoSpotRate> currencySpotRates = [];
+
+    private int pageIndex = 0;
+
+    private int pagSize = 15;
+
+    private DateTime? reqDate = DateTime.UtcNow;
+
+    bool isActive = false;
+
+    private CurrencyDtoSpotRate selectedSpotRate = new CurrencyDtoSpotRate();
+
+    void Close()
     {
-        [Inject] ICurrencyService CurrencyServiceImpl { get; set; } = default!;
-        [Inject] ISpotRateService spotRateService { get; set; } = default!;
+        NavigationManager.NavigateTo("/App/Currencies");
+    }
+    protected override async Task OnInitializedAsync()
+    {
 
-        [Parameter] public int Id { get; set; }
+        SpotRateDtoCreate.TransactionDate = DateTime.Now;
 
-        private CurrencyDto Currency { get; set; } = new();
+        var command = new GetCurrencyByIdQuery(Id);
 
-        private CurrencyDtoSpotRateCreate SpotRateDtoCreate = new CurrencyDtoSpotRateCreate();
-        private List<CurrencyDtoSpotRate> currencySpotRates { get; set; } = default!;
-        private PaginatedList<CurrencyDtoSpotRate> CurrencyPaginatedList { get; set; } = default!;
-        private int pageIndex = 1;
-        private DateTime? reqDate = DateTime.UtcNow;
-        bool isActive = false;
-        private CurrencyDtoSpotRate selectedSpotRate = new CurrencyDtoSpotRate();
+        var curResult = await mediator.Send(command);
 
-        void Close()
+        if (curResult.IsSuccess())
         {
-            NavigationManager.NavigateTo("/Account/Currencies");
-        }
-        protected override async Task OnInitializedAsync()
-        {
-
-            SpotRateDtoCreate.TransactionDate = DateTime.Now;
-
-            var command = new GetCurrencyByIdQuery(Id);
-
-            var curResult = await mediator.Send(command); //CurrencyServiceImpl.GetCurrencyById(Id);
-
-            if (curResult.IsSuccess())
-            {
-                Currency = curResult.Value.Adapt<CurrencyDto>();
-            }
-
-            await ChangePageIndex(pageIndex);
-
-            await base.OnInitializedAsync();
+            _currency = curResult.Value;
         }
 
-        private void SelectedRow(CurrencyDtoSpotRate param)
+        await ChangePageIndex(pageIndex);
+
+        await base.OnInitializedAsync();
+    }
+
+    private void SelectedRow(CurrencyDtoSpotRate param)
+    {
+        selectedSpotRate = param;
+
+        if (param is not null)
         {
-            selectedSpotRate = param;
-            if (param is not null)
+            reqDate = param.TransactionDate;
+            SpotRateDtoCreate.SpotRate = param.SpotRate;
+            SpotRateDtoCreate.BuyingRate = param.BuyingRate;
+            SpotRateDtoCreate.SellingRate = param.SellingRate;
+            SpotRateDtoCreate.TransactionDate = reqDate;
+            SpotRateDtoCreate.EditSeq = param.EditSeq;
+        }
+        else
+        {
+            SpotRateDtoCreate = new();
+
+            reqDate = DateTime.Now;
+        }
+        StateHasChanged();
+    }
+
+    async Task SelectPageChanged(int page)
+    {
+        try
+        {
+            pageIndex = page;
+
+            await ChangePageIndex(page);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        StateHasChanged();
+    }
+
+    async Task FormSubmit()
+    {
+        try
+        {
+
+            var message = await mediator.Send(new SetSpotRateCommand(Id, SpotRateDtoCreate));
+
+            if (message.IsSuccess)
             {
-                reqDate = param.TransactionDate;
-                SpotRateDtoCreate.SpotRate = param.SpotRate;
-                SpotRateDtoCreate.BuyingRate = param.BuyingRate;
-                SpotRateDtoCreate.SellingRate = param.SellingRate;
-                SpotRateDtoCreate.TransactionDate = reqDate;
-                SpotRateDtoCreate.EditSeq = param.EditSeq;
+
+                try
+                {
+                    await ChangePageIndex(pageIndex);
+
+                    SpotRateDtoCreate = new();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
             else
             {
-                SpotRateDtoCreate = new CurrencyDtoSpotRateCreate();
-                reqDate = DateTime.Now;
-            }
-            StateHasChanged();
-        }
 
-        async Task SelectPageChanged(int page)
+            }
+        }
+        catch (Exception ex)
         {
-            try
-            {
-                pageIndex = page;
-                await ChangePageIndex(page);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            StateHasChanged();
+            Console.WriteLine(ex.Message);
         }
-
-        async Task FormSubmit()
-        {
-            try
-            {
-
-                var req = SpotRateDtoCreate.Adapt<CurrencySpotRate>();
-
-                var message = await spotRateService.SetSpotRate(Id, req);
-
-                if (message.IsSuccess)
-                {
-
-                    try
-                    {
-                        await ChangePageIndex(pageIndex);
-                        SpotRateDtoCreate = new CurrencyDtoSpotRateCreate();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                }
-                else
-                {
-
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            //StateHasChanged();
-        }
-
-
-        private async Task ChangePageIndex(int pageIndex, int pageSize = 10)
-        {
-            var qparam = new QueryParam
-            {
-                Page = pageIndex,
-                Take = pageSize
-            };
-            CurrencyPaginatedList = await spotRateService.GetSpotRates(Id, qparam);
-            currencySpotRates = CurrencyPaginatedList.Items;
-        }
-
-
-
-
+        //StateHasChanged();
     }
+
+
+    private async Task ChangePageIndex(int pageIndex, int pageSize = 15)
+    {
+        Tracker.Show();
+
+        var qparam = new QueryParam(pageIndex, pageSize);
+
+        var result = await mediator.Send(new GetSpotRatesQuery(Id, qparam)); //
+
+        currencySpotRates = result.Items;
+
+        Tracker.Hide();
+
+        StateHasChanged();
+    }
+
+
+
+
 }

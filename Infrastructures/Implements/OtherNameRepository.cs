@@ -1,3 +1,4 @@
+using Applications.Commons;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.Guarantor.Dtos;
@@ -6,6 +7,7 @@ using Applications.Interfaces.Lists;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.OtherNames;
+using Dapper;
 using Domains.Models.Bases;
 using Domains.Models.Lists;
 using Domains.Models.Lists.Customers;
@@ -20,7 +22,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements;
 
-public sealed class OtherNameRepository(IDbContextFactory<DataContext> dbContextFactory,ILogger<OtherNameRepository> logger) : IOtherNameService
+public sealed class OtherNameRepository(IDbContextFactory<DataContext> dbContextFactory, ILogger<OtherNameRepository> logger, IDapperConnectionFactory connectionFactory) : IOtherNameService
 {
     public async Task<ErrorOr<VOtherNames>> CreateAsync(EntityNames othername, CancellationToken cancellation = default)
     {
@@ -205,7 +207,7 @@ public sealed class OtherNameRepository(IDbContextFactory<DataContext> dbContext
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
         var entity = await context.EntityNames
-                                    .Where(x => x.Id == id && x.EntType!.Equals(EntType.OtherName.ToString()))
+                                    .Where(x => x.Id == id && x.EntType == EntType.OtherName.ToString())
                                     .AsNoTracking()
                                     .FirstOrDefaultAsync(cancellation);
 
@@ -318,6 +320,70 @@ public sealed class OtherNameRepository(IDbContextFactory<DataContext> dbContext
         }
 
         return await queries.ProjectToType<VOtherNames>().AsNoTracking().ToListAsync(cancellation);
+    }
+
+    public async Task<PageMetaData<VOtherNames>> GetNameListsAsync(string? nameId, QueryParam param, CancellationToken cancellation = default, params string[] columns)
+    {
+
+        logger.LogInformation("Retrieving name lists with filter {Filter} and name ID {NameId}.", param.Filter, nameId);
+
+        using var connection = await connectionFactory.CreateConnectionAsync(cancellation);
+
+        var sqlColumns = columns is { Length: > 0 } ? string.Join(", ", columns) : "*";
+
+        var conditions = new List<string>();
+
+        var parameters = new DynamicParameters();
+
+        if (!string.IsNullOrEmpty(param.Filter))
+        {
+            conditions.Add("(FirstName LIKE @Filter OR LastName LIKE @Filter OR AltName LIKE @Filter)");
+
+            parameters.Add("Filter", $"{param.Filter}%");
+        }
+
+        if (!string.IsNullOrEmpty(nameId))
+        {
+            conditions.Add("Id LIKE @NameId");
+
+            parameters.Add("NameId", $"{nameId}%");
+        }
+
+        var whereSql = conditions.Count > 0 ? "WHERE " + string.Join(" AND ", conditions) : string.Empty;
+
+        var take = param.Take > 0 ? param.Take : int.MaxValue;
+
+        var offset = param.Take > 0 ? param.Page * param.Take : 0;
+
+        var sql = $"""
+            SELECT {sqlColumns}
+            FROM VNameList
+            {whereSql}
+            ORDER BY FirstName DESC, LastName DESC
+            OFFSET @Offset ROWS FETCH NEXT @Take ROWS ONLY;
+
+            SELECT COUNT(*)
+            FROM VNameList
+            {whereSql};
+            """;
+
+        parameters.Add("Offset", offset);
+
+        parameters.Add("Take", take);
+
+        using var multi = await connection.QueryMultipleAsync(sql, parameters);
+
+        var items = (await multi.ReadAsync<VOtherNames>()).ToList();
+
+        var totalCount = await multi.ReadSingleAsync<int>();
+
+        return new PageMetaData<VOtherNames>
+        {
+            Items = items,
+            Page = param.Page,
+            PageSize = param.Take > 0 ? param.Take : totalCount,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<Pager<VOtherNames>> GetNameAsync(string? nameId, QueryParam param, CancellationToken cancellation = default)

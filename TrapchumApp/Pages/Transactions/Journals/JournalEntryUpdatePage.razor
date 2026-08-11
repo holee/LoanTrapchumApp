@@ -1,0 +1,291 @@
+﻿@page "/app/transactions/journals/edit/{JournalId}/branches/{BranchId:int}"
+@using Applications.Features.Currencies.Dto
+@using Applications.Features.Journals.Dtos
+@using Applications.Responses.ViewModels.Ledgers
+@using Applications.Responses.ViewModels.OtherNames
+
+<PageTitle>Journal Entry - Edit</PageTitle>
+
+<div class="je-page">
+
+    @if (_isLoading)
+    {
+        <div class="je-card" style="display:flex;align-items:center;justify-content:center;padding:2.5rem;">
+            <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+        </div>
+    }
+    else
+    {
+        <div class="je-header">
+            <div class="je-header-icon">
+                <RadzenIcon Icon="edit_note" Style="font-size:1.2rem;" />
+            </div>
+            <div>
+                <h2>Edit Journal Entry</h2>
+                <p>Update this double-entry transaction across accounts</p>
+            </div>
+            @if (IsBalanced)
+            {
+                <span class="je-balance-badge ok" style="margin-left:auto;">
+                    <RadzenIcon Icon="check_circle" Style="font-size:0.9rem;" /> Balanced
+                </span>
+            }
+            else if (TotalDebit > 0 || TotalCredit > 0)
+            {
+                <span class="je-balance-badge error" style="margin-left:auto;">
+                    <RadzenIcon Icon="error" Style="font-size:0.9rem;" /> Out of Balance
+                </span>
+            }
+        </div>
+
+        <RadzenAlert AlertStyle="AlertStyle.Danger" Visible="@_isMessage" ShowIcon="true"
+                     Variant="Variant.Flat" Shade="Shade.Lighter" style="margin:0;">
+            <strong>@_titleMessage</strong>&nbsp;@_messageAlert
+        </RadzenAlert>
+
+        <EditForm Model="JLe" OnValidSubmit="@HandleFormSave" FormName="JournalEntryUpdateForm">
+            <DataAnnotationsValidator />
+
+            <div class="je-card">
+                <div class="je-card-title">
+                    <RadzenIcon Icon="tune" />
+                    Entry Details
+                </div>
+                <RadzenRow RowGap="0.75rem">
+                    <RadzenColumn SizeMD="2">
+                        <RadzenFormField AllowFloatingLabel="true" Text="Journal Date" Style="width:100%;">
+                            <ChildContent>
+                                <RadzenDatePicker @bind-Value="JLe.JournalDate"
+                                                  DateFormat="yyyy-MM-dd"
+                                                  Change="@(_ => OnValidateDate())"
+                                                  class="rz-w-100" />
+                            </ChildContent>
+                            <Helper>
+                                <ValidationMessage For="@(() => JLe.JournalDate)" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="3">
+                        <RadzenFormField AllowFloatingLabel="true" Text="Journal Type" Style="width:100%;">
+                            <ChildContent>
+                                <RadzenDropDown @bind-Value="@JLe.JournalType"
+                                                TValue="string"
+                                                class="rz-w-100"
+                                                Data="@_journalTypes"
+                                                Placeholder="Select type"
+                                                TextProperty="@nameof(JournalTypeDto.Description)"
+                                                ValueProperty="@nameof(JournalTypeDto.Code)"
+                                                Name="JournalType" />
+                            </ChildContent>
+                            <Helper>
+                                <ValidationMessage For="@(() => JLe.JournalType)" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="2">
+                        <RadzenFormField AllowFloatingLabel="true" Text="Currency" Style="width:100%;">
+                            <ChildContent>
+                                <RadzenDropDown @bind-Value="@JLe.CurrencyRefId"
+                                                class="rz-w-100"
+                                                Data="@_currencies"
+                                                TextProperty="@nameof(CurrencyDto.CurrencyCode)"
+                                                ValueProperty="@nameof(CurrencyDto.CurrencyId)"
+                                                SelectedItemChanged="SelectedCurrencyChanged"
+                                                Name="Currency" />
+                            </ChildContent>
+                            <Helper>
+                                <ValidationMessage For="@(() => JLe.CurrencyRefId)" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="3">
+                        <RadzenFormField AllowFloatingLabel="true" Text="Reference #" Style="width:100%;">
+                            <ChildContent>
+                                <RadzenTextBox @bind-Value="JLe.ReferrenceNum"
+                                               Placeholder="e.g. INV-2025-001"
+                                               class="rz-w-100" />
+                            </ChildContent>
+                            <Helper>
+                                <ValidationMessage For="@(() => JLe.ReferrenceNum)" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="2">
+                        <div class="je-adjustment-wrap">
+                            <RadzenCheckBox @bind-Value="@JLe.IsAdjustment" Name="IsAdjustment" TValue="bool" />
+                            <RadzenLabel Component="IsAdjustment" Text="Adjustment Entry" Style="font-size:0.85rem;" />
+                        </div>
+                    </RadzenColumn>
+                </RadzenRow>
+            </div>
+
+            <div class="je-card" style="padding-bottom:0.75rem;">
+                <div class="je-card-title" style="justify-content:space-between;">
+                    <span style="display:flex;align-items:center;gap:0.4rem;">
+                        <RadzenIcon Icon="table_rows" />
+                        Journal Lines
+                    </span>
+                    <RadzenButton Text="Add Line"
+                                  Size="ButtonSize.Small"
+                                  Icon="add"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Variant="Variant.Text"
+                                  Click="@AddLine" />
+                </div>
+                <table class="je-table">
+                    <thead>
+                        <tr>
+                            <th style="width:42px;" class="text-center">#</th>
+                            <th style="width:260px;">Account</th>
+                            <th style="width:140px;" class="text-right">Debit</th>
+                            <th style="width:140px;" class="text-right">Credit</th>
+                            <th>Description</th>
+                            <th style="width:200px;">Name / Entity</th>
+                            <th style="width:36px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var jl in JournalLines)
+                        {
+                            <tr>
+                                <td class="text-center"><span class="je-line-num">@jl.LineSeq</span></td>
+                                <td>
+                                    <RadzenDropDownDataGrid @bind-Value="jl.LedgerRefId"
+                                                            Style="width:100%;"
+                                                            Density="Density.Compact"
+                                                            Data="@Ledgers"
+                                                            LoadData="LoadDataLedger"
+                                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                            Placeholder="Select account…"
+                                                            ValueProperty="@nameof(VLedger.LedgerId)"
+                                                            TextProperty="@nameof(VLedger.LedgerName)"
+                                                            SelectedItemChanged="@((arg) => OnAccountSelected(arg, jl))"
+                                                            Name="@($"Account_{jl.LineSeq}")">
+                                        <Template Context="c">
+                                            <RadzenStack Orientation="Orientation.Horizontal"
+                                                         JustifyContent="JustifyContent.SpaceBetween">
+                                                <span>@((c as VLedger)?.LedgerName)</span>
+                                                <span style="font-size:0.72rem;opacity:0.55;font-style:italic;">
+                                                    @((c as VLedger)?.LedgerTypeCode)
+                                                </span>
+                                            </RadzenStack>
+                                        </Template>
+                                    </RadzenDropDownDataGrid>
+                                </td>
+                                <td class="text-right">
+                                    <RadzenNumeric @bind-Value="jl.Debit"
+                                                   TextAlign="TextAlign.Right"
+                                                   class="rz-w-100"
+                                                   ShowUpDown="false"
+                                                   Disabled="@(jl.Credit > 0 || jl.LedgerRefId is null or 0)"
+                                                   Change="@((decimal? _) => OnAmountChanged(jl))" />
+                                </td>
+                                <td class="text-right">
+                                    <RadzenNumeric @bind-Value="jl.Credit"
+                                                   TextAlign="TextAlign.Right"
+                                                   class="rz-w-100"
+                                                   ShowUpDown="false"
+                                                   Disabled="@(jl.Debit > 0 || jl.LedgerRefId is null or 0)"
+                                                   Change="@((decimal? _) => OnAmountChanged(jl))" />
+                                </td>
+                                <td>
+                                    <RadzenTextBox @bind-Value="jl.JournalLineDesc"
+                                                   Disabled="@(jl.LedgerRefId is null or 0)"
+                                                   Placeholder="Line description…"
+                                                   class="rz-w-100" />
+                                </td>
+                                <td>
+                                    <RadzenDropDownDataGrid @bind-Value="jl.EntityNameRefId"
+                                                            Density="Density.Compact"
+                                                            Data="@NameLists"
+                                                            LoadData="@LoadNamesList"
+                                                            TextProperty="@nameof(VOtherNames.AltName)"
+                                                            ValueProperty="@nameof(VOtherNames.Id)"
+                                                            Placeholder="Search name…"
+                                                            AllowFilteringByAllStringColumns="true"
+                                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                            SelectedItemChanged="@((arg) => OnNameSelected(arg, jl))"
+                                                            Name="@($"Name_{jl.LineSeq}")"
+                                                            Disabled="@(jl.LedgerRefId is null or 0)">
+                                        <Columns>
+                                            <RadzenDropDownDataGridColumn Property="@nameof(VOtherNames.AltName)" Title="Name" Width="100px" />
+                                            <RadzenDropDownDataGridColumn Property="@nameof(VOtherNames.EntType)" Title="Type" Width="80px" />
+                                        </Columns>
+                                    </RadzenDropDownDataGrid>
+                                </td>
+                                <td class="text-center">
+                                    @if (JournalLines.Count > 1)
+                                    {
+                                        <RadzenButton Icon="delete_outline"
+                                                      Size="ButtonSize.ExtraSmall"
+                                                      ButtonStyle="ButtonStyle.Danger"
+                                                      Variant="Variant.Text"
+                                                      Click="@(() => DeleteLine(jl))"
+                                                      title="Remove line" />
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" style="font-size:0.78rem;color:var(--rz-text-secondary-color);">
+                                @JournalLines.Count line(s)
+                            </td>
+                            <td class="text-right">@TotalDebit.Format(JLe.CurrencyRefId)</td>
+                            <td class="text-right">@TotalCredit.Format(JLe.CurrencyRefId)</td>
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="je-card">
+                <RadzenRow RowGap="1rem" AlignItems="AlignItems.Start">
+                    <RadzenColumn SizeMD="7">
+                        <div class="je-card-title">
+                            <RadzenIcon Icon="notes" />
+                            Memo
+                        </div>
+                        <RadzenTextArea @bind-Value="JLe.JournalDesc"
+                                        Rows="3"
+                                        Placeholder="Add an optional memo or note for this entry…"
+                                        Style="resize:none;width:100%;" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="5">
+                        <div class="je-card-title">
+                            <RadzenIcon Icon="functions" />
+                            Summary
+                        </div>
+                        <div class="je-summary">
+                            <div class="je-summary-row">
+                                <span class="je-summary-label">Total Debit</span>
+                                <span class="je-summary-value">@TotalDebit.Format(JLe.CurrencyRefId)</span>
+                            </div>
+                            <div class="je-summary-row">
+                                <span class="je-summary-label">Total Credit</span>
+                                <span class="je-summary-value">@TotalCredit.Format(JLe.CurrencyRefId)</span>
+                            </div>
+                            <div class="je-summary-row divider">
+                                <span class="je-summary-label">Difference</span>
+                                <span class="@(IsBalanced ? "je-diff-ok" : "je-diff-err")">@Difference.Format(JLe.CurrencyRefId)</span>
+                            </div>
+                        </div>
+                    </RadzenColumn>
+                </RadzenRow>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:0.6rem;">
+                <RadzenButton Text="Cancel"
+                              ButtonStyle="ButtonStyle.Light"
+                              Variant="Variant.Flat"
+                              Click="@CloseSelectedTab" />
+                <RadzenButton ButtonType="ButtonType.Submit"
+                              Text="Update Journal Entry"
+                              Icon="save"
+                              IsBusy="@_visibled"
+                              ButtonStyle="ButtonStyle.Primary" />
+            </div>
+        </EditForm>
+    }
+</div>

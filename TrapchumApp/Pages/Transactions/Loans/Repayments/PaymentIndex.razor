@@ -7,7 +7,7 @@
 @using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate
 <PageTitle>Payment Schedules</PageTitle>
 
-<RadzenFieldset AllowCollapse="true" Collapsed="true" Text="Payment Details">
+@* <RadzenFieldset AllowCollapse="true" Collapsed="true" Text="Payment Details">
     @foreach (var grp in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
     {
         var currLabel = grp.Key == 2 ? "USD $" : "KHR ៛";
@@ -59,7 +59,7 @@
             </div>
         </div>
     }
-</RadzenFieldset>
+</RadzenFieldset> *@
 
 <RadzenTabs RenderMode="TabRenderMode.Client" SelectedIndex="@_selectedIndex" @ref="@refTabs">
     <Tabs>
@@ -672,10 +672,8 @@
         ContextMenuService.Open(args, new List<ContextMenuItem>
         {
             new ContextMenuItem { Text = "Receive Payment",      Value = "1", Icon = "payments" },
-            new ContextMenuItem { Text = "Collection Payment",   Value = "5", Icon = "payments" },
-            new ContextMenuItem { Text = "Receive By Schedule",  Value = "2", Icon = "schedule",         Disabled = p.IsLate },
-            new ContextMenuItem { Text = "Schedule Details",     Value = "3", Icon = "info" },
-            new ContextMenuItem { Text = "Show Late Schedules",  Value = "4", Icon = "credit_card_clock" }
+            new ContextMenuItem { Text = "Schedule Details",     Value = "2", Icon = "info" },
+            new ContextMenuItem { Text = "Show Late Schedules",  Value = "3", Icon = "credit_card_clock" }
         }, e =>
     {
         ContextMenuService.Close();
@@ -690,9 +688,8 @@
             switch (id)
             {
                 case 1: NavigationManager.NavigateTo(recievePaymentUrl); break;
-                case 3: NavigationManager.NavigateTo(getLoanDetailsUrl); break;
-                case 4: NavigationManager.NavigateTo(lateScheduleUrl); break;
-                case 5: NavigationManager.NavigateTo(multiUrl); break;
+                case 2: NavigationManager.NavigateTo(getLoanDetailsUrl); break;
+                case 3: GetCustomerLateSchedules(p); break;
             }
         }
     });
@@ -716,7 +713,7 @@
     }
 
   
-    private void ShowLateScheduleDetails(string loanId)
+    private void ShowLateScheduleDetails(string? loanId)
     {
         var existingIndex = _tabs.FindIndex(t => t.Key == loanId);
 
@@ -741,11 +738,13 @@
                 CloseTab(loanId);
 
             }));
+
             builder.SetKey(loanId);
+
             builder.CloseComponent();
         };
 
-        var newTab = new CustomTab(loanId, "Late Schedule Details", TabActions.Details, content);
+        var newTab = new CustomTab(loanId!, "Late Schedule Details", TabActions.Details, content);
 
         _tabs.Add(newTab);
 
@@ -795,7 +794,7 @@
 
     }
 
-    private void ShowDueDateScheduleTab(string key)
+    private void ShowDueDateScheduleTab(string? key)
     {
 
         var newKey = $"{key}_DueDateSchedules";
@@ -817,12 +816,16 @@
         RenderFragment content = builder =>
         {
             builder.OpenComponent(0, typeof(ClientDuePayTab));
+
             builder.AddAttribute(1, "BranchId", BranchId);
+
             builder.AddAttribute(2, "GetCounts", EventCallback.Factory.Create(this, (int x) =>
             {
                 counts = x;
             }));
+
             builder.SetKey(newKey);
+
             builder.CloseComponent();
         };
 
@@ -858,7 +861,7 @@
 
             builder.AddAttribute(2, "GetScheduleChanged", EventCallback.Factory.Create(this, (VSchedule x) =>
             {
-                ShowLateScheduleDetails(x.LoanId!);
+                ShowLateScheduleDetails(x.LoanId);
             }));
 
             builder.AddAttribute(3, "GetCounts", EventCallback.Factory.Create(this, (int x) =>
@@ -933,7 +936,7 @@
     }
 
 
-    void CloseTab(string tabId)
+    void CloseTab(string? tabId)
     {
         var tabIndex = _tabs.FirstOrDefault(t => t.Key == tabId);
 

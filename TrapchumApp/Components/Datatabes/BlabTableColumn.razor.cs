@@ -40,6 +40,15 @@ public partial class BlabTableColumn<TItem> : ComponentBase, IDisposable
     /// </summary>
     [Parameter] public RenderFragment<TItem>? EditTemplate { get; set; }
 
+    /// <summary>Whether this column shows a per-column search filter input.</summary>
+    [Parameter] public bool Filterable { get; set; }
+
+    /// <summary>Placeholder text for the per-column filter input.</summary>
+    [Parameter] public string FilterPlaceholder { get; set; } = "Filter...";
+
+    /// <summary>When true, this column is frozen (sticky) on horizontal scroll.</summary>
+    [Parameter] public bool Frozen { get; set; }
+
     protected override void OnInitialized()
     {
         ParentTable?.AddColumn(this);

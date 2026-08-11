@@ -39,7 +39,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<INationalityServiceImpl, NationalityService>();
         services.AddScoped<IOtherNameServiceImpl, OtherNameService>();
         services.AddScoped<IGuarantorServiceImpl, GuarantorService>();
-        services.AddScoped<ISpotRateServiceImpl, SpotRateService>();
+        //services.AddScoped<ISpotRateServiceImpl, SpotRateService>();
         services.AddScoped<ISettingServiceImpl, SettingService>();
         services.AddScoped<IVendorServiceImpl, VendorService>();
         services.AddScoped<IPrintExelServiceImpl, PrintExelServiceImpl>();

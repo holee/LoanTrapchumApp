@@ -75,7 +75,7 @@ internal static class MapAdditinalEndpoints
                     detail: $"Error uploading file: {ex.Message}",
                     statusCode: 500);
             }
-        });
+        }).DisableAntiforgery();
 
 
         uploadGroup.MapPost("/Files", async (IFormFileCollection files,
@@ -147,7 +147,7 @@ internal static class MapAdditinalEndpoints
 
                 return Results.Problem(detail: $"Error uploading file: {ex.Message}", statusCode: 500);
             }
-        });
+        }).DisableAntiforgery();
 
 
         uploadGroup.MapPost("/Customers/Profiles", async (IFormFile file,

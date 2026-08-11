@@ -77,9 +77,7 @@ public partial class LoanRequestCreateNoCustomer(ILogger<LoanRequestCreateNoCust
     {
         if (!_isDirty) return;
 
-        var confirmed = await DialogService.Confirm(
-            "You have unsaved changes. Are you sure you want to leave?",
-            "Unsaved Changes");
+        var confirmed = await Swal.ConfirmAsync("លោកអ្នកមិនបានរក្សាទុកការផ្លាស់ប្តូរ។ តើអ្នកប្រាកដថាចង់ចាកចេញ?", "Unsaved Changes");
 
         if (confirmed != true)
         {
@@ -96,7 +94,7 @@ public partial class LoanRequestCreateNoCustomer(ILogger<LoanRequestCreateNoCust
     {
         _userId = BState.UserId;
 
-        await BState.GetEmployeeId();
+        model.CreditAgentRefId = await BState.GetEmployeeId();
 
         await GetCustomers();
 
@@ -137,9 +135,9 @@ public partial class LoanRequestCreateNoCustomer(ILogger<LoanRequestCreateNoCust
 
     }
 
-    private async Task GetCustomers()
+    private async Task GetCustomers(string? filterText = null)
     {
-        var command = new GetCustomerAsPagingQuery(BranchId, null, null, new QueryParam(0, 15));
+        var command = new GetCustomerAsPagingQuery(BranchId, null, null, new QueryParam(0, 15, null, false, false, filterText));
 
         var rsp = await mediator.Send(command);
 

@@ -1,6 +1,4 @@
-﻿using Applications.Features.Transactions.Journals;
-
-namespace Applications.Features.Journals.Command.CreateJournal;
+﻿namespace Applications.Features.Journals.Command.CreateJournal;
 
 public sealed class CreateJournalValidator : AbstractValidator<JournalTransactionDtoCreate>
 {

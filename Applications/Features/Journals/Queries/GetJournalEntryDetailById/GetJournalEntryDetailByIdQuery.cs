@@ -3,4 +3,4 @@ using ErrorOr;
 
 namespace Applications.Features.Journals.Queries.GetJournalEntryDetailById;
 
-public record GetJournalEntryDetailByIdQuery(string? JournalId) : IRequest<ErrorOr<JournalEntryDto>>;
+public record GetJournalEntryDetailByIdQuery(string? JournalId, bool Include = false) : IRequest<ErrorOr<JournalEntryDto>>;

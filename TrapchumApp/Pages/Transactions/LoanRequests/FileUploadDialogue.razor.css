@@ -1,0 +1,235 @@
+/* ═══════════════════════════════════════════════════════════════
+   FileUploadDialogue – Scoped Styles (Visual Redesign)
+   Same class names, same markup — only the look is upgraded.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Wrapper ── */
+.dropzone-wrapper {
+    padding: 1.25rem;
+    position: relative;
+}
+
+/* ── Dropzone ── */
+.dropzone {
+    position: relative;
+    border: 2px dashed #c7d2e0;
+    border-radius: 14px;
+    background: linear-gradient(160deg, #f8faff 0%, #f1f4fa 100%);
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    transition: border-color 0.25s ease,
+                background 0.25s ease,
+                box-shadow 0.25s ease,
+                transform 0.2s ease;
+    cursor: pointer;
+}
+
+.dropzone:hover {
+    border-color: #8bb3e0;
+    background: linear-gradient(160deg, #eef4ff 0%, #e8eef8 100%);
+    box-shadow: 0 2px 12px rgba(25, 118, 210, 0.06);
+}
+
+.dropzone-active {
+    border-color: #1976d2 !important;
+    border-style: solid;
+    background: linear-gradient(160deg, #e3effe 0%, #d6e8fc 100%) !important;
+    box-shadow: 0 0 0 4px rgba(25, 118, 210, 0.1),
+                0 8px 28px rgba(25, 118, 210, 0.1) !important;
+    transform: scale(1.01);
+}
+
+/* ── Dropzone content ── */
+.dropzone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
+.dropzone-text h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #1d2939;
+    letter-spacing: -0.01em;
+}
+
+.dropzone-text .muted {
+    margin: 4px 0 0;
+    color: #667085;
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
+/* ── Upload overlay ── */
+.upload-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 14px;
+    animation: fadeOverlayIn 0.2s ease;
+}
+
+.upload-overlay-content {
+    text-align: center;
+    min-width: 280px;
+    max-width: 320px;
+    padding: 1.5rem;
+}
+
+.upload-spinner-icon {
+    font-size: 2.5rem !important;
+    color: #1976d2;
+    display: block;
+    margin: 0 auto 1rem;
+    animation: pulseUpIcon 1.4s ease-in-out infinite;
+}
+
+.upload-progress-label {
+    margin-top: 0.75rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #344054;
+    letter-spacing: 0.01em;
+}
+
+@keyframes fadeOverlayIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes pulseUpIcon {
+    0%, 100% { opacity: 1; transform: translateY(0); }
+    50% { opacity: 0.5; transform: translateY(-4px); }
+}
+
+/* ── Status indicators ── */
+.upload-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 0.55rem 0.85rem;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 500;
+    justify-content: center;
+    animation: slideStatusIn 0.25s ease-out;
+}
+
+.upload-complete {
+    background: #ecfdf3;
+    color: #067647 !important;
+    border: 1px solid #abefc6;
+}
+
+.upload-complete span { color: #067647 !important; }
+
+.upload-error {
+    background: #fef3f2;
+    color: #b42318 !important;
+    border: 1px solid #fecdca;
+}
+
+.upload-error span { color: #b42318 !important; }
+
+@keyframes slideStatusIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Files list ── */
+.files-preview {
+    margin-top: 1rem;
+    max-height: 230px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-right: 4px;
+}
+
+/* Custom scrollbar */
+.files-preview::-webkit-scrollbar { width: 5px; }
+.files-preview::-webkit-scrollbar-track { background: #f2f4f7; border-radius: 4px; }
+.files-preview::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 4px; }
+.files-preview::-webkit-scrollbar-thumb:hover { background: #98a2b3; }
+
+/* ── File item card ── */
+.file-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #eef0f4;
+    border-radius: 10px;
+    background: #fff;
+    transition: border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease;
+    animation: fileCardIn 0.22s ease-out;
+}
+
+.file-item:hover {
+    border-color: #d5dbe5;
+    background: #fafbfd;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+@keyframes fileCardIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* ── File meta ── */
+.file-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.file-name {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: #344054;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-name a {
+    color: #1976d2;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.file-name a:hover {
+    color: #1565c0;
+    text-decoration: underline;
+}
+
+.file-size {
+    color: #667085;
+    font-size: 0.78rem;
+    letter-spacing: 0.01em;
+}
+
+/* ── Actions bar ── */
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f0f2f5;
+}

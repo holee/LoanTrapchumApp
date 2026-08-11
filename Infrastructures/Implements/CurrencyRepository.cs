@@ -42,20 +42,25 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
     public async Task<ErrorOr<CurrencyDto>> GetCurrencyById(int? currencyId, CancellationToken cancellationToken = default, params Expression<Func<Currency, object>>[] includes)
     {
+        if (currencyId is null or <= 0)
+        {
+            return Error.Validation(description: "Currency Id must be greater than zero.");
+        }
+
         await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
-        var query = context.Currencies.AsQueryable();
+        var queries = context.Currencies.AsNoTracking()
+                                            .Where(x => x.CurrencyId == currencyId);
 
         if (includes is not null && includes.Length > 0)
         {
             foreach (var include in includes)
             {
-                query = query.Include(include);
+                queries = queries.Include(include);
             }
         }
 
-        var currency = await query
-                            .AsNoTracking()
+        var currency = await queries
                             .AsSplitQuery()
                             .Select(x => new CurrencyDto
                             {
@@ -87,7 +92,7 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
                                     IsActive = c.IsActive
                                 }).ToList()
                             })
-                        .SingleOrDefaultAsync(x => x.CurrencyId == currencyId, cancellationToken);
+                        .SingleOrDefaultAsync(cancellationToken);
 
         return currency is null
             ? Error.NotFound(Messages.DataNotFound)
@@ -157,7 +162,7 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
                 context.Currencies.Update(currency);
             }
 
-            var createdCurrency = await GetCurrencyDetailById(1, cancellation);
+            var createdCurrency = await GetCurrencyDetailById(currency.CurrencyId, cancellation);
 
             return createdCurrency;
         }
@@ -368,7 +373,7 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
             else
             {
 
-                baseQueries = baseQueries.Contains(filter, param.FilterColumn);
+                baseQueries = baseQueries.StartWith(filter, param.FilterColumn);
             }
         }
 
@@ -485,7 +490,7 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
         else
         {
 
-            baseQueries = baseQueries.Contains(filter, param.FilterColumn);
+            baseQueries = baseQueries.StartWith(filter, param.FilterColumn);
         }
 
         return baseQueries;

@@ -108,6 +108,50 @@ public partial class BlabTable<TItem> : ComponentBase, IAsyncDisposable
     /// <summary>When true, a column visibility picker button is shown in the toolbar.</summary>
     [Parameter] public bool ShowColumnFilterPicker { get; set; }
 
+    // ── Row Selection ───────────────────────────────────────────────
+    /// <summary>Row selection mode: None, Single, or Multiple.</summary>
+    [Parameter] public BlabTableSelectionMode SelectionMode { get; set; } = BlabTableSelectionMode.None;
+
+    /// <summary>Currently selected items (two-way bindable).</summary>
+    [Parameter] public IEnumerable<TItem>? SelectedItems { get; set; }
+
+    /// <summary>Callback when selected items change.</summary>
+    [Parameter] public EventCallback<IEnumerable<TItem>> SelectedItemsChanged { get; set; }
+
+    /// <summary>Fired when selection changes. Carries the full selected list.</summary>
+    [Parameter] public EventCallback<IEnumerable<TItem>> SelectionChanged { get; set; }
+
+    // ── Row Details / Child Rows ────────────────────────────────────
+    /// <summary>
+    /// Expandable detail template rendered below the row when expanded.
+    /// Receives the row TItem as context.
+    /// </summary>
+    [Parameter] public RenderFragment<TItem>? DetailTemplate { get; set; }
+
+    // ── Row Grouping ────────────────────────────────────────────────
+    /// <summary>
+    /// Groups rows by the returned key. A group header row is rendered before each group.
+    /// </summary>
+    [Parameter] public Func<TItem, string?>? GroupBy { get; set; }
+
+    /// <summary>
+    /// Custom group header template. Receives the group key and items as context.
+    /// </summary>
+    [Parameter] public RenderFragment<BlabTableGroupContext<TItem>>? GroupHeaderTemplate { get; set; }
+
+    // ── Export / Print / Copy ────────────────────────────────────────
+    /// <summary>Show CSV export button in toolbar.</summary>
+    [Parameter] public bool ShowExportButton { get; set; }
+
+    /// <summary>Show print button in toolbar.</summary>
+    [Parameter] public bool ShowPrintButton { get; set; }
+
+    /// <summary>Show copy-to-clipboard button in toolbar.</summary>
+    [Parameter] public bool ShowCopyButton { get; set; }
+
+    /// <summary>Filename for CSV export (without extension).</summary>
+    [Parameter] public string ExportFileName { get; set; } = "export";
+
     [Parameter(CaptureUnmatchedValues = true)]
     public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
@@ -118,27 +162,56 @@ public partial class BlabTable<TItem> : ComponentBase, IAsyncDisposable
     private int _pageSize;
     private bool _pageSizeInitialized;
     private string _searchText = string.Empty;
-    private string? _sortColumn;
-    private bool _sortDescending;
     private bool _isLoading;
     private Timer? _debounceTimer;
     private IJSObjectReference? _jsModule;
     private bool _columnPickerOpen;
+
+    // ── Multi-sort state ────────────────────────────────────────────
+    private readonly List<BlabTableSortInfo> _sortColumns = [];
+
+    // Legacy single-sort computed properties for backward compat in args
+    private string? _sortColumn => _sortColumns.Count > 0 ? _sortColumns[0].Column : null;
+    private bool _sortDescending => _sortColumns.Count > 0 && _sortColumns[0].Descending;
+
+    // ── Per-column filter state ─────────────────────────────────────
+    private readonly Dictionary<string, string> _columnFilters = new();
+    private Timer? _columnFilterDebounceTimer;
 
     // ── Edit state ──────────────────────────────────────────────────
     private TItem? _editingRow;
     private TItem? _editingCellRow;
     private BlabTableColumn<TItem>? _editingCellColumn;
 
+    // ── Row selection state ──────────────────────────────────────────
+    private readonly HashSet<TItem> _selectedItems = new();
+
+    // ── Row detail state ────────────────────────────────────────────
+    private readonly HashSet<TItem> _expandedRows = new();
+
     // ── Computed ─────────────────────────────────────────────────────
     private int TotalPages => _pageSize > 0 ? (int)Math.Ceiling((double)TotalCount / _pageSize) : 1;
     private int CurrentPage => _pageIndex + 1;
     private int ShowingFrom => TotalCount == 0 ? 0 : _pageIndex * _pageSize + 1;
     private int ShowingTo => Math.Min((_pageIndex + 1) * _pageSize, TotalCount);
+    private int ColSpan => ColumnDefinitions.Count(c => c.Visible) + (HasSelection ? 1 : 0) + (HasDetailTemplate ? 1 : 0) + (EditMode == BlabTableEditMode.Row ? 1 : 0);
 
     // Pagination position helpers
     private bool ShowTopPagination => PaginationPosition is BlabTablePaginationPosition.Top or BlabTablePaginationPosition.Both;
     private bool ShowBottomPagination => PaginationPosition is BlabTablePaginationPosition.Bottom or BlabTablePaginationPosition.Both;
+
+    // Selection helpers
+    private bool HasSelection => SelectionMode != BlabTableSelectionMode.None;
+    private bool HasDetailTemplate => DetailTemplate is not null;
+    private bool HasGrouping => GroupBy is not null;
+    private bool HasColumnFilters => ColumnDefinitions.Any(c => c.Filterable);
+    private bool HasToolbarButtons => ShowExportButton || ShowPrintButton || ShowCopyButton;
+
+    private bool IsAllSelected =>
+        _items.Count > 0 && _items.All(item => _selectedItems.Contains(item));
+
+    private bool IsIndeterminate =>
+        _selectedItems.Count > 0 && !IsAllSelected && _items.Any(item => _selectedItems.Contains(item));
 
     // ── Lifecycle ───────────────────────────────────────────────────
     protected override void OnParametersSet()
@@ -151,6 +224,14 @@ public partial class BlabTable<TItem> : ComponentBase, IAsyncDisposable
 
         if (Data is not null)
             _items = Data.ToList();
+
+        // Sync external SelectedItems parameter
+        if (SelectedItems is not null && SelectionMode != BlabTableSelectionMode.None)
+        {
+            _selectedItems.Clear();
+            foreach (var item in SelectedItems)
+                _selectedItems.Add(item);
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -203,20 +284,83 @@ public partial class BlabTable<TItem> : ComponentBase, IAsyncDisposable
         });
     }
 
-    // ── Sorting ─────────────────────────────────────────────────────
-    private async Task OnSort(BlabTableColumn<TItem> column)
+    // ── Per-column filter ───────────────────────────────────────────
+    private void OnColumnFilterInput(string property, ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? string.Empty;
+
+        if (string.IsNullOrEmpty(value))
+            _columnFilters.Remove(property);
+        else
+            _columnFilters[property] = value;
+
+        _columnFilterDebounceTimer?.Stop();
+        _columnFilterDebounceTimer?.Dispose();
+
+        _columnFilterDebounceTimer = new Timer(400);
+        _columnFilterDebounceTimer.Elapsed += ColumnFilterDebounceElapsed;
+        _columnFilterDebounceTimer.AutoReset = false;
+        _columnFilterDebounceTimer.Start();
+    }
+
+    private async void ColumnFilterDebounceElapsed(object? sender, ElapsedEventArgs e)
+    {
+        await InvokeAsync(async () =>
+        {
+            _pageIndex = 0;
+            await RequestData();
+            StateHasChanged();
+        });
+    }
+
+    private string GetColumnFilterValue(string? property)
+    {
+        if (property is null) return string.Empty;
+        return _columnFilters.TryGetValue(property, out var val) ? val : string.Empty;
+    }
+
+    // ── Sorting (multi-sort with Shift+Click) ───────────────────────
+    private async Task OnSort(BlabTableColumn<TItem> column, MouseEventArgs? mouseArgs = null)
     {
         if (!column.Sortable || string.IsNullOrEmpty(column.Property))
             return;
 
-        if (_sortColumn == column.Property)
+        var isShift = mouseArgs?.ShiftKey ?? false;
+
+        var existingIndex = _sortColumns.FindIndex(s => s.Column == column.Property);
+
+        if (existingIndex >= 0)
         {
-            _sortDescending = !_sortDescending;
+            // Toggle direction or remove
+            var existing = _sortColumns[existingIndex];
+            if (existing.Descending)
+            {
+                // Already desc → remove from sort
+                _sortColumns.RemoveAt(existingIndex);
+            }
+            else
+            {
+                // Asc → toggle to desc
+                _sortColumns[existingIndex] = new BlabTableSortInfo
+                {
+                    Column = column.Property,
+                    Descending = true
+                };
+            }
         }
         else
         {
-            _sortColumn = column.Property;
-            _sortDescending = false;
+            if (!isShift)
+            {
+                // Single sort: clear others
+                _sortColumns.Clear();
+            }
+
+            _sortColumns.Add(new BlabTableSortInfo
+            {
+                Column = column.Property,
+                Descending = false
+            });
         }
 
         _pageIndex = 0;
@@ -228,18 +372,27 @@ public partial class BlabTable<TItem> : ComponentBase, IAsyncDisposable
         if (!column.Sortable || string.IsNullOrEmpty(column.Property))
             return "";
 
-        if (_sortColumn != column.Property)
+        var sortInfo = _sortColumns.FirstOrDefault(s => s.Column == column.Property);
+        if (sortInfo is null)
             return "blab-dt__sortable";
 
-        return _sortDescending
+        return sortInfo.Descending
             ? "blab-dt__sortable blab-dt__sort-desc"
             : "blab-dt__sortable blab-dt__sort-asc";
     }
 
     private string GetSortState(BlabTableColumn<TItem> column)
     {
-        if (_sortColumn != column.Property) return "none";
-        return _sortDescending ? "desc" : "asc";
+        var sortInfo = _sortColumns.FirstOrDefault(s => s.Column == column.Property);
+        if (sortInfo is null) return "none";
+        return sortInfo.Descending ? "desc" : "asc";
+    }
+
+    private int GetSortOrder(BlabTableColumn<TItem> column)
+    {
+        if (_sortColumns.Count <= 1) return -1;
+        var index = _sortColumns.FindIndex(s => s.Column == column.Property);
+        return index >= 0 ? index + 1 : -1;
     }
 
     // ── Pagination ──────────────────────────────────────────────────
@@ -387,6 +540,145 @@ public partial class BlabTable<TItem> : ComponentBase, IAsyncDisposable
         StateHasChanged();
     }
 
+    // ── Row Selection ───────────────────────────────────────────────
+    private async Task ToggleRowSelection(TItem item, ChangeEventArgs e)
+    {
+        var isChecked = bool.TryParse(e.Value?.ToString(), out var v) && v;
+
+        if (SelectionMode == BlabTableSelectionMode.Single)
+        {
+            _selectedItems.Clear();
+            if (isChecked)
+                _selectedItems.Add(item);
+        }
+        else if (SelectionMode == BlabTableSelectionMode.Multiple)
+        {
+            if (isChecked)
+                _selectedItems.Add(item);
+            else
+                _selectedItems.Remove(item);
+        }
+
+        await NotifySelectionChanged();
+    }
+
+    private async Task ToggleSelectAll(ChangeEventArgs e)
+    {
+        var isChecked = bool.TryParse(e.Value?.ToString(), out var v) && v;
+
+        if (isChecked)
+        {
+            foreach (var item in _items)
+                _selectedItems.Add(item);
+        }
+        else
+        {
+            foreach (var item in _items)
+                _selectedItems.Remove(item);
+        }
+
+        await NotifySelectionChanged();
+    }
+
+    private bool IsRowSelected(TItem item) => _selectedItems.Contains(item);
+
+    private async Task NotifySelectionChanged()
+    {
+        var selected = _selectedItems.ToList();
+
+        if (SelectedItemsChanged.HasDelegate)
+            await SelectedItemsChanged.InvokeAsync(selected);
+
+        if (SelectionChanged.HasDelegate)
+            await SelectionChanged.InvokeAsync(selected);
+
+        StateHasChanged();
+    }
+
+    /// <summary>Clears all selected items programmatically.</summary>
+    public async Task ClearSelectionAsync()
+    {
+        _selectedItems.Clear();
+        await NotifySelectionChanged();
+    }
+
+    /// <summary>Gets the currently selected items.</summary>
+    public IReadOnlyCollection<TItem> GetSelectedItems() => _selectedItems;
+
+    // ── Row Details / Expand ────────────────────────────────────────
+    private void ToggleRowDetail(TItem item)
+    {
+        if (!_expandedRows.Remove(item))
+            _expandedRows.Add(item);
+
+        StateHasChanged();
+    }
+
+    private bool IsRowExpanded(TItem item) => _expandedRows.Contains(item);
+
+    /// <summary>Expands all rows' detail views.</summary>
+    public void ExpandAllDetails()
+    {
+        foreach (var item in _items)
+            _expandedRows.Add(item);
+        StateHasChanged();
+    }
+
+    /// <summary>Collapses all rows' detail views.</summary>
+    public void CollapseAllDetails()
+    {
+        _expandedRows.Clear();
+        StateHasChanged();
+    }
+
+    // ── Row Grouping ────────────────────────────────────────────────
+    private IEnumerable<IGrouping<string?, TItem>> GetGroupedItems()
+    {
+        if (GroupBy is null) return [];
+        return _items.GroupBy(GroupBy);
+    }
+
+    // ── Export / Print / Copy ────────────────────────────────────────
+    private async Task ExportCsv()
+    {
+        if (_jsModule is null) return;
+
+        var visibleCols = ColumnDefinitions.Where(c => c.Visible && !string.IsNullOrEmpty(c.Property)).ToList();
+        var headers = visibleCols.Select(c => c.Title).ToArray();
+        var rows = _items.Select(item =>
+            visibleCols.Select(c => GetPropertyValue(item, c.Property!) ?? "").ToArray()
+        ).ToArray();
+
+        await _jsModule.InvokeVoidAsync("exportCsv", headers, rows, ExportFileName);
+    }
+
+    private async Task CopyToClipboard()
+    {
+        if (_jsModule is null) return;
+
+        var visibleCols = ColumnDefinitions.Where(c => c.Visible && !string.IsNullOrEmpty(c.Property)).ToList();
+        var headers = string.Join("\t", visibleCols.Select(c => c.Title));
+        var dataRows = _items.Select(item =>
+            string.Join("\t", visibleCols.Select(c => GetPropertyValue(item, c.Property!) ?? ""))
+        );
+        var text = headers + "\n" + string.Join("\n", dataRows);
+
+        await _jsModule.InvokeVoidAsync("copyToClipboard", text);
+    }
+
+    private async Task PrintTable()
+    {
+        if (_jsModule is null) return;
+
+        var visibleCols = ColumnDefinitions.Where(c => c.Visible && !string.IsNullOrEmpty(c.Property)).ToList();
+        var headers = visibleCols.Select(c => c.Title).ToArray();
+        var rows = _items.Select(item =>
+            visibleCols.Select(c => GetPropertyValue(item, c.Property!) ?? "").ToArray()
+        ).ToArray();
+
+        await _jsModule.InvokeVoidAsync("printTable", headers, rows);
+    }
+
     // ── Data request ────────────────────────────────────────────────
     private async Task RequestData()
     {
@@ -402,6 +694,10 @@ public partial class BlabTable<TItem> : ComponentBase, IAsyncDisposable
             SearchText = _searchText,
             SortColumn = _sortColumn,
             SortDescending = _sortDescending,
+            SortColumns = _sortColumns.ToList(),
+            ColumnFilters = _columnFilters.Count > 0
+                ? new Dictionary<string, string>(_columnFilters)
+                : null,
             PageIndex = _pageIndex
         };
 
@@ -422,6 +718,9 @@ public partial class BlabTable<TItem> : ComponentBase, IAsyncDisposable
         _debounceTimer?.Stop();
         _debounceTimer?.Dispose();
 
+        _columnFilterDebounceTimer?.Stop();
+        _columnFilterDebounceTimer?.Dispose();
+
         if (_jsModule is not null)
         {
             await _jsModule.DisposeAsync();
@@ -435,8 +734,19 @@ public sealed class BlabTableLoadDataArgs
     public int Skip { get; init; }
     public int Top { get; init; }
     public string? SearchText { get; init; }
+
+    /// <summary>Primary sort column (first in multi-sort, for backward compat).</summary>
     public string? SortColumn { get; init; }
+
+    /// <summary>Primary sort direction (first in multi-sort, for backward compat).</summary>
     public bool SortDescending { get; init; }
+
+    /// <summary>All sort columns in order (for multi-sort support).</summary>
+    public List<BlabTableSortInfo>? SortColumns { get; init; }
+
+    /// <summary>Per-column filter values. Key = Property name, Value = filter text.</summary>
+    public Dictionary<string, string>? ColumnFilters { get; init; }
+
     public int PageIndex { get; init; }
 }
 
@@ -445,4 +755,12 @@ public sealed class BlabTableCellEditArgs<TItem>(TItem item, string? property)
 {
     public TItem Item { get; } = item;
     public string? Property { get; } = property;
+}
+
+/// <summary>Context for group header templates.</summary>
+public sealed class BlabTableGroupContext<TItem>
+{
+    public string? GroupKey { get; init; }
+    public IEnumerable<TItem> Items { get; init; } = [];
+    public int Count { get; init; }
 }

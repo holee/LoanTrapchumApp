@@ -54,17 +54,22 @@ public partial class LedgerIndexPage
     {
         try
         {
+
+            Tracker.Show();
+
             isLoading = true;
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, includeInactive, sortDescending, filter);
 
-            var res = await mediator.Send(new GetLedgersPaginatedQuery(currencyId, param));   //_ledgerService.GetLedgersAsync(currencyId, param);
+            var res = await mediator.Send(new GetLedgersPaginatedQuery(currencyId, param));  
 
             Ledgers = res.Items;
 
             counts = res.Count;
 
             isLoading = false;
+
+            Tracker.Hide();
 
             StateHasChanged();
         }
@@ -203,8 +208,6 @@ public partial class LedgerIndexPage
 
         if (confirm == MsgBoxResult.No) return;
 
-        //_ledgerService.ChangeLedgerStatus(new(ledgerId, false));
-
         var resp = await mediator.Send(new ChangeLedgerStatusCommand(new LedgerChangeStatus
         {
             LedgerId = ledgerId,
@@ -222,6 +225,5 @@ public partial class LedgerIndexPage
         }
 
     }
-
 
 }

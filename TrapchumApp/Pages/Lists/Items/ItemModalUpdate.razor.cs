@@ -1,4 +1,5 @@
 using Applications.Features.Items.Dto;
+using Applications.Features.Ledgers.Queries.GetLedgerByCurrency;
 using Applications.Interfaces.Lists;
 using Applications.Interfaces.Transactions;
 using Applications.Responses.ViewModels.Ledgers;
@@ -23,16 +24,7 @@ public partial class ItemModalUpdate
 
     protected override async Task OnInitializedAsync()
     {
-        var ledgersRsp = await _ledgerService.GetLedgersAsync(ledgerId: 0, currencyId: 0);
-
-        if (!ledgersRsp.IsError)
-        {
-            Ledgers = ledgersRsp.Value;
-        }
-        else
-        {
-            NotificationService.Notify(NotificationSeverity.Warning, "Unable to load ledgers.");
-        }
+        await GetAllLedgers();
 
         var rsp = await _itemService.GetItemByIdAsync(Id);
 
@@ -49,10 +41,17 @@ public partial class ItemModalUpdate
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+            _toastService.ShowError(rsp.GetMessage(), "Error");
         }
 
         await base.OnInitializedAsync();
+    }
+
+    private async Task GetAllLedgers()
+    {
+        var ledgersRsp = await mediator.Send(new GetLedgerByCurrencyQuery(0, 0, new(0, 0)));
+
+        Ledgers = ledgersRsp.Items;
     }
 
     protected async Task Update()

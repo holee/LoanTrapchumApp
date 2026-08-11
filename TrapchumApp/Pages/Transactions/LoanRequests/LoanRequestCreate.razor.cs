@@ -72,9 +72,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         {
             if (!_isDirty) return;
 
-            var confirmed = await DialogService.Confirm(
-                "You have unsaved changes. Are you sure you want to leave?",
-                "Unsaved Changes");
+            var confirmed = await Swal.ConfirmAsync("លោកអ្នកមិនបានរក្សាទុកការផ្លាស់ប្តូរ។ តើអ្នកប្រាកដថាចង់ចាកចេញ?", "Unsaved Changes");
 
             if (confirmed != true)
             {

@@ -1,22 +1,20 @@
-﻿using Applications.Extensions.mappers;
-using Applications.Helpers;
-using Applications.Requests.Journals;
-using Applications.Responses.ViewModels.Journals;
-using Applications.Responses.ViewModels.Ledgers;
-using Applications.Services.Lists;
-using Applications.Services.Transactions.Journals;
-using Applications.Features.Transactions.Journals;
+﻿using Applications.Constants;
+using Applications.Extensions.mappers;
+using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Features.Journals.Command.CreateJournal;
-using Applications.Features.Currencies.Dto;
+using Applications.Features.Journals.Dtos;
+using Applications.Features.Ledgers.Queries.GetLedgerByCurrency;
+using Applications.Features.OtherNames.Queries.GetOtherNames;
+using Applications.Helpers;
+using Applications.Responses.ViewModels.Ledgers;
 using Applications.Responses.ViewModels.OtherNames;
+using Applications.Services.Lists;
+using Applications.Services.Transactions.Journals;
 
 namespace TrapchumApp.Pages.Transactions.Journals;
 
-public partial class JournalEntryCreate(
-    ILedgerServiceImpl ledgerService,
-    IJournalServiceImpl journalService,
-    IOtherNameServiceImpl nameService)
+public partial class JournalEntryCreate(ILedgerServiceImpl ledgerService, IJournalServiceImpl journalService)
 {
     protected JournalEntryDtoCreate JLe = new();
     protected List<JournalLineDtoCreate> JournalLines = [];
@@ -34,8 +32,6 @@ public partial class JournalEntryCreate(
 
     [Parameter] public string? UserId { get; set; }
     [Parameter] public int BranchId { get; set; }
-
-    // Computed properties for balance display
     protected decimal TotalDebit => JournalLines.Sum(x => x.Debit ?? 0);
     protected decimal TotalCredit => JournalLines.Sum(x => x.Credit ?? 0);
     protected decimal Difference => Math.Abs(TotalDebit - TotalCredit);
@@ -46,7 +42,9 @@ public partial class JournalEntryCreate(
         try
         {
             JLe.JournalType = JournalTypes.PV.ToString();
+
             JLe.JournalDate = DateTime.Now;
+
             JLe.CurrencyRefId = (int)CurrenciesType.KHR;
 
             InitializeLines();
@@ -57,20 +55,22 @@ public partial class JournalEntryCreate(
 
             _selectedCurrencyId = (int)CurrenciesType.KHR;
 
-            await GetNameLists(null);
+            await GetNameLists(string.Empty);
 
             await base.OnInitializedAsync();
         }
         catch (Exception ex)
         {
-            NotificationService!.Notify(NotificationSeverity.Error, "Error", ex.Message);
+            _toastService.ShowError(ex.Message, "Initialization Error");
+
         }
     }
 
     private void InitializeLines()
     {
         JournalLines.Clear();
-        for (int i = 1; i <= 6; i++)
+
+        for (int i = 1; i <= 4; i++)
         {
             JournalLines.Add(new JournalLineDtoCreate { LineSeq = i });
         }
@@ -96,21 +96,16 @@ public partial class JournalEntryCreate(
     {
         try
         {
-            var res = await ledgerService.GetLedgersAsync(0, currencyId, searchText);
+            var res = await mediator.Send(new GetLedgerByCurrencyQuery(0, currencyId, new QueryParam(0, 0, string.Empty, false, false, searchText)));
 
-            if (res.IsSuccess())
-            {
-                Ledgers = res.Value;
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Error, res.GetMessage());
-            }
+            Ledgers = res.Items;
+
             StateHasChanged();
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+            _toastService.ShowError(ex.Message, "Error");
+
         }
     }
 
@@ -128,19 +123,24 @@ public partial class JournalEntryCreate(
         await GetNameLists(null, arg.Filter ?? string.Empty);
     }
 
+    string[] columns = { nameof(VOtherNames.Id), nameof(VOtherNames.EntType), nameof(VOtherNames.AltName) };
+
     private async Task GetNameLists(string? id = null, string? searchText = null)
     {
         try
         {
-            var param = new QueryParam(1, 10, string.Empty, true, false, searchText);
+            var param = new QueryParam(1, 15, string.Empty, false, false, searchText);
 
-           NameLists = await nameService.GetNameLists(id, param);
+            var rsp = await mediator.Send(new GetOtherNamesQuery(id, param, columns));
+
+            NameLists = rsp.Items;
 
             StateHasChanged();
+
         }
         catch (Exception ex)
         {
-            NotificationService!.Notify(NotificationSeverity.Error, "Error", ex.Message);
+            _toastService.ShowError(ex.Message, "Error");
         }
     }
 
@@ -204,7 +204,7 @@ public partial class JournalEntryCreate(
 
     private void OnNameSelected(object? arg, JournalLineDtoCreate row)
     {
-        if (arg is VNameList name)
+        if (arg is VOtherNames name)
         {
             row.EntityName = name.AltName;
         }
@@ -351,7 +351,7 @@ public partial class JournalEntryCreate(
 
             var confirm = await DialogService.Confirm("Are you sure you want to save this journal entry?", "Confirm Save", new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
 
-            if(!confirm.HasValue || !confirm.Value)
+            if (!confirm.HasValue || !confirm.Value)
             {
                 _visibled = false;
                 return;
@@ -412,24 +412,30 @@ public partial class JournalEntryCreate(
             if (resp.IsSuccess())
             {
                 var ledger = resp.Value;
+
                 var typeCode = ledger?.LedgerType?.LedgerTypeCode?.ToUpper();
 
-                if (typeCode == "ACCOUNTS PAYABLE")
+                if (typeCode == LedgerTypeConstant.ACCOUNTS_PAYABLE)
                 {
                     accApCount++;
-                    if (nameItem?.EntType?.ToUpper() != "VENDOR" || journalLine.EntityNameRefId == null)
+
+                    if (nameItem?.EntType?.ToUpper() != EntityTypeConstant.VENDOR || journalLine.EntityNameRefId == null)
                     {
-                        ShowAlert("Required Name", "Please choose a vendor when using an Accounts Payable account.");
+                        _toastService.ShowError("Please choose a vendor when using an Accounts Payable account.", "Required Name");
+
                         return (false, accApCount);
                     }
                 }
 
-                if (typeCode == "ACCOUNTS RECEIVABLE")
+                if (typeCode == LedgerTypeConstant.ACCOUNTS_RECEIVABLE)
                 {
                     accApCount++;
-                    if (nameItem?.EntType?.ToUpper() != "CUSTOMER" || journalLine.EntityNameRefId == null)
+
+                    if (nameItem?.EntType?.ToUpper() != EntityTypeConstant.CUSTOMER || journalLine.EntityNameRefId == null)
                     {
-                        ShowAlert("Required Name", "Please choose a customer when using an Accounts Receivable account.");
+
+                        _toastService.ShowError("Please choose a customer when using an Accounts Receivable account.", "Required Name");
+
                         return (false, accApCount);
                     }
                 }
@@ -437,11 +443,13 @@ public partial class JournalEntryCreate(
 
             if (accApCount > 1)
             {
-                ShowAlert("Invalid Account", "You cannot use more than one A/R or A/P account in the same transaction.");
+                _toastService.ShowError("You cannot use more than one A/R or A/P account in the same transaction.", "Invalid Account");
+
                 return (false, accApCount);
             }
 
             await InvokeAsync(StateHasChanged);
+
             return (true, accApCount);
         }
         catch

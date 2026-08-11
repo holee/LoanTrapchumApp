@@ -1,19 +1,18 @@
-using Applications.Extensions.mappers;
+using Applications.Exceptions;
 using Applications.Features.Currencies.Command.AddCurrencyNote;
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
-using Domains.Models.Currencies;
-using Mapster;
 
 namespace TrapchumApp.Pages.Currencies
 {
     public partial class NoteModalCreate
     {
         [Parameter] public int Id { get; set; }
-        
-        private bool isValid = true;
+
         CurrencyNoteDtoCreate model = new CurrencyNoteDtoCreate();
-        EditForm? editForm;
+
+        //EditForm? editForm;
+
         IEnumerable<CurrencyDto> Currencies = new List<CurrencyDto>();
         void Close() => DialogService.Close(false);
         protected override async Task OnInitializedAsync()
@@ -22,37 +21,42 @@ namespace TrapchumApp.Pages.Currencies
 
             model.Quantity = 0;
 
-            var command = new GetCurrenciesQuery(0, new QueryParam(0, 0));
+            var command = new GetCurrenciesDtoQuery(0, new QueryParam(0, 0));
 
-            var currenciesResponse = await mediator.Send(command);   //_currencyService.GetCurrencies();
+            var cur = await mediator.Send(command);
 
-            if (currenciesResponse.IsSuccess)
-            {
-                Currencies = currenciesResponse.Items.Maps<CurrencyDto>();
-            }
+            Currencies = cur.Items;
 
             await base.OnInitializedAsync();
         }
 
         async Task FormSubmit()
         {
-
-            editForm?.EditContext?.Validate();
-
-            var req = model.Adapt<CurrencyCounter>();
-
-            var command = new AddCurrencyNoteCommand(model);
-
-            var response = await mediator.Send(command);  //_currencyService.AddNote(req);
-
-            if (response.IsSuccess())
+            try
             {
-                Close();
+                var command = new AddCurrencyNoteCommand(model);
+
+                var response = await mediator.Send(command);
+
+                if (response.IsSuccess())
+                {
+                    Close();
+                }
+                else
+                {
+                    _toastService.ShowError("Not Success.", "Error");
+                }
             }
-            else
+            catch (MediatorException ex)
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Not Success.");
+                _toastService.ShowError(ex.ErrorMessage, "Error");
             }
+            catch (Exception ex)
+            {
+                _toastService.ShowError(ex.Message, "Error");
+            }
+
+
         }
     }
 }

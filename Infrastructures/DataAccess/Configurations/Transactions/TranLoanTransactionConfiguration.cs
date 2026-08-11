@@ -21,7 +21,8 @@ namespace Infrastructures.DataAccess.Configurations.Transactions
 
             builder.HasOne(x => x.JournalEntry)
                         .WithOne()
-                        .HasForeignKey<JournalEntry>(fk => fk.TransactionsRefId);
+                        .HasForeignKey<JournalEntry>(fk => fk.TransactionsRefId)
+                        .IsRequired(false);
 
             builder.HasMany(c => c.CashManagements)
                        .WithOne()

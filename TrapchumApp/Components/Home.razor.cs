@@ -1,3 +1,5 @@
+using Applications.Services.Lists;
+using Domains.Models.Lists;
 using Microsoft.JSInterop;
 using TrapchumApp.Components.Datatabes;
 using TrapchumApp.Components.Messageboxes;
@@ -87,6 +89,21 @@ namespace TrapchumApp.Components
         private int _templateItemId;
         private int _asyncNationalityId;
 
+        // Size variant demos
+        private int _sizeSmallId;
+        private int _sizeDefaultId;
+        private int _sizeLargeId;
+        private IEnumerable<int>? _sizeSmallMultiIds = [];
+        private IEnumerable<int>? _sizeDefaultMultiIds = [];
+        private IEnumerable<int>? _sizeLargeMultiIds = [];
+
+        // Advanced feature demos
+        private int _groupedItemId;
+        private IEnumerable<int>? _maxSelectIds = [];
+
+        // Server-side search demos
+        private IEnumerable<int>? _asyncNationalityIds = [];
+
         private readonly List<DemoItem> _demoItems =
         [
             new(1, "Cambodia",      "🇰🇭"),
@@ -101,11 +118,12 @@ namespace TrapchumApp.Components
             new(10, "Canada",       "🇨🇦"),
         ];
 
-        //private async Task<IEnumerable<Nationality>> SearchNationalitiesAsync(
-        //    string query, CancellationToken ct)
-        //{
-        //    return await NationalityService.GetNationalities(query);
-        //}
+        private async Task<IEnumerable<Nationality>> SearchNationalitiesAsync(
+            string query, CancellationToken ct)
+        {
+            var svc = ServiceProvider.GetRequiredService<INationalityServiceImpl>();
+            return await svc.GetNationalities(query);
+        }
 
         private sealed record DemoItem(int Id, string Name, string Flag = "");
 
@@ -117,6 +135,7 @@ namespace TrapchumApp.Components
         private string? _selectedEmployee;
         private string? _lastEditAction;
         private string? _lastCellEdit;
+        private IEnumerable<EmployeeDemo>? _selectedEmployees;
 
         private static readonly List<EmployeeDemo> _allEmployees =
         [
@@ -144,6 +163,7 @@ namespace TrapchumApp.Components
         {
             var query = source;
 
+            // Global search
             if (!string.IsNullOrWhiteSpace(args.SearchText))
             {
                 query = query.Where(e =>
@@ -152,16 +172,71 @@ namespace TrapchumApp.Components
                     e.Department.Contains(args.SearchText, StringComparison.OrdinalIgnoreCase));
             }
 
-            query = args.SortColumn switch
+            // Per-column filters
+            if (args.ColumnFilters is { Count: > 0 })
             {
-                "Id" => args.SortDescending ? query.OrderByDescending(e => e.Id) : query.OrderBy(e => e.Id),
-                "FullName" => args.SortDescending ? query.OrderByDescending(e => e.FullName) : query.OrderBy(e => e.FullName),
-                "Position" => args.SortDescending ? query.OrderByDescending(e => e.Position) : query.OrderBy(e => e.Position),
-                "Department" => args.SortDescending ? query.OrderByDescending(e => e.Department) : query.OrderBy(e => e.Department),
-                "Salary" => args.SortDescending ? query.OrderByDescending(e => e.Salary) : query.OrderBy(e => e.Salary),
-                "JoinDate" => args.SortDescending ? query.OrderByDescending(e => e.JoinDate) : query.OrderBy(e => e.JoinDate),
-                _ => query.OrderBy(e => e.Id)
-            };
+                foreach (var (column, filterValue) in args.ColumnFilters)
+                {
+                    if (string.IsNullOrWhiteSpace(filterValue)) continue;
+
+                    query = column switch
+                    {
+                        "FullName" => query.Where(e => e.FullName.Contains(filterValue, StringComparison.OrdinalIgnoreCase)),
+                        "Position" => query.Where(e => e.Position.Contains(filterValue, StringComparison.OrdinalIgnoreCase)),
+                        "Department" => query.Where(e => e.Department.Contains(filterValue, StringComparison.OrdinalIgnoreCase)),
+                        _ => query
+                    };
+                }
+            }
+
+            // Multi-sort
+            if (args.SortColumns is { Count: > 0 })
+            {
+                IOrderedEnumerable<EmployeeDemo>? ordered = null;
+
+                foreach (var sort in args.SortColumns)
+                {
+                    Func<EmployeeDemo, object> keySelector = sort.Column switch
+                    {
+                        "Id" => e => e.Id,
+                        "FullName" => e => e.FullName,
+                        "Position" => e => e.Position,
+                        "Department" => e => e.Department,
+                        "Salary" => e => e.Salary,
+                        "JoinDate" => e => e.JoinDate,
+                        _ => e => e.Id
+                    };
+
+                    if (ordered is null)
+                    {
+                        ordered = sort.Descending
+                            ? query.OrderByDescending(keySelector)
+                            : query.OrderBy(keySelector);
+                    }
+                    else
+                    {
+                        ordered = sort.Descending
+                            ? ordered.ThenByDescending(keySelector)
+                            : ordered.ThenBy(keySelector);
+                    }
+                }
+
+                query = ordered ?? query.OrderBy(e => e.Id);
+            }
+            else
+            {
+                // Fallback to single sort (backward compat)
+                query = args.SortColumn switch
+                {
+                    "Id" => args.SortDescending ? query.OrderByDescending(e => e.Id) : query.OrderBy(e => e.Id),
+                    "FullName" => args.SortDescending ? query.OrderByDescending(e => e.FullName) : query.OrderBy(e => e.FullName),
+                    "Position" => args.SortDescending ? query.OrderByDescending(e => e.Position) : query.OrderBy(e => e.Position),
+                    "Department" => args.SortDescending ? query.OrderByDescending(e => e.Department) : query.OrderBy(e => e.Department),
+                    "Salary" => args.SortDescending ? query.OrderByDescending(e => e.Salary) : query.OrderBy(e => e.Salary),
+                    "JoinDate" => args.SortDescending ? query.OrderByDescending(e => e.JoinDate) : query.OrderBy(e => e.JoinDate),
+                    _ => query.OrderBy(e => e.Id)
+                };
+            }
 
             return query;
         }
@@ -203,6 +278,11 @@ namespace TrapchumApp.Components
         {
             _lastCellEdit = $"Saved cell [{args.Property}] for {args.Item.FullName}";
             return Task.CompletedTask;
+        }
+
+        private void OnSelectionChanged(IEnumerable<EmployeeDemo> selected)
+        {
+            _selectedEmployees = selected;
         }
 
         private sealed class EmployeeDemo

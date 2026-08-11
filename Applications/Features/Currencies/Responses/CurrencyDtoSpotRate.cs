@@ -1,4 +1,6 @@
-﻿namespace Applications.Features.Currencies
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Applications.Features.Currencies
 {
     public class CurrencyDtoSpotRate 
     {
@@ -11,5 +13,6 @@
         public decimal? AvgRate { get; set; }
         public string? Description { get; set; } = string.Empty;
         public int EditSeq { get; set; } = 0;
+        [NotMapped]public int RowIndex { get; set; } = 0;
     }
 }

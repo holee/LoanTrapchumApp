@@ -97,7 +97,7 @@ public static class InfrastructureServiceInjection
         services.AddScoped<ILoanSettingService, LoanSettingRepository>();
         services.AddScoped<IForiegnCurrencyExchange, ForiegnCurrencyExchange>();
         services.AddScoped<IJournalService, JournalRepository>();
-        services.AddScoped<ISpotRateService, SpotRateService>();
+        services.AddScoped<ISpotRateService, SpotRateRepository>();
         services.AddScoped<ILedgerService, LedgerRepository>();
         services.AddScoped<IUserService, UserRepository>();
         services.AddScoped<IRoleService, RoleRepository>();

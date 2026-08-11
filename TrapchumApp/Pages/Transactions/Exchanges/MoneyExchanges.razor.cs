@@ -125,7 +125,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 mx.ExchangeRate = Currency!.BuyingRate;
             }
 
-            if (selectedValue == (int) ExchangeAction.SellCurrency)//2
+            if (selectedValue == (int)ExchangeAction.SellCurrency)//2
             {
                 isBuy = false;
 
@@ -274,11 +274,11 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             if (mx.TotalAmount <= 0)
             {
-                
+
                 _toastService.ShowInfo("Total Amount must be greater than 0", "Validation Error");
 
                 isBusy = false;
-               
+
                 return;
             }
             if (mx.TotalAmount < mx.Amount)
@@ -287,7 +287,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 _toastService.ShowInfo("Total Amount must be greater than Amount", "Validation Error");
 
                 isBusy = false;
-               
+
                 return;
             }
 
@@ -380,6 +380,11 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             isBusy = false;
 
             _toastService.ShowSuccess("Money exchange created successfully.", "Success");
+
+            if (saveNew)
+            {
+                return;
+            }
 
             DialogService.Close(result.Value);
 

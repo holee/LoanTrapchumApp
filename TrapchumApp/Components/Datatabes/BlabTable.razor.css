@@ -32,6 +32,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .blab-dt__header-right {
@@ -96,6 +97,44 @@
 
 .blab-dt__search-input::placeholder {
     color: #94a3b8;
+}
+
+/* ── Toolbar buttons (Export / Print / Copy) ─────────────── */
+.blab-dt__toolbar-buttons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.blab-dt__toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.blab-dt__toolbar-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #1e293b;
+}
+
+.blab-dt__toolbar-btn:active {
+    background: #e2e8f0;
+    transform: scale(0.97);
+}
+
+.blab-dt__toolbar-btn svg {
+    flex-shrink: 0;
 }
 
 /* ── Table wrapper ───────────────────────────────────────── */
@@ -178,6 +217,59 @@
     height: 14px;
 }
 
+/* Multi-sort order badge */
+.blab-dt__sort-order {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+/* ── Per-column filter row ──────────────────────────────── */
+.blab-dt__filter-row th {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 6px 8px;
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.blab-dt__filter-cell {
+    padding: 4px 6px !important;
+}
+
+.blab-dt__filter-input {
+    width: 100%;
+    padding: 5px 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    font-size: 12px;
+    color: #334155;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.blab-dt__filter-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
+}
+
+.blab-dt__filter-input::placeholder {
+    color: #94a3b8;
+    font-style: italic;
+}
+
 /* ── Tbody ────────────────────────────────────────────────── */
 .blab-dt__table tbody td {
     padding: 10px 14px;
@@ -215,6 +307,162 @@
 .blab-dt__row {
     cursor: pointer;
     transition: background-color 0.15s;
+}
+
+/* ── Selected row highlight ─────────────────────────────── */
+.blab-dt__row--selected {
+    background-color: #eff6ff !important;
+    box-shadow: inset 3px 0 0 #3b82f6;
+}
+
+.blab-dt__row--selected td {
+    color: #1e293b;
+}
+
+/* ── Selection checkbox / radio ─────────────────────────── */
+.blab-dt__select-checkbox,
+.blab-dt__select-radio {
+    width: 16px;
+    height: 16px;
+    accent-color: #3b82f6;
+    cursor: pointer;
+    margin: 0;
+}
+
+.blab-dt__th-select,
+.blab-dt__cell-select {
+    width: 2.5rem;
+}
+
+/* ── Expand/collapse button ─────────────────────────────── */
+.blab-dt__th-expand,
+.blab-dt__cell-expand {
+    width: 2.5rem;
+}
+
+.blab-dt__expand-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    background: #fff;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.blab-dt__expand-btn svg {
+    transition: transform 0.2s ease;
+}
+
+.blab-dt__expand-btn--open svg {
+    transform: rotate(90deg);
+}
+
+.blab-dt__expand-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #334155;
+}
+
+.blab-dt__expand-all-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #fff;
+    color: #475569;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    transition: all 0.15s;
+}
+
+.blab-dt__expand-all-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+/* ── Detail / child row ─────────────────────────────────── */
+.blab-dt__detail-row {
+    background: #fafbfc;
+}
+
+.blab-dt__detail-row:hover {
+    background: #fafbfc !important;
+}
+
+.blab-dt__detail-cell {
+    padding: 16px 20px !important;
+    border-bottom: 2px solid #e2e8f0;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    position: relative;
+}
+
+.blab-dt__detail-cell::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #3b82f6;
+    border-radius: 0 2px 2px 0;
+}
+
+/* ── Group header row ───────────────────────────────────── */
+.blab-dt__group-row {
+    cursor: default;
+}
+
+.blab-dt__group-row:hover {
+    background: #e8ecf2 !important;
+}
+
+.blab-dt__group-cell {
+    padding: 8px 14px !important;
+    background: #e2e8f0;
+    border-bottom: 1px solid #cbd5e1;
+    font-weight: 600;
+    font-size: 13px;
+    color: #334155;
+    letter-spacing: 0.01em;
+}
+
+.blab-dt__group-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.blab-dt__group-label::before {
+    content: "▸";
+    font-size: 10px;
+    color: #64748b;
+}
+
+.blab-dt__group-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: #cbd5e1;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
 }
 
 /* ── Editing row highlight ───────────────────────────────── */
@@ -379,8 +627,6 @@
     100% { background-position: -200% 0; }
 }
 
-/* ── Footer summary (tfoot) ──────────────────────────────── */
-
 /* ── Column filter picker ────────────────────────────────── */
 .blab-dt__col-picker {
     position: relative;
@@ -500,6 +746,11 @@
     color: #64748b;
 }
 
+.blab-dt__info-selected {
+    color: #3b82f6;
+    font-weight: 500;
+}
+
 /* ── Pagination ──────────────────────────────────────────── */
 .blab-dt__paging {
     display: flex;
@@ -579,6 +830,10 @@
         flex-wrap: wrap;
     }
 
+    .blab-dt__toolbar-buttons {
+        flex-wrap: wrap;
+    }
+
     /* ── Responsive card view ── */
     .blab-dt--responsive .blab-dt__table thead {
         display: none;
@@ -623,6 +878,22 @@
         text-align: left;
         margin-right: 1rem;
         flex-shrink: 0;
+    }
+
+    /* Detail row in responsive */
+    .blab-dt--responsive .blab-dt__detail-row {
+        margin-top: -12px;
+        margin-bottom: 12px;
+    }
+
+    .blab-dt--responsive .blab-dt__detail-cell {
+        border-radius: 0 0 8px 8px;
+    }
+
+    /* Group row in responsive */
+    .blab-dt--responsive .blab-dt__group-row {
+        border-radius: 8px;
+        margin-bottom: 4px;
     }
 
     /* Skeleton rows in responsive mode */

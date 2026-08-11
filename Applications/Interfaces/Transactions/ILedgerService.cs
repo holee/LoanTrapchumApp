@@ -16,8 +16,7 @@ public interface ILedgerService
     Task<ErrorOr<IEnumerable<LedgerType>>> FindLedgerTypes(int? ledgerTypeId = 0, string? q = null);
     Task<ErrorOr<LedgerType>> GetLedgerTypeById(int? ledgerId);
     Task<ErrorOr<IEnumerable<VLedger>>> GetLedgersAsync(int? ledgerId = 0, int? currencyId = 1, string? q = null);
-    Task<Pager<VLedger>> GetLedgersAsync(int? pageIndex, int? pageSize, string sortColumn,
-                                         bool sortDescending = false, int currencyId = 1,
-                                         bool includeInactive = false, string? q = null);
     Task<Pager<VLedger>> GetLedgersAsync(int? currencyId, QueryParam q, CancellationToken cancellation = default);
+    Task<PageMetaData<VLedger>> GetLedgersAsync(int? ledgerId, int? currencyId, QueryParam? param, CancellationToken cancellation = default, params string[] columns);
+    Task<PageMetaData<VLedger>> GetLedgersAsync(int? currencyId, QueryParam query, CancellationToken cancellation = default, params string[] columns);
 }

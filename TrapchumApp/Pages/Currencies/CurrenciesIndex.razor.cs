@@ -78,37 +78,16 @@ namespace TrapchumApp.Pages.Currencies
 
         Task DisplayCurrencySetSpotRateDialogue()
         {
-            // return ModalService.Show<SetDailySpotRateModal>(param =>
-            // {
-            //     param.Add(x => x.onVildated, ValidateSuccess);
-            //     param.Add(x => x.OnSuccess, CreateSuccess);
-
-            // }, new ModalInstanceOptions
-            //     {
-            //         UseModalStructure = false,
-            //         FocusTrap = true,
-            //         Closing = OnModalClosing,
-            //         Size = ModalSize.ExtraLarge
-            //     });
 
             return Task.CompletedTask;
         }
 
 
-        Task ShowCurrencyDialogue()
+        async Task ShowCurrencyDialogue()
         {
-            return Task.CompletedTask;
-            // return ModalService.Show<ExchangeModalCurrency>(param =>
-            // {
 
+           await DialogService.OpenAsync<CurrencyModalCreate>("Currency");
 
-            // }, new ModalInstanceOptions
-            //     {
-            //         UseModalStructure = false,
-            //         FocusTrap = true,
-            //         Closing = OnModalClosing,
-            //         Size = ModalSize.Large
-            //     });
         }
 
     }

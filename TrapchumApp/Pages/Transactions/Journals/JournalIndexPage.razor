@@ -3,7 +3,10 @@
 @using Applications.Responses.ViewModels.Journals
 <PageTitle>Journal list</PageTitle>
 <div class="journal-page">
-    <RadzenTabs RenderMode="TabRenderMode.Server" @bind-SelectedIndex="@selectedIndex" Change="e=>TabChanged(e)" @ref="tb" class="journal-tabs">
+    <RadzenTabs RenderMode="TabRenderMode.Client"
+                SelectedIndex="@selectedIndex"
+                Change="e => TabChanged(e)"
+                @ref="tb" class="journal-tabs">
         <Tabs>
             <RadzenTabsItem Text="Journals">
                 <div class="journal-card">
@@ -94,50 +97,94 @@
                     </RadzenDataGrid>
                 </div>
             </RadzenTabsItem>
-            <RadzenTabsItem Visible="showCreateTab">
-                <Template>
-                    <span style="display: flex; gap: 6px">
-                        <RadzenButton Icon="close"
-                                      @onclick:stopPropagation Click="CloseCreateTab"
-                                      Size="ButtonSize.ExtraSmall"
-                                      ButtonStyle="ButtonStyle.Danger"
-                                      Variant="Variant.Text"/>
-                        New Journal
-                    </span>
-                </Template>
-                <ChildContent>
-                    <JournalEntryCreate Close="CloseCreateTab" 
-                            UserId="@UserId"
-                            BranchId="@BranchId"/>
-                </ChildContent>
-            </RadzenTabsItem>
-            <RadzenTabsItem Visible="showDetailTab">
-                <Template>
-                    <span style="display: flex; gap: 6px">
-                        <RadzenButton Icon="close" @onclick:stopPropagation Click="CloseDetailTab"
-                                      Size="ButtonSize.ExtraSmall"
-                                      ButtonStyle="ButtonStyle.Danger" Variant="Variant.Text"/>
-                        Journal Details
-                    </span>
-                </Template>
-                <ChildContent>
-                    <JournalDetails SelectIndex="CloseDetailJournal" JournalId="@_selectedJournalId"/>
-                </ChildContent>
-            </RadzenTabsItem>
+
+            @foreach (var tab in _tabs)
+            {
+                <RadzenTabsItem Text="@tab.Title" @Key="@tab.Key">
+                    <Template>
+                        <CloseTabButton Title="@tab.Title"
+                                        Closed="(() => CloseTab(tab.Key))" />
+                    </Template>
+                    <ChildContent>
+                        @tab.Content
+                    </ChildContent>
+                </RadzenTabsItem>
+            }
         </Tabs>
     </RadzenTabs>
 </div>
 
 @code {
 
+
+    private List<CustomTab> _tabs = new();
+
+
+    private void ShowDetailsTab(JournalEntryVm entryVm)
+    {
+
+        ContextMenuService.Close();
+
+        var newKey = "details-" + entryVm.JournalEntryId;
+
+        var existingIndex = _tabs.FindIndex(t => t.Key == newKey);
+
+        if (existingIndex != -1)
+        {
+
+            selectedIndex = existingIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(JournalDetails));
+
+            builder.AddAttribute(1, "JournalId", entryVm.JournalEntryId);
+
+            //builder.AddAttribute(1, "BranchId", BranchId);
+
+            builder.AddAttribute(2, "Close", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(newKey);
+            }));
+
+            builder.SetKey(newKey);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(newKey, $"BranchName:{entryVm.BranchName}", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        selectedIndex = _tabs.Count;
+
+    }
+
+
+    void CloseTab(string? tabId)
+    {
+        var tabIndex = _tabs.FirstOrDefault(t => t.Key == tabId);
+
+        if (tabIndex is not null)
+        {
+            _tabs.Remove(tabIndex);
+
+            selectedIndex = _tabs.Count;
+        }
+    }
+
     void ShowContextMenuWithContent(MouseEventArgs args, string? id)
     {
         ContextMenuService.Open(args, ds =>
             @<RadzenMenu Style="font-size:0.8rem;">
-
-                <RadzenMenuItem Click="@(() => GetDetailJournal(id))" Icon="info" Text="Details"
+                <RadzenMenuItem Click="@(() => ShowDetailsTab(new JournalEntryVm { JournalEntryId = id }))"
+                                Icon="info" Text="Journal Details"
                                 Value="@id"></RadzenMenuItem>
-
             </RadzenMenu>
         );
     }

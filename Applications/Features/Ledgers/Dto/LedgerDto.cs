@@ -1,5 +1,4 @@
-﻿using Applications.Features.Transactions.Journals;
-namespace Applications.Features.Ledgers.Dto;
+﻿namespace Applications.Features.Ledgers.Dto;
 
 public sealed class LedgerDto
 {

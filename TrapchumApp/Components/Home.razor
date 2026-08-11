@@ -1,4 +1,4 @@
-﻿@page "/Home"
+@page "/Home"
 @using Applications.Features.Documents.Dto
 @using Radzen.Blazor
 @using TrapchumApp.Components.Datatabes
@@ -74,6 +74,150 @@
             </BlabSelect2>
         </RadzenColumn>
     </RadzenRow>
+
+    @* ── Size variants ── *@
+    <h5 class="rz-mt-6 rz-mb-2">Size Variants</h5>
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="4">
+            <label class="rz-mb-1 d-block"><strong>Small</strong></label>
+            <BlabSelect2 TItem="DemoItem" TValue="int"
+                         Data="_demoItems"
+                         ValueSelector="x => x.Id"
+                         TextSelector="x => x.Name"
+                         @bind-Value="_sizeSmallId"
+                         Size="Select2Size.Small"
+                         Placeholder="Small size..."
+                         AllowClear="true" />
+        </RadzenColumn>
+        <RadzenColumn Size="4">
+            <label class="rz-mb-1 d-block"><strong>Default</strong></label>
+            <BlabSelect2 TItem="DemoItem" TValue="int"
+                         Data="_demoItems"
+                         ValueSelector="x => x.Id"
+                         TextSelector="x => x.Name"
+                         @bind-Value="_sizeDefaultId"
+                         Size="Select2Size.Default"
+                         Placeholder="Default size..."
+                         AllowClear="true" />
+        </RadzenColumn>
+        <RadzenColumn Size="4">
+            <label class="rz-mb-1 d-block"><strong>Large</strong></label>
+            <BlabSelect2 TItem="DemoItem" TValue="int"
+                         Data="_demoItems"
+                         ValueSelector="x => x.Id"
+                         TextSelector="x => x.Name"
+                         @bind-Value="_sizeLargeId"
+                         Size="Select2Size.Large"
+                         Placeholder="Large size..."
+                         AllowClear="true" />
+        </RadzenColumn>
+    </RadzenRow>
+
+    @* ── Multi-select sizes ── *@
+    <h5 class="rz-mt-6 rz-mb-2">Multi-Select Sizes</h5>
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="4">
+            <label class="rz-mb-1 d-block"><strong>Small Multi</strong></label>
+            <BlabSelect2 TItem="DemoItem" TValue="int"
+                         Data="_demoItems"
+                         ValueSelector="x => x.Id"
+                         TextSelector="x => x.Name"
+                         @bind-Values="_sizeSmallMultiIds"
+                         Multiple="true"
+                         Size="Select2Size.Small"
+                         Placeholder="Small multi..."
+                         AllowClear="true" />
+        </RadzenColumn>
+        <RadzenColumn Size="4">
+            <label class="rz-mb-1 d-block"><strong>Default Multi</strong></label>
+            <BlabSelect2 TItem="DemoItem" TValue="int"
+                         Data="_demoItems"
+                         ValueSelector="x => x.Id"
+                         TextSelector="x => x.Name"
+                         @bind-Values="_sizeDefaultMultiIds"
+                         Multiple="true"
+                         Size="Select2Size.Default"
+                         Placeholder="Default multi..."
+                         AllowClear="true" />
+        </RadzenColumn>
+        <RadzenColumn Size="4">
+            <label class="rz-mb-1 d-block"><strong>Large Multi</strong></label>
+            <BlabSelect2 TItem="DemoItem" TValue="int"
+                         Data="_demoItems"
+                         ValueSelector="x => x.Id"
+                         TextSelector="x => x.Name"
+                         @bind-Values="_sizeLargeMultiIds"
+                         Multiple="true"
+                         Size="Select2Size.Large"
+                         Placeholder="Large multi..."
+                         AllowClear="true" />
+        </RadzenColumn>
+    </RadzenRow>
+
+    @* ── Advanced features ── *@
+    <h5 class="rz-mt-6 rz-mb-2">Advanced Features</h5>
+    <RadzenRow Gap="1rem">
+        @* ── Grouped + Disabled items ── *@
+        <RadzenColumn Size="6">
+            <label class="rz-mb-1 d-block"><strong>Grouped + Disabled Items</strong></label>
+            <BlabSelect2 TItem="DemoItem" TValue="int"
+                         Data="_demoItems"
+                         ValueSelector="x => x.Id"
+                         TextSelector="x => x.Name"
+                         @bind-Value="_groupedItemId"
+                         GroupSelector="@(x => x.Id <= 5 ? "Asia" : "Others")"
+                         DisabledSelector="@(x => x.Id == 3 || x.Id == 8)"
+                         Placeholder="Grouped select..."
+                         AllowClear="true" />
+        </RadzenColumn>
+
+        @* ── Max selection (3) ── *@
+        <RadzenColumn Size="6">
+            <label class="rz-mb-1 d-block"><strong>Max 3 Selections</strong></label>
+            <BlabSelect2 TItem="DemoItem" TValue="int"
+                         Data="_demoItems"
+                         ValueSelector="x => x.Id"
+                         TextSelector="x => x.Name"
+                         @bind-Values="_maxSelectIds"
+                         Multiple="true"
+                         MaxSelectionLength="3"
+                         Placeholder="Pick up to 3..."
+                         AllowClear="true" />
+            <small class="rz-mt-1 d-block text-muted">Selected: @string.Join(", ", _maxSelectIds ?? [])</small>
+        </RadzenColumn>
+    </RadzenRow>
+
+    @* ── Server-side search ── *@
+    <h5 class="rz-mt-6 rz-mb-2">Server-Side Search</h5>
+    <RadzenRow Gap="1rem">
+        <RadzenColumn Size="6">
+            <label class="rz-mb-1 d-block"><strong>Nationality (Async)</strong></label>
+            <BlabSelect2 TItem="Nationality" TValue="int"
+                         SearchAsync="SearchNationalitiesAsync"
+                         ValueSelector="x => x.NationalityId"
+                         TextSelector="x => x.NationalityName ?? string.Empty"
+                         @bind-Value="_asyncNationalityId"
+                         MinimumInputLength="1"
+                         DebounceMs="300"
+                         Placeholder="Search nationalities..."
+                         AllowClear="true" />
+            <small class="rz-mt-1 d-block text-muted">Selected ID: @_asyncNationalityId</small>
+        </RadzenColumn>
+        <RadzenColumn Size="6">
+            <label class="rz-mb-1 d-block"><strong>Nationality Multi (Async)</strong></label>
+            <BlabSelect2 TItem="Nationality" TValue="int"
+                         SearchAsync="SearchNationalitiesAsync"
+                         ValueSelector="x => x.NationalityId"
+                         TextSelector="x => x.NationalityName ?? string.Empty"
+                         @bind-Values="_asyncNationalityIds"
+                         Multiple="true"
+                         MinimumInputLength="1"
+                         DebounceMs="300"
+                         Placeholder="Search & pick nationalities..."
+                         AllowClear="true" />
+            <small class="rz-mt-1 d-block text-muted">Selected IDs: @string.Join(", ", _asyncNationalityIds ?? [])</small>
+        </RadzenColumn>
+    </RadzenRow>
 </RadzenCard>
 
 @* ══════════════════════════════════════════════════════════════
@@ -83,11 +227,12 @@
     <h4 class="rz-mb-4">BlabTable Demo</h4>
 
     <RadzenRow Gap="1rem">
-        @* ── 1. Row-edit mode with footer summary, sticky header, top pagination ── *@
+        @* ── 1. Full-featured: Row-edit + Column filters + Multi-sort + Detail rows + Export/Print/Copy ── *@
         <RadzenColumn Size="12">
             <label class="rz-mb-2 d-block">
-                <strong>Row Edit + Footer Summary + Top Pagination + Sticky Header</strong>
+                <strong>Full Features: Row Edit + Column Filters + Multi-Sort + Detail Rows + Export/Print/Copy</strong>
             </label>
+            <small class="rz-mb-2 d-block text-muted">💡 Hold <kbd>Shift</kbd> + click headers to multi-sort</small>
             <BlabTable TItem="EmployeeDemo"
                        Data="_tableData"
                        TotalCount="_tableTotalCount"
@@ -97,7 +242,7 @@
                        Bordered="true"
                        Hoverable="true"
                        Compact="true"
-                       Height="380px"
+                       Height="420px"
                        StickyHeader="true"
                        ShowColumnFilterPicker="true"
                        ShowSearchBox="true"
@@ -107,24 +252,28 @@
                        EditMode="BlabTableEditMode.Row"
                        RowEditSave="OnRowEditSave"
                        RowEditCancel="OnRowEditCancel"
-                       RowClick="OnTableRowClick">
+                       RowClick="OnTableRowClick"
+                       ShowExportButton="true"
+                       ShowPrintButton="true"
+                       ShowCopyButton="true"
+                       ExportFileName="employees">
                 <Columns>
                     <BlabTableColumn TItem="EmployeeDemo" Property="Id" Title="#" Width="4rem" TextAlign="center" />
-                    <BlabTableColumn TItem="EmployeeDemo" Property="FullName" Title="Full Name" Editable="true">
+                    <BlabTableColumn TItem="EmployeeDemo" Property="FullName" Title="Full Name" Editable="true" Filterable="true">
                         <EditTemplate>
                             <input type="text" class="blab-dt__search-input" style="width:100%"
                                    value="@context.FullName"
                                    @onchange="(e) => context.FullName = e.Value?.ToString() ?? string.Empty" />
                         </EditTemplate>
                     </BlabTableColumn>
-                    <BlabTableColumn TItem="EmployeeDemo" Property="Position" Title="Position" Editable="true">
+                    <BlabTableColumn TItem="EmployeeDemo" Property="Position" Title="Position" Editable="true" Filterable="true">
                         <EditTemplate>
                             <input type="text" class="blab-dt__search-input" style="width:100%"
                                    value="@context.Position"
                                    @onchange="(e) => context.Position = e.Value?.ToString() ?? string.Empty" />
                         </EditTemplate>
                     </BlabTableColumn>
-                    <BlabTableColumn TItem="EmployeeDemo" Property="Department" Title="Department" Editable="true">
+                    <BlabTableColumn TItem="EmployeeDemo" Property="Department" Title="Department" Editable="true" Filterable="true" FilterPlaceholder="Dept...">
                         <EditTemplate>
                             <select class="blab-dt__length-select" style="width:100%"
                                     value="@context.Department"
@@ -155,9 +304,25 @@
                         </Template>
                     </BlabTableColumn>
                 </Columns>
+                <DetailTemplate>
+                    <div style="display:flex;gap:2rem;flex-wrap:wrap;">
+                        <div>
+                            <strong>Employee Details</strong>
+                            <p style="margin:4px 0;color:#64748b;font-size:12px;">ID: @context.Id</p>
+                            <p style="margin:4px 0;color:#64748b;font-size:12px;">Full Name: @context.FullName</p>
+                            <p style="margin:4px 0;color:#64748b;font-size:12px;">Position: @context.Position</p>
+                        </div>
+                        <div>
+                            <strong>Employment Info</strong>
+                            <p style="margin:4px 0;color:#64748b;font-size:12px;">Department: @context.Department</p>
+                            <p style="margin:4px 0;color:#64748b;font-size:12px;">Salary: @context.Salary.ToString("C2")</p>
+                            <p style="margin:4px 0;color:#64748b;font-size:12px;">Join Date: @context.JoinDate.ToString("dd-MMMM-yyyy")</p>
+                        </div>
+                    </div>
+                </DetailTemplate>
                 <FooterSummary>
                     <tr>
-                        <td style="text-align:center" colspan="2"></td>
+                        <td style="text-align:center" colspan="3"></td>
                         <td><strong>Page Total</strong></td>
                         <td>@context.Select(e => e.Department).Distinct().Count() depts</td>
                         <td style="text-align:right"><strong>@context.Sum(e => e.Salary).ToString("N2") $</strong></td>
@@ -170,26 +335,30 @@
     </RadzenRow>
 
     <RadzenRow Gap="1rem" class="rz-mt-4">
-        @* ── 2. Cell-edit mode with pagination at top only ── *@
+        @* ── 2. Row selection + Grouping demo ── *@
         <RadzenColumn Size="12">
-            <label class="rz-mb-2 d-block"><strong>Cell Edit + Pagination Top Only</strong></label>
+            <label class="rz-mb-2 d-block">
+                <strong>Multi-Select + Row Grouping by Department</strong>
+            </label>
             <BlabTable TItem="EmployeeDemo"
                        Data="_tableData2"
                        TotalCount="_tableTotalCount2"
                        LoadData="OnTableLoadData2"
-                       PageSize="5"
+                       PageSize="10"
                        Striped="true"
                        Bordered="true"
                        Hoverable="true"
                        Responsive="true"
                        SearchPlaceholder="Search..."
-                       PaginationPosition="BlabTablePaginationPosition.Top"
-                       EditMode="BlabTableEditMode.Cell"
-                       CellEditSave="OnCellEditSave">
+                       PaginationPosition="BlabTablePaginationPosition.Bottom"
+                       SelectionMode="BlabTableSelectionMode.Multiple"
+                       SelectedItems="_selectedEmployees"
+                       SelectedItemsChanged="OnSelectionChanged"
+                       GroupBy="@(e => e.Department)">
                 <Columns>
                     <BlabTableColumn TItem="EmployeeDemo" Property="Id" Title="#" Width="4rem" TextAlign="center" />
-                    <BlabTableColumn TItem="EmployeeDemo" Property="FullName" Title="Full Name" Editable="true" />
-                    <BlabTableColumn TItem="EmployeeDemo" Property="Position" Title="Position" Editable="true" />
+                    <BlabTableColumn TItem="EmployeeDemo" Property="FullName" Title="Full Name" Filterable="true" />
+                    <BlabTableColumn TItem="EmployeeDemo" Property="Position" Title="Position" />
                     <BlabTableColumn TItem="EmployeeDemo" Property="Department" Title="Department" />
                     <BlabTableColumn TItem="EmployeeDemo" Property="Salary" Title="Salary" TextAlign="right">
                         <Template>
@@ -197,8 +366,18 @@
                         </Template>
                     </BlabTableColumn>
                 </Columns>
+                <GroupHeaderTemplate>
+                    <span style="font-size:13px;">📁 <strong>@context.GroupKey</strong> Department</span>
+                    <span style="margin-left:8px;color:#64748b;font-size:12px;">(@context.Count employees)</span>
+                </GroupHeaderTemplate>
             </BlabTable>
-            <small class="rz-mt-1 d-block text-muted">Last cell edit: @_lastCellEdit</small>
+            <small class="rz-mt-1 d-block text-muted">
+                Selected employees: @(_selectedEmployees?.Count() ?? 0)
+                @if (_selectedEmployees?.Any() == true)
+                {
+                    <span> — @string.Join(", ", _selectedEmployees.Select(e => e.FullName))</span>
+                }
+            </small>
         </RadzenColumn>
     </RadzenRow>
 </RadzenCard>

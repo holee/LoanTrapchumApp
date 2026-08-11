@@ -2,6 +2,7 @@ using Applications.Extensions.mappers;
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Features.Ledgers.Dto;
+using Applications.Features.Ledgers.Queries.GetLedgerByCurrency;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
 using Applications.Responses.ViewModels.Ledgers;
@@ -13,6 +14,7 @@ namespace TrapchumApp.Pages.Transactions.Ledgers;
 public partial class EditLedgerModal
 {
     private readonly ILedgerService _ledgService;
+
     private readonly ICurrencyService _currencyService;
     public EditLedgerModal(ILedgerService ledgerService, ICurrencyService currencyService)
     {
@@ -41,7 +43,9 @@ public partial class EditLedgerModal
     async Task LoadDataLedgerTypeChanged(LoadDataArgs e)
     {
         filterTypeText = e.Filter ?? string.Empty;
+
         var resp = await _ledgService.FindLedgerTypes(0, filterTypeText);
+
         if (resp.IsSuccess())
         {
             LedgerTypes = resp.Value.Adapt<IEnumerable<LedgerTypeDto>>();
@@ -49,22 +53,18 @@ public partial class EditLedgerModal
         else
         {
             LedgerTypes = [];
-            NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
+
+            _toastService.ShowError(resp.GetMessage(), "Error");
         }
     }
 
 
     protected async Task GetLedgers(int? currencyId = 1, string? searchText = null)
     {
-        var resp = await _ledgService.GetLedgersAsync(0, currencyId, null);
-        if (resp.IsSuccess())
-        {
-            FilterLedgers = resp.Value.Adapt<IEnumerable<VLedger>>();
-        }
-        else
-        {
-            NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
-        }
+        var resp = await mediator.Send(new GetLedgerByCurrencyQuery(0, currencyId, new QueryParam(0, 0, string.Empty, searchText)));
+
+        FilterLedgers = resp.Items;
+
     }
 
     void Close(bool IsSuccess = false) => DialogService.Close(IsSuccess);
@@ -75,13 +75,15 @@ public partial class EditLedgerModal
 
         if (model.IsSubTypeOf && model.ParentRefId <= 0)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Please select ledger name.");
+            _toastService.ShowError("Please select ledger name.", "Error");
+
             return;
         }
 
         if (model.LedgerTypeRefId == 1 && string.IsNullOrEmpty(model.BankNumber))
         {
-            NotificationService.Notify(NotificationSeverity.Error, "please input bank acoount number.");
+            _toastService.ShowError("please input bank acoount number.", "Error");
+
             return;
         }
 
@@ -91,13 +93,15 @@ public partial class EditLedgerModal
 
         if (result.IsSuccess())
         {
-            NotificationService.Notify(NotificationSeverity.Success, result.Value);
+            _toastService.ShowSuccess(result.Value, "Success");
+
             model = new();
+
             Close(true);
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, result.GetMessage());
+            _toastService.ShowError(result.GetMessage(), "Error");
         }
     }
     protected override async Task OnParametersSetAsync()

@@ -1,8 +1,6 @@
 ﻿<EditForm Model="mx" @ref="form">
-    <ValidationSummary />
     <Blazilla.FluentValidator />
     <input type="hidden" value="@mx.SpotRate" />
-
     <div class="mx-card">
 
         @* ── Card Header ── *@
@@ -40,7 +38,7 @@
                     </RadzenFormField>
                 </RadzenColumn>
                 <RadzenColumn Size="12" SizeMD="3">
-                    <RadzenFormField Text="Buy Currency" AllowFloatingLabel="true" class="rz-w-100">
+                    <RadzenFormField Text="Currency" AllowFloatingLabel="true" class="rz-w-100">
                         <ChildContent>
                             <RadzenDropDown TextProperty="@nameof(Items.Label)"
                                             class="rz-w-100"
@@ -116,11 +114,19 @@
                          Gap="0.75rem">
                 <RadzenButton Icon="save"
                               ButtonType="ButtonType.Button"
-                              Text="Save & New"
-                              Click="SaveAndNew"
+                              Text="Save"
                               BusyText="Please wait…"
                               IsBusy="isBusy"
+                              Click="@SaveAndClose"
                               ButtonStyle="ButtonStyle.Success"
+                              Size="ButtonSize.ExtraSmall" />
+                <RadzenButton Icon="save"
+                              ButtonType="ButtonType.Button"
+                              Text="Save & New"
+                              Click="@SaveAndNew"
+                              BusyText="Please wait…"
+                              IsBusy="isBusy"
+                              ButtonStyle="ButtonStyle.Primary"
                               Size="ButtonSize.ExtraSmall" />
                 <RadzenButton Icon="close"
                               ButtonType="ButtonType.Button"

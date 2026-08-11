@@ -71,7 +71,7 @@ public partial class FileUploadDialogue(ILogger<FileUploadDialogue> logger)
     {
         if (!_dz_selectedFiles.Any())
         {
-            NotificationService.Notify(NotificationSeverity.Error, "There is no any file to upload");
+            _toastService.ShowError("There is no any file to upload");
 
             Dz_CloseModal();
 
@@ -98,7 +98,8 @@ public partial class FileUploadDialogue(ILogger<FileUploadDialogue> logger)
 
         if (result)
         {
-            NotificationService.Notify(NotificationSeverity.Success, $"File removed: {file.OriginalName}");
+
+            _toastService.ShowSuccess($"File removed: {file.OriginalName}");
 
             _dz_selectedFiles.Remove(file);
 
@@ -128,48 +129,9 @@ public partial class FileUploadDialogue(ILogger<FileUploadDialogue> logger)
     private Task Dz_OnDrop(DragEventArgs e)
     {
         _dz_isDragOver = false;
+
         return Task.CompletedTask;
     }
 
 
 }
-
-
-//private async Task Dz_OnFileUpload(UploadChangeEventArgs args)
-//{
-
-//    if (args.Files is null || !args.Files.Any()) return;
-
-//    try
-//    {
-//        foreach (var file in args.Files)
-//        {
-//            var ext = Path.GetExtension(file.Name);
-
-//            var originalName = file.Name;
-
-//            if (file is null)
-//            {
-//                continue;
-//            }
-//            using var stream = new MemoryStream();
-
-//            using (var fileStream = file.OpenReadStream(maxFileSize)) // 30 MB limit
-//            {
-//                await fileStream.CopyToAsync(stream); // ✅ Read the file content
-
-//                //_dz_files.Add(new FileModel(file.Name, originalName, file.Size, stream.ToArray()));
-//            }
-
-//        }
-
-//       // _dz_selectedFiles = _dz_files;
-//    }
-//    catch (Exception ex)
-//    {
-//        Console.WriteLine($"Error uploading files: {ex.Message}");
-//        // Handle error (e.g., show notification)
-//    }
-//}
-
-// Remove a selected file from the lists

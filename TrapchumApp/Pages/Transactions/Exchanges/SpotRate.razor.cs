@@ -1,9 +1,8 @@
 using Applications.Features.Currencies;
+using Applications.Features.Currencies.Command.SetSpotRate;
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencyDetails;
-using Applications.Interfaces.Currencies;
-using Applications.Interfaces.Transactions;
-using Domains.Models.Currencies;
+using Applications.Features.Currencies.Queries.GetSpotRates;
 using Mapster;
 using Radzen.Blazor;
 
@@ -11,17 +10,22 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 {
     public partial class SpotRate
     {
-        [Inject] ICurrencyService CurrencyServiceImpl { get; set; } = default!;
-        [Inject] ISpotRateService spotRateService { get; set; } = default!;
-        private CurrencyDto? Currency { get; set; } = new();
-        private CurrencyDtoSpotRateCreate SpotRateDtoCreate = new CurrencyDtoSpotRateCreate();
-        private List<CurrencyDtoSpotRate> currencySpotRates { get; set; } = default!;
-        private PaginatedList<CurrencyDtoSpotRate> CurrencyPaginatedList { get; set; } = default!;
-        IList<CurrencyDtoSpotRate>? SelectedCurrencySpotRates = null;
-        private int pageIndex = 1;
-        private DateTime? reqDate = DateTime.UtcNow;
         [Parameter] public int Id { get; set; }
+
+        private CurrencyDto? Currency { get; set; } = new();
+
+        private CurrencySpotRateDtoCreate SpotRateDtoCreate = new();
+
+        private IEnumerable<CurrencyDtoSpotRate> currencySpotRates = [];
+
+        IList<CurrencyDtoSpotRate>? SelectedCurrencySpotRates = null;
+
+        private int pageIndex = 1;
+
+        private DateTime? reqDate = DateTime.UtcNow;
+
         bool isActive = false;
+
         private CurrencyDtoSpotRate selectedSpotRate = new CurrencyDtoSpotRate();
 
         RadzenDataGrid<CurrencyDtoSpotRate> gridRef = default!;
@@ -40,7 +44,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             }
             else
             {
-                SpotRateDtoCreate = new CurrencyDtoSpotRateCreate();
+                SpotRateDtoCreate = new();
                 reqDate = DateTime.Now;
             }
         }
@@ -84,6 +88,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         private void SelectedRow(CurrencyDtoSpotRate param)
         {
             selectedSpotRate = param;
+
             if (param is not null)
             {
                 reqDate = param.TransactionDate;
@@ -95,7 +100,8 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             }
             else
             {
-                SpotRateDtoCreate = new CurrencyDtoSpotRateCreate();
+                SpotRateDtoCreate = new();
+
                 reqDate = DateTime.Now;
             }
             StateHasChanged();
@@ -148,9 +154,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             try
             {
 
-                var req = SpotRateDtoCreate.Adapt<CurrencySpotRate>();
-
-                var message = await spotRateService.SetSpotRate(Id, req);
+                var message = await mediator.Send(new SetSpotRateCommand(Id, SpotRateDtoCreate));
 
                 if (message.IsSuccess)
                 {
@@ -158,7 +162,8 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                     try
                     {
                         await ChangePageIndex(pageIndex);
-                        SpotRateDtoCreate = new CurrencyDtoSpotRateCreate();
+
+                        SpotRateDtoCreate = new();
                     }
                     catch (Exception ex)
                     {
@@ -174,7 +179,6 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             {
                 Console.WriteLine(ex.Message);
             }
-            //StateHasChanged();
         }
 
 
@@ -185,8 +189,10 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 Page = pageIndex,
                 Take = pageSize
             };
-            CurrencyPaginatedList = await spotRateService.GetSpotRates(Id, qparam);
-            currencySpotRates = CurrencyPaginatedList.Items;
+
+            var rsp = await mediator.Send(new GetSpotRatesQuery(Id, qparam));
+
+            currencySpotRates = rsp.Items;
         }
 
 

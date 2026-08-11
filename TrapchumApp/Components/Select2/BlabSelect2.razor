@@ -1,9 +1,11 @@
-﻿@typeparam TItem
+@typeparam TItem
 @typeparam TValue
 
 <div class="@ContainerCssClass"
      id="@_containerId"
      @ref="_containerRef"
+     style="@ContainerStyle"
+     dir="@Dir"
      @attributes="AdditionalAttributes">
 
     @* ── Selection area (clickable to open) ── *@
@@ -25,9 +27,12 @@
                         {
                             <span class="blab-select2__tag-text">@GetTextByValue(val)</span>
                         }
-                        <span class="blab-select2__tag-remove"
-                              @onclick="() => UnselectValue(val)"
-                              @onclick:stopPropagation="true">×</span>
+                        @if (!Disabled)
+                        {
+                            <span class="blab-select2__tag-remove"
+                                  @onclick="() => UnselectValue(val)"
+                                  @onclick:stopPropagation="true">×</span>
+                        }
                     </span>
                 }
 
@@ -41,6 +46,7 @@
                            @onkeydown="OnKeyDown"
                            @onkeydown:preventDefault="@(_highlightedIndex >= 0)"
                            placeholder="@(!HasSelection ? Placeholder : "")"
+                           maxlength="@(MaximumInputLength > 0 ? MaximumInputLength : (int?)null)"
                            autocomplete="off" />
                 }
                 else if (!HasSelection)
@@ -102,6 +108,7 @@
                            @onkeydown="OnKeyDown"
                            @onkeydown:preventDefault="@(_highlightedIndex >= 0)"
                            placeholder="Search..."
+                           maxlength="@(MaximumInputLength > 0 ? MaximumInputLength : (int?)null)"
                            autocomplete="off" />
                 </div>
             }
@@ -111,7 +118,7 @@
                 {
                     <div class="blab-select2__message blab-select2__loading">
                         <span class="blab-select2__spinner"></span>
-                        Searching...
+                        @L_Searching
                     </div>
                 }
                 else if (ShowMinLengthHint)
@@ -126,21 +133,59 @@
                         Type to search...
                     </div>
                 }
+                else if (_maxSelectionReached)
+                {
+                    <div class="blab-select2__message blab-select2__message--warning">
+                        @L_MaximumSelected
+                    </div>
+                }
                 else if (_filteredItems.Count == 0)
                 {
                     <div class="blab-select2__message">
-                        @NoResultsText
+                        @L_NoResults
                     </div>
+                }
+                else if (HasGrouping)
+                {
+                    @* ── Grouped rendering ── *@
+                    @foreach (var group in GetGroupedItems())
+                    {
+                        @if (!string.IsNullOrEmpty(group.Key))
+                        {
+                            <div class="blab-select2__group">@group.Key</div>
+                        }
+                        @foreach (var item in group)
+                        {
+                            var index = _filteredItems.IndexOf(item);
+                            <div class="@GetItemCssClass(index, item)"
+                                 @onclick="() => SelectItem(item)"
+                                 @onmouseenter="() => { if (!IsItemDisabled(item)) _highlightedIndex = index; }">
+                                @if (ItemTemplate is not null)
+                                {
+                                    @ItemTemplate(item)
+                                }
+                                else
+                                {
+                                    @TextSelector(item)
+                                }
+                                @if (IsSelected(item))
+                                {
+                                    <span class="blab-select2__option-check">✓</span>
+                                }
+                            </div>
+                        }
+                    }
                 }
                 else
                 {
+                    @* ── Flat rendering ── *@
                     @for (var i = 0; i < _filteredItems.Count; i++)
                     {
                         var index = i;
                         var item = _filteredItems[index];
                         <div class="@GetItemCssClass(index, item)"
                              @onclick="() => SelectItem(item)"
-                             @onmouseenter="() => _highlightedIndex = index">
+                             @onmouseenter="() => { if (!IsItemDisabled(item)) _highlightedIndex = index; }">
                             @if (ItemTemplate is not null)
                             {
                                 @ItemTemplate(item)
@@ -160,4 +205,3 @@
         </div>
     }
 </div>
-

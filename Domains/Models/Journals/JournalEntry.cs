@@ -22,7 +22,8 @@ public sealed class JournalEntry : BaseEntity
     public decimal? TotalBaseCr { get; set; } = 0;
     public int? JournalLineCount { get; set; } = 1;
     public string JournalDesc { get; set; } = string.Empty;
-    //public LoanTransaction? LoanTransaction { get; set; }
+    
+    public LoanTransaction? LoanTransaction { get; set; }
     public List<JournalEntryLine>? JournalEntryLines { get; set; } = [];
 
 }

@@ -1,5 +1,6 @@
 ﻿@page "/App/Account/Ledgers/{BranchId:int}/Branches"
 @using Applications.Responses.ViewModels.Ledgers
+@using Radzen.Blazor.Rendering
 @using TrapchumApp.Components.Indicatros
 <PageTitle>Chart of Accounts</PageTitle>
 @attribute [StreamRendering]
@@ -53,6 +54,9 @@ else
                         </div>
 
                     </LeftChildren>
+                    <ChildContent>
+                        <RadzenTextBox Change="@OnFilters" class="rz-w-100" @bind-Value="searchField" />
+                    </ChildContent>
                 </GridToolbar>
             </div>
             <RadzenDataGrid Data="Ledgers"
@@ -66,6 +70,7 @@ else
                             AllowSorting="true"
                             AllowMultiColumnSorting="false"
                             PagerHorizontalAlign="HorizontalAlign.Right"
+                            PagerPosition="PagerPosition.Top"
                             PageSizeOptions="@StorageConstant.PageSizeOptions"
                             PageSizeChanged="ChangedPageSize"
                             GridLines="DataGridGridLines.Horizontal"

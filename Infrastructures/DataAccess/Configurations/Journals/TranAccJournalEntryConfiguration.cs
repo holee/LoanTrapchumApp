@@ -1,4 +1,5 @@
 ﻿using Domains.Models.Journals;
+using Domains.Models.Transaction;
 using Infrastructures.DataAccess.Conversions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -24,8 +25,15 @@ public class TranAccJournalEntryConfiguration : IEntityTypeConfiguration<Journal
         builder.Property(j => j.ModifiedDt).HasDefaultValueSql("GETDATE()");
         builder.Property(j => j.EditSeq).HasDefaultValue(0);
         builder.Property(j => j.IsAdjustment).HasDefaultValue(false);
-       
+
         builder.HasMany(x => x.JournalEntryLines)
-                    .WithOne().HasForeignKey(fk => fk.JournalRefId);
+                    .WithOne()
+                    .HasForeignKey(fk => fk.JournalRefId)
+                    .IsRequired(false);
+
+        builder.HasOne(x => x.LoanTransaction)
+                    .WithOne(x => x.JournalEntry)
+                    .HasForeignKey<JournalEntry>(fk => fk.TransactionsRefId)
+                    .IsRequired(false);
     }
 }

@@ -4,6 +4,7 @@ using Applications.Features.Loans.Queries.GetLoanDetailsById;
 using Microsoft.JSInterop;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
 using TrapchumApp.Services;
+using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
@@ -12,9 +13,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         [Parameter] public VLoanDisbursments? LoanSchedule { get; set; } = new();
         [Parameter] public string? LoanId { get; set; } = string.Empty;
         [Parameter] public int BranchId { get; set; } = 1;
+        [CascadingParameter] CascadingAppState AppState { get; set; } = default!;
 
         private bool showLoader = false;
-
         private async Task DownLoadScheduleAsExcel()
         {
             Tracker.Show();
@@ -38,13 +39,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
             if (string.IsNullOrEmpty(base64))
             {
 
-                NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Error,
-                    Summary = "Error",
-                    Detail = "Failed to generate the Excel file.",
-                    Duration = 3000
-                });
+                _toastService.ShowError("Failed to generate the Excel file.");
 
                 Tracker.Hide();
 
@@ -63,7 +58,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
             if (LoanId.IsNotNullOrEmpty() && BranchId > 0 && LoanSchedule!.LoanId.IsNullOrEmpty())
             {
                 await GetLoanWithSchedules(BranchId, LoanId);
+
+                await AppState.CanEditLoanDisbursement(LoanSchedule);
+
+                await AppState.CanDeleteLoanDisbursement(LoanSchedule);
             }
+
             await base.OnInitializedAsync();
         }
 
