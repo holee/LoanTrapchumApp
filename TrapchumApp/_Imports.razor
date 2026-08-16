@@ -1,4 +1,4 @@
-﻿@using System.Net.Http
+@using System.Net.Http
 @using System.Net.Http.Json
 @using Applications.Constants
 @using Applications.Constants.Authorizations
@@ -42,6 +42,7 @@
 @using TrapchumApp.Components.Toasts
 @using TrapchumApp.Components.Select2
 @using TrapchumApp.Components.Datatabes
+@using TrapchumApp.Components.DatagridViews
 @using TrapchumApp.Components.Identity
 @using TrapchumApp.Components.Messageboxes
 @using TrapchumApp.Helpers.Constants
@@ -62,7 +63,6 @@
 @inject ContextMenuService ContextMenuService
 @inject TooltipService tooltipService
 @inject IAddressServiceImpl _addressService
-@inject ICurrencyServiceImpl _curService
 @inject IUserServiceImpl _userService
 @inject IMediator mediator
 @inject NotificationServices _notiService

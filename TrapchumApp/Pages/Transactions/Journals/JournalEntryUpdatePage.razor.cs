@@ -4,12 +4,10 @@ using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Features.Journals.Command.CreateJournal;
 using Applications.Features.Journals.Dtos;
 using Applications.Features.Journals.Queries.GetJournalEntryDetailById;
+using Applications.Features.Ledgers.Dto;
 using Applications.Features.Ledgers.Queries.GetLedgerByCurrency;
-using Applications.Features.OtherNames.Queries.GetNameLists;
 using Applications.Features.OtherNames.Queries.GetOtherNames;
-using Applications.Responses.ViewModels.Ledgers;
 using Applications.Responses.ViewModels.OtherNames;
-using Applications.Services.Lists;
 using Applications.Services.Transactions.Journals;
 
 namespace TrapchumApp.Pages.Transactions.Journals;
@@ -372,7 +370,7 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
                 ExchangeRate = JLe.ExchangeRate,
                 TotalDr = TotalDebit,
                 TotalCr = TotalCredit,
-                JournalLineCount = validLines.Count,
+                //JournalLineCount = validLines.Count,
                 JournalDesc = JLe.JournalDesc,
                 JournalEntryLines = validLines.Select((line, index) => new JournalLineDtoCreate
                 {

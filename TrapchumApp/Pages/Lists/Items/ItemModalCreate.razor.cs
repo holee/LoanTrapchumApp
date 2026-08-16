@@ -1,8 +1,8 @@
 using Applications.Features.Items.Dto;
+using Applications.Features.Ledgers.Dto;
 using Applications.Features.Ledgers.Queries.GetLedgerByCurrency;
 using Applications.Interfaces.Lists;
 using Applications.Interfaces.Transactions;
-using Applications.Responses.ViewModels.Ledgers;
 
 namespace TrapchumApp.Pages.Lists.Items;
 

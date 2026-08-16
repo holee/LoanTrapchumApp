@@ -1,4 +1,5 @@
-﻿using Applications.Commons.Extensions.QueryableExtensions;
+﻿using Applications.Commons;
+using Applications.Commons.Extensions.QueryableExtensions;
 using Applications.Extensions;
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Responses;
@@ -9,6 +10,7 @@ using Domains.Models.Currencies;
 using ErrorOr;
 using Infrastructures.DataAccess;
 using Infrastructures.Implements.Extensions;
+using Infrastructures.Utils;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Linq.Expressions;
@@ -325,79 +327,15 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
     }
 
-    public async Task<Pager<VCurrencyCounter>> GetCurrencyCounter(int? currencyId, QueryParam param, CancellationToken cancellation = default)
-    {
-        using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-        IQueryable<VCurrencyCounter> queries = context.VCurrencyNotes
-                                                .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId);
 
-        queries = ApplyFilter(param, queries);
-
-        queries = ApplySort(param, queries);
-
-        var counts = queries.Count();
-
-        if (param.Page > 0)
-        {
-            queries = queries.Skip(param.Page).Take(param.Take);
-
-        }
-
-        var items = await queries.AsNoTracking().ToListAsync(cancellation);
-
-        var pager = new Pager<VCurrencyCounter>(items, counts);
-
-        return pager;
-    }
-
-    public async Task<Pager<Currency>> GetCurrencies(int? currencyId, QueryParam param, CancellationToken cancellation = default)
+    public async Task<PageMetaData<CurrencyDto>> GetCurrenciesAsync(int? currencyId, QueryParam param,
+        CancellationToken cancellation = default,
+        params string[] columns)
     {
         using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
         var baseQueries = context.Currencies
-                            .Include(x => x.SpotRates)
-                            .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId)
-                            .AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(param.Filter))
-        {
-            var filter = param.Filter.Trim();
-
-            if (string.IsNullOrWhiteSpace(param.FilterColumn))
-            {
-                string[] props = { nameof(Currency.CurrencyCode), nameof(Currency.Description) };
-
-                baseQueries = baseQueries.StartWiths(filter, props);
-            }
-            else
-            {
-
-                baseQueries = baseQueries.StartWith(filter, param.FilterColumn);
-            }
-        }
-
-        var counts = await baseQueries.CountAsync(cancellation);
-
-        if (param.Take > 0)
-        {
-            baseQueries = baseQueries.Skip(param.Page).Take(param.Take);
-        }
-
-        var items = await baseQueries
-                            .AsNoTracking()
-                            .ToListAsync(cancellation);
-
-        return PagerExtensions.Create(items, counts);
-
-    }
-
-    public async Task<Pager<CurrencyDto>> GetCurrenciesAsync(int? currencyId, QueryParam param, CancellationToken cancellation = default)
-    {
-        using var context = await contextFactory.CreateDbContextAsync(cancellation);
-
-        var baseQueries = context.Currencies
-                            .Include(x => x.SpotRates)
                             .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId)
                             .AsQueryable();
 
@@ -405,21 +343,12 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
         baseQueries = ApplySort(param, baseQueries);
 
-        var counts = await baseQueries.CountAsync(cancellation);
+        var newQueries = baseQueries.MapToType<Currency, CurrencyDto>(columns);
 
-        if (param.Take > 0)
-        {
-            baseQueries = baseQueries.Skip(param.Page).Take(param.Take);
-        }
-
-        var items = await baseQueries
-                            .AsNoTracking()
-                            .Select(x => ProjectCurrencyDto(x))
-                            .ToListAsync(cancellation);
-
-        return PagerExtensions.Create(items, counts);
-
+        return await newQueries.ToPagedAsync(param.Page, param.Take, cancellation);
     }
+
+
 
     private static IQueryable<Currency> ApplySort(QueryParam param, IQueryable<Currency> baseQueries)
     {
@@ -715,6 +644,33 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
 
 
+//public async Task<PageMetaData<CurrencyDto>> GetCurrenciesAsync(int? currencyId, QueryParam param, CancellationToken cancellation = default)
+//{
+//    using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+//    var baseQueries = context.Currencies
+//                        .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId)
+//                        .AsQueryable();
+
+//    baseQueries = ApplyFilter(param, baseQueries);
+
+//    baseQueries = ApplySort(param, baseQueries);
+
+//    var counts = await baseQueries.CountAsync(cancellation);
+
+//    if (param.Take > 0)
+//    {
+//        baseQueries = baseQueries.Skip(param.Page).Take(param.Take);
+//    }
+
+//    var items = await baseQueries
+//                        .AsNoTracking()
+//                        .Select(x => ProjectCurrencyDto(x))
+//                        .ToListAsync(cancellation);
+
+//    return PagerExtensions.Create(items, counts);
+
+//}
 //public async Task<ErrorOr<Currency>> GetCurrencyWithSpotRates(int? currencyId, CancellationToken cancellation = default)
 //{
 //    using var context = await contextFactory.CreateDbContextAsync(cancellation);
@@ -866,4 +822,30 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 //                        .ToListAsync(cancellation);
 
 //    return new Pager<CurrencyNoteViewDto>(items, counts);
+//}
+
+//public async Task<Pager<VCurrencyCounter>> GetCurrencyCounter(int? currencyId, QueryParam param, CancellationToken cancellation = default)
+//{
+//    using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+//    IQueryable<VCurrencyCounter> queries = context.VCurrencyNotes
+//                                            .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId);
+
+//    queries = ApplyFilter(param, queries);
+
+//    queries = ApplySort(param, queries);
+
+//    var counts = queries.Count();
+
+//    if (param.Page > 0)
+//    {
+//        queries = queries.Skip(param.Page).Take(param.Take);
+
+//    }
+
+//    var items = await queries.AsNoTracking().ToListAsync(cancellation);
+
+//    var pager = new Pager<VCurrencyCounter>(items, counts);
+
+//    return pager;
 //}

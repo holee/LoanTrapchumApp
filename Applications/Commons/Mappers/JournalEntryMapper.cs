@@ -10,7 +10,7 @@ public static class JournalEntryMapper
         {
 
             TransactionsId = $"trx-{Guid.CreateVersion7()}",
-            TransactionDate = DateTime.Now,
+            TransactionDate = DateTimeOffset.UtcNow,
             UserRefId = dto.UserRefId,
             TransactionTypeName = dto.TransactionTypeName,
             BranchRefId = dto.BranchRefId,
@@ -25,7 +25,7 @@ public static class JournalEntryMapper
         {
 
             TransactionsId = $"trx-{Guid.CreateVersion7()}",
-            TransactionDate = DateTime.Now,
+            TransactionDate = DateTimeOffset.UtcNow,
             UserRefId = dto.UserRefId,
             TransactionTypeName = dto.TransactionTypeName,
             BranchRefId = dto.BranchRefId,
@@ -53,7 +53,7 @@ public static class JournalEntryMapper
                 CurrencyRefId = source.JournalEntry!.CurrencyRefId,
                 JournalDesc = source.JournalEntry!.JournalDesc,
                 JournalDate = source.JournalEntry!.JournalDate,
-                JournalLineCount = source.JournalEntry!.JournalLineCount!.Value,
+                //JournalLineCount = source.JournalEntry!.JournalLineCount!.Value,
                 IsAdjustment = source.JournalEntry!.IsAdjustment!.Value,
                 JournalType = source.JournalEntry!.JournalType,
                 TotalCr = source.JournalEntry!.TotalCr,

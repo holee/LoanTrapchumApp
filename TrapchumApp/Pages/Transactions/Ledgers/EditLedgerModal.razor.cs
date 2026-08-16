@@ -1,34 +1,23 @@
 using Applications.Extensions.mappers;
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
+using Applications.Features.Ledgers.Commands.UpdateLedger;
 using Applications.Features.Ledgers.Dto;
 using Applications.Features.Ledgers.Queries.GetLedgerByCurrency;
-using Applications.Interfaces.Currencies;
-using Applications.Interfaces.Transactions;
-using Applications.Responses.ViewModels.Ledgers;
-using Domains.Models.Journals;
+using Applications.Features.Ledgers.Queries.GetLedgerForUpdateById;
+using Applications.Features.Ledgers.Queries.GetLedgerTypes;
 using Mapster;
 
 namespace TrapchumApp.Pages.Transactions.Ledgers;
 
 public partial class EditLedgerModal
 {
-    private readonly ILedgerService _ledgService;
-
-    private readonly ICurrencyService _currencyService;
-    public EditLedgerModal(ILedgerService ledgerService, ICurrencyService currencyService)
-    {
-        _ledgService = ledgerService;
-        _currencyService = currencyService;
-    }
-
     [Parameter] public int Id { get; set; }
     IEnumerable<LedgerTypeDto>? LedgerTypes = [];
     IEnumerable<CurrencyDto>? Currencies = [];
     IEnumerable<VLedger>? FilterLedgers = [];
     LedgerUpdateDto model = new LedgerUpdateDto();
     EditForm? editForm;
-    private bool isValid = true;
     int? tempParentRefIdId = 0;
     int? tempCurrencyId = 0;
     string filterText = "";
@@ -37,6 +26,7 @@ public partial class EditLedgerModal
     async Task LoadDataTextChanged(LoadDataArgs e)
     {
         filterText = e.Filter ?? string.Empty;
+
         await GetLedgers(model.CurrencyRefId, filterText);
     }
 
@@ -44,20 +34,11 @@ public partial class EditLedgerModal
     {
         filterTypeText = e.Filter ?? string.Empty;
 
-        var resp = await _ledgService.FindLedgerTypes(0, filterTypeText);
+        var resp = await mediator.Send(new GetLedgerTypesQuery(0, new QueryParam(0, 0, string.Empty, filterTypeText)));
 
-        if (resp.IsSuccess())
-        {
-            LedgerTypes = resp.Value.Adapt<IEnumerable<LedgerTypeDto>>();
-        }
-        else
-        {
-            LedgerTypes = [];
+        LedgerTypes = resp.Items.Adapt<IEnumerable<LedgerTypeDto>>();
 
-            _toastService.ShowError(resp.GetMessage(), "Error");
-        }
     }
-
 
     protected async Task GetLedgers(int? currencyId = 1, string? searchText = null)
     {
@@ -87,13 +68,11 @@ public partial class EditLedgerModal
             return;
         }
 
-        var req = model.Adapt<Ledger>();
-
-        var result = await _ledgService.CreateOrUpdateLedger(req);
+        var result = await mediator.Send(new UpdateLedgerCommand(model));
 
         if (result.IsSuccess())
         {
-            _toastService.ShowSuccess(result.Value, "Success");
+            _toastService.ShowSuccess("", "Success");
 
             model = new();
 
@@ -106,23 +85,13 @@ public partial class EditLedgerModal
     }
     protected override async Task OnParametersSetAsync()
     {
-        var resp = await _ledgService.FindLedgerTypes();
+        var resp = await mediator.Send(new GetLedgerTypesQuery(0, new QueryParam(0, 0)));
 
-        if ((resp.IsSuccess()))
-        {
-            LedgerTypes = resp.Value.Adapt<IEnumerable<LedgerTypeDto>>();
-        }
-        else
-        {
-            NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
-        }
-
+        LedgerTypes = resp.Items.Adapt<IEnumerable<LedgerTypeDto>>();
 
         var command = new GetCurrenciesQuery(null, new QueryParam(0, 0));
 
-        var rsp = await mediator.Send(command); //_currencyService.GetCurrencies(0);
-
-        //var currenciesRsponse = await _currencyService.GetCurrencies(0);
+        var rsp = await mediator.Send(command);
 
         Currencies = rsp.Items.Maps<CurrencyDto>();
 
@@ -131,19 +100,23 @@ public partial class EditLedgerModal
     protected override async Task OnInitializedAsync()
     {
 
-        var res = await _ledgService.GetLedgerByIdAsync(Id);
+        var res = await mediator.Send(new GetLedgerForUpdateByIdQuery(Id));
 
-        if (!res.IsError)
+        if (res.IsSuccess())
         {
-            model = res.Value.Adapt<LedgerUpdateDto>();
+            model = res.Value;
 
             if (model is not null && model!.ParentRefId > 0)
             {
                 model.IsSubTypeOf = true;
+
                 tempIsSubTypeOf = true;
+
                 tempParentRefIdId = model!.ParentRefId;
             }
+
             tempCurrencyId = model?.CurrencyRefId;
+
             await GetLedgers(model?.CurrencyRefId);
         }
 

@@ -1,0 +1,1158 @@
+/* ═══════════════════════════════════════════════════════════
+   BlabGridView – Modern clean DataGridView theme
+   Mirrors BlabTable design system for consistency
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Container ───────────────────────────────────────────── */
+.bgv {
+    box-sizing: border-box;
+    width: 100%;
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    color: #1e293b;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+/* ── Header (page-size + search + toolbar + top pagination) ── */
+.bgv__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.bgv__header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.bgv__header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.bgv__length-label {
+    font-size: 13px;
+    color: #64748b;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bgv__length-select {
+    display: inline-block;
+    width: auto;
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    background: #fff;
+    color: #334155;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.bgv__length-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.bgv__search-label {
+    font-size: 13px;
+    color: #64748b;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bgv__search-input {
+    display: inline-block;
+    width: 220px;
+    padding: 6px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #334155;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.bgv__search-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.bgv__search-input::placeholder {
+    color: #94a3b8;
+}
+
+/* ── Toolbar buttons (Export / Print / Copy) ─────────────── */
+.bgv__toolbar-buttons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.bgv__toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.bgv__toolbar-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #1e293b;
+}
+
+.bgv__toolbar-btn:active {
+    background: #e2e8f0;
+    transform: scale(0.97);
+}
+
+.bgv__toolbar-btn svg {
+    flex-shrink: 0;
+}
+
+/* ── Column filter picker ────────────────────────────────── */
+.bgv__col-picker {
+    position: relative;
+    display: inline-block;
+}
+
+.bgv__col-picker-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.bgv__col-picker-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #1e293b;
+}
+
+.bgv__col-picker-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 20;
+    min-width: 180px;
+    max-height: 280px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+    padding: 6px 0;
+}
+
+.bgv__col-picker-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #334155;
+    cursor: pointer;
+    transition: background-color 0.1s;
+    white-space: nowrap;
+}
+
+.bgv__col-picker-item:hover {
+    background: #f1f5f9;
+}
+
+.bgv__col-picker-item input[type="checkbox"] {
+    accent-color: #3b82f6;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+}
+
+/* ── Table wrapper ───────────────────────────────────────── */
+.bgv__scroll {
+    overflow-x: auto;
+    position: relative;
+}
+
+.bgv__table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/* ── Thead ────────────────────────────────────────────────── */
+.bgv__table thead th {
+    background: #f1f5f9;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 12px;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    cursor: default;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.15s;
+}
+
+.bgv--bordered .bgv__table thead th {
+    border-right: 1px solid #e2e8f0;
+}
+
+.bgv--bordered .bgv__table thead th:last-child {
+    border-right: none;
+}
+
+.bgv--compact .bgv__table thead th {
+    padding: 6px 10px;
+    font-size: 11px;
+}
+
+/* ── Sticky header ───────────────────────────────────────── */
+.bgv__scroll--sticky .bgv__table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Sort icons ──────────────────────────────────────────── */
+.bgv__sortable {
+    cursor: pointer !important;
+}
+
+.bgv__sortable:hover {
+    background: #e2e8f0;
+}
+
+.bgv__th-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bgv__sort-icon {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.bgv__sort-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Multi-sort order badge */
+.bgv__sort-order {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+/* ── Column resize handle ────────────────────────────────── */
+.bgv__th-resizable {
+    position: relative;
+}
+
+.bgv__resize-handle {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    cursor: col-resize;
+    background: transparent;
+    transition: background 0.15s;
+    z-index: 6;
+}
+
+.bgv__resize-handle:hover {
+    background: #3b82f6;
+}
+
+/* ── Per-column filter row ──────────────────────────────── */
+.bgv__filter-row th {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 6px 8px;
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.bgv__filter-cell {
+    padding: 4px 6px !important;
+}
+
+.bgv__filter-input {
+    width: 100%;
+    padding: 5px 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    font-size: 12px;
+    color: #334155;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.bgv__filter-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
+}
+
+.bgv__filter-input::placeholder {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* ── Tbody ────────────────────────────────────────────────── */
+.bgv__table tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    font-size: 13px;
+    color: #334155;
+    transition: background-color 0.1s;
+}
+
+.bgv--bordered .bgv__table tbody td {
+    border: 1px solid #e2e8f0;
+}
+
+.bgv--compact .bgv__table tbody td {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* Striped rows */
+.bgv__table--striped tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.bgv__table--striped tbody tr:nth-child(odd) {
+    background-color: #fff;
+}
+
+/* Hover rows */
+.bgv__table--hover tbody tr:hover {
+    background-color: #eff6ff;
+}
+
+/* Row clickable cursor */
+.bgv__row {
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+/* ── Selected row highlight ─────────────────────────────── */
+.bgv__row--selected {
+    background-color: #eff6ff !important;
+    box-shadow: inset 3px 0 0 #3b82f6;
+}
+
+.bgv__row--selected td {
+    color: #1e293b;
+}
+
+/* ── Editing row highlight ───────────────────────────────── */
+.bgv__row--editing {
+    background-color: #fefce8 !important;
+    box-shadow: inset 0 1px 0 #fde68a, inset 0 -1px 0 #fde68a;
+}
+
+.bgv__row--editing td {
+    border-bottom-color: #fde68a;
+}
+
+/* ── Selection checkbox / radio ─────────────────────────── */
+.bgv__select-checkbox,
+.bgv__select-radio {
+    width: 16px;
+    height: 16px;
+    accent-color: #3b82f6;
+    cursor: pointer;
+    margin: 0;
+}
+
+.bgv__th-select,
+.bgv__cell-select {
+    width: 2.5rem;
+}
+
+/* ── Expand/collapse button ─────────────────────────────── */
+.bgv__th-expand,
+.bgv__cell-expand {
+    width: 2.5rem;
+}
+
+.bgv__expand-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    background: #fff;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.bgv__expand-btn svg {
+    transition: transform 0.2s ease;
+}
+
+.bgv__expand-btn--open svg {
+    transform: rotate(90deg);
+}
+
+.bgv__expand-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #334155;
+}
+
+.bgv__expand-all-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #fff;
+    color: #475569;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    transition: all 0.15s;
+}
+
+.bgv__expand-all-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+/* ── Detail / child row ─────────────────────────────────── */
+.bgv__detail-row {
+    background: #fafbfc;
+}
+
+.bgv__detail-row:hover {
+    background: #fafbfc !important;
+}
+
+.bgv__detail-cell {
+    padding: 16px 20px !important;
+    border-bottom: 2px solid #e2e8f0;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    position: relative;
+}
+
+.bgv__detail-cell::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #3b82f6;
+    border-radius: 0 2px 2px 0;
+}
+
+/* ── Group header row ───────────────────────────────────── */
+.bgv__group-row {
+    cursor: default;
+}
+
+.bgv__group-row:hover {
+    background: #e8ecf2 !important;
+}
+
+.bgv__group-cell {
+    padding: 8px 14px !important;
+    background: #e2e8f0;
+    border-bottom: 1px solid #cbd5e1;
+    font-weight: 600;
+    font-size: 13px;
+    color: #334155;
+    letter-spacing: 0.01em;
+}
+
+.bgv__group-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bgv__group-label::before {
+    content: "▸";
+    font-size: 10px;
+    color: #64748b;
+}
+
+.bgv__group-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: #cbd5e1;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CommandField buttons
+   ═══════════════════════════════════════════════════════════ */
+.bgv__cmd-actions {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.bgv__cmd-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.bgv__cmd-btn--edit {
+    color: #2563eb;
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.bgv__cmd-btn--edit:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.bgv__cmd-btn--delete {
+    color: #dc2626;
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.bgv__cmd-btn--delete:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.bgv__cmd-btn--select {
+    color: #7c3aed;
+    background: #f5f3ff;
+    border-color: #ddd6fe;
+}
+
+.bgv__cmd-btn--select:hover {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.bgv__cmd-btn--save {
+    color: #16a34a;
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.bgv__cmd-btn--save:hover {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.bgv__cmd-btn--cancel {
+    color: #64748b;
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+.bgv__cmd-btn--cancel:hover {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ButtonField
+   ═══════════════════════════════════════════════════════════ */
+.bgv__btn-field {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #475569;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.bgv__btn-field:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #1e293b;
+}
+
+.bgv__btn-field:active {
+    transform: scale(0.97);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HyperLinkField
+   ═══════════════════════════════════════════════════════════ */
+.bgv__hyperlink {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s;
+}
+
+.bgv__hyperlink:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ImageField
+   ═══════════════════════════════════════════════════════════ */
+.bgv__image {
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    display: block;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CheckBoxField
+   ═══════════════════════════════════════════════════════════ */
+.bgv__checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: #3b82f6;
+    cursor: default;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Edit input (BoundField inline edit)
+   ═══════════════════════════════════════════════════════════ */
+.bgv__cell--editing {
+    padding: 2px !important;
+    background-color: #fffbeb !important;
+    box-shadow: inset 0 0 0 1px #fde68a;
+}
+
+.bgv__edit-input {
+    width: 100%;
+    padding: 5px 8px;
+    border: 1px solid #fbbf24;
+    border-radius: 5px;
+    font-size: 13px;
+    color: #334155;
+    background: #fffbeb;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.bgv__edit-input:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+.bgv__empty-cell {
+    text-align: center;
+    padding: 40px 16px;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.bgv__empty-icon {
+    display: block;
+    font-size: 32px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+}
+
+/* ── Loading overlay ─────────────────────────────────────── */
+.bgv__loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.75);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    z-index: 10;
+    backdrop-filter: blur(1px);
+    border-radius: 0;
+    transition: opacity 0.2s;
+}
+
+.bgv__loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: bgv-spin 0.65s linear infinite;
+}
+
+.bgv__loading-text {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+@keyframes bgv-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Skeleton rows */
+.bgv__skeleton-row td {
+    padding: 10px 14px;
+}
+
+.bgv__skeleton-bar {
+    height: 14px;
+    background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+    background-size: 200% 100%;
+    border-radius: 4px;
+    animation: bgv-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes bgv-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── Footer summary (tfoot) ──────────────────────────────── */
+.bgv__tfoot {
+    background: #f8fafc;
+    border-top: 2px solid #e2e8f0;
+}
+
+.bgv__tfoot td,
+.bgv__tfoot th {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.bgv--bordered .bgv__tfoot td,
+.bgv--bordered .bgv__tfoot th {
+    border: 1px solid #e2e8f0;
+}
+
+.bgv--compact .bgv__tfoot td,
+.bgv--compact .bgv__tfoot th {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* ── Footer (info + pagination) ──────────────────────────── */
+.bgv__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.bgv__footer-left {
+    display: flex;
+    align-items: center;
+}
+
+.bgv__footer-right {
+    display: flex;
+    align-items: center;
+}
+
+.bgv__info {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.bgv__info-selected {
+    color: #3b82f6;
+    font-weight: 500;
+}
+
+/* ── Pagination ──────────────────────────────────────────── */
+.bgv__paging {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.bgv__page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    color: #475569;
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    transition: all 0.15s;
+}
+
+.bgv__page-btn:hover:not(:disabled):not(.bgv__page-btn--active) {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #1e293b;
+}
+
+.bgv__page-btn--active {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(59, 130, 246, 0.3);
+}
+
+.bgv__page-btn--active:hover {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+}
+
+.bgv__page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f8fafc;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Delete confirmation modal
+   ═══════════════════════════════════════════════════════════ */
+.bgv__confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: bgv-fade-in 0.15s ease;
+}
+
+.bgv__confirm-dialog {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.08);
+    padding: 28px 32px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    animation: bgv-scale-in 0.2s ease;
+}
+
+.bgv__confirm-icon {
+    margin-bottom: 12px;
+}
+
+.bgv__confirm-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+}
+
+.bgv__confirm-message {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+}
+
+.bgv__confirm-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.bgv__confirm-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-width: 100px;
+}
+
+.bgv__confirm-btn--cancel {
+    color: #475569;
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+}
+
+.bgv__confirm-btn--cancel:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.bgv__confirm-btn--delete {
+    color: #fff;
+    background: #ef4444;
+    border-color: #ef4444;
+}
+
+.bgv__confirm-btn--delete:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+@keyframes bgv-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes bgv-scale-in {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Responsive – card/stacked layout on small screens
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .bgv__header,
+    .bgv__footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .bgv__header-right {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 0.5rem;
+    }
+
+    .bgv__search-input {
+        width: 100%;
+        min-width: 160px;
+    }
+
+    .bgv__paging {
+        flex-wrap: wrap;
+    }
+
+    .bgv__toolbar-buttons {
+        flex-wrap: wrap;
+    }
+
+    /* ── Responsive card view ── */
+    .bgv--responsive .bgv__table thead {
+        display: none;
+    }
+
+    .bgv--responsive .bgv__table,
+    .bgv--responsive .bgv__table tbody,
+    .bgv--responsive .bgv__table tr,
+    .bgv--responsive .bgv__table td {
+        display: block;
+        width: 100%;
+    }
+
+    .bgv--responsive .bgv__table tbody tr {
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .bgv--responsive .bgv__table tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        text-align: right !important;
+    }
+
+    .bgv--responsive .bgv__table tbody td:last-child {
+        border-bottom: none;
+    }
+
+    .bgv--responsive .bgv__table tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 12px;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        text-align: left;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    /* Detail row in responsive */
+    .bgv--responsive .bgv__detail-row {
+        margin-top: -12px;
+        margin-bottom: 12px;
+    }
+
+    .bgv--responsive .bgv__detail-cell {
+        border-radius: 0 0 8px 8px;
+    }
+
+    /* Group row in responsive */
+    .bgv--responsive .bgv__group-row {
+        border-radius: 8px;
+        margin-bottom: 4px;
+    }
+
+    /* Skeleton rows in responsive */
+    .bgv--responsive .bgv__skeleton-row {
+        display: block;
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .bgv--responsive .bgv__skeleton-row td {
+        display: block;
+        padding: 10px 14px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .bgv--responsive .bgv__skeleton-row td:last-child {
+        border-bottom: none;
+    }
+
+    /* tfoot in responsive */
+    .bgv--responsive .bgv__tfoot {
+        display: block;
+    }
+
+    .bgv--responsive .bgv__tfoot tr {
+        display: block;
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f8fafc;
+    }
+
+    .bgv--responsive .bgv__tfoot td,
+    .bgv--responsive .bgv__tfoot th {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 14px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .bgv--responsive .bgv__tfoot td:last-child,
+    .bgv--responsive .bgv__tfoot th:last-child {
+        border-bottom: none;
+    }
+
+    /* Empty and loading cells in responsive */
+    .bgv--responsive .bgv__empty-cell {
+        text-align: center !important;
+    }
+
+    .bgv--responsive .bgv__empty-cell::before {
+        display: none;
+    }
+}

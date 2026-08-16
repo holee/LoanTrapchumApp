@@ -1,0 +1,237 @@
+@page "/App/GridExample"
+@using TrapchumApp.Components.DatagridViews
+
+<PageTitle>BlabGridView Example</PageTitle>
+
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="m-0">BlabGridView Example</h3>
+        <div>
+            <label class="me-2 fw-bold">Edit Mode:</label>
+            <select class="form-select form-select-sm d-inline-block w-auto" @bind="_editMode">
+                <option value="@GridViewEditMode.None">None</option>
+                <option value="@GridViewEditMode.Row">Row</option>
+                <option value="@GridViewEditMode.Cell">Cell</option>
+            </select>
+        </div>
+    </div>
+
+    <BlabGridView TItem="EmployeeMock"
+                  EditMode="@_editMode"
+                  Data="@_pagedData"
+                  TotalCount="@_totalCount"
+                  LoadData="OnLoadData"
+                  AllowPaging="true"
+                  PageSize="5"
+                  AllowSorting="true"
+                  ShowSearchBox="true"
+                  ShowExportButton="true"
+                  ShowPrintButton="true"
+                  ShowColumnFilterPicker="true"
+                  SelectionMode="GridViewSelectionMode.Multiple"
+                  RowEditing="OnRowEditing"
+                  RowUpdating="OnRowUpdating"
+                  RowDeleting="OnRowDeleting"
+                  RowCommand="OnRowCommand"
+                  ShowDeleteConfirm="true">
+        
+        <Columns>
+            @* BoundField with per-column filter *@
+            <BlabGridViewColumn TItem="EmployeeMock"
+                                FieldType="GridViewFieldType.BoundField"
+                                DataField="@nameof(EmployeeMock.Name)"
+                                HeaderText="Employee Name"
+                                Filterable="true"
+                                Sortable="true" />
+
+            @* TemplateField for Department with BlabSelect2 for editing *@
+            <BlabGridViewColumn TItem="EmployeeMock"
+                                FieldType="GridViewFieldType.TemplateField"
+                                HeaderText="Department"
+                                SortExpression="Department"
+                                Filterable="true"
+                                DataField="@nameof(EmployeeMock.Department)">
+                <Template>
+                    @context.Department
+                </Template>
+                <EditTemplate>
+                    <TrapchumApp.Components.Select2.BlabSelect2 TItem="string"
+                                  TValue="string"
+                                  Data="@_departments"
+                                  ValueSelector="@(x => x)"
+                                  TextSelector="@(x => x)"
+                                  Value="@context.Department"
+                                  ValueChanged="@(val => context.Department = val ?? "")"
+                                  Width="100%"
+                                  AllowClear="false" />
+                </EditTemplate>
+            </BlabGridViewColumn>
+
+            @* CheckBoxField for IsActive *@
+            <BlabGridViewColumn TItem="EmployeeMock"
+                                FieldType="GridViewFieldType.CheckBoxField"
+                                DataField="@nameof(EmployeeMock.IsActive)"
+                                HeaderText="Active"
+                                TextAlign="center"
+                                Width="80px" />
+
+            @* TemplateField for Salary *@
+            <BlabGridViewColumn TItem="EmployeeMock"
+                                FieldType="GridViewFieldType.TemplateField"
+                                HeaderText="Salary"
+                                SortExpression="Salary"
+                                TextAlign="right">
+                <Template>
+                    <span class="text-success fw-bold">@context.Salary.ToString("C2")</span>
+                </Template>
+                <EditTemplate>
+                    <input type="number" class="form-control form-control-sm" value="@context.Salary" 
+                           @onchange="@(e => context.Salary = decimal.Parse(e.Value?.ToString() ?? "0"))" />
+                </EditTemplate>
+                <FooterTemplate>
+                    <div class="fw-bold">Total: @_data.Sum(x => x.Salary).ToString("C2")</div>
+                </FooterTemplate>
+            </BlabGridViewColumn>
+
+            @* CommandField for Edit/Delete Actions *@
+            <BlabGridViewColumn TItem="EmployeeMock"
+                                FieldType="GridViewFieldType.CommandField"
+                                HeaderText="Actions"
+                                ShowEditButton="true"
+                                ShowDeleteButton="true"
+                                Width="150px"
+                                TextAlign="center" />
+        </Columns>
+
+        @* Expandable Detail Template *@
+        <DetailTemplate>
+            <div class="p-3 bg-light border rounded m-2">
+                <h5>Details for @context.Name</h5>
+                <p><strong>Department:</strong> @context.Department</p>
+                <p><strong>Hire Date:</strong> @context.HireDate.ToShortDateString()</p>
+                <p><strong>Bio:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            </div>
+        </DetailTemplate>
+        
+    </BlabGridView>
+    
+    <div class="mt-4">
+        <h5>Event Logs:</h5>
+        <textarea class="form-control" rows="5" readonly>@_eventLogs</textarea>
+    </div>
+</div>
+
+@code {
+    // ─── Mock Data Model ───────────────────────────────────────────
+    public class EmployeeMock
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Department { get; set; } = string.Empty;
+        public decimal Salary { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime HireDate { get; set; }
+    }
+
+    // ─── State ─────────────────────────────────────────────────────
+    private List<string> _departments = new() { "IT", "HR", "Finance", "Sales", "Marketing" };
+    private List<EmployeeMock> _data = new();
+    private List<EmployeeMock> _pagedData = new();
+    private int _totalCount;
+    private string _eventLogs = "";
+    private GridViewEditMode _editMode = GridViewEditMode.Cell;
+
+    protected override void OnInitialized()
+    {
+        // Generate mock data
+        for (int i = 1; i <= 50; i++)
+        {
+            _data.Add(new EmployeeMock
+            {
+                Id = i,
+                Name = $"Employee {i}",
+                Department = _departments[Random.Shared.Next(_departments.Count)],
+                Salary = Random.Shared.Next(40000, 120000),
+                IsActive = i % 4 != 0,
+                HireDate = DateTime.Now.AddDays(-Random.Shared.Next(100, 2000))
+            });
+        }
+    }
+
+    // ─── Data Loading (Paging/Sorting/Filtering) ───────────────────
+    private async Task OnLoadData(GridViewLoadDataArgs args)
+    {
+        // Simulate network delay
+        await Task.Delay(300);
+
+        var query = _data.AsQueryable();
+
+        // 1. Global Search
+        if (!string.IsNullOrWhiteSpace(args.SearchText))
+        {
+            var search = args.SearchText.ToLower();
+            query = query.Where(x => x.Name.ToLower().Contains(search) || 
+                                     x.Department.ToLower().Contains(search));
+        }
+
+        // 2. Column Filters
+        if (args.ColumnFilters != null)
+        {
+            foreach (var filter in args.ColumnFilters)
+            {
+                if (filter.Key == nameof(EmployeeMock.Name))
+                    query = query.Where(x => x.Name.Contains(filter.Value, StringComparison.OrdinalIgnoreCase));
+                if (filter.Key == nameof(EmployeeMock.Department))
+                    query = query.Where(x => x.Department.Contains(filter.Value, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
+        // 3. Sorting
+        if (!string.IsNullOrEmpty(args.SortColumn))
+        {
+            if (args.SortColumn == nameof(EmployeeMock.Name))
+                query = args.SortDescending ? query.OrderByDescending(x => x.Name) : query.OrderBy(x => x.Name);
+            else if (args.SortColumn == nameof(EmployeeMock.Department))
+                query = args.SortDescending ? query.OrderByDescending(x => x.Department) : query.OrderBy(x => x.Department);
+            else if (args.SortColumn == nameof(EmployeeMock.Salary))
+                query = args.SortDescending ? query.OrderByDescending(x => x.Salary) : query.OrderBy(x => x.Salary);
+        }
+
+        // 4. Count and Paging
+        _totalCount = query.Count();
+        _pagedData = query.Skip(args.Skip).Take(args.Top).ToList();
+        
+        StateHasChanged();
+    }
+
+    // ─── Event Handlers ─────────────────────────────────────────────
+    private void LogEvent(string message)
+    {
+        _eventLogs = $"[{DateTime.Now:HH:mm:ss}] {message}\n" + _eventLogs;
+        StateHasChanged();
+    }
+
+    private void OnRowCommand(GridViewCommandEventArgs<EmployeeMock> args)
+    {
+        LogEvent($"Command '{args.CommandName}' clicked on row {args.RowIndex} (Employee: {args.Item.Name})");
+    }
+
+    private void OnRowEditing(GridViewEditEventArgs<EmployeeMock> args)
+    {
+        LogEvent($"Started editing: {args.Item.Name}");
+    }
+
+    private void OnRowUpdating(GridViewEditEventArgs<EmployeeMock> args)
+    {
+        LogEvent($"Updated: {args.Item.Name}. New Salary: {args.Item.Salary:C2}");
+        // In a real app, you would save to database here.
+        // The object `args.Item` already has the updated values if bound in EditTemplate.
+    }
+
+    private void OnRowDeleting(GridViewDeleteEventArgs<EmployeeMock> args)
+    {
+        LogEvent($"Deleted: {args.Item.Name}");
+        _data.Remove(args.Item);
+        // Deletion completes and GridView automatically calls LoadData again to refresh.
+    }
+}

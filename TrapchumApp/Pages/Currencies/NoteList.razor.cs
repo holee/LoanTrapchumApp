@@ -44,7 +44,7 @@ public partial class NoteList
 
             var temp = rsp.Items;
 
-            temp.Add(new Currency { CurrencyId = 0, CurrencyCode = "All" });
+            temp.Append(new CurrencyDto { CurrencyId = 0, CurrencyCode = "All" });
 
             Currencies = temp.OrderBy(x => x.CurrencyId).ToList();
         }
@@ -55,7 +55,7 @@ public partial class NoteList
     {
         if (obj is not null)
         {
-            var selectedResult = (Currency)obj;
+            var selectedResult = (CurrencyDto)obj;
 
             _currencyId = selectedResult.CurrencyId;
 

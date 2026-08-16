@@ -46,11 +46,15 @@
     <Compile Remove="Features\Settings\Responses\**" />
     <Compile Remove="Features\Vendors\Mapperes\**" />
     <Compile Remove="Features\Vendors\UseCases\**" />
+    <Compile Remove="Requests\Identity\**" />
     <Compile Remove="Responses\Lists\Collaterals\**" />
+    <Compile Remove="Responses\Lists\Currency\**" />
     <Compile Remove="Responses\Transactions\**" />
     <Compile Remove="Responses\Vendors\**" />
     <Compile Remove="Responses\ViewModels\Branches\**" />
     <Compile Remove="Responses\ViewModels\Collaterals\**" />
+    <Compile Remove="Responses\ViewModels\Holidays\**" />
+    <Compile Remove="Responses\ViewModels\Ledgers\**" />
     <Compile Remove="Responses\ViewModels\Trans\**" />
     <Compile Remove="Responses\ViewModels\Users\**" />
     <Compile Remove="Responses\ViewModels\Vendors\**" />
@@ -95,11 +99,15 @@
     <EmbeddedResource Remove="Features\Settings\Responses\**" />
     <EmbeddedResource Remove="Features\Vendors\Mapperes\**" />
     <EmbeddedResource Remove="Features\Vendors\UseCases\**" />
+    <EmbeddedResource Remove="Requests\Identity\**" />
     <EmbeddedResource Remove="Responses\Lists\Collaterals\**" />
+    <EmbeddedResource Remove="Responses\Lists\Currency\**" />
     <EmbeddedResource Remove="Responses\Transactions\**" />
     <EmbeddedResource Remove="Responses\Vendors\**" />
     <EmbeddedResource Remove="Responses\ViewModels\Branches\**" />
     <EmbeddedResource Remove="Responses\ViewModels\Collaterals\**" />
+    <EmbeddedResource Remove="Responses\ViewModels\Holidays\**" />
+    <EmbeddedResource Remove="Responses\ViewModels\Ledgers\**" />
     <EmbeddedResource Remove="Responses\ViewModels\Trans\**" />
     <EmbeddedResource Remove="Responses\ViewModels\Users\**" />
     <EmbeddedResource Remove="Responses\ViewModels\Vendors\**" />
@@ -144,11 +152,15 @@
     <None Remove="Features\Settings\Responses\**" />
     <None Remove="Features\Vendors\Mapperes\**" />
     <None Remove="Features\Vendors\UseCases\**" />
+    <None Remove="Requests\Identity\**" />
     <None Remove="Responses\Lists\Collaterals\**" />
+    <None Remove="Responses\Lists\Currency\**" />
     <None Remove="Responses\Transactions\**" />
     <None Remove="Responses\Vendors\**" />
     <None Remove="Responses\ViewModels\Branches\**" />
     <None Remove="Responses\ViewModels\Collaterals\**" />
+    <None Remove="Responses\ViewModels\Holidays\**" />
+    <None Remove="Responses\ViewModels\Ledgers\**" />
     <None Remove="Responses\ViewModels\Trans\**" />
     <None Remove="Responses\ViewModels\Users\**" />
     <None Remove="Responses\ViewModels\Vendors\**" />
@@ -168,11 +180,7 @@
     <Folder Include="Features\Products\Responses\" />
     <Folder Include="Features\Products\UseCases\" />
     <Folder Include="Features\Products\Validations\" />
-    <Folder Include="Requests\Identity\" />
-    <Folder Include="Responses\Lists\Currency\" />
-    <Folder Include="Responses\ViewModels\Holidays\" />
     <Folder Include="Responses\ViewModels\Loans\Payments\" />
-    <Folder Include="Responses\ViewModels\Locations\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,240 @@
+@page "/create-journal"
+@using Applications.Features.Currencies.Dto
+@using Applications.Features.Ledgers.Dto
+@using Applications.Responses.ViewModels.OtherNames
+
+<PageTitle>Journal Entry</PageTitle>
+
+<div class="qb-page-container">
+    <div class="qb-header">
+        <div class="qb-header-left">
+            <RadzenIcon Icon="history_edu" class="qb-header-icon" />
+            <h1>Journal Entry</h1>
+        </div>
+        <div class="qb-header-right">
+            <RadzenButton Icon="help_outline" ButtonStyle="ButtonStyle.Light" Variant="Variant.Text" class="qb-icon-btn" title="Help" />
+            <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Text" class="qb-icon-btn" title="Close" Click="Cancel" />
+        </div>
+    </div>
+
+    @if (_isMessage)
+    {
+        <div class="qb-alert">
+            <RadzenIcon Icon="error" class="qb-alert-icon" />
+            <span><strong>@_titleMessage</strong> @_messageAlert</span>
+            <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Text" Size="ButtonSize.ExtraSmall" class="qb-alert-close" Click="ClearAlert" />
+        </div>
+    }
+
+    <EditForm Model="JLe" OnValidSubmit="HandleFormSave" FormName="JournalEntryForm" class="qb-form">
+        <DataAnnotationsValidator />
+
+        <div class="qb-form-content">
+            <div class="qb-top-section">
+                <div class="qb-row">
+                    <div class="qb-col">
+                        <label>Journal date</label>
+                        <RadzenDatePicker @bind-Value="JLe.JournalDate" DateFormat="MM/dd/yyyy" Change="OnValidateDate" class="qb-input" />
+                        <ValidationMessage For="@(() => JLe.JournalDate)" />
+                    </div>
+                    <div class="qb-col qb-col-wide">
+                        <label>Journal no.</label>
+                        <RadzenTextBox @bind-Value="JLe.ReferrenceNum" class="qb-input" />
+                        <ValidationMessage For="@(() => JLe.ReferrenceNum)" />
+                    </div>
+                    <div class="qb-col">
+                        <label>Currency</label>
+                        <RadzenDropDown @bind-Value="@JLe.CurrencyRefId"
+                                        Data="@_currencies"
+                                        TextProperty="@nameof(CurrencyDto.CurrencyCode)"
+                                        ValueProperty="@nameof(CurrencyDto.CurrencyId)"
+                                        SelectedItemChanged="SelectedCurrencyChanged"
+                                        Name="Currency"
+                                        class="qb-input" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="qb-grid-container">
+                <table class="qb-grid">
+                    <thead>
+                        <tr>
+                            <th class="col-ctl"></th>
+                            <th class="col-num">#</th>
+                            <th class="col-account">ACCOUNT</th>
+                            <th class="col-debit">DEBITS</th>
+                            <th class="col-credit">CREDITS</th>
+                            <th class="col-desc">DESCRIPTION</th>
+                            <th class="col-name">NAME</th>
+                            <th class="col-action"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (var i = 1; i <= VisibleRowCount; i++)
+                        {
+                            var line = JournalLines.ElementAtOrDefault(i - 1);
+                            if (line is not null)
+                            {
+                                <tr class="qb-grid-row">
+                                    <td class="col-ctl">
+                                        @if (line == JournalLines.Last())
+                                        {
+                                            <RadzenButton Icon="add_circle"
+                                                          ButtonStyle="ButtonStyle.Success"
+                                                          Variant="Variant.Text"
+                                                          class="qb-plus-btn"
+                                                          Click="AddLine"
+                                                          tabindex="-1"
+                                                          title="Add line" />
+                                        }
+                                        else
+                                        {
+                                            <RadzenIcon Icon="drag_indicator" class="qb-grip-icon" />
+                                        }
+                                    </td>
+                                    <td class="col-num">@line.LineSeq</td>
+                                    <td class="col-account">
+                                        <RadzenDropDownDataGrid @bind-Value="line.LedgerRefId"
+                                                                Density="Density.Compact"
+                                                                Data="@Ledgers"
+                                                                AllowFiltering="true"
+                                                                PageSize="10"
+                                                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                                Placeholder="Select account"
+                                                                ValueProperty="@nameof(VLedger.LedgerId)"
+                                                                TextProperty="@nameof(VLedger.LedgerName)"
+                                                                SelectedItemChanged="@((arg) => OnAccountSelected(arg, line))"
+                                                                Name="@($"Account_{line.LineSeq}")"
+                                                                class="qb-grid-input">
+                                            <Template Context="c">
+                                                <div class="qb-dropdown-item">
+                                                    <span>@((c as VLedger)?.LedgerName)</span>
+                                                    <small>@((c as VLedger)?.LedgerTypeCode)</small>
+                                                </div>
+                                            </Template>
+                                            <ValueTemplate Context="c">
+                                                <span>@((c as VLedger)?.LedgerName)</span>
+                                            </ValueTemplate>
+                                        </RadzenDropDownDataGrid>
+                                    </td>
+                                    <td class="col-debit">
+                                        <RadzenNumeric @bind-Value="line.Debit"
+                                                       ShowUpDown="false"
+                                                       Disabled="@(line.IsCredit || line.LedgerRefId is null or 0)"
+                                                       Change="@((decimal? _) => OnAmountChanged(line))"
+                                                       class="qb-grid-input num-input"
+                                                       Format="N2" />
+                                    </td>
+                                    <td class="col-credit">
+                                        <RadzenNumeric @bind-Value="line.Credit"
+                                                       ShowUpDown="false"
+                                                       Disabled="@(line.IsDebit || line.LedgerRefId is null or 0)"
+                                                       Change="@((decimal? _) => OnAmountChanged(line))"
+                                                       class="qb-grid-input num-input"
+                                                       Format="N2" />
+                                    </td>
+                                    <td class="col-desc">
+                                        <RadzenTextBox @bind-Value="line.JournalLineDesc"
+                                                       Disabled="@(line.LedgerRefId is null or 0)"
+                                                       class="qb-grid-input"
+                                                       Placeholder="Description" />
+                                    </td>
+                                    <td class="col-name">
+                                        <RadzenDropDownDataGrid @bind-Value="line.EntityNameRefId"
+                                                                Density="Density.Compact"
+                                                                Data="@NameLists"
+                                                                TextProperty="@nameof(VOtherNames.AltName)"
+                                                                ValueProperty="@nameof(VOtherNames.Id)"
+                                                                AllowFilteringByAllStringColumns="true"
+                                                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                                Placeholder="Enter text"
+                                                                SelectedItemChanged="@((arg) => OnNameSelected(arg, line))"
+                                                                Name="@($"Name_{line.LineSeq}")"
+                                                                PageSize="10"
+                                                                Disabled="@(line.LedgerRefId is null or 0)"
+                                                                class="qb-grid-input">
+                                            <Columns>
+                                                <RadzenDropDownDataGridColumn Property="@nameof(VOtherNames.AltName)" Title="Name" Width="100px" />
+                                                <RadzenDropDownDataGridColumn Property="@nameof(VOtherNames.EntType)" Title="Type" Width="80px" />
+                                            </Columns>
+                                            <Template Context="n">
+                                                <div class="qb-dropdown-item">
+                                                    <span>@((n as VOtherNames)?.AltName)</span>
+                                                    <small>@((n as VOtherNames)?.EntType)</small>
+                                                </div>
+                                            </Template>
+                                            <ValueTemplate Context="n">
+                                                <span>@((n as VOtherNames)?.AltName)</span>
+                                            </ValueTemplate>
+                                        </RadzenDropDownDataGrid>
+                                    </td>
+                                    <td class="col-action">
+                                        @if (JournalLines.Count > 1)
+                                        {
+                                            <RadzenButton Icon="delete"
+                                                          ButtonStyle="ButtonStyle.Light"
+                                                          Variant="Variant.Text"
+                                                          class="qb-delete-btn"
+                                                          Click="@(() => DeleteLine(line))"
+                                                          title="Delete line"
+                                                          tabindex="-1" />
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr class="qb-grid-row qb-grid-empty-row">
+                                    <td class="col-ctl"><RadzenIcon Icon="drag_indicator" class="qb-grip-icon" /></td>
+                                    <td class="col-num">@i</td>
+                                    <td class="col-account"><div class="qb-empty-cell"></div></td>
+                                    <td class="col-debit"><div class="qb-empty-cell"></div></td>
+                                    <td class="col-credit"><div class="qb-empty-cell"></div></td>
+                                    <td class="col-desc"><div class="qb-empty-cell"></div></td>
+                                    <td class="col-name"><div class="qb-empty-cell"></div></td>
+                                    <td class="col-action"><RadzenIcon Icon="delete" class="qb-empty-delete" /></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="qb-total-label-cell">Total</td>
+                            <td class="qb-total-value">@TotalDebit.ToString("N2")</td>
+                            <td class="qb-total-value">@TotalCredit.ToString("N2")</td>
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="qb-bottom-section">
+                <div class="qb-memo-section">
+                    <label>Memo</label>
+                    <RadzenTextArea @bind-Value="JLe.JournalDesc" class="qb-memo-input" />
+                </div>
+
+                <div class="qb-totals-section">
+                    @if (!IsBalanced && (TotalDebit > 0 || TotalCredit > 0))
+                    {
+                        <div class="qb-out-of-balance">
+                            <span>Out of Balance By:</span>
+                            <span class="diff-val">@Difference.ToString("N2")</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="qb-footer">
+            <div class="qb-footer-left">
+                <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Base" Click="Cancel" class="qb-btn-secondary" />
+                <RadzenButton Text="Clear" ButtonStyle="ButtonStyle.Base" Click="ClearForm" class="qb-btn-secondary" />
+            </div>
+            <div class="qb-footer-right">
+                <RadzenButton Text="Save" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Base" IsBusy="@_visibled" class="qb-btn-secondary" Disabled="@(!IsBalanced)" />
+                <RadzenButton Text="Save and close" ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Success" IsBusy="@_visibled" class="qb-btn-primary" Disabled="@(!IsBalanced)" />
+            </div>
+        </div>
+    </EditForm>
+</div>

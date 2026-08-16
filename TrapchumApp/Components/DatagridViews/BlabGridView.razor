@@ -1,0 +1,712 @@
+@typeparam TItem
+
+<CascadingValue Value="this" IsFixed="true">
+    @* Hidden: column definitions register themselves *@
+    <div style="display:none">@Columns</div>
+</CascadingValue>
+
+<div id="@_gridId"
+     class="bgv @(Bordered ? "bgv--bordered" : "") @(Compact ? "bgv--compact" : "") @(Responsive ? "bgv--responsive" : "")"
+     @attributes="AdditionalAttributes">
+
+    @* ══════════════════════════════════════════════════════════
+       Top bar: page-size selector + search + toolbar + top pager
+       ══════════════════════════════════════════════════════════ *@
+    <div class="bgv__header">
+        <div class="bgv__header-left">
+            @if (ShowPageSizeSelector && AllowPaging)
+            {
+                <label class="bgv__length-label">
+                    Show
+                    <select class="bgv__length-select" @onchange="OnPageSizeChanged">
+                        @foreach (var opt in PageSizeOptions)
+                        {
+                            if (opt == _pageSize)
+                            {
+                                <option value="@opt" selected>@opt</option>
+                            }
+                            else
+                            {
+                                <option value="@opt">@opt</option>
+                            }
+                        }
+                    </select>
+                    entries
+                </label>
+            }
+            @if (ToolbarContent is not null)
+            {
+                @ToolbarContent
+            }
+            @if (ShowColumnFilterPicker)
+            {
+                <div class="bgv__col-picker">
+                    <button class="bgv__col-picker-btn" type="button" @onclick="ToggleColumnPicker" @onclick:stopPropagation="true"
+                            title="Show/Hide Columns">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                            <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v2A1.5 1.5 0 0 0 1.5 7h4A1.5 1.5 0 0 0 7 5.5v-2A1.5 1.5 0 0 0 5.5 2h-4ZM1 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-2ZM10.5 2A1.5 1.5 0 0 0 9 3.5v2A1.5 1.5 0 0 0 10.5 7h4A1.5 1.5 0 0 0 16 5.5v-2A1.5 1.5 0 0 0 14.5 2h-4Zm-.5 1.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-2ZM1.5 9A1.5 1.5 0 0 0 0 10.5v2A1.5 1.5 0 0 0 1.5 14h4A1.5 1.5 0 0 0 7 12.5v-2A1.5 1.5 0 0 0 5.5 9h-4ZM1 10.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-2ZM10.5 9A1.5 1.5 0 0 0 9 10.5v2a1.5 1.5 0 0 0 1.5 1.5h4a1.5 1.5 0 0 0 1.5-1.5v-2A1.5 1.5 0 0 0 14.5 9h-4Zm-.5 1.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-2Z"/>
+                        </svg>
+                        Columns
+                    </button>
+                    @if (_columnPickerOpen)
+                    {
+                        <div class="bgv__col-picker-dropdown">
+                            @foreach (var col in EffectiveColumns)
+                            {
+                                <label class="bgv__col-picker-item">
+                                    <input type="checkbox" checked="@col.Visible"
+                                           @onchange="() => ToggleColumnVisibility(col)" />
+                                    <span>@(string.IsNullOrEmpty(col.HeaderText) ? col.DataField ?? "Column" : col.HeaderText)</span>
+                                </label>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
+            @* ── Export / Print / Copy buttons ── *@
+            @if (HasToolbarButtons)
+            {
+                <div class="bgv__toolbar-buttons">
+                    @if (ShowCopyButton)
+                    {
+                        <button class="bgv__toolbar-btn" type="button" @onclick="CopyToClipboard" title="Copy to clipboard">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            Copy
+                        </button>
+                    }
+                    @if (ShowExportButton)
+                    {
+                        <button class="bgv__toolbar-btn" type="button" @onclick="ExportCsv" title="Export as CSV">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            CSV
+                        </button>
+                    }
+                    @if (ShowPrintButton)
+                    {
+                        <button class="bgv__toolbar-btn" type="button" @onclick="PrintTable" title="Print table">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+                            </svg>
+                            Print
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+        <div class="bgv__header-right">
+            @if (ShowTopPagination && AllowPaging)
+            {
+                @RenderPagination()
+            }
+            @if (ShowSearchBox)
+            {
+                <label class="bgv__search-label">
+                    Search:
+                    <input type="text"
+                           class="bgv__search-input"
+                           placeholder="@SearchPlaceholder"
+                           value="@_searchText"
+                           @oninput="OnSearchInput" />
+                </label>
+            }
+        </div>
+    </div>
+
+    @* ══════════════════════════════════════════════════════════
+       Table
+       ══════════════════════════════════════════════════════════ *@
+    <div class="bgv__scroll @(StickyHeader ? "bgv__scroll--sticky" : "")"
+         style="@(Height is not null ? $"max-height:{Height};overflow-y:auto;" : "")">
+
+        @* ── Loading overlay ── *@
+        @if (_isLoading && _items.Any())
+        {
+            <div class="bgv__loading-overlay">
+                <div class="bgv__loading-spinner"></div>
+                <span class="bgv__loading-text">Loading…</span>
+            </div>
+        }
+
+        <table class="bgv__table @(Striped ? "bgv__table--striped" : "") @(Hoverable ? "bgv__table--hover" : "")">
+            <thead>
+                @* ── Main header row ── *@
+                <tr>
+                    @* Expand/collapse column header *@
+                    @if (HasDetailTemplate)
+                    {
+                        <th class="bgv__th-expand" style="width:2.5rem;text-align:center;">
+                            @if (_items.Any())
+                            {
+                                <button class="bgv__expand-all-btn" type="button"
+                                        @onclick="() => { if (_expandedRows.Count == _items.Count) CollapseAllDetails(); else ExpandAllDetails(); }"
+                                        title="Expand/Collapse All">
+                                    @if (_expandedRows.Count > 0 && _expandedRows.Count == _items.Count)
+                                    {
+                                        <span>−</span>
+                                    }
+                                    else
+                                    {
+                                        <span>+</span>
+                                    }
+                                </button>
+                            }
+                        </th>
+                    }
+                    @* Selection checkbox column header *@
+                    @if (HasSelection)
+                    {
+                        <th class="bgv__th-select" style="width:2.5rem;text-align:center;">
+                            @if (SelectionMode == GridViewSelectionMode.Multiple)
+                            {
+                                <input type="checkbox"
+                                       class="bgv__select-checkbox"
+                                       checked="@IsAllSelected"
+                                       @onchange="ToggleSelectAll" />
+                            }
+                        </th>
+                    }
+
+                    @{ int colIdx = 0; }
+                    @foreach (var col in VisibleColumns)
+                    {
+                        var currentIdx = colIdx;
+                        var frozenStyle = col.Frozen ? "position:sticky;left:0;z-index:4;background:#f1f5f9;" : "";
+                        var sortOrder = GetSortOrder(col);
+                        var isDraggable = AllowColumnReorder && !col.IsCommandType;
+                        var resizable = AllowColumnResize && !col.IsCommandType;
+
+                        <th class="@GetSortCss(col) @col.CssClass @(resizable ? "bgv__th-resizable" : "")"
+                            style="@(col.Width is not null ? $"width:{col.Width};" : "") text-align:@col.TextAlign; @frozenStyle"
+                            @onclick="(MouseEventArgs e) => OnSort(col, e)"
+                            draggable="@isDraggable"
+                            @ondragstart="() => OnColumnDragStart(currentIdx)"
+                            @ondragover:preventDefault="true"
+                            @ondrop="() => OnColumnDrop(currentIdx)"
+                            @ondragend="OnColumnDragEnd">
+
+                            @if (col.HeaderTemplate is not null)
+                            {
+                                @col.HeaderTemplate
+                            }
+                            else
+                            {
+                                <span class="bgv__th-content">
+                                    <span class="bgv__th-text">@col.HeaderText</span>
+                                    @if (AllowSorting && col.Sortable && !string.IsNullOrEmpty(col.EffectiveSortProperty))
+                                    {
+                                        @RenderSortIcon(col)
+                                        @if (sortOrder > 0)
+                                        {
+                                            <span class="bgv__sort-order">@sortOrder</span>
+                                        }
+                                    }
+                                </span>
+                            }
+                            @if (resizable)
+                            {
+                                <div class="bgv__resize-handle" @onclick:stopPropagation="true"></div>
+                            }
+                        </th>
+
+                        colIdx++;
+                    }
+                </tr>
+
+                @* ── Per-column filter row ── *@
+                @if (HasColumnFilters)
+                {
+                    <tr class="bgv__filter-row">
+                        @if (HasDetailTemplate)
+                        {
+                            <th></th>
+                        }
+                        @if (HasSelection)
+                        {
+                            <th></th>
+                        }
+                        @foreach (var col in VisibleColumns)
+                        {
+                            var frozenStyle = col.Frozen ? "position:sticky;left:0;z-index:4;background:#f8fafc;" : "";
+
+                            <th class="bgv__filter-cell" style="@frozenStyle">
+                                @if (col.Filterable && !string.IsNullOrEmpty(col.DataField))
+                                {
+                                    var propCapture = col.DataField;
+                                    <input type="text"
+                                           class="bgv__filter-input"
+                                           placeholder="@col.FilterPlaceholder"
+                                           value="@GetColumnFilterValue(col.DataField)"
+                                           @oninput="(ChangeEventArgs e) => OnColumnFilterInput(propCapture, e)" />
+                                }
+                            </th>
+                        }
+                    </tr>
+                }
+            </thead>
+
+            <tbody>
+                @if (_isLoading && !_items.Any())
+                {
+                    @* Skeleton loading rows *@
+                    @for (int s = 0; s < Math.Min(_pageSize, 5); s++)
+                    {
+                        <tr class="bgv__skeleton-row">
+                            @if (HasDetailTemplate)
+                            {
+                                <td><div class="bgv__skeleton-bar" style="width:40%"></div></td>
+                            }
+                            @if (HasSelection)
+                            {
+                                <td><div class="bgv__skeleton-bar" style="width:40%"></div></td>
+                            }
+                            @foreach (var col in VisibleColumns)
+                            {
+                                <td><div class="bgv__skeleton-bar" style="width:@(Random.Shared.Next(40, 90))%"></div></td>
+                            }
+                        </tr>
+                    }
+                }
+                else if (!_items.Any())
+                {
+                    @* Empty state *@
+                    <tr>
+                        <td colspan="@ColSpan" class="bgv__empty-cell">
+                            @if (EmptyDataTemplate is not null)
+                            {
+                                @EmptyDataTemplate
+                            }
+                            else
+                            {
+                                <span class="bgv__empty-icon">📋</span>
+                                <span>No data available</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                else if (HasGrouping)
+                {
+                    @* ── Grouped rendering ── *@
+                    @foreach (var group in GetGroupedItems())
+                    {
+                        <tr class="bgv__group-row">
+                            <td colspan="@ColSpan" class="bgv__group-cell">
+                                @if (GroupHeaderTemplate is not null)
+                                {
+                                    @GroupHeaderTemplate(new GridViewGroupContext<TItem>
+                                    {
+                                        GroupKey = group.Key,
+                                        Items = group,
+                                        Count = group.Count()
+                                    })
+                                }
+                                else
+                                {
+                                    <span class="bgv__group-label">@(group.Key ?? "Ungrouped")</span>
+                                    <span class="bgv__group-count">(@group.Count())</span>
+                                }
+                            </td>
+                        </tr>
+                        @foreach (var item in group)
+                        {
+                            @RenderDataRow(item)
+                        }
+                    }
+                }
+                else
+                {
+                    @foreach (var item in _items)
+                    {
+                        @RenderDataRow(item)
+                    }
+                }
+            </tbody>
+
+            @* ── Footer row (tfoot) ── *@
+            @if (HasFooterTemplates || FooterSummary is not null)
+            {
+                <tfoot class="bgv__tfoot">
+                    @if (FooterSummary is not null && _items.Any())
+                    {
+                        @FooterSummary(_items)
+                    }
+                    @if (HasFooterTemplates)
+                    {
+                        <tr>
+                            @if (HasDetailTemplate) { <td></td> }
+                            @if (HasSelection) { <td></td> }
+                            @foreach (var col in VisibleColumns)
+                            {
+                                <td style="text-align:@col.TextAlign;">
+                                    @if (col.FooterTemplate is not null)
+                                    {
+                                        @col.FooterTemplate
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tfoot>
+            }
+        </table>
+    </div>
+
+    @* ══════════════════════════════════════════════════════════
+       Footer: info + pagination
+       ══════════════════════════════════════════════════════════ *@
+    <div class="bgv__footer">
+        <div class="bgv__footer-left">
+            <span class="bgv__info">
+                Showing @ShowingFrom to @ShowingTo of @TotalCount entries
+                @if (HasSelection && _selectedItems.Count > 0)
+                {
+                    <span class="bgv__info-selected"> — @_selectedItems.Count selected</span>
+                }
+            </span>
+        </div>
+        @if (ShowBottomPagination && AllowPaging)
+        {
+            <div class="bgv__footer-right">
+                @RenderPagination()
+            </div>
+        }
+    </div>
+
+    @* ══════════════════════════════════════════════════════════
+       Delete confirmation modal
+       ══════════════════════════════════════════════════════════ *@
+    @if (_deleteConfirmOpen)
+    {
+        <div class="bgv__confirm-overlay" @onclick="CancelDelete">
+            <div class="bgv__confirm-dialog" @onclick:stopPropagation="true">
+                <div class="bgv__confirm-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </div>
+                <h4 class="bgv__confirm-title">Confirm Delete</h4>
+                <p class="bgv__confirm-message">@DeleteConfirmMessage</p>
+                <div class="bgv__confirm-actions">
+                    <button type="button" class="bgv__confirm-btn bgv__confirm-btn--cancel" @onclick="CancelDelete">Cancel</button>
+                    <button type="button" class="bgv__confirm-btn bgv__confirm-btn--delete" @onclick="ConfirmDelete">Delete</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+
+    /// <summary>Renders a single data row + optional detail row.</summary>
+    private RenderFragment RenderDataRow(TItem item) => __builder =>
+    {
+        var isEditing = IsRowEditing(item);
+        var rowClassExtra = RowClass?.Invoke(item);
+        var rowStyleExtra = RowStyle?.Invoke(item);
+        var isSelected = IsRowSelected(item);
+        var isExpanded = IsRowExpanded(item);
+        var rowIndex = GetRowIndex(item);
+
+        <tr class="bgv__row @(isEditing ? "bgv__row--editing" : "") @(isSelected ? "bgv__row--selected" : "") @rowClassExtra"
+            style="@rowStyleExtra"
+            @onclick="() => OnRowClick(item)"
+            @ondblclick="() => OnRowDoubleClick(item)">
+
+            @* ── Expand/collapse toggle ── *@
+            @if (HasDetailTemplate)
+            {
+                <td class="bgv__cell-expand" style="text-align:center;">
+                    <button class="bgv__expand-btn @(isExpanded ? "bgv__expand-btn--open" : "")"
+                            type="button"
+                            @onclick="() => ToggleRowDetail(item)"
+                            @onclick:stopPropagation="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                            <path d="M4.5 2L9 6L4.5 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </td>
+            }
+
+            @* ── Selection checkbox/radio ── *@
+            @if (HasSelection)
+            {
+                <td class="bgv__cell-select" style="text-align:center;">
+                    @if (SelectionMode == GridViewSelectionMode.Multiple)
+                    {
+                        <input type="checkbox"
+                               class="bgv__select-checkbox"
+                               checked="@isSelected"
+                               @onchange="(ChangeEventArgs e) => ToggleRowSelection(item, e)"
+                               @onclick:stopPropagation="true" />
+                    }
+                    else
+                    {
+                        <input type="radio"
+                               name="@($"{_gridId}-select")"
+                               class="bgv__select-radio"
+                               checked="@isSelected"
+                               @onchange="(ChangeEventArgs e) => ToggleRowSelection(item, e)"
+                               @onclick:stopPropagation="true" />
+                    }
+                </td>
+            }
+
+            @* ── Data columns ── *@
+            @foreach (var col in VisibleColumns)
+            {
+                var isCellEditing = IsCellEditing(item, col);
+                var isEditingAny = isEditing || isCellEditing;
+
+                var cellCss = col.CssClass ?? "";
+                if (isCellEditing) cellCss += " bgv__cell--editing";
+
+                var cellClassExtra = CellClass?.Invoke(item, col);
+                if (!string.IsNullOrEmpty(cellClassExtra)) cellCss += " " + cellClassExtra;
+                var cellStyleExtra = CellStyle?.Invoke(item, col);
+                var frozenStyle = col.Frozen ? "position:sticky;left:0;z-index:2;background:inherit;" : "";
+                var combinedCellStyle = $"text-align:{col.TextAlign};{frozenStyle}{cellStyleExtra}";
+
+                <td class="@cellCss"
+                    style="@combinedCellStyle"
+                    data-label="@col.HeaderText"
+                    @ondblclick="() => OnCellDoubleClick(item, col)">
+
+                    @switch (col.FieldType)
+                    {
+                        // ═══ CommandField ═══════════════════════════
+                        case GridViewFieldType.CommandField:
+                            <div class="bgv__cmd-actions">
+                                @if (isEditing)
+                                {
+                                    <button type="button" class="bgv__cmd-btn bgv__cmd-btn--save"
+                                            @onclick="() => HandleCommandUpdate(item, rowIndex)"
+                                            @onclick:stopPropagation="true">
+                                        @col.UpdateText
+                                    </button>
+                                    <button type="button" class="bgv__cmd-btn bgv__cmd-btn--cancel"
+                                            @onclick="() => HandleCommandCancel(item, rowIndex)"
+                                            @onclick:stopPropagation="true">
+                                        @col.CancelText
+                                    </button>
+                                }
+                                else
+                                {
+                                    @if (col.ShowEditButton)
+                                    {
+                                        <button type="button" class="bgv__cmd-btn bgv__cmd-btn--edit"
+                                                @onclick="() => HandleCommandEdit(item, rowIndex)"
+                                                @onclick:stopPropagation="true">
+                                            @col.EditText
+                                        </button>
+                                    }
+                                    @if (col.ShowDeleteButton)
+                                    {
+                                        <button type="button" class="bgv__cmd-btn bgv__cmd-btn--delete"
+                                                @onclick="() => HandleCommandDelete(item, rowIndex)"
+                                                @onclick:stopPropagation="true">
+                                            @col.DeleteText
+                                        </button>
+                                    }
+                                    @if (col.ShowSelectButton)
+                                    {
+                                        <button type="button" class="bgv__cmd-btn bgv__cmd-btn--select"
+                                                @onclick="() => HandleCommandSelect(item, rowIndex)"
+                                                @onclick:stopPropagation="true">
+                                            @col.SelectText
+                                        </button>
+                                    }
+                                }
+                            </div>
+                            break;
+
+                        // ═══ ButtonField ════════════════════════════
+                        case GridViewFieldType.ButtonField:
+                            <button type="button"
+                                    class="bgv__btn-field @(col.ButtonCssClass)"
+                                    @onclick="() => HandleButtonFieldCommand(col, item)"
+                                    @onclick:stopPropagation="true">
+                                @(col.ButtonText ?? col.CommandName ?? "Action")
+                            </button>
+                            break;
+
+                        // ═══ HyperLinkField ═════════════════════════
+                        case GridViewFieldType.HyperLinkField:
+                            {
+                                var href = col.NavigateUrl;
+                                if (!string.IsNullOrEmpty(col.DataNavigateUrlField))
+                                    href = GetPropertyValue(item, col.DataNavigateUrlField);
+
+                                var linkText = col.HeaderText;
+                                if (!string.IsNullOrEmpty(col.DataTextField))
+                                    linkText = GetPropertyValue(item, col.DataTextField) ?? linkText;
+                                else if (!string.IsNullOrEmpty(col.DataField))
+                                    linkText = GetPropertyValue(item, col.DataField) ?? linkText;
+
+                                <a href="@href" target="@col.Target" class="bgv__hyperlink" @onclick:stopPropagation="true">
+                                    @linkText
+                                </a>
+                            }
+                            break;
+
+                        // ═══ ImageField ══════════════════════════════
+                        case GridViewFieldType.ImageField:
+                            {
+                                var imgUrl = "";
+                                if (!string.IsNullOrEmpty(col.DataImageUrlField))
+                                    imgUrl = GetPropertyValue(item, col.DataImageUrlField) ?? "";
+                                else if (!string.IsNullOrEmpty(col.DataField))
+                                    imgUrl = GetPropertyValue(item, col.DataField) ?? "";
+
+                                var altText = "";
+                                if (!string.IsNullOrEmpty(col.DataAlternateTextField))
+                                    altText = GetPropertyValue(item, col.DataAlternateTextField) ?? "";
+
+                                <img src="@imgUrl"
+                                     alt="@altText"
+                                     class="bgv__image @col.ImageCssClass"
+                                     style="width:@col.ImageWidth;height:@col.ImageHeight;object-fit:cover;" />
+                            }
+                            break;
+
+                        // ═══ CheckBoxField ═══════════════════════════
+                        case GridViewFieldType.CheckBoxField:
+                            {
+                                var isChecked = false;
+                                if (!string.IsNullOrEmpty(col.DataField))
+                                    isChecked = GetBooleanValue(item, col.DataField);
+
+                                if (isEditingAny && !col.ReadOnly)
+                                {
+                                    @if (col.EditTemplate is not null)
+                                    {
+                                        @col.EditTemplate(item)
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" checked="@isChecked"
+                                               class="bgv__checkbox" disabled="false" />
+                                    }
+                                }
+                                else
+                                {
+                                    <input type="checkbox" checked="@isChecked"
+                                           class="bgv__checkbox" disabled />
+                                }
+                            }
+                            break;
+
+                        // ═══ TemplateField ═══════════════════════════
+                        case GridViewFieldType.TemplateField:
+                            @if (isEditingAny && !col.ReadOnly && col.EditTemplate is not null)
+                            {
+                                @col.EditTemplate(item)
+                            }
+                            else if (col.Template is not null)
+                            {
+                                @col.Template(item)
+                            }
+                            else if (!string.IsNullOrEmpty(col.DataField))
+                            {
+                                @(GetFormattedValue(item, col.DataField, col.DataFormatString))
+                            }
+                            break;
+
+                        // ═══ BoundField (default) ═══════════════════
+                        case GridViewFieldType.BoundField:
+                        default:
+                            @if (isEditingAny && !col.ReadOnly)
+                            {
+                                @if (col.EditTemplate is not null)
+                                {
+                                    @col.EditTemplate(item)
+                                }
+                                else
+                                {
+                                    <input type="text" class="bgv__edit-input"
+                                           value="@GetPropertyValue(item, col.DataField ?? "")"
+                                           @onblur="() => CellEditCommit(item)"
+                                           @onkeyup="(e) => HandleCellKeyPress(e, item)" />
+                                }
+                            }
+                            else if (col.Template is not null)
+                            {
+                                @col.Template(item)
+                            }
+                            else if (!string.IsNullOrEmpty(col.DataField))
+                            {
+                                @(GetFormattedValue(item, col.DataField, col.DataFormatString))
+                            }
+                            break;
+                    }
+                </td>
+            }
+        </tr>
+
+        @* ── Detail / child row ── *@
+        @if (HasDetailTemplate && isExpanded)
+        {
+            <tr class="bgv__detail-row">
+                <td colspan="@ColSpan" class="bgv__detail-cell">
+                    @DetailTemplate!(item)
+                </td>
+            </tr>
+        }
+    };
+
+    /// <summary>Renders the sort icon SVG.</summary>
+    private RenderFragment RenderSortIcon(BlabGridViewColumn<TItem> col) => __builder =>
+    {
+        var state = GetSortState(col);
+        var upColor   = state == "asc"  ? "#1e293b" : "#cbd5e1";
+        var downColor = state == "desc" ? "#1e293b" : "#cbd5e1";
+
+        <span class="bgv__sort-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" fill="none">
+                <path d="M7 1.5L10.5 6H3.5L7 1.5Z" fill="@upColor"/>
+                <path d="M7 12.5L3.5 8H10.5L7 12.5Z" fill="@downColor"/>
+            </svg>
+        </span>
+    };
+
+    /// <summary>Reusable pagination nav block.</summary>
+    private RenderFragment RenderPagination() => __builder =>
+    {
+        <nav class="bgv__paging">
+            <button class="bgv__page-btn"
+                    disabled="@(_pageIndex == 0)"
+                    @onclick="() => GoToPage(0)">
+                First
+            </button>
+            <button class="bgv__page-btn"
+                    disabled="@(_pageIndex == 0)"
+                    @onclick="() => GoToPage(_pageIndex - 1)">
+                ‹
+            </button>
+
+            @foreach (var p in GetPageNumbers())
+            {
+                var page = p;
+                <button class="bgv__page-btn @(page == _pageIndex ? "bgv__page-btn--active" : "")"
+                        @onclick="() => GoToPage(page)">
+                    @(page + 1)
+                </button>
+            }
+
+            <button class="bgv__page-btn"
+                    disabled="@(_pageIndex >= TotalPages - 1)"
+                    @onclick="() => GoToPage(_pageIndex + 1)">
+                ›
+            </button>
+            <button class="bgv__page-btn"
+                    disabled="@(_pageIndex >= TotalPages - 1)"
+                    @onclick="() => GoToPage(TotalPages - 1)">
+                Last
+            </button>
+        </nav>
+    };
+}

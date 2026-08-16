@@ -200,7 +200,6 @@
 		<AdditionalFiles Include="Pages\Transactions\Exchanges\SpotRate.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Exchanges\SpotRateRow.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Journals\JournalDetails.razor" />
-		<AdditionalFiles Include="Pages\Transactions\Journals\JournalEntryCreate.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Journals\JournalEntryRowCreate.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Journals\JournalIndexPage.razor" />
 		<AdditionalFiles Include="Pages\Transactions\Ledgers\CreateLedgerModal.razor" />

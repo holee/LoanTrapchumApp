@@ -1,8 +1,4 @@
-﻿using Applications.Responses.ViewModels.Journals;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace Infrastructures.DataAccess.Configurations.Journals
+﻿namespace Infrastructures.DataAccess.Configurations.Journals
 {
     //public class VNameListConfig : IEntityTypeConfiguration<VNameList>
     //{

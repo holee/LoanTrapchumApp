@@ -1,33 +1,24 @@
-using Applications.Features.Currencies.Responses;
-using Applications.Interfaces.Currencies;
+using Applications.Features.Currencies.Dto;
+using Applications.Features.Currencies.Queries.GetCurrencies;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {
     public partial class ExchangeCurrencyIndexPage
     {
-        private readonly ICurrencyService _currencyService;
-
-        public ExchangeCurrencyIndexPage(ICurrencyService currencyService)
-        {
-            _currencyService = currencyService;
-        }
-
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; } = 0;
-        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
-
-        VCurrenciesList? Currency;
+        private CurrencyDto? Currency;
         protected override async Task OnInitializedAsync()
         {
             var auth = await AuthenticationState;
 
             var user = auth.User;
 
-            var Currencies = await _currencyService.GetCurrencies(string.Empty);
+            var Currencies = await mediator.Send(new GetCurrenciesQuery((int)CurrenciesType.KHR, new QueryParam(0, 0)));
 
-            if (Currencies.Any())
+            if (Currencies.Items.Count > 0)
             {
-                Currency = Currencies.FirstOrDefault(x => x.CurrencyId == (int)CurrenciesType.KHR);
+                Currency = Currencies.Items.FirstOrDefault(x => x.CurrencyId == (int)CurrenciesType.KHR);
             }
             await base.OnInitializedAsync();
         }

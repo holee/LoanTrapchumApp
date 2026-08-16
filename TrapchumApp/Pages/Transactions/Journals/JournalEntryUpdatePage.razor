@@ -1,8 +1,9 @@
 ﻿@page "/app/transactions/journals/edit/{JournalId}/branches/{BranchId:int}"
 @using Applications.Features.Currencies.Dto
 @using Applications.Features.Journals.Dtos
-@using Applications.Responses.ViewModels.Ledgers
+@using Applications.Features.Ledgers.Dto
 @using Applications.Responses.ViewModels.OtherNames
+@using TrapchumApp.Components.Indicatros
 
 <PageTitle>Journal Entry - Edit</PageTitle>
 
@@ -10,9 +11,7 @@
 
     @if (_isLoading)
     {
-        <div class="je-card" style="display:flex;align-items:center;justify-content:center;padding:2.5rem;">
-            <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
-        </div>
+        <Loading />
     }
     else
     {
@@ -45,6 +44,7 @@
 
         <EditForm Model="JLe" OnValidSubmit="@HandleFormSave" FormName="JournalEntryUpdateForm">
             <DataAnnotationsValidator />
+            <FluentValidator />
 
             <div class="je-card">
                 <div class="je-card-title">

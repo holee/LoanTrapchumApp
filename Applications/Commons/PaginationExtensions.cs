@@ -14,7 +14,7 @@ public static class PaginationExtensions
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        if (page == 0 && pageSize == 0)
+        if (pageSize <= 0)
         {
             var allItems = await query.ToListAsync(cancellationToken);
 

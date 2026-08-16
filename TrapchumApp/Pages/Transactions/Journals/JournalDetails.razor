@@ -11,7 +11,10 @@
             <h2>Journal Details</h2>
             <p>@(JournalEntry?.ReferrenceNum ?? "—")</p>
         </div>
-        <NavLink href="#">Edit</NavLink>
+        <RadzenButton Text="Edit" ButtonType="ButtonType.Button"
+                      Icon="edit"
+                      Click="@ShowEditTab"
+                      Size="ButtonSize.ExtraSmall"></RadzenButton>
         @{
             var isBalanced = JournalEntry is not null && JournalEntry.TotalDr == JournalEntry.TotalCr;
         }

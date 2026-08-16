@@ -13,7 +13,6 @@ public sealed class CurrencyDto
     public decimal? Limited { get; set; }
     public bool IsBaseCurrency { get; set; } = false;
     public bool IsActive { get; set; } = false;
-
     public ICollection<CurrencySpotRateDto> CurrencySpotRates { get; set; } = [];
     public ICollection<CurrencyCounterDto> CurrencyCounters { get; set; } = [];
     public ICollection<LedgerDto> Ledgers { get; set; } = [];

@@ -77,7 +77,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
                 return;
             }
 
-            var query = new GetCurrenciesDtoQuery(0, new QueryParam(0, 25));
+            var query = new GetCurrenciesQuery(0, new QueryParam(0, 25));
 
             var rsp = await mediator.Send(query);
 

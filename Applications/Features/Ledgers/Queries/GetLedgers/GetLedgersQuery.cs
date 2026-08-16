@@ -1,4 +1,4 @@
-using Applications.Responses.ViewModels.Ledgers;
+using Applications.Features.Ledgers.Dto;
 using ErrorOr;
 
 namespace Applications.Features.Ledgers.Queries.GetLedgers;

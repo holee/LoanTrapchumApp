@@ -1,4 +1,4 @@
-﻿using Applications.Responses.ViewModels.Journals;
+﻿using Applications.Features.Journals.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

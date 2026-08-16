@@ -1,6 +1,6 @@
 ﻿@page "/App/Account/Journals/{BranchId:int}/Branches"
 @attribute [Authorize(Policy = "AccountOnly")]
-@using Applications.Responses.ViewModels.Journals
+@using Applications.Features.Journals.Dtos
 <PageTitle>Journal list</PageTitle>
 <div class="journal-page">
     <RadzenTabs RenderMode="TabRenderMode.Client"
@@ -85,12 +85,13 @@
                                                   Context="c"
                                                   Sortable="false" Title="Actions">
                                 <Template>
-                                    <div class="row-actions">
-                                        <RadzenButton Size="ButtonSize.ExtraSmall"
-                                                      Icon="more_vert"
-                                                      Variant="Variant.Text"
-                                                      Click="@((args) => ShowContextMenuWithContent(args, c.JournalEntryId))" />
-                                    </div>
+
+                                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                                  Icon="more_vert"
+                                                  Variant="Variant.Text"
+                                                  ButtonStyle="ButtonStyle.Danger"
+                                                  Click="@((args) => ShowContextMenuWithContent(args, c.JournalEntryId))" />
+
                                 </Template>
                             </RadzenDataGridColumn>
                         </Columns>

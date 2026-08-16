@@ -1,5 +1,4 @@
-﻿using Applications.Features.Currencies.Responses;
-using Applications.Interfaces.Currencies;
+﻿using Applications.Interfaces.Currencies;
 
 namespace Applications.Features.Currencies.Queries.GetCurrenciesAsPaging;
 

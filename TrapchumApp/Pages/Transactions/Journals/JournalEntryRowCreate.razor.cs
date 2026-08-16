@@ -1,6 +1,5 @@
 ﻿using Applications.Features.Journals.Dtos;
-using Applications.Responses.ViewModels.Journals;
-using Applications.Responses.ViewModels.Ledgers;
+using Applications.Features.Ledgers.Dto;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
 using Applications.Services.Transactions.Journals;
@@ -8,8 +7,7 @@ using Microsoft.JSInterop;
 
 namespace TrapchumApp.Pages.Transactions.Journals;
 
-public partial class JournalEntryRowCreate(ILedgerServiceImpl ledgerService,
-    IOtherNameServiceImpl nameService)
+public partial class JournalEntryRowCreate(ILedgerServiceImpl ledgerService, IOtherNameServiceImpl nameService)
 {
     [Parameter] public JournalLineDtoCreate JournalLine { get; set; } = new();
     [Parameter] public IEnumerable<VNameList> NameData { get; set; } = [];

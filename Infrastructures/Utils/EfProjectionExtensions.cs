@@ -58,13 +58,14 @@ public static class EfProjectionExtensions
         return query.Select(selector);
     }
 
-    public static IQueryable<TDest> ProjectTo<TSource, TDest>(this IQueryable<TSource> query,
+    public static IQueryable<TDest> MapToType<TSource, TDest>(this IQueryable<TSource> query,
         params string[]? columns) where TDest : class, new()
     {
         // ── cache key ───────────────────────────────────────────────
         string suffix;
 
         var sourceProps = GetWritableProperties(typeof(TSource));
+
         var destProps = GetWritableProperties(typeof(TDest));
 
         // ── discard columns that don't exist on both source and dest ─
@@ -95,6 +96,7 @@ public static class EfProjectionExtensions
 
         // ── slow path ───────────────────────────────────────────────
         var parameter = Expression.Parameter(typeof(TSource), "x");
+
         var bindings = new List<MemberBinding>(requestedSet?.Count ?? destProps.Count);
 
         foreach (var (name, destPi) in destProps)
@@ -115,6 +117,7 @@ public static class EfProjectionExtensions
             return query.Select(_ => new TDest());
 
         var body = Expression.MemberInit(Expression.New(typeof(TDest)), bindings);
+
         var selector = Expression.Lambda<Func<TSource, TDest>>(body, parameter);
 
         ExpressionCache.TryAdd(key, selector);

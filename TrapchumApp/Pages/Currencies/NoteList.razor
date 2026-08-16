@@ -1,4 +1,5 @@
 ﻿@page "/App/Notes/CurrencyCounter"
+@using Applications.Features.Currencies.Dto
 @using Applications.Features.Currencies.Responses
 @using Domains.Models.Currencies
 <PageTitle>Currency Notes</PageTitle>
@@ -169,7 +170,7 @@
 @code {
     private int? _currencyId = 0;
 
-    [PersistentState] public IEnumerable<Currency>? Currencies { get; set; }
+    [PersistentState] public IEnumerable<CurrencyDto>? Currencies { get; set; }
 
     void ShowContextMenu(MouseEventArgs args, VCurrencyCounter item)
     {

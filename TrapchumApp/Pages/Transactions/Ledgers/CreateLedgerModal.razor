@@ -1,4 +1,5 @@
-﻿<RadzenCard>
+﻿@using Applications.Features.Ledgers.Dto
+<RadzenCard>
     <EditForm Model="model" @ref="editForm">
         <FluentValidator />
 
@@ -23,7 +24,7 @@
                                                 ShowPagingSummary="true"
                                                 Placeholder="Select a ledger type">
                             <Columns>
-                                <RadzenDropDownDataGridColumn Property="LedgerTypeCode"
+                                <RadzenDropDownDataGridColumn Property="@nameof(LedgerTypeDto.LedgerTypeCode)"
                                                               Title="Type"
                                                               Sortable="false"
                                                               Width="200px" />
@@ -57,7 +58,8 @@
         </RadzenStack>
 
         <RadzenRow AlignItems="AlignItems.Start" Gap="1rem">
-            @if (model.LedgerTypeRefId == 1)
+         
+            @if (model.LedgerTypeRefId == (int)AccountTypes.CashAndBank)
             {
                 <RadzenColumn Size="12" SizeMD="8">
                     <RadzenFormField Text="Bank Account Number" AllowFloatingLabel="true" class="@Styles.W100">
@@ -151,28 +153,46 @@
                         </RadzenStack>
                     </Start>
                     <ChildContent>
-                        <RadzenDropDownDataGrid Data="FilterLedgers"
+                        <RadzenDropDownDataGrid Data="@FilterLedgers"
                                                 AllowColumnResize="true"
+                                                AllowFiltering="true"
+                                                AllowFilteringByAllStringColumns="true"
                                                 @bind-Value="model.ParentRefId"
-                                                TextProperty="LedgerName"
-                                                ValueProperty="LedgerId"
+                                                TextProperty="@nameof(VLedger.LedgerName)"
+                                                ValueProperty="@nameof(VLedger.LedgerId)"
                                                 Disabled="!model.IsSubTypeOf"
                                                 Density="Density.Compact"
                                                 class="@Styles.W100"
-                                                ShowSearch="false"
+                                                Style="border-radius:10px;"
+                                                ShowSearch="true"
                                                 PageSize="10"
-                                                LoadData="LoadDataTextChanged"
+                                                ShowPagingSummary="true"
                                                 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                Placeholder="Select parent ledger">
+                                                Placeholder="Search and select parent ledger">
                             <Columns>
-                                <RadzenDropDownDataGridColumn Property="LedgerName"
+                                <RadzenDropDownDataGridColumn Property="@nameof(VLedger.LedgerName)"
                                                               Sortable="false"
-                                                              Title="Ledger Name" />
-                                <RadzenDropDownDataGridColumn Property="LedgerTypeCode"
+                                                              Title="Ledger"
+                                                              Width="280px" />
+                                <RadzenDropDownDataGridColumn Property="@nameof(VLedger.LedgerTypeCode)"
                                                               Sortable="false"
                                                               Title="Type"
                                                               Width="120px" />
                             </Columns>
+                            <Template Context="ledger">
+                                <div style="display:flex; align-items:center; justify-content:space-between; gap:.5rem; width:100%;">
+                                    <span style="font-weight:500;">@((ledger as VLedger)?.LedgerName)</span>
+                                    <span style="font-size:.72rem; font-weight:600; color:var(--rz-primary); background:var(--rz-base-200); border-radius:999px; padding:.1rem .5rem;">
+                                        @((ledger as VLedger)?.LedgerTypeCode)
+                                    </span>
+                                </div>
+                            </Template>
+                            <ValueTemplate Context="ledger">
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+                                    <RadzenIcon Icon="account_tree" Style="font-size:0.9rem; color:var(--rz-primary);" />
+                                    <span>@((ledger as VLedger)?.LedgerName)</span>
+                                </RadzenStack>
+                            </ValueTemplate>
                         </RadzenDropDownDataGrid>
                     </ChildContent>
                     <Helper>

@@ -35,6 +35,39 @@ namespace TrapchumApp.Pages.Transactions.Journals
             await Close.InvokeAsync();
         }
 
+        async Task ShowEditTab()
+        {
+            if (JournalEntry is null)
+            {
+                return;
+            }
+
+            var options = new DialogOptions
+            {
+                Width = "100vw",
+                Height = "100vh",
+                Draggable = true,
+                Resizable = true,
+                CloseDialogOnEsc = true,
+                ShowClose = true
+            };
+
+            var parameters = new Dictionary<string, object?>
+            {
+                { "JournalId", JournalEntry.JournalEntryId },
+                { "BranchId", JournalEntry.BranchId ?? 0 }
+            };
+
+            var dia = await DialogService.OpenAsync<JournalEntryUpdatePage>("Journal Entry", parameters, options);
+
+            if (dia is bool success && success)
+            {
+                await GetJournalEntry(JournalId);
+
+                StateHasChanged();
+            }
+        }
+
         async Task GetJournalEntry(string? journalId)
         {
             if (!string.IsNullOrEmpty(journalId) || JournalEntry is null)

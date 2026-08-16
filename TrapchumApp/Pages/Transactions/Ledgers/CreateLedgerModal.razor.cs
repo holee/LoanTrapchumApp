@@ -1,12 +1,10 @@
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
-using Applications.Features.Ledgers.Commands.CreateOrUpdateLedger;
+using Applications.Features.Ledgers.Commands.CreateLedger;
 using Applications.Features.Ledgers.Dto;
 using Applications.Features.Ledgers.Queries.GetLedgers;
 using Applications.Features.Ledgers.Queries.GetLedgerTypes;
-using Applications.Responses.ViewModels.Ledgers;
 using Domains.Enumerations;
-using Domains.Models.Journals;
 using Mapster;
 
 namespace TrapchumApp.Pages.Transactions.Ledgers
@@ -20,7 +18,6 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
         IEnumerable<VLedger>? FilterLedgers = [];
         bool IsSubTypeOf { get; set; }
         LedgerCreateDto model = new();
-        //LedgerList ledgerList = new LedgerList();
         LedgerTypeDto? SelectedLedgerType;
         VLedger? SelectedLedger;
         bool isValid = true;
@@ -33,6 +30,7 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
             if (isMain)
             {
                 model.IsSubTypeOf = false;
+
                 model.ParentRefId = null;
             }
         }
@@ -41,14 +39,17 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
             if (!isSubTypeOf)
             {
                 model.ParentRefId = null;
+
                 return;
             }
+
             await GetLedgers(model.CurrencyRefId, ledgerSearchText);
         }
 
         async Task LoadDataTextChanged(LoadDataArgs e)
         {
             ledgerSearchText = e.Filter ?? string.Empty;
+
             await GetLedgers(selectedCurrencyId, ledgerSearchText);
         }
         async void SelectedCurrencyChanged(object o)
@@ -81,25 +82,26 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
 
             if (model.IsSubTypeOf && model.ParentRefId <= 0)
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Please select ledger name.");
+                _toastService.ShowError("Please select ledger name.", "Error");
+
                 return;
             }
 
-            if (model.LedgerTypeRefId == 1 && string.IsNullOrEmpty(model.BankNumber))
+            if (model.LedgerTypeRefId == (int)AccountTypes.CashAndBank && string.IsNullOrEmpty(model.BankNumber))
             {
-                NotificationService.Notify(NotificationSeverity.Error, "please input bank acoount number.");
+                _toastService.ShowError("Please input bank acoount number.", "Error");
+
                 return;
             }
 
-            var req = model.Adapt<Ledger>();
+            var command = new CreateLedgerCommand(model);
 
-            var command = new CreateOrUpdateLedgerCommand(req);
-
-            var response = await mediator.Send(command); //_ledgerService.CreateOrUpdateLedger(req);
+            var response = await mediator.Send(command); 
 
             if (response.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, response.Value);
+                
+                _toastService.ShowSuccess("Ledger created successfully.", "Success");
 
                 model = new();
 
@@ -107,7 +109,7 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, response.GetMessage());
+                _toastService.ShowError(response.GetMessage(), "Error");
             }
         }
         void Close(bool IsSuccess = false) => DialogService.Close(IsSuccess);
@@ -136,42 +138,29 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
 
         private async Task GetLedgerTypes()
         {
-            var command = new GetLedgerTypesQuery(null, string.Empty);
+            var command = new GetLedgerTypesQuery(null, new QueryParam(0, 0));
 
-            var resp = await mediator.Send(command);  //_ledgerService.FindLedgerTypes();
+            var resp = await mediator.Send(command);
 
-            if (resp.IsSuccess())
-            {
-                LedgerTypes = resp.Value.Adapt<IEnumerable<LedgerTypeDto>>();
+            LedgerTypes = resp.Items.Adapt<IEnumerable<LedgerTypeDto>>();
 
-                counts = resp.Value.Count();
-            }
-            else
-            {
-                counts = 0;
-
-                NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
-            }
+            counts = resp.TotalCount;
 
         }
 
         async Task GetLedgers(int? currencyId = 1, string? searchText = null)
         {
 
-            var command = new GetLedgersQuery(null, currencyId, searchText);
+            var param = new QueryParam(0, 0, string.Empty, false, false, searchText);
 
-            var resp = await mediator.Send(command);  //_ledgerService.GetLedgersAsync(0, currencyId, searchText);
+            var command = new GetLedgersPaginatedQuery(currencyId, param);
 
-            if (resp.IsSuccess())
-            {
-                FilterLedgers = resp.Value!;
-            }
-            else
-            {
-                FilterLedgers = [];
+            var resp = await mediator.Send(command);
 
-                NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
-            }
+            FilterLedgers = resp.Items;
+
+            StateHasChanged();
+
         }
         void SelectedChangedLedgerType(object p)
         {

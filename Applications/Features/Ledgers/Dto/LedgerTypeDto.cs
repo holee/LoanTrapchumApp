@@ -6,5 +6,4 @@ public class LedgerTypeDto
     public string? LedgerTypeCode { get; set; }
     public string? CrOrDr { get; set; }
     public int NOrder { get; set; }
-    public LedgerDto? LedgerDto { get; set; }    
 }

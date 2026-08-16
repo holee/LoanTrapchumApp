@@ -6,7 +6,6 @@ using Applications.Features.Journals.Dtos;
 using Applications.Interfaces.Transactions;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.OtherNames;
 using Dapper;
 using Domains.Models.Journals;
@@ -162,29 +161,9 @@ public sealed class JournalRepository(DataContext context,
     }
 
 
-    public async Task<ErrorOr<LoanTransaction>> CreateJournalAsync(LoanTransaction model)
-    {
-        logger.LogInformation("Attempt to create Journal");
-        try
-        {
-            await using var dataContext = await dbContextFactory.CreateDbContextAsync();
-
-            var insertedEntity = dataContext.Add(model).Entity;
-
-            await dataContext.SaveChangesAsync();
-
-            return insertedEntity;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, ex.Message);
-
-            return Error.Unexpected(description: ex.Message);
-        }
-    }
 
 
-   
+
 
     public async Task<ErrorOr<JournalEntry?>> CreateAsync(LoanTransaction model, CancellationToken cancellation = default)
     {
@@ -273,34 +252,6 @@ public sealed class JournalRepository(DataContext context,
         }
     }
 
-    public async Task<ErrorOr<string>> DeleteJournalAsync(string? id)
-    {
-        try
-        {
-            await context.Database.BeginTransactionAsync();
-
-            var journalEntry = await context.JournalEntries.FirstOrDefaultAsync(x => x.JournalEntryId == id);
-
-            if (journalEntry is null)
-            {
-                return Error.NotFound(description: Messages.DataNotFound);
-            }
-
-            context.JournalEntries.Remove(journalEntry);
-
-            await context.SaveChangesAsync();
-
-            await context.Database.CommitTransactionAsync();
-
-            return Messages.DataDeleted;
-        }
-        catch (Exception ex)
-        {
-            await context.Database.RollbackTransactionAsync();
-
-            return Error.Unexpected(description: ex.Message);
-        }
-    }
 
 
     public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId, QueryParam param, CancellationToken cancellation = default)
@@ -333,23 +284,81 @@ public sealed class JournalRepository(DataContext context,
         };
     }
 
-    public async Task<IEnumerable<JournalEntry>> GetJournalsAsync(string? journalId, string? q = null)
+
+    private static readonly HashSet<string> JournalEntryVmSortableColumns = typeof(JournalEntryVm)
+        .GetProperties()
+        .Where(p => p.Name != nameof(JournalEntryVm.JournalEntryLines))
+        .Select(p => p.Name)
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+    public async Task<PageMetaData<JournalEntryVm>> GetJournalsAsync(int? branchId, QueryParam param, CancellationToken cancellation = default, params string[] columns)
     {
-        var queries = context.JournalEntries
-                             .Include(x => x.JournalEntryLines)
-                             .WhereIf(!string.IsNullOrEmpty(journalId), x => x.JournalEntryId == journalId);
+        using var db = await dapperConnectionFactory.CreateConnectionAsync(cancellation);
 
-        if (!string.IsNullOrEmpty(q))
+        var sqlColumns = columns.BuildSafeColumns<JournalEntryVm>();
+
+        var conditions = new List<string> { "(BranchId = @BranchId OR (@BranchId IS NULL AND BranchId IS NULL))" };
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("BranchId", branchId);
+
+        var filter = param.Filter?.Trim();
+
+        if (!string.IsNullOrWhiteSpace(filter))
         {
-            var like = "%" + q + "%";
+            conditions.Add("""
+                (ReferrenceNum LIKE @Filter OR
+                 JournalType LIKE @Filter OR
+                 TransactionTypeName LIKE @Filter OR
+                 CONVERT(varchar(50), TransactionDate, 120) LIKE @Filter)
+                """);
 
-            queries = queries.Where(x => EF.Functions.Like(x.ReferrenceNum!, like) ||
-                                         EF.Functions.Like(x.JournalType!, like) ||
-                                         EF.Functions.Like(x.JournalEntryId, like));
+            parameters.Add("Filter", $"%{filter}%");
         }
 
-        return await queries.AsNoTracking().ToListAsync();
+        var whereSql = "WHERE " + string.Join(" AND ", conditions);
+
+        var orderBy = !string.IsNullOrWhiteSpace(param.SortColumn) && JournalEntryVmSortableColumns.Contains(param.SortColumn)
+            ? $"{param.SortColumn} {(param.SortDescending ? "DESC" : "ASC")}"
+            : $"{nameof(JournalEntryVm.ModiFiedDT)} DESC";
+
+        var take = param.Take > 0 ? param.Take : int.MaxValue;
+
+        parameters.Add("Offset", param.Page);
+
+        parameters.Add("Take", take);
+
+        var sql = $"""
+            SELECT {sqlColumns}
+            FROM VJournalEntryVm
+            {whereSql}
+            ORDER BY {orderBy}
+            OFFSET @Offset ROWS FETCH NEXT @Take ROWS ONLY;
+
+            SELECT COUNT(*)
+            FROM VJournalEntryVm
+            {whereSql};
+            """;
+
+        var command = new CommandDefinition(sql, parameters, cancellationToken: cancellation);
+
+        using var multi = await db.QueryMultipleAsync(command);
+
+        var pageItems = (await multi.ReadAsync<JournalEntryVm>()).ToList();
+
+        var totalCount = await multi.ReadSingleAsync<int>();
+
+        return new PageMetaData<JournalEntryVm>
+        {
+            Items = pageItems,
+            Page = param.Page,
+            PageSize = param.Take > 0 ? param.Take : totalCount,
+            TotalCount = totalCount
+        };
     }
+
+
 
 
     public async Task<PageMetaData<JournalEntryDto>> GetJournalsAsync(string? journalId, QueryParam param, CancellationToken cancellation = default)
@@ -372,63 +381,6 @@ public sealed class JournalRepository(DataContext context,
         }
 
         return await queries.ToPagedAsync(param.Page, param.Take, cancellation);
-    }
-
-    public async Task<ErrorOr<JournalEntryVm>> GetJournalByIdAsync(string? journalId, bool include)
-    {
-
-        if (journalId.IsNotNullOrEmpty())
-        {
-            return Error.NotFound(description: $"There is no journal with this id:{journalId}.");
-        }
-
-        using var db = dapperConnectionFactory.CreateConnection();
-
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-
-        var parameters = new DynamicParameters();
-
-        parameters.Add("@JounrnalEntryId", journalId);
-
-        parameters.Add("@Include", include);
-
-        if (!include)
-        {
-            var existingJournal =
-                await db.QueryFirstOrDefaultAsync("spGetJournalEntries",
-                    param: parameters,
-                    commandType: CommandType.StoredProcedure);
-
-            return existingJournal is null
-                ? Error.NotFound(description: "Data Not Found.")
-                : (ErrorOr<JournalEntryVm>)existingJournal;
-        }
-
-        var lookup = new Dictionary<string, JournalEntryVm>();
-
-        var items = await db.QueryAsync<JournalEntryVm, JournalEntryLineVm, JournalEntryVm>("spGetJournalEntries",
-            (journal, line) =>
-            {
-                if (lookup.TryGetValue(journal.JournalEntryId!, out var journalEntryVm))
-                {
-                    journal = journalEntryVm;
-                }
-                else
-                {
-                    lookup.Add(journal.JournalEntryId!, journalEntryVm!);
-                }
-
-                journal.JournalEntryLines?.Add(line);
-                return journal;
-            }, splitOn: "JournalLineId",
-            param: parameters,
-            commandType: CommandType.StoredProcedure);
-
-        var item2 = items.FirstOrDefault(x => x.JournalEntryId == journalId);
-
-        return item2 is null
-            ? Error.NotFound(description: "Data Not Found.")
-            : (ErrorOr<JournalEntryVm>)item2;
     }
 
 
@@ -480,15 +432,6 @@ public sealed class JournalRepository(DataContext context,
     }
 
 
-    public async Task<JournalEntry?> GetJournalByIdAsync(string? id)
-    {
-        var journal = context.JournalEntries
-            .Where(x => x.JournalEntryId == id)
-            .Include(a => a.JournalEntryLines);
-        return await journal.AsNoTracking().FirstOrDefaultAsync();
-    }
-
-
     public async Task<JournalEntry?> GetJournalByIdAsync(string? journalEntryId, CancellationToken cancellation = default)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
@@ -519,6 +462,19 @@ public sealed class JournalRepository(DataContext context,
         }
 
         return foundItem;
+    }
+
+
+    public async Task<bool> IsNumberIsAllreadyUsed(string? refNumber,int? branchId, CancellationToken cancellation = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(refNumber, nameof(refNumber));
+        refNumber = refNumber.Trim();
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation).ConfigureAwait(false);
+
+        return await context.JournalEntries
+            .AsNoTracking()
+            .AnyAsync(x => x.ReferrenceNum == refNumber && x.BranchRefId == branchId, cancellation)
+            .ConfigureAwait(false);
     }
 
     public async Task<JournalEntryDto?> GetJournalDetailByIdAsync(string? journalEntryId, CancellationToken cancellation = default)
@@ -614,11 +570,12 @@ public sealed class JournalRepository(DataContext context,
         return await queries.ToPagedAsync(query.Page, query.Take, cancellation);
     }
 
-    public async Task<Pager<JournalTypeDto>> GetJournalTypesAsync(int? journalTypeId, QueryParam param, CancellationToken cancellation = default)
+    public async Task<PageMetaData<JournalTypeDto>> GetJournalTypesAsync(int? journalTypeId, QueryParam param, CancellationToken cancellation = default)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
         var queries = context.JournalTypes
+                                  .AsNoTracking()
                                   .WhereIf(journalTypeId.HasValue && journalTypeId > 0, x => x.Id == journalTypeId);
         queries = ApplyFilters(param, queries);
 
@@ -632,12 +589,9 @@ public sealed class JournalRepository(DataContext context,
                              .Take(param.Take);
         }
 
-        var items = await queries.OrderByDescending(x => x.Id)
-                        .AsNoTracking()
-                        .Select(x => x.ToDto())
-                       .ToListAsync(cancellation);
+        var journalTypes = queries.Select(x => x.ToDto()).AsQueryable();
 
-        return PagerExtensions.Create(items, counts);
+        return await journalTypes.ToPagedAsync(param.Page, param.Take, cancellation);
     }
 
     public async Task<IEnumerable<VNameList>> GetNameLists(long? id = 0, int takeRows = 0, string? q = null)
@@ -778,6 +732,136 @@ public sealed class JournalRepository(DataContext context,
 
 }
 
+
+//public async Task<ErrorOr<string>> DeleteJournalAsync(string? id)
+//{
+//    try
+//    {
+//        await context.Database.BeginTransactionAsync();
+
+//        var journalEntry = await context.JournalEntries.FirstOrDefaultAsync(x => x.JournalEntryId == id);
+
+//        if (journalEntry is null)
+//        {
+//            return Error.NotFound(description: Messages.DataNotFound);
+//        }
+
+//        context.JournalEntries.Remove(journalEntry);
+
+//        await context.SaveChangesAsync();
+
+//        await context.Database.CommitTransactionAsync();
+
+//        return Messages.DataDeleted;
+//    }
+//    catch (Exception ex)
+//    {
+//        await context.Database.RollbackTransactionAsync();
+
+//        return Error.Unexpected(description: ex.Message);
+//    }
+//}
+
+
+//public async Task<ErrorOr<LoanTransaction>> CreateJournalAsync(LoanTransaction model)
+//{
+//    logger.LogInformation("Attempt to create Journal");
+//    try
+//    {
+//        await using var dataContext = await dbContextFactory.CreateDbContextAsync();
+
+//        var insertedEntity = dataContext.Add(model).Entity;
+
+//        await dataContext.SaveChangesAsync();
+
+//        return insertedEntity;
+//    }
+//    catch (Exception ex)
+//    {
+//        logger.LogError(ex, ex.Message);
+
+//        return Error.Unexpected(description: ex.Message);
+//    }
+//}
+
+
+//public async Task<ErrorOr<JournalEntryVm>> GetJournalByIdAsync(string? journalId, bool include)
+//{
+
+//    if (journalId.IsNotNullOrEmpty())
+//    {
+//        return Error.NotFound(description: $"There is no journal with this id:{journalId}.");
+//    }
+
+//    using var db = dapperConnectionFactory.CreateConnection();
+
+//    await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+//    var parameters = new DynamicParameters();
+
+//    parameters.Add("@JounrnalEntryId", journalId);
+
+//    parameters.Add("@Include", include);
+
+//    if (!include)
+//    {
+//        var existingJournal =
+//            await db.QueryFirstOrDefaultAsync("spGetJournalEntries",
+//                param: parameters,
+//                commandType: CommandType.StoredProcedure);
+
+//        return existingJournal is null
+//            ? Error.NotFound(description: "Data Not Found.")
+//            : (ErrorOr<JournalEntryVm>)existingJournal;
+//    }
+
+//    var lookup = new Dictionary<string, JournalEntryVm>();
+
+//    var items = await db.QueryAsync<JournalEntryVm, JournalEntryLineVm, JournalEntryVm>("spGetJournalEntries",
+//        (journal, line) =>
+//        {
+//            if (lookup.TryGetValue(journal.JournalEntryId!, out var journalEntryVm))
+//            {
+//                journal = journalEntryVm;
+//            }
+//            else
+//            {
+//                lookup.Add(journal.JournalEntryId!, journalEntryVm!);
+//            }
+
+//            journal.JournalEntryLines?.Add(line);
+//            return journal;
+//        }, splitOn: "JournalLineId",
+//        param: parameters,
+//        commandType: CommandType.StoredProcedure);
+
+//    var item2 = items.FirstOrDefault(x => x.JournalEntryId == journalId);
+
+//    return item2 is null
+//        ? Error.NotFound(description: "Data Not Found.")
+//        : (ErrorOr<JournalEntryVm>)item2;
+//}
+
+
+
+
+//public async Task<IEnumerable<JournalEntry>> GetJournalsAsync(string? journalId, string? q = null)
+//{
+//    var queries = context.JournalEntries
+//                         .Include(x => x.JournalEntryLines)
+//                         .WhereIf(!string.IsNullOrEmpty(journalId), x => x.JournalEntryId == journalId);
+
+//    if (!string.IsNullOrEmpty(q))
+//    {
+//        var like = "%" + q + "%";
+
+//        queries = queries.Where(x => EF.Functions.Like(x.ReferrenceNum!, like) ||
+//                                     EF.Functions.Like(x.JournalType!, like) ||
+//                                     EF.Functions.Like(x.JournalEntryId, like));
+//    }
+
+//    return await queries.AsNoTracking().ToListAsync();
+//}
 
 
 //public async Task<ErrorOr<LoanTransaction>> CreateAsync(LoanTransaction model, CancellationToken cancellation = default)
@@ -957,10 +1041,10 @@ public sealed class JournalRepository(DataContext context,
 //public async Task<IEnumerable<JournalEntryVM>> FindAllJournalEntries()
 //{
 //    //IQueryable<JournalEntryVM> journalEntries = context.JournalEntries.Include(x => x.LoanTransaction)
-//    //                                                      .Include(x => x.Currency)
-//    //                                                      .Select(x => new JournalEntryVM
-//    //                                                      {
-//    //                                                          JournalId = x.JournalId,
+////    //                                                      .Include(x => x.Currency)
+////    //                                                      .Select(x => new JournalEntryVM
+////    //                                                      {
+////    //                                                          JournalId = x.JournalId,
 //    //                                                          Date = x.JournalDate,
 //    //                                                          JournalType = x.JournalType,
 //    //                                                          JournalDesc = x.JournalDesc,

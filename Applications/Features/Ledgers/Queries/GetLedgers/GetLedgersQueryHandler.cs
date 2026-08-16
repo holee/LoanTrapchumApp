@@ -1,5 +1,4 @@
 using Applications.Interfaces.Transactions;
-using Applications.Responses.ViewModels.Ledgers;
 using ErrorOr;
 
 namespace Applications.Features.Ledgers.Queries.GetLedgers;

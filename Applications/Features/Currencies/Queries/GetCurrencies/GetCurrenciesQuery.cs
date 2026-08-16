@@ -5,4 +5,4 @@ using System.Text;
 
 namespace Applications.Features.Currencies.Queries.GetCurrencies;
 
-public record GetCurrenciesQuery(int? currencyId, QueryParam Param) : IRequest<Pager<Currency>>;
+public record GetCurrenciesQuery(int? currencyId, QueryParam Param, params string[] Columns) : IRequest<PageMetaData<CurrencyDto>>;

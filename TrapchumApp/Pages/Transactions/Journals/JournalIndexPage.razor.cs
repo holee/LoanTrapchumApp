@@ -1,48 +1,30 @@
-﻿using Applications.Extensions.mappers;
-using Applications.Requests.Journals;
-using Applications.Responses.ViewModels.Journals;
-using Applications.Services.Transactions.Journals;
-using Radzen.Blazor;
+﻿using Radzen.Blazor;
 using Domains.Models.Identity;
+using Applications.Features.Journals.Queries.GetJournalAsPaging;
+using Applications.Features.Journals.Queries.GetJournalTypes;
+using Applications.Features.Journals.Dtos;
 
 namespace TrapchumApp.Pages.Transactions.Journals
 {
     public partial class JournalIndexPage
     {
         [Parameter] public int BranchId { get; set; } = 0;
-        private readonly IJournalServiceImpl _journalService;
         [Parameter] public int selectedIndex { get; set; } = 0;
         [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
 
-        public JournalIndexPage(IJournalServiceImpl journalService)
-        {
-            _journalService = journalService;
-        }
-
         string SearchText = string.Empty;
-        string types = string.Empty;
         int pageIndex = 0;
         int pageSize = 15;
-        string sortColumn = "TransactionDate";
-        bool sortDescending = false;
+        string sortColumn = nameof(JournalEntryVm.TransactionDate);
+        bool sortDescending = true;
         int counts = 0;
-        bool isDataLoading = false;
-        bool isLoading = true;
         bool showCreateTab = false;
-        bool showDetailTab = false;
-        bool IsNewEdit = false;
-        bool IsEnableDetail = false;
         List<string> indexCounts = [];
         RadzenTabs tb = default!;
-        IEnumerable<JournalTypeDto>? JournalTypes { get; set; }
-        List<JournalEntryVm>? Journals { get; set; } = [];
-        List<int> SelectedRow = [10, 20, 50, 100];
+        IEnumerable<JournalTypeDto>? JournalTypes = [];
         IEnumerable<JournalEntryVm> JournalItems = [];
-        JournalEntryVm? modelDetails = new();
-        private readonly SemaphoreSlim _loadLock = new(1, 1);
-        private string? _selectedJournalId;
         string? UserId = string.Empty;
-       
+
         async Task ShowCreatedTab()
         {
             var options = new DialogOptions
@@ -53,8 +35,7 @@ namespace TrapchumApp.Pages.Transactions.Journals
 
             var parameters = new Dictionary<string, object?>
             {
-                {"BranchId",BranchId },
-                {"UserId",UserId }
+                {"BranchId",BranchId }
             };
 
             var dia = await DialogService.OpenAsync<JournalEntryCreate>("Jorunal Entry", parameters, options);
@@ -67,7 +48,7 @@ namespace TrapchumApp.Pages.Transactions.Journals
         }
 
 
-        async Task ShowEditTab() 
+        async Task ShowEditTab()
         {
             var options = new DialogOptions
             {
@@ -90,13 +71,6 @@ namespace TrapchumApp.Pages.Transactions.Journals
 
         }
 
-        void CloseCreateTab()
-        {
-            showCreateTab = !showCreateTab;
-            indexCounts.Remove("create");
-            selectedIndex = 0;
-        }
-
         void RowSelecting()
         {
         }
@@ -111,46 +85,26 @@ namespace TrapchumApp.Pages.Transactions.Journals
 
             await GetJournals();
 
-            var resp = await _journalService.GetJournalTypesAsync(null);
+            var resp = await mediator.Send(new GetJournalTypesQuery(0, new QueryParam(0, 0)));
 
-            if (resp.Any())
-            {
-                JournalTypes = resp.Maps<JournalTypeDto>();
-            }
+            JournalTypes = resp.Items;
 
             await base.OnInitializedAsync();
         }
 
         private async Task GetJournals(string? filter = null)
         {
-            await _loadLock.WaitAsync();
+            Tracker.Show();
 
-            try
-            {
-                Tracker.Show();
+            var param = new QueryParam(pageIndex, pageSize, sortColumn, false, sortDescending, filter);
 
-                var param = new QueryParam(pageIndex, pageSize, sortColumn, false, sortDescending, filter);
+            var journalItems = await mediator.Send(new GetJournalAsPagingQuery(BranchId, param));
 
-                var journalItems = await _journalService.GetJournalsAsync(BranchId, param);
+            counts = journalItems.TotalCount;
 
-                counts = journalItems.Count;
+            JournalItems = journalItems.Items;
 
-                JournalItems = journalItems.Items;
-
-                Tracker.Hide();
-            }
-            catch (Exception ex)
-            {
-                _toastService.ShowError($"{ex.Message}");
-
-                Tracker.Hide();
-            }
-            finally
-            {
-                Tracker.Hide();
-
-                _loadLock.Release();
-            }
+            Tracker.Hide();
 
             StateHasChanged();
         }
@@ -182,40 +136,11 @@ namespace TrapchumApp.Pages.Transactions.Journals
             await InvokeAsync(StateHasChanged);
         }
 
-        private async Task OnFilterType()
-        {
-            if (types == "")
-                await GetJournals();
-            else
-                await GetJournals(types);
-            await InvokeAsync(StateHasChanged);
-        }
-
-        void CloseDetailJournal(int e)
-        {
-            IsEnableDetail = false;
-
-            selectedIndex = e;
-            
-            StateHasChanged();
-        }
 
         void TabChanged(int e)
         {
             Console.WriteLine(e);
         }
 
-        async void GetDetailJournal(string? journalId)
-        {
-            ContextMenuService.Close();
-
-            _selectedJournalId = journalId;
-
-            showDetailTab = true;
-
-            selectedIndex = 2;
-
-            StateHasChanged();
-        }
     }
 }

@@ -3,7 +3,6 @@ using Applications.Features.Ledgers.Commands.DeleteLedger;
 using Applications.Features.Ledgers.Dto;
 using Applications.Features.Ledgers.Queries.GetLedgers;
 using Applications.Interfaces.Transactions;
-using Applications.Responses.ViewModels.Ledgers;
 
 namespace TrapchumApp.Pages.Transactions.Ledgers;
 
@@ -29,7 +28,7 @@ public partial class LedgerIndexPage
 
     protected int ledgerId;
 
-    protected List<VLedger>? Ledgers { get; set; } = [];
+    protected IEnumerable<VLedger>? Ledgers = [];
 
     protected int currencyId = 0;
 
@@ -46,7 +45,11 @@ public partial class LedgerIndexPage
     }
     protected async override Task OnInitializedAsync()
     {
+        isLoading = true;
+
         await LoadLedgerPageList();
+
+        isLoading = false;
 
         await base.OnInitializedAsync();
     }
@@ -57,17 +60,13 @@ public partial class LedgerIndexPage
 
             Tracker.Show();
 
-            isLoading = true;
-
             var param = new QueryParam(pageIndex, pageSize, sortColumn, includeInactive, sortDescending, filter);
 
-            var res = await mediator.Send(new GetLedgersPaginatedQuery(currencyId, param));  
+            var res = await mediator.Send(new GetLedgersPaginatedQuery(currencyId, param));
 
             Ledgers = res.Items;
 
-            counts = res.Count;
-
-            isLoading = false;
+            counts = res.TotalCount;
 
             Tracker.Hide();
 
@@ -213,8 +212,8 @@ public partial class LedgerIndexPage
             LedgerId = ledgerId,
 
             Status = false
-        })); 
- 
+        }));
+
         if (!resp.IsError)
         {
             await LoadLedgerPageList(searchField);

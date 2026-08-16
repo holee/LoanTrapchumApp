@@ -21,7 +21,7 @@ namespace TrapchumApp.Pages.Currencies
 
             model.Quantity = 0;
 
-            var command = new GetCurrenciesDtoQuery(0, new QueryParam(0, 0));
+            var command = new GetCurrenciesQuery(0, new QueryParam(0, 0));
 
             var cur = await mediator.Send(command);
 

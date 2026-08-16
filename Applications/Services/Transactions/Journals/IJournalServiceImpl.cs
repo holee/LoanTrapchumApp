@@ -1,5 +1,4 @@
-﻿using Applications.Responses.ViewModels.Journals;
-using ErrorOr;
+﻿using ErrorOr;
 
 namespace Applications.Services.Transactions.Journals;
 

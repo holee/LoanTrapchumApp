@@ -2,7 +2,7 @@ namespace Infrastructures.Implements.Extensions;
 
 public static class ColumnValidationExtensions
 {
-    public static string ToSafeColumnList<T>(this string[]? columns)
+    public static string BuildSafeColumns<T>(this string[]? columns)
     {
         if (columns is not { Length: > 0 })
             return "*";
