@@ -1,5 +1,6 @@
 using Applications;
 using Applications.Calculations;
+using Applications.Features.NbcBank.Services;
 using Domains.Models.Identity;
 using Infrastructures;
 using Infrastructures.DependencyInjects;
@@ -67,6 +68,8 @@ builder.Services.AddSingleton<BranchService>();
 builder.Services.AddSingleton<CurrencyServices>();
 builder.Services.AddScoped<AppSettingService>();
 builder.Services.AddScoped<ManagerRedirectMiddleware>();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient<INbcExchangeRateService, NbcExchangeRateService>();
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 104857600; // 100 MB
@@ -120,6 +123,8 @@ app.MapHealthChecks("/health/live").AllowAnonymous();
 await app.MapAdditionalIdentityEndpoints();
 
 app.MapUploadFileEndpoints();
+
+app.MapNbcExchangeRateEndpoints();
 
 app.MapHub<AppNotificationHub>("/hubs/notifications");
 

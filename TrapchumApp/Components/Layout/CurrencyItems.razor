@@ -3,6 +3,7 @@
     <RadzenPanelMenuItem Text="Currency Note" Icon="money" Path="@($"/App/Notes/CurrencyCounter?BranchId={BranchId}")" />
     <RadzenPanelMenuItem Text="Set Daily Spot Rate" Icon="mintmark" Path="/App/SetDailySpotRates" />
     <RadzenPanelMenuItem Text="Money Exchange" Icon="currency_exchange" Path="@($"/App/Exchanges/{BranchId}/Branches")" />
+     <RadzenPanelMenuItem Text="NBC Exchange" Icon="currency_exchange" Path="/App/Exchanges/NbcRates" />
 </RadzenPanelMenuItem>
 @code {
     [Parameter] public string? UserId { get; set; } = string.Empty;

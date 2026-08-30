@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBC Money Exchange Rate</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand-section">
+        <div class="brand-icon">៛</div>
+        <div class="brand-title">
+          <h1 data-i18n="title">NBC Exchange Rates</h1>
+          <p data-i18n="subtitle">Official Rates from National Bank of Cambodia</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <!-- Language Switcher -->
+        <button id="langEn" class="lang-btn active">🇺🇸 English</button>
+        <button id="langKm" class="lang-btn">🇰🇭 ភាសាខ្មែរ</button>
+
+        <!-- Refresh Button -->
+        <button id="refreshBtn" class="refresh-btn">
+          <svg id="refreshIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          <span data-i18n="refresh">Refresh</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Error Banner -->
+    <div id="errorBanner" class="error-banner"></div>
+
+    <!-- Top Grid: Official Rate + Converter -->
+    <div class="top-grid">
+      <!-- Official Rate Card -->
+      <div class="card official-card">
+        <div>
+          <div class="official-header">
+            <span class="badge badge-official" data-i18n="officialBadge">Official Rate</span>
+            <span style="font-size: 1.5rem;">🏦</span>
+          </div>
+          <div style="font-size: 0.95rem; opacity: 0.9;" data-i18n="officialLabel">USD / KHR Rate</div>
+          <div class="official-rate-val" id="officialRateVal">
+            ... <span class="currency-unit">KHR / USD</span>
+          </div>
+          <div class="official-date" id="officialDate">Date: Loading...</div>
+        </div>
+
+        <div>
+          <div style="font-size: 0.8rem; opacity: 0.85; margin-top: 14px;" data-i18n="popular">Popular Pairs:</div>
+          <div class="popular-list" id="popularChips"></div>
+        </div>
+      </div>
+
+      <!-- Currency Converter Card -->
+      <div class="card converter-card">
+        <h2 data-i18n="converterTitle">💱 Currency Converter</h2>
+        <div class="converter-form">
+          <div class="input-group">
+            <label for="amountInput" data-i18n="amount">Amount</label>
+            <input type="number" id="amountInput" class="input-control" value="100" min="0" step="any">
+          </div>
+
+          <div class="converter-row">
+            <div class="input-group">
+              <label for="fromCurrency" data-i18n="from">From Currency</label>
+              <select id="fromCurrency" class="input-control"></select>
+            </div>
+
+            <button id="swapBtn" class="swap-btn" title="Swap currencies">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4"/>
+              </svg>
+            </button>
+
+            <div class="input-group">
+              <label for="toCurrency" data-i18n="to">To Currency</label>
+              <select id="toCurrency" class="input-control"></select>
+            </div>
+          </div>
+
+          <!-- Converter Result -->
+          <div class="converter-result">
+            <div class="result-main" id="resultAmount">0.00</div>
+            <div class="result-rate" id="resultRate"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exchange Rates Table Section -->
+    <div class="card">
+      <div class="table-header-bar">
+        <h2 data-i18n="ratesTitle">Market Cross Rates</h2>
+        <div class="search-box">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search currency name or code...">
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="colCurrency">Currency</th>
+              <th class="text-center" data-i18n="colSymbol">Symbol</th>
+              <th class="text-center" data-i18n="colUnit">Unit</th>
+              <th class="num-cell" data-i18n="colBid">Bid (KHR)</th>
+              <th class="num-cell" data-i18n="colAsk">Ask (KHR)</th>
+              <th class="num-cell" data-i18n="colAverage">Average (KHR)</th>
+              <th class="num-cell" data-i18n="colRate1">Rate for 1 Unit</th>
+            </tr>
+          </thead>
+          <tbody id="ratesTableBody">
+            <tr>
+              <td colspan="7" class="loading-box">Loading exchange rates from National Bank of Cambodia...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>Data source: <a href="https://www.nbc.gov.kh/economic_research/exchange_rate.php" target="_blank" style="color: var(--primary); text-decoration: none;">National Bank of Cambodia (NBC)</a></p>
+      <p style="margin-top: 4px;">Powered by ASP.NET Core Web API</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
