@@ -1,61 +1,107 @@
-﻿@using Applications.Features.Journals.Dtos
+@using Applications.Features.Journals.Dtos
 <PageTitle>Journal Details</PageTitle>
 
 <div class="jd-page">
 
-    <div class="jd-header">
-        <div class="jd-header-icon">
-            <RadzenIcon Icon="receipt_long" Style="font-size:1.2rem;" />
+        <div class="jd-header">
+            <div class="jd-header-icon">
+                <RadzenIcon Icon="receipt_long" Style="font-size:1.2rem;" />
+            </div>
+            <div>
+                <h2>Journal Details</h2>
+                <p>@(JournalEntry?.ReferrenceNum ?? "—")</p>
+            </div>
+            <div style="margin-left:auto; display:flex; align-items:center; gap:0.5rem;">
+                @{
+                    var isBalanced = JournalEntry is not null && JournalEntry.TotalDr == JournalEntry.TotalCr;
+                }
+                @if (isBalanced)
+                {
+                    <span class="jd-balance-badge ok">
+                        <RadzenIcon Icon="check_circle" Style="font-size:0.9rem;" /> Balanced
+                    </span>
+                }
+                else
+                {
+                    <span class="jd-balance-badge error">
+                        <RadzenIcon Icon="error" Style="font-size:0.9rem;" /> Out of Balance
+                    </span>
+                }
+                <RadzenButton Text="Edit" ButtonType="ButtonType.Button"
+                              Icon="edit"
+                              ButtonStyle="ButtonStyle.Light"
+                              Variant="Variant.Flat"
+                              Click="@ShowEditTab"
+                              Size="ButtonSize.Small" />
+            </div>
         </div>
-        <div>
-            <h2>Journal Details</h2>
-            <p>@(JournalEntry?.ReferrenceNum ?? "—")</p>
-        </div>
-        <RadzenButton Text="Edit" ButtonType="ButtonType.Button"
-                      Icon="edit"
-                      Click="@ShowEditTab"
-                      Size="ButtonSize.ExtraSmall"></RadzenButton>
-        @{
-            var isBalanced = JournalEntry is not null && JournalEntry.TotalDr == JournalEntry.TotalCr;
-        }
-        @if (isBalanced)
-        {
-            <span class="jd-balance-badge ok" style="margin-left:auto;">
-                <RadzenIcon Icon="check_circle" Style="font-size:0.9rem;" /> Balanced
-            </span>
-        }
-        else
-        {
-            <span class="jd-balance-badge error" style="margin-left:auto;">
-                <RadzenIcon Icon="error" Style="font-size:0.9rem;" /> Out of Balance
-            </span>
-        }
-    </div>
 
-    <div class="jd-card">
-        <div class="jd-card-title">
-            <RadzenIcon Icon="info" CssClass="rzi" />
-            Entry Information
+        <div class="jd-card">
+            <input type="hidden" @bind="JournalEntry!.TransactionsId" />
+            <div class="jd-card-title">
+                <RadzenIcon Icon="info" CssClass="rzi" />
+                Entry Information
+            </div>
+            <div class="jd-info-grid">
+                <div>
+                    <div class="jd-info-label">Reference #</div>
+                    <div class="jd-info-value">@(JournalEntry?.ReferrenceNum ?? "—")</div>
+                </div>
+                <div>
+                    <div class="jd-info-label">Journal Date</div>
+                    <div class="jd-info-value">@Applications.Extensions.DateTimeExtensions.DayFirst(JournalEntry?.JournalDate)</div>
+                </div>
+                <div>
+                    <div class="jd-info-label">Journal Type</div>
+                    <div class="jd-info-value">@(JournalEntry?.JournalType ?? "—")</div>
+                </div>
+                <div>
+                    <div class="jd-info-label">Description</div>
+                    <div class="jd-info-value">@(JournalEntry?.Description ?? "—")</div>
+                </div>
+            </div>
         </div>
-        <div class="jd-info-grid">
-            <div>
-                <div class="jd-info-label">Reference #</div>
-                <div class="jd-info-value">@(JournalEntry?.ReferrenceNum ?? "—")</div>
+
+        <div class="jd-card">
+            <div class="jd-card-title">
+                <RadzenIcon Icon="account_balance_wallet" CssClass="rzi" />
+                Financial Summary
             </div>
-            <div>
-                <div class="jd-info-label">Journal Date</div>
-                <div class="jd-info-value">@Applications.Extensions.DateTimeExtensions.DayFirst(JournalEntry?.JournalDate)</div>
-            </div>
-            <div>
-                <div class="jd-info-label">Journal Type</div>
-                <div class="jd-info-value">@(JournalEntry?.JournalType ?? "—")</div>
-            </div>
-            <div>
-                <div class="jd-info-label">Description</div>
-                <div class="jd-info-value">@(JournalEntry?.Description ?? "—")</div>
+            <div class="jd-summary-grid">
+                <div class="jd-summary-item">
+                    <div class="jd-summary-label">Total Debit</div>
+                    <div class="jd-summary-value debit">
+                        @if (JournalEntry?.TotalDr is not null)
+                        {
+                            @JournalEntry.TotalDr.Format(JournalEntry?.CurrencyId)
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </div>
+                </div>
+                <div class="jd-summary-item">
+                    <div class="jd-summary-label">Total Credit</div>
+                    <div class="jd-summary-value credit">
+                        @if (JournalEntry?.TotalCr is not null)
+                        {
+                            @JournalEntry.TotalCr.Format(JournalEntry?.CurrencyId)
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </div>
+                </div>
+                <div class="jd-summary-item">
+                    <div class="jd-summary-label">Balance</div>
+                    <div class="jd-summary-value @(JournalEntry?.TotalDr == JournalEntry?.TotalCr ? "balanced" : (JournalEntry?.TotalDr > JournalEntry?.TotalCr ? "debit" : "credit"))">
+                        @(((JournalEntry?.TotalDr ?? 0) - (JournalEntry?.TotalCr ?? 0)).Format(JournalEntry?.CurrencyId))
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
     <div class="jd-card">
         <div class="jd-card-title">
@@ -69,11 +115,12 @@
                         AllowSorting="false"
                         RowSelect="RowSelecting"
                         TItem="JournalEntryLineDto"
+                        RowRender="@OnRowRender"
                         Data="@_journalEntryLines">
             <Columns>
                 <RadzenDataGridColumn Width="4rem" Context="j" Title="#" Sortable="false" TextAlign="TextAlign.Center">
                     <Template>
-                        <span class="jd-line-num">@(_journalEntryLines.ToList().IndexOf(j) + 1)</span>
+                        <span class="jd-line-num">@j.RowIndex</span>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Property="LedgerName" Title="Account" Sortable="false" />
@@ -131,3 +178,11 @@
     </RadzenStack>
 
 </div>
+@code {
+    private void OnRowRender(RowRenderEventArgs<JournalEntryLineDto> args)
+    {
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
+    }
+}

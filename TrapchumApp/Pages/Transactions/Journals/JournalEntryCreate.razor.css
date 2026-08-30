@@ -273,6 +273,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.45rem;
+    padding-right:0.5rem;
     min-width: 240px;
 }
 .je-summary-row {
@@ -293,6 +294,7 @@
 .je-summary-value {
     font-weight: 600;
     font-variant-numeric: tabular-nums;
+    padding-right:0.7rem;
 }
 
 /* ── Balance badge ── */
@@ -423,7 +425,9 @@
     background: #fff;
     box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
     overflow: visible;
-    max-width: 1400px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 
 .je-titlebar {

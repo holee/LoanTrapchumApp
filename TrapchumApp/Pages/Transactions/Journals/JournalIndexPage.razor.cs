@@ -75,6 +75,115 @@ namespace TrapchumApp.Pages.Transactions.Journals
         {
         }
 
+        async Task EditJournal(JournalEntryVm j)
+        {
+            var options = new DialogOptions
+            {
+                Width = "100vw",
+                Height = "100vh",
+                Draggable = true,
+                Resizable = true,
+                CloseDialogOnEsc = true,
+                ShowClose = true
+            };
+
+            var parameters = new Dictionary<string, object?>
+            {
+                { "JournalId", j.JournalEntryId },
+                { "BranchId", j.BranchId ?? BranchId },
+                { "TransactionId", j.TransactionsId }
+            };
+
+            var dia = await DialogService.OpenAsync<JournalEntryUpdatePage>("Journal Entry", parameters, options);
+
+            if (dia is bool success && success)
+            {
+                await GetJournals(SearchText);
+            }
+        }
+
+        void ShowContextMenu(MouseEventArgs args, JournalEntryVm j)
+        {
+            ContextMenuService.Open(args, new List<ContextMenuItem>
+            {
+                new ContextMenuItem
+                {
+                    Text = "Journal Details",
+                    Icon = "info",
+                    Value = "1"
+                },
+                new ContextMenuItem
+                {
+                    Text = "Edit Journal",
+                    Icon = "edit",
+                    Value = "2"
+                }
+            }, (e) =>
+            {
+                ContextMenuService.Close();
+                if (int.TryParse(e.Value?.ToString(), out int value))
+                {
+                    if (value == 1)
+                    {
+                        ShowDetailsTab(j);
+                    }
+                    else if (value == 2)
+                    {
+                        _ = EditJournal(j);
+                    }
+                }
+            });
+        }
+
+        void OnMenuItemClick(MenuItemEventArgs args)
+        {
+            ContextMenuService.Close();
+        }
+
+        private void ShowContextMenu(DataGridCellMouseEventArgs<JournalEntryVm> args)
+        {
+            if (args.Data is null) return;
+
+            ContextMenuService.Open(args, new List<ContextMenuItem>
+            {
+                new ContextMenuItem
+                {
+                    Text = "Journal Details",
+                    Icon = "info",
+                    Value = "1"
+                },
+                new ContextMenuItem
+                {
+                    Text = "Edit Journal",
+                    Icon = "edit",
+                    Value = "2"
+                }
+            }, (e) =>
+            {
+                ContextMenuService.Close();
+                DoShowJournalActions(e, args);
+            });
+        }
+
+        private void DoShowJournalActions(MenuItemEventArgs e, DataGridCellMouseEventArgs<JournalEntryVm> args)
+        {
+            if (args.Data is null) return;
+
+            if (int.TryParse(e.Value?.ToString(), out int value))
+            {
+                if (value == 1)
+                {
+                    ShowDetailsTab(args.Data);
+                    return;
+                }
+                if (value == 2)
+                {
+                    _ = EditJournal(args.Data);
+                    return;
+                }
+            }
+        }
+
         protected override async Task OnInitializedAsync()
         {
 

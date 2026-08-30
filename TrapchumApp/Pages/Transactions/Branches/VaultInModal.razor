@@ -235,15 +235,15 @@
     <div class="vin-section-body" style="padding-top:0;">
         <div class="vin-grid-wrapper">
             <RadzenDataGrid Responsive
-                            GridLines="DataGridGridLines.Both"
-                            Data="cashMDList"
-                            TItem="CashManagementDetailDtoCreate"
-                            @ref="@grid"
-                            EditMode="DataGridEditMode.Single"
-                            CellClick="@OnCellClick"
-                            RowUpdate="@OnUpdateRow"
-                            Density="Density.Compact"
-                            Style="border:none;">
+                                         GridLines="DataGridGridLines.Both"
+                                         Data="cashMDList"
+                                         TItem="CashManagementDetailDtoCreate"
+                                         @ref="@grid"
+                                         EditMode="DataGridEditMode.Multiple"
+                                         CellClick="@OnCellClick"
+                                         RowUpdate="@OnUpdateRow"
+                                         Density="Density.Compact"
+                                         Style="border:none;">
                 <Columns>
 
                     <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
@@ -277,11 +277,10 @@
                     </RadzenDataGridColumn>
 
                     <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
-                                          IsInEditMode="@IsEditing"
-                                          Property="@nameof(CashManagementDetailDtoCreate.Quantity)"
-                                          TextAlign="TextAlign.Right"
-                                          Context="c"
-                                          Width="130px">
+                                                               Property="@nameof(CashManagementDetailDtoCreate.Quantity)"
+                                                               TextAlign="TextAlign.Right"
+                                                               Context="c"
+                                                               Width="130px">
                         <HeaderTemplate>
                             <RadzenIcon Icon="tag" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
                             Quantity
@@ -293,26 +292,24 @@
                         </Template>
                         <EditTemplate Context="item">
                             <RadzenNumeric TValue="int?"
-                                           ShowUpDown="false"
-                                           TextAlign="TextAlign.Right"
-                                           class="@Styles.W100"
-                                           onclick="this.querySelector('.rz-numeric-input').select()"
-                                           @bind-Value="item.Quantity"
-                                           Min="0"
-                                           @ref="editor"
-                                           @key="item.CurrencyNoteValue"
-                                           InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Quantity" }})"
-                                           Change="@(args => CalculateByQuantity(item, args))" />
+                                                                        ShowUpDown="false"
+                                                                        TextAlign="TextAlign.Right"
+                                                                        class="@Styles.W100"
+                                                                        onclick="this.querySelector('.rz-numeric-input').select()"
+                                                                        @bind-Value="item.Quantity"
+                                                                        Min="0"
+                                                                        @ref="editor"
+                                                                        @key="item.CurrencyNoteValue"
+                                                                        InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Quantity" }})"
+                                                                        Change="@(args => CalculateByQuantity(item, args))" />
                         </EditTemplate>
                     </RadzenDataGridColumn>
 
                     <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
-                                          Property="@nameof(CashManagementDetailDtoCreate.TotalValue)"
-                                          Context="c"
-                                          IsInEditMode="@IsEditing"
-                                          CalculatedCssClass="@IsEdited"
-                                          TextAlign="TextAlign.Right"
-                                          Width="150px">
+                                                               Property="@nameof(CashManagementDetailDtoCreate.TotalValue)"
+                                                               Context="c"
+                                                               TextAlign="TextAlign.Right"
+                                                               Width="150px">
                         <HeaderTemplate>
                             <RadzenIcon Icon="calculate" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
                             Sub Total

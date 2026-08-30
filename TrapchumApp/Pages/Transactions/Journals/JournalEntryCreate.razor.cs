@@ -140,8 +140,6 @@ public partial class JournalEntryCreate
         }
     }
 
-
-    // A filler row is a placeholder used only to pad the grid's height; it is never part of JournalLines.
     protected bool IsFillerLine(JournalLineDtoCreate jl) => !_entryLines.Contains(jl);
 
     private RadzenDataGrid<JournalLineDtoCreate> _journalGrid = default!;
@@ -329,7 +327,7 @@ public partial class JournalEntryCreate
 
     protected void DeleteLine(JournalLineDtoCreate line)
     {
-        _entryLines.Add(line);
+        _entryLines.Remove(line);
 
         _rowsToUpdate.Remove(line);
 
@@ -449,19 +447,23 @@ public partial class JournalEntryCreate
     {
         var day = (DateTime.Now - _entry.JournalDate!.Value).Days;
 
+        _validation = new ValidationResults();
+
         if (day > 30)
         {
-            _toastService.ShowWarning("This transaction is more than 30 days in the past.", "Past Transaction");
-
+            _validation.Add("This transaction is more than 30 days in the past.");
         }
         else if (day < -30)
         {
-            _toastService.ShowWarning("This transaction is more than 30 days in the future.", "Future Transaction");
+            _validation.Add("This transaction is more than 30 days in the future.");
         }
-        else
+
+        if (_validation.IsValid)
         {
             ClearAlert();
         }
+
+
     }
 
     // Save
@@ -495,21 +497,21 @@ public partial class JournalEntryCreate
                 return;
             }
 
-            //int accApCount = 0;
+            int accApCount = 0;
 
-            //foreach (var line in validLines)
-            //{
-            //    var result = await ValidateNameType(line, accApCount);
+            foreach (var line in validLines)
+            {
+                var result = await ValidateNameType(line, accApCount);
 
-            //    if (!result.IsValid)
-            //    {
-            //        _visibled = false;
+                if (!result.IsValid)
+                {
+                    _visibled = false;
 
-            //        return;
-            //    }
+                    return;
+                }
 
-            //    accApCount = result.AccApCount;
-            //}
+                accApCount = result.AccApCount;
+            }
 
             if (!IsBalanced)
             {
@@ -530,10 +532,9 @@ public partial class JournalEntryCreate
             };
 
             _entry.BranchRefId = BranchId;
+
             _entry.BankRefId = 11;
-            _entry.TotalCr = TotalCredit;
-            _entry.TotalDr = TotalDebit;
-            //_entry.JournalLineCount = validLines.Count;
+
             _entry.JournalEntryLines = validLines.Select((line, index) => new JournalLineDtoCreate
             {
                 JournalLineId = line.JournalLineId,

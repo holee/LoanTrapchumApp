@@ -109,7 +109,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
         protected async Task Edit(int Id)
         {
             var resultModal = await DialogService!.OpenAsync<DistrictUpdatePage>("Edit District",
-               new Dictionary<string, object> { { "Id", Id } },
+               new Dictionary<string, object?> { { "Id", Id } },
                new DialogOptions
                {
                    Draggable = true,
@@ -127,7 +127,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
         protected async Task AddCommune(int Id)
         {
             var resultModal = await DialogService!.OpenAsync<CommuneCreatePage>("Commune Create",
-               new Dictionary<string, object> { { "Id", Id } },
+               new Dictionary<string, object?> { { "Id", Id } },
                new DialogOptions
                {
                    Draggable = true,

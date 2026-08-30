@@ -3,6 +3,47 @@
 @using Applications.Features.Journals.Dtos
 <PageTitle>Journal list</PageTitle>
 <div class="journal-page">
+
+    <!-- Top Summary Cards (Journal Types & Total) -->
+    <div class="journal-stats-grid">
+        <div class="journal-stat-card journal-stat-total">
+            <div class="stat-card-body">
+                <div class="stat-card-icon stat-icon-total">
+                    <RadzenIcon Icon="menu_book" />
+                </div>
+                <div class="stat-card-content">
+                    <span class="stat-card-label">Total Entries</span>
+                    <h3 class="stat-card-value">@counts</h3>
+                </div>
+            </div>
+            <div class="stat-card-footer">
+                <span>All Journal Records</span>
+            </div>
+        </div>
+
+        @if (JournalTypes != null)
+        {
+            @foreach (var type in JournalTypes)
+            {
+                var typeCount = JournalItems?.Count(x => x.JournalType == type.Code || x.JournalType == type.Description) ?? 0;
+                <div class="journal-stat-card">
+                    <div class="stat-card-body">
+                        <div class="stat-card-icon stat-icon-type">
+                            <RadzenIcon Icon="receipt_long" />
+                        </div>
+                        <div class="stat-card-content">
+                            <span class="stat-card-label" title="@type.Description">@(type.Description ?? type.Code)</span>
+                            <h3 class="stat-card-value">@type.Code</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card-footer">
+                        <span>Journal Type #@type.Id</span>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
     <RadzenTabs RenderMode="TabRenderMode.Client"
                 SelectedIndex="@selectedIndex"
                 Change="e => TabChanged(e)"
@@ -42,6 +83,7 @@
                                     Count="@counts"
                                     TItem="JournalEntryVm"
                                     RowSelect="RowSelecting"
+                                    CellContextMenu="@ShowContextMenu"
                                     PageSizeOptions="@StorageConstant.PageSizeOptions"
                                     Style="min-height:50dvh"
                                     Data="@JournalItems">
@@ -85,13 +127,11 @@
                                                   Context="c"
                                                   Sortable="false" Title="Actions">
                                 <Template>
-
                                     <RadzenButton Size="ButtonSize.ExtraSmall"
                                                   Icon="more_vert"
                                                   Variant="Variant.Text"
-                                                  ButtonStyle="ButtonStyle.Danger"
-                                                  Click="@((args) => ShowContextMenuWithContent(args, c.JournalEntryId))" />
-
+                                                  ButtonStyle="ButtonStyle.Light"
+                                                  Click="@((args) => ShowContextMenu(args, c))" />
                                 </Template>
                             </RadzenDataGridColumn>
                         </Columns>
@@ -178,17 +218,4 @@
             selectedIndex = _tabs.Count;
         }
     }
-
-    void ShowContextMenuWithContent(MouseEventArgs args, string? id)
-    {
-        ContextMenuService.Open(args, ds =>
-            @<RadzenMenu Style="font-size:0.8rem;">
-                <RadzenMenuItem Click="@(() => ShowDetailsTab(new JournalEntryVm { JournalEntryId = id }))"
-                                Icon="info" Text="Journal Details"
-                                Value="@id"></RadzenMenuItem>
-            </RadzenMenu>
-        );
-    }
-
-
 }

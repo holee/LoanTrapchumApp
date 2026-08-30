@@ -1,9 +1,4 @@
-﻿using Domains.Models.Journals;
-using ErrorOr;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿using ErrorOr;
 namespace Applications.Features.Journals.Command.CreateJournal;
 
 public record CreateJournalCommand(JournalTransactionDtoCreate req) : IRequest<ErrorOr<JournalEntry?>>;

@@ -175,3 +175,331 @@
 .je-amount-positive { color: var(--rz-success); font-weight: 600; }
 .je-diff-ok { color: var(--rz-success); font-weight: 700; }
 .je-diff-err { color: var(--rz-danger); font-weight: 700; }
+
+
+/*----------------------------------------------------------------------------*/
+.je-window {
+    border: 1px solid #b6bcc6;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.je-titlebar {
+    background: linear-gradient(#4a6785, #3d5872);
+    color: #fff;
+    padding: 0.5rem 0.9rem;
+    border-radius: 5px 5px 0 0;
+}
+
+    .je-titlebar h1 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+.je-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    padding: 0.4rem 0.6rem;
+    background: #f2f4f7;
+    border-bottom: 1px solid #d8dde5;
+}
+
+.je-tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 0.25rem 0.55rem;
+    font-size: 0.8125rem;
+    color: #212529;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+    .je-tool:hover:not(:disabled) {
+        background: #e2e8f0;
+        border-color: #c3ccd8;
+    }
+
+    .je-tool:disabled {
+        opacity: 0.5;
+        cursor: default;
+    }
+
+.je-tool-divider {
+    width: 1px;
+    height: 1.25rem;
+    background: #ccd3dd;
+    margin: 0 0.3rem;
+}
+
+.je-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding: 0.85rem;
+    border-bottom: 1px solid #e3e7ee;
+}
+
+.je-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+    .je-field label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #495057;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .je-field input[type="date"],
+    .je-field input[type="text"] {
+        width: 11rem;
+    }
+
+.je-field-check {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
+    padding-bottom: 0.35rem;
+}
+
+    .je-field-check label {
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+.je-grid-wrapper {
+    overflow-x: auto;
+    padding: 0 0.35rem;
+}
+
+.je-grid {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.875rem;
+}
+
+    .je-grid thead th {
+        position: sticky;
+        top: 0;
+        background: #eef1f5;
+        border-bottom: 1px solid #ccd3dd;
+        padding: 0.4rem 0.45rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: #495057;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .je-grid tbody td {
+        padding: 0.2rem 0.25rem;
+        border-bottom: 1px solid #f0f2f6;
+        vertical-align: top;
+    }
+
+    .je-grid tbody tr:hover {
+        background: #fafbfd;
+    }
+
+.col-account {
+    min-width: 15rem;
+}
+
+.col-amount {
+    width: 8.5rem;
+}
+
+.col-memo {
+    min-width: 12rem;
+}
+
+.col-name {
+    width: 11rem;
+}
+
+.col-billable {
+    width: 5.5rem;
+    text-align: center;
+}
+
+.col-actions {
+    width: 2.5rem;
+}
+
+.je-amount {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Marks an amount the page calculated to balance the entry, so it reads
+   differently from one the user typed. */
+.je-amount-auto {
+    background: #eef6ff;
+    border-color: #9dc3ea;
+    color: #14538a;
+    font-style: italic;
+}
+
+    .je-amount-auto:focus {
+        font-style: normal;
+    }
+
+.je-grid tfoot th,
+.je-grid tfoot td {
+    padding: 0.5rem 0.45rem;
+    border-top: 2px solid #ccd3dd;
+    font-weight: 600;
+    background: #f7f9fb;
+}
+
+.je-total {
+    font-variant-numeric: tabular-nums;
+}
+
+.je-out-of-balance {
+    color: #b02a37;
+    font-weight: 600;
+}
+
+.je-in-balance {
+    color: #146c43;
+    font-weight: 600;
+}
+
+.je-row-delete {
+    border: none;
+    background: transparent;
+    color: #8a929c;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0.15rem 0.35rem;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+    .je-row-delete:hover {
+        background: #f8d7da;
+        color: #b02a37;
+    }
+
+.je-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 0.75rem 0.85rem;
+}
+
+.je-hint {
+    align-self: center;
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.je-validation {
+    margin: 0 0.85rem 0.85rem;
+}
+
+    .je-validation ul {
+        margin: 0.4rem 0 0;
+        padding-left: 1.25rem;
+    }
+
+.je-issue-line {
+    font-weight: 600;
+}
+
+/* ──── Alert component ──── */
+.je-alert {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0 0.85rem 0.85rem;
+    padding: 0.875rem 1rem;
+    border-radius: 6px;
+    border: 1px solid;
+    background-color: transparent;
+    font-size: 0.875rem;
+}
+
+.je-alert-warning {
+    border-color: #ffc107;
+    background-color: #fff8e1;
+    color: #856404;
+}
+
+    .je-alert-warning .je-alert-icon {
+        color: #ffc107;
+    }
+
+.je-alert-success {
+    border-color: #28a745;
+    background-color: #d4edda;
+    color: #155724;
+}
+
+    .je-alert-success .je-alert-icon {
+        color: #28a745;
+    }
+
+.je-alert-message {
+    padding-left: 1.6rem;
+}
+
+.je-alert-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.je-alert-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+}
+
+.je-alert-title {
+    margin: 0;
+    font-size: inherit;
+}
+
+.je-alert-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding-left: 1.6rem;
+}
+
+.je-alert-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    line-height: 1.4;
+}
+
+.je-issue-line {
+    font-weight: 700;
+    color: inherit;
+    white-space: nowrap;
+}

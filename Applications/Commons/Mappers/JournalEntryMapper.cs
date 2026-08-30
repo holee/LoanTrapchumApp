@@ -4,7 +4,7 @@ namespace Applications.Commons.Mappers;
 
 public static class JournalEntryMapper
 {
-    public static LoanTransaction MapTransactionCreate(this JournalTransactionDtoCreate dto)
+    public static LoanTransaction MapJournalTransactionCreate(this JournalTransactionDtoCreate dto)
     {
         return new LoanTransaction
         {
@@ -16,6 +16,24 @@ public static class JournalEntryMapper
             BranchRefId = dto.BranchRefId,
             TranTypeRefId = dto.TranTypeRefId,
             JournalEntry = dto.JournalEntry.MapJournalCreate(),
+        };
+    }
+
+    public static LoanTransaction MapJournalTransactionUpdate(this JournalTransactionDtoUpdate dto)
+    {
+        return new LoanTransaction
+        {
+
+            TransactionsId = $"trx-{Guid.CreateVersion7()}",
+            TransactionDate = DateTimeOffset.UtcNow,
+            UserRefId = dto.UserRefId,
+            TransactionTypeName = dto.TransactionTypeName,
+            BranchRefId = dto.BranchRefId,
+            TranTypeRefId = dto.TranTypeRefId,
+            JournalEntry = new JournalEntry
+            {
+
+            },
         };
     }
 
@@ -34,9 +52,9 @@ public static class JournalEntryMapper
         };
     }
 
-    public static JournalTransactionDtoCreate MapTransactionUpdate(this LoanTransaction source)
+    public static JournalTransactionDtoUpdate MapTransactionUpdate(this LoanTransaction source)
     {
-        return new JournalTransactionDtoCreate
+        return new JournalTransactionDtoUpdate
         {
 
             TransactionsId = source.TransactionsId,
@@ -45,7 +63,7 @@ public static class JournalEntryMapper
             TransactionTypeName = source.TransactionTypeName,
             BranchRefId = source.BranchRefId,
             TranTypeRefId = source.TranTypeRefId,
-            JournalEntry = new JournalEntryDtoCreate
+            JournalEntry = new JournalEntryDtoUpdate
             {
                 JournalEntryId = source.JournalEntry!.JournalEntryId,
                 BankRefId = source.JournalEntry!.BankRefId,
@@ -53,13 +71,10 @@ public static class JournalEntryMapper
                 CurrencyRefId = source.JournalEntry!.CurrencyRefId,
                 JournalDesc = source.JournalEntry!.JournalDesc,
                 JournalDate = source.JournalEntry!.JournalDate,
-                //JournalLineCount = source.JournalEntry!.JournalLineCount!.Value,
                 IsAdjustment = source.JournalEntry!.IsAdjustment!.Value,
                 JournalType = source.JournalEntry!.JournalType,
-                TotalCr = source.JournalEntry!.TotalCr,
-                TotalDr = source.JournalEntry!.TotalDr,
                 ReferrenceNum = source.JournalEntry!.ReferrenceNum,
-                JournalEntryLines = source.JournalEntry!.JournalEntryLines!.Select(x => new JournalLineDtoCreate
+                JournalEntryLines = source.JournalEntry!.JournalEntryLines!.Select(x => new JournalLineDtoUpdate
                 {
                     BaseAmount = x.BaseAmount,
                     Credit = x.Credit,
@@ -75,43 +90,43 @@ public static class JournalEntryMapper
         };
     }
 
-    public static JournalEntryDtoUpdate MapToJournalEntryDtoUpdate(this LoanTransaction source)
+    public static JournalTransactionDtoUpdate MapToJournalEntryDtoUpdate(this LoanTransaction source)
     {
         var journalEntry = source.JournalEntry;
 
-        return new JournalEntryDtoUpdate
+        return new JournalTransactionDtoUpdate
         {
-            JournalId = journalEntry?.JournalEntryId,
-            JournalType = journalEntry?.JournalType,
-            JournalDate = journalEntry?.JournalDate,
-            IsAdjustment = journalEntry?.IsAdjustment ?? false,
-            ReferrenceNum = journalEntry?.ReferrenceNum,
-            JournalDesc = journalEntry?.JournalDesc ?? string.Empty,
+            TransactionsId = source.TransactionsId,
+            TranTypeRefId = source.TranTypeRefId,
+            TransactionName = source.TransactionTypeName ?? string.Empty,
+            UserRefId = source.UserRefId,
             CurrencyRefId = journalEntry?.CurrencyRefId,
-            TotalDr = journalEntry?.TotalDr,
-            TotalCr = journalEntry?.TotalCr,
-            JournalEntryLines = journalEntry?.JournalEntryLines?.Select(x => new JournalLineDtoUpdate
+            JournalEntry = new JournalEntryDtoUpdate
             {
-                JournalLineId = (int)x.JournalLineId,
-                JournalRefId = x.JournalRefId,
-                EntityNameRefId = x.EntityNameRefId,
-                EntityName = x.EntityName,
-                LedgerRefId = x.LedgerRefId,
-                LedgerName = x.LedgerName,
-                Amount = x.Amount,
-                Debit = x.Debit,
-                Credit = x.Credit,
-                ExchRate = x.ExchangeRate,
-                BaseAmount = x.BaseAmount,
-                JournalLineDesc = x.JournalLineDesc
-            }).ToList() ?? new List<JournalLineDtoUpdate>(),
-            LoanTransaction = new JournalTransactionDtoUpdate
-            {
-                TranId = source.TransactionsId,
-                TranTypeRefId = source.TranTypeRefId,
-                TransactionName = source.TransactionTypeName ?? string.Empty,
-                UserRefId = source.UserRefId,
-                CurrencyRefId = journalEntry?.CurrencyRefId
+                JournalEntryId = journalEntry?.JournalEntryId,
+                BankRefId = journalEntry?.BankRefId,
+                BranchRefId = journalEntry?.BranchRefId,
+                CurrencyRefId = journalEntry?.CurrencyRefId,
+                JournalDesc = journalEntry?.JournalDesc ?? string.Empty,
+                JournalDate = journalEntry?.JournalDate,
+                IsAdjustment = journalEntry?.IsAdjustment ?? false,
+                JournalType = journalEntry?.JournalType,
+                ReferrenceNum = journalEntry?.ReferrenceNum,
+                JournalEntryLines = journalEntry?.JournalEntryLines?.Select(x => new JournalLineDtoUpdate
+                {
+                    JournalLineId = (int)x.JournalLineId,
+                    JournalRefId = x.JournalRefId,
+                    EntityNameRefId = x.EntityNameRefId,
+                    EntityName = x.EntityName,
+                    LedgerRefId = x.LedgerRefId,
+                    LedgerName = x.LedgerName,
+                    Amount = x.Amount,
+                    Debit = x.Debit,
+                    Credit = x.Credit,
+                    ExchRate = x.ExchangeRate,
+                    BaseAmount = x.BaseAmount,
+                    JournalLineDesc = x.JournalLineDesc
+                }).ToList() ?? new List<JournalLineDtoUpdate>()
             }
         };
     }
@@ -137,6 +152,25 @@ public static class JournalEntryMapper
         };
     }
 
+    public static JournalEntry MapJournalUpdate(this JournalEntryDtoUpdate dto)
+    {
+        return new JournalEntry
+        {
+            JournalEntryId = dto.JournalId,
+            BankRefId = dto.BankRefId,
+            BranchRefId = dto.BranchRefId,
+            CurrencyRefId = dto.CurrencyRefId,
+            JournalDesc = dto.JournalDesc ?? string.Empty,
+            JournalDate = dto.JournalDate,
+            JournalLineCount = dto.JournalLineCount,
+            IsAdjustment = dto.IsAdjustment,
+            JournalType = dto.JournalType ?? string.Empty,
+            TotalCr = dto.TotalCr,
+            TotalDr = dto.TotalDr,
+            ReferrenceNum = dto.ReferrenceNum,
+            JournalEntryLines = dto.JournalEntryLines?.Select(x => x.MapJournalLineUpate()).ToList()
+        };
+    }
 
     public static JournalEntryLine MapJournalLineCreate(this JournalLineDtoCreate dto)
     {
@@ -148,13 +182,28 @@ public static class JournalEntryMapper
             Debit = dto.Debit,
             JournalLineDesc = dto.JournalLineDesc,
             LedgerRefId = dto.LedgerRefId,
-            LedgerName = dto.LedgerName,
+            LedgerName = dto.LedgerName ?? string.Empty,
             EntityNameRefId = dto.EntityNameRefId,
             EntityName = dto.EntityName,
             LineSeq = dto.LineSeq,
         };
     }
 
+    public static JournalEntryLine MapJournalLineUpate(this JournalLineDtoUpdate dto)
+    {
+        return new JournalEntryLine
+        {
 
+            BaseAmount = dto.BaseAmount,
+            Credit = dto.Credit,
+            Debit = dto.Debit,
+            JournalLineDesc = dto.JournalLineDesc,
+            LedgerRefId = dto.LedgerRefId,
+            LedgerName = dto.LedgerName ?? string.Empty,
+            EntityNameRefId = dto.EntityNameRefId,
+            EntityName = dto.EntityName,
+            LineSeq = dto.LineSeq,
+        };
+    }
 
 }

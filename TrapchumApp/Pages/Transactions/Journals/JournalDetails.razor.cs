@@ -6,16 +6,13 @@ namespace TrapchumApp.Pages.Transactions.Journals
     public partial class JournalDetails
     {
         [Parameter] public string? JournalId { get; set; }
-        [Parameter] public JournalEntryDto? JournalEntry { get; set; } = new(); 
+        [Parameter] public JournalEntryDto? JournalEntry { get; set; } = new();
         [Parameter] public EventCallback<int> SelectIndex { get; set; }
         [Parameter] public EventCallback Close { get; set; }
-
         private IEnumerable<JournalEntryLineDto> _journalEntryLines = [];
-
         void RowSelecting()
         {
         }
-
         protected async void SelectedIndex()
         {
             await SelectIndex.InvokeAsync(0);
@@ -55,7 +52,8 @@ namespace TrapchumApp.Pages.Transactions.Journals
             var parameters = new Dictionary<string, object?>
             {
                 { "JournalId", JournalEntry.JournalEntryId },
-                { "BranchId", JournalEntry.BranchId ?? 0 }
+                { "BranchId", JournalEntry.BranchId ?? 0 },
+                { "TransactionId",JournalEntry.TransactionsId }
             };
 
             var dia = await DialogService.OpenAsync<JournalEntryUpdatePage>("Journal Entry", parameters, options);

@@ -17,7 +17,7 @@ public sealed class GetJournalTransactionByIdQueryHandler : IRequestHandler<GetJ
         try
         {
 
-            var result = await _journalService.GetJournalById(request.TransactionId, cancellationToken);
+            var result = await _journalService.GetJournalById(request.TransactionId, request.BranchId, cancellationToken);
 
             if (result == null)
             {

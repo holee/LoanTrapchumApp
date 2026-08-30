@@ -80,11 +80,11 @@ public partial class Create
         var rsp = await mediator.Send(command);
         _currencies = rsp.Items.Maps<CurrencyDto>();
 
-        var journalTypes = await journalService.GetJournalTypesAsync(null);
-        if (journalTypes.Any())
-        {
-            _journalTypes = journalTypes.Maps<JournalTypeDto>();
-        }
+        //var journalTypes = await journalService.GetJournalTypesAsync(null);
+        //if (journalTypes.Any())
+        //{
+        //    _journalTypes = journalTypes.Maps<JournalTypeDto>();
+        //}
     }
 
     private async Task GetLedgerByCurrency(int? currencyId, string? searchText = null)
@@ -311,8 +311,8 @@ public partial class Create
 
             JLe.BranchRefId = BranchId;
             JLe.BankRefId = 11;
-            JLe.TotalCr = TotalCredit;
-            JLe.TotalDr = TotalDebit;
+            //JLe.TotalCr = TotalCredit;
+            //JLe.TotalDr = TotalDebit;
             //JLe.JournalLineCount = validLines.Count;
             //JLe.JournalEntryLines = validLines.Select((line, index) => new JournalEntryLineDtoCreate
             //{

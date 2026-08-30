@@ -1,30 +1,33 @@
 using Applications.Extensions.mappers;
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
-using Applications.Features.Journals.Command.CreateJournal;
+using Applications.Features.Journals.Command.UpdateJournal;
 using Applications.Features.Journals.Dtos;
-using Applications.Features.Journals.Queries.GetJournalEntryDetailById;
+using Applications.Features.Journals.Queries.GetJournalEntryForUpdate;
+using Applications.Features.Journals.Queries.GetJournalTypes;
 using Applications.Features.Ledgers.Dto;
 using Applications.Features.Ledgers.Queries.GetLedgerByCurrency;
 using Applications.Features.OtherNames.Queries.GetOtherNames;
 using Applications.Responses.ViewModels.OtherNames;
-using Applications.Services.Transactions.Journals;
+using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Transactions.Journals;
 
-public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
+public partial class JournalEntryUpdatePage
 {
 
     [Parameter] public string? JournalId { get; set; }
+    [Parameter] public string? TransactionId { get; set; }
     [Parameter] public int BranchId { get; set; }
     [CascadingParameter] Task<AuthenticationState> AuthState { get; set; } = default!;
 
-    protected JournalEntryDto JLe = new();
-    protected List<JournalEntryLineDto> JournalLines = [];
-    private IEnumerable<CurrencyDto>? _currencies = [];
-    private IEnumerable<JournalTypeDto>? _journalTypes = [];
-    protected IEnumerable<VLedger>? Ledgers = [];
-    protected IEnumerable<VOtherNames> NameLists = [];
+    protected JournalEntryDtoUpdate _entry = new();
+    private JournalTransactionDtoUpdate _tranx = new();
+    protected List<JournalLineDtoUpdate> _entryLines = new();
+    private IEnumerable<CurrencyDto>? _currencies = new List<CurrencyDto>();
+    private IEnumerable<JournalTypeDto>? _journalTypes = new List<JournalTypeDto>();
+    protected IEnumerable<VLedger>? Ledgers = new List<VLedger>();
+    protected IEnumerable<VOtherNames> NameLists = new List<VOtherNames>();
     private bool _isMessage;
     private string _messageAlert = "";
     private string _titleMessage = "";
@@ -32,8 +35,52 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
     private bool _visibled;
     private bool _isLoading = true;
     private string _filter = "";
-    protected decimal TotalDebit => JournalLines.Sum(x => x.Debit ?? 0);
-    protected decimal TotalCredit => JournalLines.Sum(x => x.Credit ?? 0);
+
+    private RadzenDataGrid<JournalLineDtoUpdate> _journalGrid = default!;
+    private string _columnEditing = string.Empty;
+    private readonly List<JournalLineDtoUpdate> _rowsToUpdate = [];
+    protected bool IsFillerLine(JournalLineDtoUpdate jl) => !_entryLines.Contains(jl);
+
+    private async Task OnCellClick(DataGridCellMouseEventArgs<JournalLineDtoUpdate> args)
+    {
+        if (args.Data is null) return;
+        if (args.Column is null) return;
+        if (string.IsNullOrEmpty(args.Column.Property)) return;
+        if (IsFillerLine(args.Data)) return;
+
+        if (_rowsToUpdate.Contains(args.Data) && _columnEditing == args.Column.Property) return;
+
+        if (_rowsToUpdate.Any())
+        {
+            await _journalGrid.UpdateRow(_rowsToUpdate.First());
+        }
+
+        _columnEditing = args.Column.Property;
+        await EditRow(args.Data);
+    }
+
+    private async Task EditRow(JournalLineDtoUpdate line)
+    {
+        if (!_rowsToUpdate.Contains(line))
+        {
+            _rowsToUpdate.Add(line);
+        }
+        await _journalGrid.EditRow(line);
+    }
+
+    private bool IsEditing(string columnName, JournalLineDtoUpdate line)
+    {
+        return _columnEditing == columnName && _rowsToUpdate.Contains(line);
+    }
+
+    private void OnRowUpdate(JournalLineDtoUpdate line)
+    {
+        _rowsToUpdate.Remove(line);
+        _columnEditing = string.Empty;
+    }
+
+    protected decimal TotalDebit => _entryLines.Sum(x => x.Debit ?? 0);
+    protected decimal TotalCredit => _entryLines.Sum(x => x.Credit ?? 0);
     protected decimal Difference => Math.Abs(TotalDebit - TotalCredit);
     protected bool IsBalanced => TotalDebit == TotalCredit && TotalDebit > 0;
 
@@ -71,17 +118,15 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
 
         _currencies = rsp.Items.Maps<CurrencyDto>();
 
-        var journalTypes = await journalService.GetJournalTypesAsync(null);
+        var journalTypes = await mediator.Send(new GetJournalTypesQuery(0, new QueryParam(0, 0)));
 
-        if (journalTypes.Any())
-        {
-            _journalTypes = journalTypes.Maps<JournalTypeDto>();
-        }
+        _journalTypes = journalTypes.Items;
+
     }
 
     private async Task LoadJournalEntry()
     {
-        var resp = await mediator.Send(new GetJournalEntryDetailByIdQuery(JournalId, true));
+        var resp = await mediator.Send(new GetJournalEntryForUpdateByIdQuery(TransactionId, BranchId));
 
         if (resp.IsError)
         {
@@ -90,16 +135,18 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
             return;
         }
 
-        JLe = resp.Value;
+        _tranx = resp.Value;
 
-        JournalLines = JLe.JournalEntryLines.ToList();
+        _entry = _tranx.JournalEntry ?? new();
 
-        if (JournalLines.Count == 0)
+        _entryLines = _entry.JournalEntryLines ?? [];
+
+        if (_entryLines.Count == 0)
         {
-            JournalLines.Add(new JournalEntryLineDto { LineSeq = 1 });
+            _entryLines.Add(new JournalLineDtoUpdate { LineSeq = 1 });
         }
 
-        _selectedCurrencyId = JLe.CurrencyRefId;
+        _selectedCurrencyId = _entry.CurrencyRefId;
     }
 
     private async Task GetLedgerByCurrency(int? currencyId, string? searchText = null)
@@ -162,41 +209,47 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
     // Row management
     protected void AddLine()
     {
-        var seq = JournalLines.Count + 1;
+        var seq = _entryLines.Count + 1;
 
-        JournalLines.Add(new JournalEntryLineDto { LineSeq = seq });
+        _entryLines.Add(new JournalLineDtoUpdate { LineSeq = seq });
+
+        _ = _journalGrid.Reload();
     }
 
-    protected void DeleteLine(JournalEntryLineDto line)
+    protected void DeleteLine(JournalLineDtoUpdate line)
     {
-        JournalLines.Remove(line);
+        _entryLines.Remove(line);
+
+        _rowsToUpdate.Remove(line);
 
         ResetLineSequence();
 
-        if (JournalLines.Count == 0)
+        if (_entryLines.Count == 0)
         {
-            JournalLines.Add(new JournalEntryLineDto { LineSeq = 1 });
+            _entryLines.Add(new JournalLineDtoUpdate { LineSeq = 1 });
         }
+
+        _ = _journalGrid.Reload();
     }
 
     private void ResetLineSequence()
     {
-        for (int i = 0; i < JournalLines.Count; i++)
+        for (int i = 0; i < _entryLines.Count; i++)
         {
-            JournalLines[i].LineSeq = i + 1;
+            _entryLines[i].LineSeq = i + 1;
         }
     }
 
-    private void AutoAddRowIfLast(JournalEntryLineDto row)
+    private void AutoAddRowIfLast(JournalLineDtoUpdate row)
     {
-        if (row == JournalLines.Last())
+        if (row == _entryLines.Last())
         {
             AddLine();
         }
     }
 
     // Selection handlers
-    private void OnAccountSelected(object? obj, JournalEntryLineDto row)
+    private void OnAccountSelected(object? obj, JournalLineDtoUpdate row)
     {
         if (obj is VLedger ledger)
         {
@@ -204,7 +257,7 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
 
             row.LedgerRefId = ledger.LedgerId;
 
-            var rowIndex = JournalLines.IndexOf(row);
+            var rowIndex = _entryLines.IndexOf(row);
 
             if (rowIndex >= 1)
             {
@@ -217,7 +270,7 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
         }
     }
 
-    private void OnNameSelected(object? arg, JournalEntryLineDto row)
+    private void OnNameSelected(object? arg, JournalLineDtoUpdate row)
     {
         if (arg is VOtherNames name)
         {
@@ -227,7 +280,7 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
         }
     }
 
-    private void OnAmountChanged(JournalEntryLineDto row)
+    private void OnAmountChanged(JournalLineDtoUpdate row)
     {
         if (row.Debit > 0)
         {
@@ -243,15 +296,15 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
         StateHasChanged();
     }
 
-    private void AutoBalanceLine(JournalEntryLineDto row)
+    private void AutoBalanceLine(JournalLineDtoUpdate row)
     {
         row.Credit = null;
 
         row.Debit = null;
 
-        var otherDebit = JournalLines.Where(x => x != row).Sum(x => x.Debit ?? 0);
+        var otherDebit = _entryLines.Where(x => x != row).Sum(x => x.Debit ?? 0);
 
-        var otherCredit = JournalLines.Where(x => x != row).Sum(x => x.Credit ?? 0);
+        var otherCredit = _entryLines.Where(x => x != row).Sum(x => x.Credit ?? 0);
 
         if (otherDebit > otherCredit)
         {
@@ -282,12 +335,12 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
     // Date validation
     private void OnValidateDate()
     {
-        if (JLe.JournalDate is null)
+        if (_entry.JournalDate is null)
         {
             return;
         }
 
-        var day = (DateTime.Now - JLe.JournalDate.Value).Days;
+        var day = (DateTime.Now - _entry.JournalDate.Value).Days;
 
         if (day > 30)
         {
@@ -310,7 +363,7 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
     {
         _visibled = true;
 
-        if (!JournalLines.Any())
+        if (!_entryLines.Any())
         {
             _visibled = false;
 
@@ -323,7 +376,7 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
 
         try
         {
-            var validLines = JournalLines
+            var validLines = _entryLines
                 .Where(x => x.LedgerRefId is not null and > 0 && (x.Credit > 0 || x.Debit > 0))
                 .ToList();
 
@@ -356,23 +409,20 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
                 return;
             }
 
-            var entity = new JournalEntryDtoCreate
+            var entity = new JournalEntryDtoUpdate
             {
-                JournalEntryId = JLe.JournalEntryId,
-                TransactionsRefId = JLe.TransactionsId,
-                BranchRefId = JLe.BranchRefId,
-                BankRefId = JLe.BankRefId,
-                JournalType = JLe.JournalType,
-                JournalDate = JLe.JournalDate,
-                IsAdjustment = JLe.IsAdjustment,
-                ReferrenceNum = JLe.ReferrenceNum,
-                CurrencyRefId = JLe.CurrencyRefId,
-                ExchangeRate = JLe.ExchangeRate,
-                TotalDr = TotalDebit,
-                TotalCr = TotalCredit,
-                //JournalLineCount = validLines.Count,
-                JournalDesc = JLe.JournalDesc,
-                JournalEntryLines = validLines.Select((line, index) => new JournalLineDtoCreate
+                JournalEntryId = _entry.JournalEntryId,
+                TransactionsRefId = _entry.TransactionsRefId,
+                BranchRefId = _entry.BranchRefId,
+                BankRefId = _entry.BankRefId,
+                JournalType = _entry.JournalType,
+                JournalDate = _entry.JournalDate,
+                IsAdjustment = _entry.IsAdjustment,
+                ReferrenceNum = _entry.ReferrenceNum,
+                CurrencyRefId = _entry.CurrencyRefId,
+                ExchangeRate = _entry.ExchangeRate,
+                JournalDesc = _entry.JournalDesc,
+                JournalEntryLines = validLines.Select((line, index) => new JournalLineDtoUpdate
                 {
                     JournalLineId = line.JournalLineId,
                     JournalRefId = line.JournalRefId,
@@ -393,18 +443,18 @@ public partial class JournalEntryUpdatePage(IJournalServiceImpl journalService)
 
             string? userId = (await AuthState).GetUserId();
 
-            var tranx = new JournalTransactionDtoCreate
+            var tranx = new JournalTransactionDtoUpdate
             {
                 TransactionsId = $"JNL_{Guid.CreateVersion7()}",
-                CurrencyRefId = JLe.CurrencyRefId,
-                BranchRefId = JLe.BranchRefId,
+                CurrencyRefId = _entry.CurrencyRefId,
+                BranchRefId = _entry.BranchRefId,
                 UserRefId = userId,
                 TranTypeRefId = (int)TransactionTypes.JORNL,
                 TransactionDate = DateTimeOffset.UtcNow,
                 JournalEntry = entity
             };
 
-            var resp = await mediator.Send(new CreateJournalCommand(tranx));
+            var resp = await mediator.Send(new UpdateJournalCommand(tranx));
 
             if (resp.IsSuccess())
             {

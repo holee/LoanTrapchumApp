@@ -1,6 +1,6 @@
 ﻿namespace Applications.Features.Journals.Dtos;
 
-public sealed class JournalEntryDto 
+public sealed class JournalEntryDto
 {
     public string? JournalEntryId { get; set; }
     public string? TransactionsId { get; set; }
@@ -27,5 +27,5 @@ public sealed class JournalEntryDto
     public int? BranchId { get; set; }
     public string? BranchName { get; set; }
     public DateTimeOffset? ModifiedDt { get; set; }
-    public ICollection<JournalEntryLineDto> JournalEntryLines { get; set; } = [];
+    public List<JournalEntryLineDto> JournalEntryLines { get; set; } = [];
 }

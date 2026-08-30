@@ -29,7 +29,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<ILoginServiceImpl, LoginService>();
         services.AddScoped<IUserServiceImpl, UserService>();
         services.AddScoped<IForiegnCurrencyExchangeImpl, ForiegnCurrencyExchange>();
-        services.AddScoped<IJournalServiceImpl, JournalService>();
+        //services.AddScoped<IJournalServiceImpl, JournalService>();
         services.AddScoped<ILoanCategoryServiceImpl, LoanCategoryService>();
         services.AddScoped<ILoanProductServiceImpl, LoanProductService>();
         services.AddScoped<ILoanReportServiceImpl, LoanReportServiceImpl>();

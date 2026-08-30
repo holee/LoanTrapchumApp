@@ -22,6 +22,6 @@ public class JournalLineDtoCreate
     public string? LoanRefId { get; set; }
     public bool IsEmpty => (LedgerRefId is null || LedgerRefId == 0)
                             && Debit == 0 && Credit == 0
-                            && string.IsNullOrWhiteSpace(JournalLineDesc)
                             && string.IsNullOrWhiteSpace(EntityNameRefId);
+
 }

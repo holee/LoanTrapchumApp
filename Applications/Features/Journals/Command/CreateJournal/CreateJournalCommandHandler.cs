@@ -8,7 +8,7 @@ public sealed class CreateJournalCommandHandler(IJournalService jService) : IReq
 {
     public async Task<ErrorOr<JournalEntry?>> Handle(CreateJournalCommand request, CancellationToken cancellationToken)
     {
-        var model = request.req.MapTransactionCreate();
+        var model = request.req.MapJournalTransactionCreate();
 
         return await jService.CreateAsync(model, cancellationToken);
     }

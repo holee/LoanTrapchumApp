@@ -16,5 +16,6 @@ public sealed class JournalEntryLineDto
     public decimal? ExchangeRate { get; set; }
     public decimal? BaseAmount { get; set; }
     public string? JournalLineDesc { get; set; }
+    public int RowIndex { get; set; } = 0;
 
 }

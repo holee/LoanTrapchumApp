@@ -116,3 +116,40 @@
     font-weight: 700;
     color: var(--rz-text-secondary-color);
 }
+
+/* ── Financial Summary ── */
+.jd-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+}
+.jd-summary-item {
+    background: var(--rz-base-100);
+    border: 1px solid var(--rz-base-300);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+.jd-summary-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--rz-text-secondary-color);
+    font-weight: 600;
+}
+.jd-summary-value {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--rz-text-color);
+}
+.jd-summary-value.debit {
+    color: var(--rz-primary);
+}
+.jd-summary-value.credit {
+    color: var(--rz-info, #0284c7);
+}
+.jd-summary-value.balanced {
+    color: var(--rz-success);
+}
