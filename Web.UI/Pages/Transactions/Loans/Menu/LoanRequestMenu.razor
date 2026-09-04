@@ -1,0 +1,85 @@
+﻿@using Applications.Responses.ViewModels.Loans.Requests
+
+@if (Request is not null)
+{
+
+    <RadzenMenu Style="font-size:0.8rem;">
+
+        @if (bState.CanRequest)
+        {
+            <RadzenMenuItem Path="@_requestNowUrl"
+                            Visible="Request.StatusId == (int)RequestStatus.New" Icon="@IconNames.SendMoney" Text="Request Now" Value="@Request.CustomerId" />
+
+            <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.New"
+                            Path="@_requestLoanRequestUrl"
+                            Icon="@IconNames.Edit" 
+                            Text="Edit Request" Value="@Request.CustomerId" />
+
+            <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Rechecked"
+                            Path="@_requestLoanRequestUrl"
+                            Icon="@IconNames.Edit" 
+                            Text="Review Request" Value="@Request.CustomerId" />
+        }
+
+        @if (bState.CanApproved)
+        {
+            <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Requested"
+                            Path="@_checkloanRequestUrl"
+                            Icon="@IconNames.Info" Text="Approved Now" Value="@Request.CustomerId" />
+        }
+
+        @if (bState.CanDisbursed)
+        {
+            <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Approved"
+                            Path="@_disburseRequestLoanUrl"
+                            Icon="@IconNames.Info" Text="Disburse Now" Value="@Request.CustomerId" />
+        }
+
+        <RadzenMenuItem Icon="@IconNames.Details"
+                        Path="@_loanRequestDetailsUrl"
+                        Text="Request Details" Value="@Request.CustomerId" />
+    </RadzenMenu>
+
+}
+@code {
+
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [CascadingParameter] CascadingAppState bState { get; set; } = default!;
+    [Parameter] public VLoanRequests? Request { get; set; }
+    private string _requestLoanRequestUrl = "";
+    private string _disburseRequestLoanUrl = "";
+    private string _loanRequestDetailsUrl = "";
+    private string _checkloanRequestUrl = "";
+    private string _requestNowUrl = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthenticationState;
+
+        if (auth.User is not null && auth.User.Identity!.IsAuthenticated)
+        {
+            await bState.GetAuthenticatedUser(auth.User);
+        }
+
+
+        
+
+        await base.OnInitializedAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+
+        if (Request is not null)
+        {
+            _requestNowUrl = $"/app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/details";
+            _checkloanRequestUrl = $"app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/details";
+            _loanRequestDetailsUrl = $"app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/details";
+            _requestLoanRequestUrl = $"/app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/edit";
+            _disburseRequestLoanUrl = $"/app/loan/request/{Request?.LoanRequestId}/disbursement/{Request?.BranchId}/branches/CreateNew?CustomerRequestId={Request?.CustomerId}";
+        }
+
+        base.OnParametersSet();
+    }
+
+}

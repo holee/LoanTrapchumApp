@@ -1,0 +1,7 @@
+﻿<div class="@BodyCssClass">
+    @ChildContent
+</div>
+@code {
+    [Parameter] public string? BodyCssClass { get; set; } = null;
+    [Parameter] public RenderFragment? ChildContent { set; get; } = null;
+}

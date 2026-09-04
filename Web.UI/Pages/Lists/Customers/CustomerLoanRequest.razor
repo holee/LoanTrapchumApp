@@ -1,0 +1,140 @@
+﻿@using Applications.Responses.ViewModels.Loans.Requests
+<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End"
+             class="rz-mb-2"
+             Orientation="Orientation.Horizontal">
+    <AuthorizeView Policy="@Policies.CreateLoanRequest">
+        <Authorized>
+            <RadzenButton Icon="add"
+                          Click="AddLoanRequest"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Size="ButtonSize.Small"
+                          Text="Add Loan Request"></RadzenButton>
+        </Authorized>
+    </AuthorizeView>
+</RadzenStack>
+<RadzenDataGrid Data="@_vLoanRequests"
+                Responsive
+                GridLines="DataGridGridLines.Both"
+                TItem="VLoanRequests"
+                RowRender="@OnRowRender"
+                Density="Density.Compact">
+    <Columns>
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.LoanRequestId)"
+                              Title="#"
+                              Width="3rem"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.RowIndex
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.RequestDate)"
+                              Title="Date"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.RequestDate.DayFirst()
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.CurrencyName)"
+                              Title="Currency"
+                              Sortable="false" />
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.RequestAmount)"
+                              Title="Amount"
+                              Context="c"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false">
+            <Template>
+                @c.RequestAmount.Format(c.CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AprovedAmount)"
+                              Title="Amount"
+                              Context="c"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false">
+            <Template>
+                @c.AprovedAmount.Format(c.CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.Summiter)"
+                              Title="Summiter"
+                              Sortable="false" />
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AprovedBy)"
+                              Title="AprovedBy"
+                              Sortable="false" />
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.Status)"
+                              Title="Status"
+                              Sortable="false" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Center" Width="6rem"
+                              Property="@nameof(VLoanRequests.LoanRequestId)"
+                              Title="Actions"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                <RadzenButton Size="ButtonSize.ExtraSmall"
+                              Icon="@IconNames.MoreVert"
+                              Variant="Variant.Text"
+                              Click="@((args)=>ShowContextMenu(args,c))" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+    <LoadingTemplate>
+        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    </LoadingTemplate>
+</RadzenDataGrid>
+@code {
+
+    [CascadingParameter]
+    public CascadingAppState AppState { get; set; } = default!;
+
+
+    void OnRowRender(RowRenderEventArgs<VLoanRequests> arg)
+    {
+        if (arg.Data is null) return;
+
+        arg.Data.RowIndex = arg.Index + 1;
+    }
+
+    void ShowContextMenu(MouseEventArgs args, VLoanRequests? c)
+    {
+        if (c is null) return;
+
+
+        var requestNowUrl = $"/App/Loans/{c.LoanRequestId}/Requests/{c.BranchId}/Branches/{c.CustomerId}/Details";
+
+        var loanRequestDetailsUrl = $"/App/Loans/{c.LoanRequestId}/Requests/{c.BranchId}/Branches/{c.CustomerId}/Details";
+        
+        var requestLoanRequestUrl = $"/App/Loans/{c.LoanRequestId}/Requests/{c.BranchId}/Branches/{c.CustomerId}/Edit";
+
+        var disburseRequestLoanUrl = $"/App/Loans/{c.LoanRequestId}/Disbursements/{c.BranchId}/Branches/CreateNew?CustomerId={c.CustomerId}";
+
+
+        ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
+            <RadzenMenuItem Visible="@AppState.CanRequest"
+                            Icon="@IconNames.Approval"
+                            Text="Request Now"
+                            Path="@requestNowUrl"
+                            Value="@c.CustomerId" />
+            <RadzenMenuItem Visible="@(AppState.CanRequest && c.StatusId == (int)RequestStatus.New)"
+                            Icon="@IconNames.Edit"
+                            Text="Edit Loan Request"
+                            Path="@requestLoanRequestUrl"
+                            Value="@c.CustomerId" />
+            <RadzenMenuItem Visible="@(AppState.CanDisbursed && c.StatusId == (int)RequestStatus.Approved)"
+                            Icon="@IconNames.Paid"
+                            Text="Disburse Now"
+                            Path="@disburseRequestLoanUrl"
+                            Value="@c.CustomerId" />
+            <RadzenMenuItem Icon="@IconNames.Info"
+                            Text="Request Details"
+                            Path="@loanRequestDetailsUrl"
+                            Value="@c.CustomerId" />
+        </RadzenMenu>);
+
+
+    }
+
+
+}
+

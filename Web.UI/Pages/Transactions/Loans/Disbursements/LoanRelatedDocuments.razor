@@ -1,0 +1,63 @@
+﻿@using Applications.Features.Loans.Dtos.Responses
+@using Applications.Features.Loans.Queries.GetLoanRelatedDocuments
+@using Applications.Responses.ViewModels.Loans.Requests
+<RadzenDataGrid Data="@_loanDocuments"
+                TItem="VLoanDisbursementDocuments"
+                AllowAlternatingRows="true"
+                GridLines="DataGridGridLines.Both"
+                AllowFiltering="false"
+                Density="Density.Compact"
+                AllowPaging="false"
+                PageSize="10"
+                AllowSorting="false"
+                Responsive="true"
+                RowRender="@OnRowRender"
+                Class="rz-mt-2">
+    <Columns>
+        <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
+                              Property="@nameof(VLoanRequestsDocuments.Id)"
+                              Title="#"
+                              Width="8rem"
+                              TextAlign="TextAlign.Center">
+            <Template>
+                @context.RowIndex
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
+                              Property="@nameof(VLoanRequestsDocuments.OriginalName)"
+                              Title="Original Name" />
+        <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
+                              Property="@nameof(VLoanRequestsDocuments.NewFileName)"
+                              Title="Name" />
+        <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
+                              Property="@nameof(VLoanRequestsDocuments.AltText)"
+                              Title="AltText" />
+        <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
+                              Property="@nameof(VLoanRequestsDocuments.Description)"
+                              Title="Description">
+            <Template>
+                @context.Description
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+@code {
+    [Parameter] public string LoanId { get; set; } = string.Empty;
+    [Parameter] public int? BranchId { get; set; } = 0;
+
+    private IEnumerable<VLoanDisbursementDocuments> _loanDocuments = Array.Empty<VLoanDisbursementDocuments>();
+
+    void OnRowRender(RowRenderEventArgs<VLoanDisbursementDocuments> args)
+    {
+        args.Data.RowIndex = args.Index + 1;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var query = new GetLoanRelatedDocumentsQuery(LoanId, BranchId);
+
+        _loanDocuments = await mediator.Send(query);
+
+        await base.OnInitializedAsync();
+    }
+}

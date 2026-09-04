@@ -1,0 +1,36 @@
+﻿<RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Icon="info" Text="Show Late Schedule Details" Click="(() => GetCustomerLateSchedules(Schedule))" />
+    <RadzenMenuItem Icon="money" Text="Recieve Payment" />
+    <RadzenMenuItem Icon="paid" Text="PayOff" />
+</RadzenMenu>
+@code {
+
+    [Parameter] public VSchedule? Schedule { set; get; }
+    [Parameter] public EventCallback<VSchedule?> GetScheduleChanged { get; set; }
+    async Task GetCustomerLateSchedules(VSchedule? p)
+    {
+        if (p is not null)
+        {
+            await GetScheduleChanged.InvokeAsync(p);
+        }
+
+    }
+
+}
+
+
+  @*   // var parameters = new Dictionary<string, object?>{
+        //             { "LoanId",p.LoanId },
+        //             { "BranchId",BranchId },
+        //             { "PaymentDate",paymentDate}
+        //         };
+        // var sideOptions = new SideDialogOptions() {
+        //     Width = "70vw",
+        //     CloseDialogOnOverlayClick=true,
+        //     ShowMask = true,
+        // };
+        //
+        // await DialogService.OpenSideAsync<LateScheduleDetail>("Late Schedule Detail", parameters, sideOptions);
+
+
+     *@

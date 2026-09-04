@@ -1,0 +1,746 @@
+/* ── Page shell ── */
+.je-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.25rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ── Page header ── */
+.je-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--rz-primary);
+}
+.je-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--rz-primary);
+    color: #fff;
+    font-size: 1.25rem;
+}
+.je-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--rz-text-color);
+    letter-spacing: 0.01em;
+}
+.je-header p {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--rz-text-secondary-color);
+}
+
+/* ── Cards ── */
+.je-card {
+    background: var(--rz-base-background-color);
+    border: 1px solid var(--rz-base-300);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+.je-card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--rz-text-secondary-color);
+    margin-bottom: 0.85rem;
+}
+.je-card-title .material-symbols-outlined,
+.je-card-title .material-icons {
+    font-size: 1rem;
+    color: var(--rz-primary);
+}
+
+/* ── Journal lines table (QuickBooks style) ── */
+.je-grid-card {
+    padding: 0;
+    overflow-x: auto;
+    border-radius: 4px;
+}
+.je-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+.je-table th {
+    padding: 8px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--rz-text-color);
+    background: var(--rz-base-background-color);
+    border-bottom: 2px solid var(--rz-base-400);
+    white-space: nowrap;
+}
+.je-table td {
+    padding: 0;
+    height: 40px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--rz-base-300);
+    border-right: 1px dotted var(--rz-base-300);
+}
+.je-table td:last-child,
+.je-table th:last-child {
+    border-right: none;
+}
+.je-grid-row:hover td {
+    background: var(--rz-base-100);
+}
+
+/* Column sizing */
+.je-col-ctl { width: 44px; text-align: center; }
+.je-col-num {
+    width: 54px;
+    text-align: right;
+    padding-right: 10px !important;
+    color: var(--rz-text-secondary-color);
+    font-size: 0.85rem;
+}
+.je-col-account { width: 290px; }
+.je-col-debit,
+.je-col-credit { width: 170px; }
+.je-col-desc { width: 300px; }
+.je-col-name { width: 290px; }
+.je-col-action { width: 42px; text-align: center; }
+.je-empty-cell {
+    height: 38px;
+}
+.je-empty-delete {
+    color: var(--rz-base-400);
+    font-size: 16px;
+}
+
+/* ── Journal lines RadzenDataGrid (in-cell edit variant, mirrors je-table) ── */
+::deep .je-datagrid.rz-data-grid {
+    border: none;
+    font-size: 0.85rem;
+}
+::deep .je-datagrid .rz-grid-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+::deep .je-datagrid .rz-grid-table thead th {
+    padding: 8px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--rz-text-color);
+    background: var(--rz-base-background-color);
+    border-bottom: 2px solid var(--rz-base-400);
+    white-space: nowrap;
+}
+::deep .je-datagrid .rz-grid-table tbody td {
+    padding: 0;
+    height: 40px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--rz-base-300);
+    border-right: 1px dotted var(--rz-base-300);
+}
+::deep .je-datagrid .rz-grid-table td:last-child,
+::deep .je-datagrid .rz-grid-table th:last-child {
+    border-right: none;
+}
+::deep .je-datagrid .rz-grid-table tbody tr:hover td {
+    background: var(--rz-base-100);
+}
+::deep .je-datagrid .je-cell-text {
+    display: block;
+    padding: 0 8px;
+    min-height: 38px;
+    line-height: 38px;
+    cursor: text;
+}
+
+
+/* Borderless grid inputs with green focus ring */
+.je-grid-input {
+    width: 100%;
+    display: block;
+}
+.je-grid-input .rz-dropdown,
+.je-grid-input .rz-textbox,
+.je-grid-input .rz-spinner {
+    border: 1px solid transparent;
+    border-radius: 0;
+    box-shadow: none;
+    min-height: 38px;
+    background: transparent;
+}
+.je-grid-input .rz-dropdown:hover,
+.je-grid-input .rz-textbox:hover,
+.je-grid-input .rz-spinner:hover {
+    border-color: var(--rz-base-400);
+    background: var(--rz-base-background-color);
+}
+.je-grid-input .rz-dropdown:focus-within,
+.je-grid-input .rz-textbox:focus,
+.je-grid-input .rz-spinner:focus-within {
+    border-color: #2ca01c;
+    box-shadow: inset 0 0 0 1px #2ca01c;
+    background: var(--rz-base-background-color);
+}
+.je-num-input .rz-spinner-input {
+    text-align: right;
+    padding-right: 10px;
+}
+.je-num-input .rz-spinner-button {
+    display: none;
+}
+
+/* Row controls */
+.je-plus-btn {
+    color: #2ca01c;
+    padding: 0;
+}
+.je-plus-btn:hover {
+    color: #248a18;
+}
+.je-grip-icon {
+    color: var(--rz-base-500);
+    font-size: 16px;
+}
+.je-delete-btn {
+    color: var(--rz-text-secondary-color);
+}
+.je-delete-btn:hover {
+    color: var(--rz-danger);
+}
+.je-dropdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+.je-dropdown-item small {
+    color: var(--rz-text-secondary-color);
+    font-size: 0.72rem;
+    font-style: italic;
+}
+
+/* Total footer */
+.je-table tfoot td {
+    background: var(--rz-base-200);
+    border-top: 1px solid var(--rz-base-400);
+    border-bottom: none;
+    border-right: none;
+    height: 34px;
+    font-size: 0.8rem;
+    color: var(--rz-text-secondary-color);
+}
+.je-total-label-cell {
+    text-align: right;
+    padding-right: 12px !important;
+    font-weight: 600;
+}
+.je-total-value {
+    text-align: right;
+    padding-right: 10px !important;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+::deep .je-datagrid .rz-grid-table tfoot td {
+    background: var(--rz-base-200);
+    border-top: 1px solid var(--rz-base-400);
+    border-bottom: none;
+    border-right: none;
+    height: 34px;
+    font-size: 0.8rem;
+    color: var(--rz-text-secondary-color);
+    padding-right: 10px;
+}
+
+/* ── Balance summary card ── */
+.je-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding-right:0.5rem;
+    min-width: 240px;
+}
+.je-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    padding: 4px 0;
+}
+.je-summary-row.divider {
+    border-top: 1px solid var(--rz-base-300);
+    padding-top: 8px;
+    margin-top: 2px;
+}
+.je-summary-label {
+    color: var(--rz-text-secondary-color);
+}
+.je-summary-value {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    padding-right:0.7rem;
+}
+
+/* ── Balance badge ── */
+.je-balance-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+.je-balance-badge.ok {
+    background: color-mix(in srgb, var(--rz-success) 12%, transparent);
+    color: var(--rz-success);
+}
+.je-balance-badge.error {
+    background: color-mix(in srgb, var(--rz-danger) 12%, transparent);
+    color: var(--rz-danger);
+}
+
+/* ── Line number chip ── */
+.je-line-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--rz-base-300);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--rz-text-secondary-color);
+}
+
+/* ── Adjustment toggle ── */
+.je-adjustment-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 100%;
+    padding-top: 0.25rem;
+}
+
+/* ── Helpers ── */
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.je-amount-positive { color: var(--rz-success); font-weight: 600; }
+.je-diff-ok { color: var(--rz-success); font-weight: 700; }
+.je-diff-err { color: var(--rz-danger); font-weight: 700; }
+
+/* ── Action bar (QuickBooks style) ── */
+.je-action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #393a3d;
+    border-radius: 4px;
+    padding: 10px 16px;
+    margin-top: 0.25rem;
+}
+.je-action-left,
+.je-action-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.je-action-center {
+    flex: 1;
+    text-align: center;
+}
+.je-recurring-text {
+    color: #d4d7dc;
+    font-size: 0.85rem;
+}
+
+.je-bar-btn.rz-button {
+    border-radius: 17px;
+    height: 34px;
+    padding: 0 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: none;
+}
+.je-bar-btn-outline.rz-button {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #8d9096;
+}
+.je-bar-btn-outline.rz-button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #d4d7dc;
+}
+.je-bar-btn-green.rz-button {
+    background: #2ca01c;
+    color: #fff;
+    border: 1px solid #2ca01c;
+}
+.je-bar-btn-green.rz-button:hover:not(:disabled) {
+    background: #258a18;
+    border-color: #258a18;
+}
+.je-bar-btn.rz-button:disabled {
+    opacity: 0.55;
+}
+
+/* Split button (Save and close + caret) */
+.je-split-btn {
+    display: inline-flex;
+    align-items: stretch;
+}
+.je-split-main.rz-button {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+}
+.je-split-toggle.rz-button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding: 0 8px;
+    min-width: 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.35);
+}
+/*----------------------------------------------------------------------------*/
+.je-window {
+    border: 1px solid #b6bcc6;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.je-titlebar {
+    background: linear-gradient(#4a6785, #3d5872);
+    color: #fff;
+    padding: 0.5rem 0.9rem;
+    border-radius: 5px 5px 0 0;
+}
+
+    .je-titlebar h1 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+.je-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    padding: 0.4rem 0.6rem;
+    background: #f2f4f7;
+    border-bottom: 1px solid #d8dde5;
+}
+
+.je-tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 0.25rem 0.55rem;
+    font-size: 0.8125rem;
+    color: #212529;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+    .je-tool:hover:not(:disabled) {
+        background: #e2e8f0;
+        border-color: #c3ccd8;
+    }
+
+    .je-tool:disabled {
+        opacity: 0.5;
+        cursor: default;
+    }
+
+.je-tool-divider {
+    width: 1px;
+    height: 1.25rem;
+    background: #ccd3dd;
+    margin: 0 0.3rem;
+}
+
+.je-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding: 0.85rem;
+    border-bottom: 1px solid #e3e7ee;
+}
+
+.je-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+    .je-field label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #495057;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .je-field input[type="date"],
+    .je-field input[type="text"] {
+        width: 11rem;
+    }
+
+.je-field-check {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
+    padding-bottom: 0.35rem;
+}
+
+    .je-field-check label {
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+.je-grid-wrapper {
+    overflow-x: auto;
+    padding: 0 0.35rem;
+}
+
+.je-grid {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.875rem;
+}
+
+    .je-grid thead th {
+        position: sticky;
+        top: 0;
+        background: #eef1f5;
+        border-bottom: 1px solid #ccd3dd;
+        padding: 0.4rem 0.45rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        color: #495057;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .je-grid tbody td {
+        padding: 0.2rem 0.25rem;
+        border-bottom: 1px solid #f0f2f6;
+        vertical-align: top;
+    }
+
+    .je-grid tbody tr:hover {
+        background: #fafbfd;
+    }
+
+.col-account {
+    min-width: 15rem;
+}
+
+.col-amount {
+    width: 8.5rem;
+}
+
+.col-memo {
+    min-width: 12rem;
+}
+
+.col-name {
+    width: 11rem;
+}
+
+.col-billable {
+    width: 5.5rem;
+    text-align: center;
+}
+
+.col-actions {
+    width: 2.5rem;
+}
+
+.je-amount {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Marks an amount the page calculated to balance the entry, so it reads
+   differently from one the user typed. */
+.je-amount-auto {
+    background: #eef6ff;
+    border-color: #9dc3ea;
+    color: #14538a;
+    font-style: italic;
+}
+
+    .je-amount-auto:focus {
+        font-style: normal;
+    }
+
+.je-grid tfoot th,
+.je-grid tfoot td {
+    padding: 0.5rem 0.45rem;
+    border-top: 2px solid #ccd3dd;
+    font-weight: 600;
+    background: #f7f9fb;
+}
+
+.je-total {
+    font-variant-numeric: tabular-nums;
+}
+
+.je-out-of-balance {
+    color: #b02a37;
+    font-weight: 600;
+}
+
+.je-in-balance {
+    color: #146c43;
+    font-weight: 600;
+}
+
+.je-row-delete {
+    border: none;
+    background: transparent;
+    color: #8a929c;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0.15rem 0.35rem;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+    .je-row-delete:hover {
+        background: #f8d7da;
+        color: #b02a37;
+    }
+
+.je-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 0.75rem 0.85rem;
+}
+
+.je-hint {
+    align-self: center;
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.je-validation {
+    margin: 0 0.85rem 0.85rem;
+}
+
+    .je-validation ul {
+        margin: 0.4rem 0 0;
+        padding-left: 1.25rem;
+    }
+
+.je-issue-line {
+    font-weight: 600;
+}
+
+/* ──── Alert component ──── */
+.je-alert {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0 0.85rem 0.85rem;
+    padding: 0.875rem 1rem;
+    border-radius: 6px;
+    border: 1px solid;
+    background-color: transparent;
+    font-size: 0.875rem;
+}
+
+.je-alert-warning {
+    border-color: #ffc107;
+    background-color: #fff8e1;
+    color: #856404;
+}
+
+.je-alert-warning .je-alert-icon {
+    color: #ffc107;
+}
+
+.je-alert-success {
+    border-color: #28a745;
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.je-alert-success .je-alert-icon {
+    color: #28a745;
+}
+
+.je-alert-message {
+    padding-left: 1.6rem;
+}
+
+.je-alert-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.je-alert-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+}
+
+.je-alert-title {
+    margin: 0;
+    font-size: inherit;
+}
+
+.je-alert-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding-left: 1.6rem;
+}
+
+.je-alert-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    line-height: 1.4;
+}
+
+.je-issue-line {
+    font-weight: 700;
+    color: inherit;
+    white-space: nowrap;
+}

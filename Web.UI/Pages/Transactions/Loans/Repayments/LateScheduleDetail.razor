@@ -1,0 +1,290 @@
+@page "/app/loans/{LoanId}/late-schedules/{BranchId:int?}/Branches"
+
+<div class="late-schedule-container">
+
+    @* Loan Info Header *@
+    <RadzenCard class="rz-mb-3 rz-p-3 loan-info-card">
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.SpaceBetween"
+                     Gap="0.5rem"
+                     class="rz-mb-2">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="warning_amber" Style="color:var(--rz-warning);font-size:1.4rem;" />
+                <RadzenText TextStyle="TextStyle.H6" class="rz-m-0" Style="font-weight:700;color:var(--rz-text-title-color);">
+                    Late Payment Schedules
+                </RadzenText>
+                @if (counts > 0)
+                {
+                    <RadzenBadge BadgeStyle="BadgeStyle.Danger" Text="@counts.ToString()" IsPill="true" />
+                }
+            </RadzenStack>
+            <RadzenBadge BadgeStyle="BadgeStyle.Warning"
+                         Text="@($"As of {PaymentDate:dd MMM yyyy}")"
+                         Shade="Shade.Light" />
+        </RadzenStack>
+    </RadzenCard>
+
+    @* Summary Cards *@
+    @if (LateSchedules.Any())
+    {
+        <div class="summary-cards rz-mb-3">
+            <RadzenCard class="summary-card">
+                <RadzenText TextStyle="TextStyle.Overline" class="rz-m-0 summary-label">Total Principle</RadzenText>
+                <RadzenText TextStyle="TextStyle.H6" class="rz-m-0 summary-value">
+                    @LateSchedules.Sum(p => p.Principle).Format(currencyId)
+                </RadzenText>
+            </RadzenCard>
+            <RadzenCard class="summary-card">
+                <RadzenText TextStyle="TextStyle.Overline" class="rz-m-0 summary-label">Total Interest</RadzenText>
+                <RadzenText TextStyle="TextStyle.H6" class="rz-m-0 summary-value">
+                    @LateSchedules.Sum(p => p.Interest).Format(currencyId)
+                </RadzenText>
+            </RadzenCard>
+            <RadzenCard class="summary-card">
+                <RadzenText TextStyle="TextStyle.Overline" class="rz-m-0 summary-label">Total Penalty</RadzenText>
+                <RadzenText TextStyle="TextStyle.H6" class="rz-m-0 summary-value text-danger">
+                    @LateSchedules.Sum(p => p.PenaltyAmount).Format(currencyId)
+                </RadzenText>
+            </RadzenCard>
+            <RadzenCard class="summary-card summary-card--highlight">
+                <RadzenText TextStyle="TextStyle.Overline" class="rz-m-0 summary-label">Grand Total Due</RadzenText>
+                <RadzenText TextStyle="TextStyle.H6" class="rz-m-0 summary-value">
+                    @LateSchedules.Sum(p => p.TotalPay).Format(currencyId)
+                </RadzenText>
+            </RadzenCard>
+        </div>
+    }
+
+    @* Data Grid *@
+    <RadzenCard class="rz-p-0 grid-card">
+        <RadzenDataGrid AllowAlternatingRows="true"
+                        AllowRowSelectOnRowClick="allowRowSelectOnRowClick"
+                        AllowSorting="false"
+                        PagerHorizontalAlign="HorizontalAlign.Right"
+                        Density="Density.Compact"
+                        GridLines="DataGridGridLines.Horizontal"
+                        @bind-Value="@SelectedSchedules"
+                        SelectionMode="DataGridSelectionMode.Single"
+                        KeyProperty="PaymentDate"
+                        @ref="grid"
+                        TItem="VSchedule"
+                        Responsive="true"
+                        Data="@LateSchedules"
+                        EmptyText="No late schedules found."
+                        Style="border-radius:var(--rz-border-radius);overflow:hidden;">
+            <Columns>
+                <RadzenDataGridColumn Title="#"
+                                      Width="3rem"
+                                      TextAlign="TextAlign.Center"
+                                      Context="p">
+                    <Template>
+                        <input type="hidden" @bind-value="p.BranchId" />
+                        <input type="hidden" @bind-value="p.LoanId" />
+                        <input type="hidden" @bind-value="p.LoanScheduleId" />
+                        <input type="hidden" @bind-value="p.InstallmentNo" />
+                        <RadzenBadge BadgeStyle="BadgeStyle.Light"
+                                     Text="@p.InstallmentNo?.ToString()"
+                                     Shade="Shade.Default" />
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Title="Due Date"
+                                      Width="10rem"
+                                      Property="PaymentDate"
+                                      Context="p">
+                    <Template>
+                        <RadzenStack Orientation="Orientation.Vertical" Gap="0">
+                            <span style="font-weight:600;font-size:0.82rem;">@p.PaymentDate.DayFirst()</span>
+                            <small style="color:var(--rz-text-secondary-color);font-size:0.72rem;">@p.PaymentDate!.DayName()</small>
+                        </RadzenStack>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Title="Overdue"
+                                      Width="6rem"
+                                      TextAlign="TextAlign.Center"
+                                      Property="DayArrea"
+                                      Context="p">
+                    <Template>
+                        <RadzenBadge BadgeStyle="@(p.DayArrea > 60 ? BadgeStyle.Danger : p.DayArrea > 30 ? BadgeStyle.Warning : BadgeStyle.Info)"
+                                     Text="@($"{p.DayArrea}d")"
+                                     IsPill="true" />
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Title="Days"
+                                      Width="4rem"
+                                      Property="TotalDay"
+                                      TextAlign="TextAlign.Right"
+                                      Context="p">
+                    <Template>
+                        <span style="font-size:0.82rem;">@p.TotalDay</span>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Title="Principle"
+                                      Width="8rem"
+                                      Property="Principal"
+                                      TextAlign="TextAlign.Right"
+                                      Context="p">
+                    <Template>
+                        <span style="font-size:0.82rem;">@p.Principle.Format(p.CurrencyId)</span>
+                    </Template>
+                    <FooterTemplate>
+                        <strong>@LateSchedules.Sum(p => p.Principle).Format(currencyId)</strong>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Title="Interest"
+                                      Width="8rem"
+                                      Property="Interest"
+                                      TextAlign="TextAlign.Right"
+                                      TItem="VSchedule"
+                                      Context="p">
+                    <Template>
+                        <span style="font-size:0.82rem;">@p.Interest.Format(p.CurrencyId)</span>
+                    </Template>
+                    <FooterTemplate>
+                        <strong>@LateSchedules.Sum(p => p.Interest).Format(currencyId)</strong>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Title="Collection Fee"
+                                      Width="8rem"
+                                      TextAlign="TextAlign.Right"
+                                      Property="CollectionFee"
+                                      Context="p">
+                    <Template>
+                        <span style="font-size:0.82rem;">@p.CollectionFee.Format(p.CurrencyId)</span>
+                    </Template>
+                    <FooterTemplate>
+                        <strong>@LateSchedules.Sum(p => p.CollectionFee).Format(currencyId)</strong>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Title="Penalty"
+                                      Width="8rem"
+                                      Property="PenaltyAmount"
+                                      TextAlign="TextAlign.Right"
+                                      Context="p">
+                    <Template>
+                        <span style="font-size:0.82rem;color:var(--rz-danger);">@p.PenaltyAmount.Format(p.CurrencyId)</span>
+                    </Template>
+                    <FooterTemplate>
+                        <strong style="color:var(--rz-danger);">@LateSchedules.Sum(p => p.PenaltyAmount).Format(currencyId)</strong>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Title="Total Due"
+                                      Width="9rem"
+                                      Property="TotalPay"
+                                      TextAlign="TextAlign.Right"
+                                      Context="p">
+                    <Template>
+                        <strong style="font-size:0.82rem;color:var(--rz-primary);">@p.TotalPay.Format(p.CurrencyId)</strong>
+                    </Template>
+                    <FooterTemplate>
+                        <strong style="color:var(--rz-primary);">@LateSchedules.Sum(p => p.TotalPay).Format(currencyId)</strong>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Title="Outstanding"
+                                      Width="9rem"
+                                      Property="LoanOutstanding"
+                                      TextAlign="TextAlign.Right"
+                                      Context="p">
+                    <Template>
+                        <span style="font-size:0.82rem;">@(p.LoanOutstanding.Format(p.CurrencyId))</span>
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </RadzenCard>
+
+    @* Action Bar *@
+    <RadzenCard class="rz-mt-3 rz-p-2 action-bar">
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.End"
+                     Gap="0.75rem">
+            <RadzenButton Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Success"
+                          Click="@RecievePayments"
+                          Text="Receive Payment"
+                          Icon="paid"
+                          Style="min-width:9rem;" />
+            <RadzenButton Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Light"
+                          Click="@OnClose"
+                          Text="Close"
+                          Icon="@IconNames.Cancel"
+                          Style="min-width:6rem;" />
+            <RadzenLink Path="@_navService.PreviousUrl"
+                        Text="Back"
+                        Icon="@IconNames.ArrowBack"
+                        Style="min-width:6rem;" />
+        </RadzenStack>
+    </RadzenCard>
+
+</div>
+
+<style>
+    .late-schedule-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        padding: 0.5rem;
+    }
+
+    .loan-info-card {
+        border-left: 4px solid var(--rz-warning) !important;
+    }
+
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+        gap: 0.75rem;
+    }
+
+    .summary-card {
+        padding: 0.75rem 1rem !important;
+        border-radius: var(--rz-border-radius) !important;
+        background: var(--rz-base-background-color);
+        transition: box-shadow 0.15s;
+    }
+
+        .summary-card:hover {
+            box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+        }
+
+    .summary-card--highlight {
+        border-left: 3px solid var(--rz-primary) !important;
+        background: var(--rz-primary-lighter) !important;
+    }
+
+    .summary-label {
+        font-size: 0.68rem;
+        letter-spacing: 0.07em;
+        color: var(--rz-text-secondary-color);
+        text-transform: uppercase;
+        margin-bottom: 0.2rem !important;
+    }
+
+    .summary-value {
+        font-weight: 700;
+        font-size: 0.95rem !important;
+    }
+
+    .grid-card {
+        border-radius: var(--rz-border-radius);
+        overflow: hidden;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    }
+
+    .action-bar {
+        background: var(--rz-base-background-color);
+        border-top: 1px solid var(--rz-border-color);
+        border-radius: var(--rz-border-radius) !important;
+    }
+</style>

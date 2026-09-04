@@ -1,0 +1,121 @@
+@page "/App/Settings"
+
+<PageTitle>Settings</PageTitle>
+
+<RadzenStack Gap="1rem">
+
+    @* ── Application Settings ── *@
+    <RadzenFieldset AllowCollapse="false">
+        <HeaderTemplate>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" AlignItems="AlignItems.Center">
+                <RadzenIcon Icon="settings" />
+                <b>Application Settings</b>
+            </RadzenStack>
+        </HeaderTemplate>
+        <ChildContent>
+            <GridToolbar SearchChanged="@TextChanged">
+                <LeftChildren>
+                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Icon="@IconNames.Add"
+                                  Text="Add New"
+                                  Click="@AddAppSetting" />
+                </LeftChildren>
+            </GridToolbar>
+
+            <RadzenDataGrid TItem="AppSettingDto"
+                            @ref="@_settingsGrid"
+                            Data="@_settings"
+                            IsLoading="@_isLoading"
+                            AllowAlternatingRows="true"
+                            AllowFiltering="false"
+                            Density="Density.Compact"
+                            GridLines="DataGridGridLines.Both"
+                            Responsive="true">
+                <Columns>
+                    <RadzenDataGridColumn TItem="AppSettingDto" Title="#" Width="4rem" Sortable="false" Filterable="false">
+                        <Template Context="s">
+                            @(_settings.IndexOf(s) + 1)
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="AppSettingDto" Property="@nameof(AppSettingDto.Code)" Title="Code" Width="10rem" />
+
+                    <RadzenDataGridColumn TItem="AppSettingDto" Property="@nameof(AppSettingDto.Value)" Title="Value" Width="10rem" />
+
+                    <RadzenDataGridColumn TItem="AppSettingDto" Property="@nameof(AppSettingDto.Description)" Title="Description" />
+
+                    <RadzenDataGridColumn TItem="AppSettingDto" Title="Status" Width="6rem" TextAlign="TextAlign.Center" Sortable="false" Filterable="false">
+                        <Template Context="s">
+                            <RadzenBadge BadgeStyle="@(s.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                         Text="@(s.IsActive ? "Active" : "Inactive")"
+                                         IsPill="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="AppSettingDto" Title="Action" Width="4rem" TextAlign="TextAlign.Center" Sortable="false" Filterable="false">
+                        <Template Context="s">
+                            <RadzenButton Icon="@IconNames.MoreVert"
+                                          Variant="Variant.Text"
+                                          Size="ButtonSize.ExtraSmall"
+                                          Click="@((args) => ShowContextMenu(args, s))"
+                                          @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </ChildContent>
+    </RadzenFieldset>
+
+    @* ── Collateral Settings ── *@
+    <RadzenFieldset AllowCollapse="false">
+        <HeaderTemplate>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" AlignItems="AlignItems.Center">
+                <RadzenIcon Icon="settings" />
+                <b>Collateral Settings</b>
+            </RadzenStack>
+        </HeaderTemplate>
+        <ChildContent>
+            <CollateralSetting />
+        </ChildContent>
+    </RadzenFieldset>
+
+    @* ── Period Settings ── *@
+    <RadzenFieldset AllowCollapse="false">
+        <HeaderTemplate>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" AlignItems="AlignItems.Center">
+                <RadzenIcon Icon="@IconNames.Alarm" />
+                <b>Period Settings</b>
+            </RadzenStack>
+        </HeaderTemplate>
+        <ChildContent>
+            <PeriodList />
+        </ChildContent>
+    </RadzenFieldset>
+
+    @* ── Loan Purpose Settings ── *@
+    <RadzenFieldset AllowCollapse="false">
+        <HeaderTemplate>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" AlignItems="AlignItems.Center">
+                <RadzenIcon Icon="@IconNames.Edit" />
+                <b>Loan Purpose Settings</b>
+            </RadzenStack>
+        </HeaderTemplate>
+        <ChildContent>
+            <LoanPurposeList />
+        </ChildContent>
+    </RadzenFieldset>
+
+</RadzenStack>
+
+@code {
+
+    private void ShowContextMenu(MouseEventArgs args, AppSettingDto item)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu>
+        <RadzenMenuItem Text="Edit" Icon="@IconNames.Edit" Click="@(() => EditAppSetting(item))" />
+        <RadzenMenuItem Text="Delete" Icon="@IconNames.Delete" Click="@(() => DeleteAppSetting(item))" />
+    </RadzenMenu>);
+    }
+}

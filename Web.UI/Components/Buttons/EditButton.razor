@@ -1,0 +1,24 @@
+﻿<RadzenButton Size="ButtonSize.ExtraSmall"
+              Text="@Title"
+              Click="@HandleClick"
+              ButtonStyle="ButtonStyle.Success"
+              ButtonType="@ButtonType"
+              Icon="@Icon"></RadzenButton>
+@code {
+    [Parameter]
+    public string Title { get; set; } = "Edit";
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+    [Parameter]
+    public string Icon { get; set; } = IconNames.Edit;
+    [Parameter]
+    public ButtonType ButtonType { get; set; } = ButtonType.Submit;
+
+    private void HandleClick()
+    {
+        if (OnClick.HasDelegate && ButtonType == ButtonType.Button)
+        {
+            OnClick.InvokeAsync();
+        }
+    }
+}

@@ -1,0 +1,31 @@
+using Application.Features.Loans.Dtos.Responses;
+using Application.Features.Loans.Mappers;
+using Application.Interfaces.Loans;
+using Application.Utils;
+using ErrorOr;
+
+namespace Application.Features.Loans.Command.EditLoanDisbursment;
+
+public sealed class EditLoanDisbursmentCommandHandler : IRequestHandler<EditLoanDisbursmentCommand, ErrorOr<DisburseResult>>
+{
+    private readonly ILoanService _loanService;
+    public EditLoanDisbursmentCommandHandler(ILoanService loanService)
+    {
+        _loanService = loanService;
+    }
+    public async Task<ErrorOr<DisburseResult>> Handle(EditLoanDisbursmentCommand request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var model = request.Req.MapLoanCreate();
+
+            return await _loanService.EditLoanDisbursementAsync(model, cancellationToken);
+
+        }
+        catch (Exception ex)
+        {
+            return Error.Unexpected(description: ex.Message);
+        }
+
+    }
+}

@@ -1,0 +1,126 @@
+﻿@typeparam TItem
+
+<CascadingValue Value="this" IsFixed="true">
+    <div style="display:none">@Columns</div>
+</CascadingValue>
+
+<div class="my-tbl @(Bordered ? "my-tbl--bordered" : "") @(Striped ? "my-tbl--striped" : "") @(Compact ? "my-tbl--compact" : "")">
+
+    @* ── Toolbar ── *@
+    @if (ToolbarContent is not null || ShowSearch)
+    {
+        <div class="my-tbl__toolbar">
+            <div class="my-tbl__toolbar-left">
+                @if (ToolbarContent is not null)
+                {
+                    @ToolbarContent
+                }
+            </div>
+            @if (ShowSearch)
+            {
+                <div class="my-tbl__toolbar-right">
+                    <div class="my-tbl__search-wrap">
+                        <svg class="my-tbl__search-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <circle cx="8.5" cy="8.5" r="5.25" stroke="currentColor" stroke-width="1.6" />
+                            <path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                        </svg>
+                        <input class="my-tbl__search" type="search" placeholder="@SearchPlaceholder"
+                               @bind="_searchText" @bind:event="oninput" />
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @* ── Selection summary ── *@
+    @* @if (_selectedItems.Count > 0)
+    {
+        <div class="my-tbl__sel-bar">
+            <span class="my-tbl__sel-dot"></span>
+            <span class="my-tbl__sel-text">
+                <strong>@_selectedItems.Count</strong> row@(_selectedItems.Count > 1 ? "s" : "") selected
+            </span>
+            <button class="my-tbl__sel-clear" type="button" @onclick="ClearSelection">
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="12" height="12">
+                    <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+                Clear
+            </button>
+        </div>
+    } *@
+
+    @* ── Table ── *@
+    <div class="my-tbl__scroll-wrap" style="@(_height is not null ? $"max-height:{_height};overflow-y:auto;" : "")">
+        <table class="my-tbl__table">
+            <thead>
+                <tr>
+                    <th class="my-tbl__th my-tbl__th--check">
+                        <input type="checkbox" class="my-tbl__checkbox"
+                               checked="@IsAllSelected"
+                               @onchange="OnSelectAllChanged" />
+                    </th>
+                    @foreach (var col in _columns.Where(c => c.Visible))
+                    {
+                        <th class="my-tbl__th" style="@BuildThStyle(col)">
+                            <span class="my-tbl__th-text">@col.Title</span>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var displayItems = FilteredItems.ToList();
+                }
+                @for (var i = 0; i < displayItems.Count; i++)
+                {
+                    var item = displayItems[i];
+                    var rowIndex = i;
+                    var isSelected = _selectedItems.Contains(item);
+                    <tr class="my-tbl__row @(isSelected ? "my-tbl__row--selected" : "") @(RowClass?.Invoke(item) ?? "")"
+                        data-row-index="@rowIndex"
+                        @onmousedown="@(e => OnRowMouseDown(e, rowIndex))"
+                        @onmouseenter="@(_ => OnRowMouseEnter(rowIndex))"
+                        @onmouseup="OnRowMouseUp"
+                        @onclick="@(e => OnRowClick(e, item))">
+                        <td class="my-tbl__td my-tbl__td--check">
+                            <input type="checkbox" class="my-tbl__checkbox"
+                                   checked="@isSelected"
+                                   @onchange="@(e => OnRowCheckboxChanged(e, item, rowIndex))"
+                                   @onclick:stopPropagation="true"
+                                   @onmousedown:stopPropagation="true"
+                                   @onmouseup:stopPropagation="true" />
+                        </td>
+                        @foreach (var col in _columns.Where(c => c.Visible))
+                        {
+                            <td class="my-tbl__td @(col.CssClass ?? "")" style="text-align:@col.TextAlign.ToCss();">
+                                @if (col.Template is not null)
+                                {
+                                    @col.Template(item)
+                                }
+                                else
+                                {
+                                    @GetPropertyValue(item, col.Title)
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+                @if (!displayItems.Any())
+                {
+                    <tr>
+                        <td class="my-tbl__empty" colspan="@(_columns.Count(c => c.Visible) + 1)">
+                            <div class="my-tbl__empty-inner">
+                                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="my-tbl__empty-icon" aria-hidden="true">
+                                    <rect x="6" y="10" width="36" height="28" rx="3" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M6 18h36" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M14 26h4M14 32h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                <span>@EmptyMessage</span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

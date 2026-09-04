@@ -1,0 +1,29 @@
+﻿<EditForm Model="model" OnValidSubmit="@FormSubmit">
+    <input type="hidden" @bind="NoteId" />
+    <RadzenFormField Text="Note Date" AllowFloatingLabel="true" class="rz-w-100">
+        <RadzenDatePicker @bind-Value="model.NoteDate" class="rz-w-100"></RadzenDatePicker>
+    </RadzenFormField>
+    <RadzenFormField Text="Note" AllowFloatingLabel="true" class="rz-w-100">
+        <RadzenTextArea @bind-Value="model.Description" class="rz-w-100"></RadzenTextArea>
+    </RadzenFormField>
+    <RadzenStack AlignItems="AlignItems.Center"
+                 Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      IsBusy="isBusy"
+                      Icon="@IconNames.Save"
+                      class="rz-mt-2"
+                      Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Success"
+                      Text="Save">
+        </RadzenButton>
+        <RadzenButton Size="ButtonSize.ExtraSmall" class="rz-mt-2"
+                      ButtonType="ButtonType.Button"
+                      Text="Close"
+                      Icon="@IconNames.Close"
+                      Click="()=>DialogService.Close(false)"
+                      ButtonStyle="ButtonStyle.Danger" />
+    </RadzenStack>
+</EditForm>
+
+

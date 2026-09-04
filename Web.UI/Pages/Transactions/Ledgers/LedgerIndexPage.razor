@@ -1,0 +1,227 @@
+﻿@page "/App/Account/Ledgers/{BranchId:int}/Branches"
+@using Applications.Features.Ledgers.Dto
+@using Web.UI.Components.Indicatros
+<PageTitle>Chart of Accounts</PageTitle>
+@attribute [StreamRendering]
+@attribute [Authorize]
+@if (isLoading)
+{
+    <Loading Text="Loading ledgers..." />
+}
+else
+{
+    <div class="ledger-page">
+        <div class="ledger-card">
+            <div class="ledger-header">
+                <div class="ledger-header-left">
+                    <span class="ledger-header-icon"><RadzenIcon Icon="account_tree" /></span>
+                    <div>
+                        <h3 class="ledger-title">Chart of Accounts</h3>
+                        <span class="ledger-subtitle">Manage your general ledger structure</span>
+                    </div>
+                </div>
+                <RadzenButton Click="DisplayModal"
+                              ButtonStyle="ButtonStyle.Success"
+                              Shade="Shade.Default"
+                              Icon="add"
+                              Text="New Account"
+                              Size="ButtonSize.Small"
+                              class="ledger-add-btn" />
+            </div>
+
+            <div class="ledger-divider"></div>
+            <div class="rz-px-2">
+                <GridToolbar SearchChanged="OnFilters" ShowSearchBox="true">
+                    <LeftChildren>
+
+                        <RadzenDropDown TValue="int"
+                                        Data="StorageConstant.Currencies"
+                                        TextProperty="@nameof(Items.Label)"
+                                        ValueProperty="@nameof(Items.Value)"
+                                        @bind-Value="currencyId"
+                                        Placeholder="All currencies"
+                                        Style="min-width: 170px;"
+                                        @bind-Value:after="SelectedCurrencyChanged" />
+                        <div class="toolbar-toggle">
+                            <RadzenCheckBox TValue="bool"
+                                            Name="IncludeInactive"
+                                            @bind-Value:after="OnIncludeInActive"
+                                            @bind-Value="includeInactive" />
+                            <RadzenLabel Text="Include inactive"
+                                         Component="IncludeInactive"
+                                         class="rz-ms-1 toolbar-toggle-label" />
+                        </div>
+
+                    </LeftChildren>
+                    <ChildContent>
+                        <RadzenTextBox Change="@OnFilters" class="rz-w-100" @bind-Value="searchField" />
+                    </ChildContent>
+                </GridToolbar>
+            </div>
+            <RadzenDataGrid Data="Ledgers"
+                            Density="Density.Compact"
+                            AllowAlternatingRows="false"
+                            AllowPaging="true"
+                            ShowPagingSummary="true"
+                            Count="@counts"
+                            PageSize="pageSize"
+                            LoadData="@LoadData"
+                            AllowSorting="true"
+                            AllowMultiColumnSorting="false"
+                            PagerHorizontalAlign="HorizontalAlign.Right"
+                            PagerPosition="PagerPosition.Top"
+                            PageSizeOptions="@StorageConstant.PageSizeOptions"
+                            PageSizeChanged="ChangedPageSize"
+                            GridLines="DataGridGridLines.Horizontal"
+                            Style="min-height:var(--min-height);height:var(--normal-height);max-height:var(--max-height);">
+                <Columns>
+                    <RadzenDataGridColumn Property="LedgerCode"
+                                          Title="កូដ"
+                                          Width="7rem"
+                                          Sortable="true" />
+                    <RadzenDataGridColumn Property="LedgerName"
+                                          Title="ឈ្មោះគណនី"
+                                          Context="g"
+                                          Sortable="true">
+                        <Template>
+                            @{
+                                var displayName = NormalizeLedgerDisplayName(g.DisplayLedgerName);
+                                var hierarchyLevel = GetLedgerHierarchyLevel(g);
+                            }
+                            @if (g.ParentRefId > 0)
+                            {
+                                <span class="ledger-child-indent" style="--ledger-level:@hierarchyLevel;">
+                                    <span class="ledger-child-dot"></span>
+                                    <span class="ledger-name-text">@displayName</span>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="ledger-parent-name">@displayName</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="LedgerTypeCode"
+                                          Title="ប្រភេទ"
+                                          Width="10rem"
+                                          Sortable="true">
+                        <Template Context="r">
+                            <span class="ledger-type-badge">@r.LedgerTypeCode</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="CurrencyCode"
+                                          Width="9rem"
+                                          Title="រូបិយប័ណ្ណ"
+                                          Sortable="true">
+                        <Template Context="r">
+                            <span class="ledger-currency-chip">@r.CurrencyCode</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="មេ"
+                                          Width="5rem"
+                                          TextAlign="TextAlign.Center"
+                                          Sortable="false"
+                                          Context="emp">
+                        <Template>
+                            @if (emp.IsMainGl == true)
+                            {
+                                <span class="ledger-main-badge">មេ</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="c"
+                                          Title="សកម្ម"
+                                          Width="6rem"
+                                          TextAlign="TextAlign.Center"
+                                          Sortable="false">
+                        <Template>
+                            <span class="@(c.IsActive == true ? "ledger-status-badge active" : "ledger-status-badge inactive")"
+                                  @onclick="@(async () => { c.IsActive = !(c.IsActive ?? false); await OnCheckChanged(c.IsActive, c.LedgerId); })">
+                                @(c.IsActive == true ? "សកម្ម" : "អសកម្ម")
+                            </span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Width="5rem"
+                                          Title=""
+                                          TextAlign="TextAlign.Center"
+                                          Context="c"
+                                          Sortable="false">
+                        <Template>
+                            <RadzenButton Size="ButtonSize.ExtraSmall"
+                                          Icon="more_vert"
+                                          Variant="Variant.Text"
+                                          Click="@(args => ShowContextMenu(args, c))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+
+        </div>
+    </div>
+}
+
+@code {
+
+    private static string NormalizeLedgerDisplayName(string? displayLedgerName)
+        => string.IsNullOrWhiteSpace(displayLedgerName) ? string.Empty : displayLedgerName.TrimStart();
+
+    private int GetLedgerHierarchyLevel(VLedger ledger)
+    {
+        if (ledger.HierarchyLevel > 0)
+        {
+            return ledger.HierarchyLevel;
+        }
+
+        if (ledger.ParentRefId is not > 0)
+        {
+            return 0;
+        }
+
+        var ledgerById = (Ledgers ?? [])
+            .GroupBy(x => x.LedgerId)
+            .ToDictionary(x => x.Key, x => x.First());
+
+        var level = 0;
+        var parentRefId = ledger.ParentRefId;
+        var visited = new HashSet<int> { ledger.LedgerId };
+
+        while (parentRefId is > 0 && visited.Add(parentRefId.Value))
+        {
+            level++;
+
+            if (!ledgerById.TryGetValue(parentRefId.Value, out var parentLedger))
+            {
+                break;
+            }
+
+            parentRefId = parentLedger.ParentRefId;
+        }
+
+        return Math.Max(level, 1);
+    }
+
+    async Task ChangedPageSize(int page)
+    {
+        pageSize = page;
+        pageIndex = 0;
+        await LoadLedgerPageList(searchField);
+    }
+
+    void ShowContextMenu(MouseEventArgs args, VLedger ledger)
+    {
+        ContextMenuService.Open(args, ds =>
+            @<RadzenMenu Style="font-size:0.8rem;">
+                <RadzenMenuItem Icon="info"
+                                Click="@(() => LedgerDetails(ledger.LedgerId))"
+                                Text="លម្អិត" />
+                <RadzenMenuItem Icon="edit"
+                                Click="@(() => Edit(ledger.LedgerId))"
+                                Text="កែប្រែ" />
+                <RadzenMenuItem Icon="delete"
+                                Click="@(() => OnDelete(ledger.LedgerId))"
+                                Text="លុប" />
+            </RadzenMenu>
+        );
+    }
+
+}

@@ -1,0 +1,69 @@
+@using Applications.Features.Periods.Dto
+
+<RadzenTemplateForm TItem="PeriodDtoCreate" Data="@_model" Submit="@OnSubmit">
+    <RadzenStack Gap="1rem">
+
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12">
+                <RadzenFormField Text="Period (Months) *" Variant="Variant.Outlined" class="rz-w-100">
+                    <RadzenNumeric @bind-Value="@_model.Period"
+                                   Name="Period"
+                                   Min="1"
+                                   ShowUpDown="false"
+                                   TextAlign="TextAlign.End"
+                                   class="rz-w-100" />
+                </RadzenFormField>
+                <RadzenRequiredValidator Component="Period" Text="Period is required." Popup="false" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton ButtonType="ButtonType.Submit"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Success"
+                          Icon="@IconNames.Save"
+                          Text="Save"
+                          IsBusy="@_isBusy"
+                          BusyText="Saving..." />
+
+            <RadzenButton ButtonType="ButtonType.Button"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Icon="@IconNames.Cancel"
+                          Text="Cancel"
+                          Click="@(() => DialogService.Close(false))" />
+        </RadzenStack>
+
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+
+    [Inject] private ISettingApi SettingApi { get; set; } = default!;
+
+    private PeriodDtoCreate _model = new();
+
+    private bool _isBusy;
+
+    private async Task OnSubmit()
+    {
+        _isBusy = true;
+
+        try
+        {
+            var created = await SettingApi.CreatePeriodAsync(_model);
+
+            NotificationService.Notify(NotificationSeverity.Success, "Success", "Period was created successfully.");
+
+            DialogService.Close(created);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+}

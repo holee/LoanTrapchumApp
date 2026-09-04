@@ -1,0 +1,141 @@
+﻿@page "/"
+
+<PageTitle>Dashboard - Loan Management System</PageTitle>
+
+<RadzenStack Gap="2rem" class="w-100">
+    <div>
+        <RadzenText TextStyle="TextStyle.H4" class="mb-2">Dashboard</RadzenText>
+        <RadzenText TextStyle="TextStyle.Body2" class="text-muted">Welcome to the Loan Management System</RadzenText>
+    </div>
+
+    <RadzenRow RowGap="2rem" ColumnGap="2rem">
+        <RadzenColumn SizeMD="6" SizeLG="3">
+            <RadzenCard>
+                <RadzenStack Gap="1rem" AlignItems="AlignItems.Center">
+                    <RadzenIcon Icon="credit_card" style="font-size: 2.5rem; color: #3f51b5;" />
+                    <div>
+                        <RadzenText TextStyle="TextStyle.H6" class="mb-1">Total Loans</RadzenText>
+                        <RadzenText TextStyle="TextStyle.H4" class="mb-0">125</RadzenText>
+                    </div>
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+
+        <RadzenColumn SizeMD="6" SizeLG="3">
+            <RadzenCard>
+                <RadzenStack Gap="1rem" AlignItems="AlignItems.Center">
+                    <RadzenIcon Icon="people" style="font-size: 2.5rem; color: #4caf50;" />
+                    <div>
+                        <RadzenText TextStyle="TextStyle.H6" class="mb-1">Total Customers</RadzenText>
+                        <RadzenText TextStyle="TextStyle.H4" class="mb-0">85</RadzenText>
+                    </div>
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+
+        <RadzenColumn SizeMD="6" SizeLG="3">
+            <RadzenCard>
+                <RadzenStack Gap="1rem" AlignItems="AlignItems.Center">
+                    <RadzenIcon Icon="receipt" style="font-size: 2.5rem; color: #ff9800;" />
+                    <div>
+                        <RadzenText TextStyle="TextStyle.H6" class="mb-1">Active Loans</RadzenText>
+                        <RadzenText TextStyle="TextStyle.H4" class="mb-0">45</RadzenText>
+                    </div>
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+
+        <RadzenColumn SizeMD="6" SizeLG="3">
+            <RadzenCard>
+                <RadzenStack Gap="1rem" AlignItems="AlignItems.Center">
+                    <RadzenIcon Icon="trending_up" style="font-size: 2.5rem; color: #f44336;" />
+                    <div>
+                        <RadzenText TextStyle="TextStyle.H6" class="mb-1">Total Amount</RadzenText>
+                        <RadzenText TextStyle="TextStyle.H4" class="mb-0">$2.5M</RadzenText>
+                    </div>
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenRow RowGap="2rem" ColumnGap="2rem">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.H6" class="mb-3">Recent Loans</RadzenText>
+                <RadzenDataGrid AllowFiltering="true" AllowPaging="true" PageSize="5" 
+                    Data="@loans" TItem="LoanRecord" ColumnWidth="100%">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="LoanRecord" Property="LoanId" Title="Loan ID" Width="80px" />
+                        <RadzenDataGridColumn TItem="LoanRecord" Property="CustomerName" Title="Customer" />
+                        <RadzenDataGridColumn TItem="LoanRecord" Property="Amount" Title="Amount" FormatString="{0:C}" />
+                        <RadzenDataGridColumn TItem="LoanRecord" Property="Status" Title="Status">
+                            <Template Context="record">
+                                @if (record.Status == "Active")
+                                {
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Success">@record.Status</RadzenBadge>
+                                }
+                                else if (record.Status == "Pending")
+                                {
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Warning">@record.Status</RadzenBadge>
+                                }
+                                else
+                                {
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Danger">@record.Status</RadzenBadge>
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenCard>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.H6" class="mb-3">Loan Status Summary</RadzenText>
+                <RadzenStack Gap="1rem">
+                    <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal" Gap="1rem">
+                        <RadzenText TextStyle="TextStyle.Body2">Active Loans</RadzenText>
+                        <RadzenProgressBar Value="45" Max="125" Style="flex: 1;" />
+                        <RadzenText TextStyle="TextStyle.Body2">45</RadzenText>
+                    </RadzenStack>
+                    <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal" Gap="1rem">
+                        <RadzenText TextStyle="TextStyle.Body2">Pending Loans</RadzenText>
+                        <RadzenProgressBar Value="30" Max="125" Style="flex: 1;" />
+                        <RadzenText TextStyle="TextStyle.Body2">30</RadzenText>
+                    </RadzenStack>
+                    <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal" Gap="1rem">
+                        <RadzenText TextStyle="TextStyle.Body2">Closed Loans</RadzenText>
+                        <RadzenProgressBar Value="50" Max="125" Style="flex: 1;" />
+                        <RadzenText TextStyle="TextStyle.Body2">50</RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenStack>
+
+@code {
+    class LoanRecord
+    {
+        public string LoanId { get; set; }
+        public string CustomerName { get; set; }
+        public decimal Amount { get; set; }
+        public string Status { get; set; }
+    }
+
+    List<LoanRecord> loans = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        loans = new()
+        {
+            new() { LoanId = "L001", CustomerName = "John Doe", Amount = 50000, Status = "Active" },
+            new() { LoanId = "L002", CustomerName = "Jane Smith", Amount = 75000, Status = "Active" },
+            new() { LoanId = "L003", CustomerName = "Bob Johnson", Amount = 60000, Status = "Pending" },
+            new() { LoanId = "L004", CustomerName = "Alice Williams", Amount = 45000, Status = "Active" },
+            new() { LoanId = "L005", CustomerName = "Charlie Brown", Amount = 80000, Status = "Active" }
+        };
+        return Task.CompletedTask;
+    }
+}
+

@@ -1,0 +1,79 @@
+﻿<PageTitle>New Holiday</PageTitle>
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25">
+            <RadzenIcon Icon="event" /> <span>New Holiday</span>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenRow class="rz-mb-2" AlignItems="AlignItems.Center">
+            <RadzenColumn Size="3">
+                Select Date
+            </RadzenColumn>
+            <RadzenColumn Size="9">
+                <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
+                    <RadzenDatePicker TValue="DateTime"
+                                      AllowInput="true"
+                                      class="rz-w-100"
+                                      DateFormat="dd/MM/yyyy"
+                                      Placeholder="select holiday date"
+                                      @bind-Value="selectedDate"
+                                      @bind-Value:format="yyyy/MM/dd">
+                    </RadzenDatePicker>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-2" AlignItems="AlignItems.Center">
+            <RadzenColumn Size="3">
+                Number Of Year
+            </RadzenColumn>
+            <RadzenColumn Size="9">
+                <RadzenDropDown @bind-Value="selectedYear"
+                                class="rz-w-100"
+                                Data="@years" TValue="int">
+
+                </RadzenDropDown>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-2" AlignItems="AlignItems.Center">
+            <RadzenColumn Size="3">
+                Description
+            </RadzenColumn>
+            <RadzenColumn Size="9">
+                <RadzenTextArea Placeholder="Enter here..." @bind-Value="Description"
+                                class="rz-h-100 rz-w-100"
+                                aria-label="TextArea with placeholder" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenStack AlignItems="AlignItems.Center"
+                     Orientation="Orientation.Horizontal"
+                     class="rz-m-2"
+                     JustifyContent="JustifyContent.End">
+
+        </RadzenStack>
+    </ChildContent>
+</RadzenFieldset>
+<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End"
+             class="rz-m-2"
+             Gap="1rem"
+             Orientation="Orientation.Horizontal">
+    <RadzenButton Text="Save"
+                  Icon="add"
+                  ButtonStyle="ButtonStyle.Success"
+                  Click="@FormValidSubmit"
+                  IsBusy="@visibled"
+                  BusyText="Creating..."
+                  Size="ButtonSize.ExtraSmall" />
+    <RadzenButton Text="Close"
+                  Icon="close"
+                  Click="OnCloseTab" 
+                  ButtonStyle="ButtonStyle.Danger"
+                  Size="ButtonSize.ExtraSmall" />
+</RadzenStack>
+@code {
+
+    async Task OnCloseTab()
+    {
+        await Closed.InvokeAsync();
+    }    
+}

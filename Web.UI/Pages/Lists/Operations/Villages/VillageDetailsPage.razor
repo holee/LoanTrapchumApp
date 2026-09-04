@@ -1,0 +1,44 @@
+﻿<PageTitle>Village Details</PageTitle>
+<div class="container-fluid">
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center">
+         
+        <table class="table table-sm">
+            <tbody>
+                <tr>
+                    <th class="table-light">Province</th>
+                    <td>@model?.ProInKhmer | @model?.ProDescription</td>
+                </tr>
+                <tr>
+                    <th class="table-light">District</th>
+                    <td>@model?.DisInKhmer | @model?.DisDescription</td>
+                </tr>
+                <tr>
+                    <th class="table-light">Commune</th>
+                    <td>@model?.ComInKhmer | @model?.ComDescription</td>
+                </tr>
+                <tr>
+                    <th class="table-light">Village</th>
+                    <td>@model?.VilInKhmer | @model?.VillDescription</td>
+                </tr>
+            </tbody>
+        </table>
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel"
+                      Text="Close"
+                      Click="@(()=>DialogService.Close(false))"
+                      Variant="Variant.Flat"
+                      Size="ButtonSize.Small">
+        </RadzenButton>
+    </RadzenStack>
+</div>
+
+
+
+
+
+

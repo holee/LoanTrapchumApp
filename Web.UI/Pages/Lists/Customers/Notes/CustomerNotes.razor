@@ -1,0 +1,73 @@
+﻿<RadzenStack Orientation="Orientation.Horizontal"
+             class="rz-mb-2"
+             Visible="ShowCommand"
+             AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                  Click="@AddNewNote"
+                  Visible="@(ShowAdd && ShowCommand)"
+                  Size="ButtonSize.Small" Icon="add" Text="Add Note"></RadzenButton>
+</RadzenStack>
+<RadzenDataGrid Data="Notes"
+                Responsive
+                TItem="VCustomerNotes"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                AllowPaging="true"
+                PageSize="15"
+                AllowSorting="false"
+                GridLines="DataGridGridLines.Both"
+                RowRender="@OnRowRender"
+                Density="Density.Compact">
+    <Columns>
+        <RadzenDataGridColumn Width="3rem"
+                              Title="#"
+                              Property="Created">
+            <Template>
+                @context.RowIndex
+            </Template>
+
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Width="6rem"
+                              Title="Date"
+                              Property="Created">
+            <Template>
+                @context.Created.DayFirst()
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Width="10rem"
+                              Title="Create By"
+                              Property="CreditAgentName"></RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Description" Property="Description"></RadzenDataGridColumn>
+        <RadzenDataGridColumn Width="5rem"
+                              Title="Action"
+                              TextAlign="TextAlign.Center"
+                              Context="c"
+                              Property="Created">
+            <Template>
+                <RadzenButton Size="ButtonSize.Small"
+                              Shade="Shade.Dark"
+                              Variant="Variant.Text"
+                              Click="@((arg)=>ShowContextMenu(arg,c))"
+                              Icon="@IconNames.MoreVert"
+                              ButtonStyle="ButtonStyle.Info">
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+
+    int value = 0;
+
+
+    void ShowContextMenu(MouseEventArgs args, VCustomerNotes c)
+    {
+    ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Click="@(() => GetDetailNotes(c))" Icon="@IconNames.Info" Text="Edit Note" Value="@c.NoteId" />
+    <RadzenMenuItem Click="@(() => GetEditNotes(c))" Icon="@IconNames.Edit" Text="Show Note" Value="@c.NoteId" />
+    <RadzenMenuItem Click="@(() => DeleteNotes(c))" Icon="@IconNames.Delete" Text="Delete Note" Value="@c.NoteId" />
+    </RadzenMenu>
+    );
+    }
+}

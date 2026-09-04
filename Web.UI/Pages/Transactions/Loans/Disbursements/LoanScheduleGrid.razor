@@ -1,0 +1,88 @@
+@using System.Linq
+@using Applications.Features.Loans.Dtos.Requests
+
+<div class="schedule-table-container">
+    <div class="schedule-panel">
+        <div class="schedule-panel-header">
+            <h5 class="schedule-title">តារាងបង់ប្រាក់</h5>
+            <div class="schedule-summary">
+                <span class="schedule-chip">ជួរ: <strong>@ScheduleRows.Count</strong></span>
+                <span class="schedule-chip">បង់សរុប: <strong>@TotalPay.As(CurrencyId)</strong></span>
+            </div>
+        </div>
+        <div class="schedule-table-wrapper">
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th>ថ្ងៃបង់ប្រាក់</th>
+                        <th class="text-center">ថ្ងៃ</th>
+                        <th class="text-right">ប្រាក់ដើម</th>
+                        <th class="text-right">ការប្រាក់</th>
+                        <th class="text-right">ប្រាក់ប្រមូលសេវា</th>
+                        <th class="text-right">បង់សរុប</th>
+                        <th class="text-right">នៅសល់</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ScheduleRows.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="8" class="schedule-empty">មិនមានតារាងបង់ប្រាក់</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var s in ScheduleRows)
+                        {
+                            <tr class="@(IsMilestoneRow(s.InstallmentNo) ? "schedule-row schedule-row-milestone" : "schedule-row")"
+                                @onclick="() => OnRowClick(s)">
+                                <td class="text-center"><span class="schedule-number">@s.InstallmentNo</span></td>
+                                <td>
+                                    <div class="schedule-date-cell">
+                                        <i class="la la-calendar"></i>
+                                        <span>@s.PaymentDate.DayFirst()</span>
+                                    </div>
+                                </td>
+                                <td class="text-center"><span class="schedule-days-badge">@s.TotalDay</span></td>
+                                <td class="text-right">@s.Principal.As(CurrencyId)</td>
+                                <td class="text-right">@s.Interest.As(CurrencyId)</td>
+                                <td class="text-right">@s.CollectionFee.As(CurrencyId)</td>
+                                <td class="text-right schedule-total"><strong>@s.TotalPay.As(CurrencyId)</strong></td>
+                                <td class="text-right">@s.LoanOutstanding.As(CurrencyId)</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" class="text-right">សរុប</td>
+                        <td class="text-center"><strong>@TotalDays</strong></td>
+                        <td class="text-right"><strong>@TotalPrincipal.As(CurrencyId)</strong></td>
+                        <td class="text-right"><strong>@TotalInterest.As(CurrencyId)</strong></td>
+                        <td class="text-right"><strong>@TotalCollectionFee.As(CurrencyId)</strong></td>
+                        <td class="text-right"><strong>@TotalPay.As(CurrencyId)</strong></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public IEnumerable<LoanScheduleDtoCreate>? Data { get; set; }
+    [Parameter] public int? CurrencyId { get; set; }
+    [Parameter] public Action<LoanScheduleDtoCreate>? RowSelect { get; set; }
+
+    private IReadOnlyList<LoanScheduleDtoCreate> ScheduleRows => Data?.ToList() ?? [];
+    private int? TotalDays => ScheduleRows.Sum(p => p.TotalDay);
+    private decimal? TotalPrincipal => ScheduleRows.Sum(p => p.Principal);
+    private decimal? TotalInterest => ScheduleRows.Sum(p => p.Interest);
+    private decimal? TotalCollectionFee => ScheduleRows.Sum(p => p.CollectionFee);
+    private decimal? TotalPay => ScheduleRows.Sum(p => p.TotalPay);
+
+    private static bool IsMilestoneRow(int? installmentNo) => installmentNo is > 0 && installmentNo % 5 == 0;
+
+    private void OnRowClick(LoanScheduleDtoCreate s) => RowSelect?.Invoke(s);
+}

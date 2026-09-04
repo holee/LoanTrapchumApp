@@ -18,11 +18,10 @@ using Applications.Interfaces.Vendors;
 using Domains.Models.Identity;
 using Infrastructures.DataAccess;
 using Infrastructures.DataAccess.Factories;
-using Infrastructures.Implements;
-using Infrastructures.Implements.Audits;
-using Infrastructures.Implements.Identity;
-using Infrastructures.Persistence.Interceptors;
 using Infrastructures.Repository;
+using Infrastructures.Repository.Audits;
+using Infrastructures.Repository.Identity;
+using Infrastructures.Persistence.Interceptors;
 using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -52,9 +51,6 @@ public static class InfrastructureServiceInjection
                 .EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null)
                 .CommandTimeout(30));
         });
-
-
-     
 
         services.AddAuthentication(options =>
         {

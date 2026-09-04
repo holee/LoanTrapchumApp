@@ -1,0 +1,7 @@
+.table th {
+    background-color: var(--rz-base-200);
+    width: var(--rz-w-25);
+}
+.table td {
+    width: var(--rz-w-75);
+}

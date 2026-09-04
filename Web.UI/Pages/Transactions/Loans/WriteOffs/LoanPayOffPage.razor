@@ -1,0 +1,15 @@
+﻿@page "/App/Loans/Disbursements/{branchId:int}/Pay-Off"
+@using Web.UI.Pages.Transactions.Loans.Disbursements
+<PageTitle>Loan Pay Off</PageTitle>
+<RadzenTabs>
+    <Tabs>
+        <RadzenTabsItem Text="All">
+            <TabAllLoans BranchId="@BranchId" />
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+@code {
+
+    [Parameter] public int BranchId{ get; set; }
+
+}

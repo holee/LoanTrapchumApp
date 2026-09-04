@@ -1,0 +1,124 @@
+﻿@using Applications.Features.Collaterals.Dtos
+<PageTitle>Edit Collateral</PageTitle>
+<EditForm Model="@model" FormName="collateralLineEdt" OnValidSubmit="@HandleFormSubmit">
+    <DataAnnotationsValidator />
+    <FluentValidationValidator DisableAssemblyScanning="true" />
+    <input type="hidden" @bind="@model.Id" />
+    <input type="hidden" @bind="model.CollateralRefId" />
+    <input type="hidden" @bind="model.SubCategoryRefId" />
+    <RadzenRow class="@Defaults.Mb2">
+        <RadzenColumn Size="12">
+            <input type="hidden" @bind="@model.ReferenceNo" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="@Defaults.Mb2">
+        <RadzenColumn Size="12">
+            <TCTextbox @bind-Value="@model.CollateralNo"
+                       IsFloatLabel="true"
+                       Label="Collateral No" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="@Defaults.Mb2">
+        <RadzenColumn Size="12">
+            <RadzenFormField Text="Type" AllowFloatingLabel="true" class="@Defaults.W100">
+                <RadzenDropDown TValue="int?"
+                                class="@Defaults.W100"
+                                Data="collateralTypes"
+                                TextProperty="@nameof(CollateralTypeDto.CollateralTypeCode)"
+                                ValueProperty="@nameof(CollateralTypeDto.CollateralTypeId)"
+                                SelectedItemChanged="@GetCollateralSubTypes"
+                                @bind-Value="@model.CategoryRefId">
+                </RadzenDropDown>
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="@Defaults.Mb2">
+        <RadzenColumn Size="12">
+            <RadzenFormField Text="Sub Types" AllowFloatingLabel="true" class="@Defaults.W100">
+                <RadzenDropDown TValue="int?"
+                                class="@Defaults.W100"
+                                Data="@allSubTypes"
+                                TextProperty="@nameof(CollateralSubTypeDto.CollateralSubTypeName)"
+                                ValueProperty="@nameof(CollateralSubTypeDto.Id)"
+                                @bind-Value="@model.SubCategoryRefId">
+                </RadzenDropDown>
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="@Defaults.Mb2">
+        <RadzenColumn Size="12">
+            <TCTextbox @bind-Value="@model.OwnerName"
+                       Placeholder="Owner Name"
+                       IsFloatLabel="true"
+                       Label="Owner Name" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="@Defaults.Mb2">
+        <RadzenColumn Size="12">
+            <TCTextbox IsFloatLabel="true" Label="Location"
+                       PlaceHolder="Location"
+                       @bind-Value="@model.Location" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="@Defaults.Mb2">
+        <RadzenColumn Size="12">
+            <TCTextbox IsFloatLabel="true" Label="Size"
+                       @bind-Value="@model.Size"></TCTextbox>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="@Defaults.Mb2">
+        <RadzenColumn Size="12">
+            <RadzenFormField Text="Quantity" AllowFloatingLabel="true" class="@Defaults.W100">
+                <RadzenNumeric ShowUpDown="false"
+                               Min="0"
+                               Placeholder="Quantity"
+                               class="@Defaults.W100"
+                               TextAlign="TextAlign.End"
+                               @bind-Value="@model.Quantity" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="@Defaults.Mb2">
+        <RadzenColumn Size="12">
+            <TCNumbers Placeholder="Market Price" IsFloatLabel="true"
+                       Label="Market Price"
+                       OnValueChanged="@((arg)=>OnMarketPriceChanged(arg,model))"
+                       @bind-Value="@model.MarketPrice" />
+            <ValidationMessage For="() => model.MarketPrice" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="@Defaults.Mb2">
+        <RadzenColumn Size="12">
+            <TCNumbers Placeholder="Hot Price" IsFloatLabel="true" Label="Hot Price"
+                       TextAlign="TextAlign.End"
+                       @bind-Value="@model.HotPrice" />
+            <ValidationMessage For="() => model.HotPrice" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="@Defaults.Mb2">
+        <RadzenColumn Size="12">
+            <TCNumbers Placeholder="Pawn Price" Label="Pawn Price"
+                       @bind-Value="@model.PawnPrice"
+                       IsFloatLabel="true"
+                       TextAlign="TextAlign.End" />
+            <ValidationMessage For="() => model.PawnPrice" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                 class="@Defaults.Mb2"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Icon="@IconNames.Save"
+                      ButtonStyle="ButtonStyle.Success"
+                      ButtonType="ButtonType.Submit"
+                      Text="Save"
+                      Size="ButtonSize.ExtraSmall">
+        </RadzenButton>
+        <RadzenButton Icon="@IconNames.Close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Text="Close"
+                      Click="()=>DialogService.Close(success)"
+                      Size="ButtonSize.ExtraSmall">
+        </RadzenButton>
+    </RadzenStack>
+
+</EditForm>

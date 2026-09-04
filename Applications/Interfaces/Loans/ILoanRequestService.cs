@@ -49,5 +49,6 @@ namespace Applications.Interfaces.Loans
         Task<IEnumerable<CoPawnCustomerDto?>> AddCoPawnCustomers2Async(int? branchId, string? requestId, IEnumerable<CoPawnCustomer> reqs, CancellationToken cancellation = default);
         Task<bool> IsCoPawnExistAsync(int? branchId, string? customerId, CancellationToken cancellationToken);
         Task<ErrorOr<RequestResult>> PassLoanRequestAsync(PassRequestDtoCreate req, CancellationToken cancellationToken = default);
+        Task<RequestResult> CreateOrSaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default);
     }
 }

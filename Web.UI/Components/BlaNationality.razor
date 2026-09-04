@@ -1,0 +1,43 @@
+﻿@using Applications.Features.AdditionalInformations.Dto
+@using System.Linq.Expressions
+@using Applications.Features.AdditionalInformations.Queries.GetNationalities
+<RadzenAutoComplete class="rz-w-100"
+                    Data="@_nationalities"
+                    FilterOperator="StringFilterOperator.Contains"
+                    TextProperty="@nameof(NationalityDto.NationalityName)"
+                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    Placeholder="Search Nationalities"
+                    OpenOnFocus="true"
+                    ValueChanged="@ValueChanged"
+                    ValueExpression="@ValueExpression"
+                    Value="@Value">
+</RadzenAutoComplete>
+@code {
+
+    [Parameter] public string? Value { get; set; } = string.Empty;
+
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    [Parameter] public Expression<Func<string?>>? ValueExpression { get; set; }
+
+    private IEnumerable<NationalityDto> _nationalities = [];
+
+    private async Task GetNationalities(string? filter = "Job")
+    {
+        var command = new GetNationalitiesQuery(0, null);
+
+        var rsp = await mediator.Send(command);
+
+        _nationalities = rsp.Items;
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetNationalities();
+
+        await base.OnInitializedAsync();
+    }
+
+
+}

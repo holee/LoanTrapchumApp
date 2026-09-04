@@ -1,0 +1,70 @@
+﻿@using System.Linq.Expressions
+
+@if (!string.IsNullOrEmpty(Text) && (!IsFloatLabel))
+    {
+        <RadzenRow>
+            <RadzenColumn Size="2" SizeMD="2" SizeSM="12">
+                <RadzenLabel Component="@Id" Text="@Text" />
+            </RadzenColumn>
+            <RadzenColumn Size="10" SizeMD="10" SizeSM="12">
+                <RadzenDatePicker InputClass="@Styles.W100"
+                                  Value="@Value"
+                                  Change="@Changed"
+                                  ValueChanged="@ValueChanged"
+                                  ValueExpression="@ValueExpression"
+                                  TValue="DateTime?"
+                                  id="@Id"
+                                  Name="@Id"
+                                  DateFormat="@Defaults.DefaultDateFormat" />
+                @if (ShowError)
+                {
+                    <div class="@Styles.TextDanger">
+                        <ValidationMessage For="@ValueExpression" />
+                    </div>
+                }
+            </RadzenColumn>
+        </RadzenRow>
+    }
+    @if (!string.IsNullOrEmpty(Text) && (IsFloatLabel))
+    {
+        <RadzenFormField class="@Styles.W100" Text="@Text" AllowFloatingLabel="true">
+            <ChildContent>
+                <RadzenDatePicker InputClass="@Styles.W100"
+                                  Value="@Value"
+                                  Change="@Changed"
+                                  ValueChanged="@ValueChanged"
+                                  ValueExpression="@ValueExpression"
+                                  TValue="DateTime?"
+                                  id="@Id"
+                                  DateFormat="@Defaults.DefaultDateFormat" />
+            </ChildContent>
+            <Helper>
+                <ValidationMessage For="@ValueExpression" />
+            </Helper>
+        </RadzenFormField>
+    }
+    @if (string.IsNullOrEmpty(Text) && (IsFloatLabel || !IsFloatLabel))
+    {
+        <RadzenDatePicker class="@Styles.W100"
+                          Value="@Value"
+                          Change="@Changed"
+                          ValueChanged="@ValueChanged"
+                          ValueExpression="@ValueExpression"
+                          TValue="DateTime?"
+                          id="@Id"
+                          Name="@Id"
+                          DateFormat="@Defaults.DefaultDateFormat" />
+    }
+
+
+@code {
+    [Parameter] public Orientation Orientation { get; set; } = Orientation.Horizontal;
+    [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string? Text { get; set; } = string.Empty;
+    [Parameter] public DateTime? Value { get; set; }
+    [Parameter] public bool ShowError { get; set; } = false;
+    [Parameter] public bool IsFloatLabel { get; set; } = false;
+    [Parameter] public EventCallback<DateTime?> Changed { get; set; }
+    [Parameter] public EventCallback<DateTime?> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<DateTime?>>? ValueExpression { get; set; }
+}

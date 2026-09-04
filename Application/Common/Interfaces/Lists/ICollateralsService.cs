@@ -1,0 +1,20 @@
+using Application.Features.Collaterals.Dtos;
+using Application.Responses;
+using Application.Responses.Paginations;
+using Domains.Models.Collaterals;
+
+namespace Application.Interfaces.Lists;
+
+public interface ICollateralsService
+{
+    Task<IEnumerable<CollateralTypeDto>> GetCollateralTypes(int? id, string? q = null);
+    Task<IEnumerable<Features.Collaterals.Dtos.CollateralSubTypeDto>> GetCollateralSubTypes(int? id, string? searchText = null);
+    Task<IEnumerable<VCollateral>> GetsCollateralAysnc(string? q = null);
+    Task<Pager<VCollateral>> GetCollateralsAysnc(QueryParam param,CancellationToken cancellation=default);
+    Task<Result<string>> InsertOrUpdateAsync(CollateralSubType req, CancellationToken cancellation = default);
+    Task<Result<string>> CreateAsync(CollateralLine req, CancellationToken cancellation = default);
+    Task<Result<string>> UpdateAsync(CollateralLine req, CancellationToken cancellation = default);
+    Task<Result<string>> UpSertAsync(CollateralLine req, CancellationToken cancellation = default);
+    Task<Result<string>> Upsert(CollateralSubType req,CancellationToken cancellation=default);
+    Task<IEnumerable<CollateralSubTypeDto>> GetCollateralSubTypes(int? id, string? searchText = null, CancellationToken cancellationToken = default);
+}

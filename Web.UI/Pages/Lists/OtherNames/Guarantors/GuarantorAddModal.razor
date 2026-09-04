@@ -1,0 +1,22 @@
+﻿<PageTitle>Create Guarantor</PageTitle>
+<EditForm Model="@model" OnValidSubmit="OnSaveChanges">
+    <Blazilla.FluentValidator />
+    <GaurantorCreateComPage Model="model" />
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 Gap="1rem"
+                 class="rz-mt-2"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                      Icon="save"
+                      Text="Save"
+                      ButtonType="ButtonType.Submit"
+                      Size="ButtonSize.Small" />
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      ButtonType="ButtonType.Button"
+                      Icon="cancel"
+                      Text="Cancel"
+                      Click="Cancel"
+                      Size="ButtonSize.Small" />
+    </RadzenStack>
+</EditForm>

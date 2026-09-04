@@ -1,0 +1,35 @@
+@page "/App/Branches/Create"
+@using Applications.Features.Branches.Dtos
+
+<RadzenCard class="branch-page-wrapper">
+    <BranchCreateModal @ref="createModalRef"
+                       PageType="PageType.Tab"
+                       OnClose="Close"
+                       OnCreated="OnCreated" />
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    [Parameter]
+    public EventCallback<VBranch> OnCreated { get; set; }
+
+    private BranchCreateModal? createModalRef;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+}
+
+<style>
+    .branch-page-wrapper {
+        padding: 0;
+        overflow: auto;
+    }
+</style>

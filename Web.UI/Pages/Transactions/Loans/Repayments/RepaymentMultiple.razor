@@ -1,0 +1,175 @@
+﻿@page "/App/Loans/Repayment/{LoanId}/Multiple"
+<PageTitle>Repayment</PageTitle>
+<div class="container-fluid">
+    <CustomerLoanInformation LoanSchedule="LoanSchedule" />
+    <Card>
+        <CardHeader>
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.SpaceBetween"
+                         AlignItems="AlignItems.Center">
+                <RadzenText Text="Payment Schedules"></RadzenText>
+                <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End"
+                             Orientation="Orientation.Horizontal">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Date</span>
+                        <InputDate disabled class="form-control" @bind-Value="paymentDate" />
+                    </div>
+                </RadzenStack>
+            </RadzenStack>
+        </CardHeader>
+        <CardBody>
+            <RadzenDataGrid TItem="VSchedule"
+                            Data="@schedules"
+                            Responsive
+                            Density="Density.Compact"
+                            SelectionMode="DataGridSelectionMode.Multiple"
+                            GridLines="DataGridGridLines.Both"
+                            @bind-Value="SelectedSchedules"
+                            RowSelect="SelectedRowEvt"
+                            RowDeselect="DeSelectedRowEvt"
+                            AllowRowSelectOnRowClick="allowSelectedRow"
+                            IsLoading="isLoading"
+                            RowRender="RowRenderChanged"
+                            @ref="grid"
+                            Style="--rz-grid-header-background-color:var(--rz-base-200);cursor:pointer;min-height:28rem;height:28rem;max-height:100vh;">
+                <Columns>
+                    <RadzenDataGridColumn Width="3.5rem"
+                                          TextAlign="TextAlign.Center" OrderIndex="0"
+                                          Sortable="false"
+                                          Filterable="false">
+                        <Template Context="data">
+                            <RadzenCheckBox TabIndex="-1"
+                                            TriState="false"
+                                            Value="@data.Selected"
+                                            TValue="bool"
+                                            Change="@(arg=>CheckBoxCheckedChanged(arg,data))"
+                                            InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select item" }})" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="c"
+                                          Width="3rem"
+                                          Title="#"
+                                          TextAlign="TextAlign.Center"
+                                          Sortable="false">
+                        <Template>
+                            @c.InstallmentNo
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Width="6rem"
+                                          Context="c"
+                                          Title="ថ្ងៃត្រូវបង់ប្រាក់"
+                                          Sortable="false">
+                        <Template>
+                            <small>
+                                <strong>@c.PaymentDate.DayFirst()</strong>
+                                <br />
+                                <em>@c.PaymentDate!.Value!.DayOfWeek</em>
+                            </small>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Context="c"
+                                          Title="ប្រាក់ដើមត្រូវបង់" Sortable="false">
+                        <Template>
+                            @c.Principle!.Value.Format(c.CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Context="c"
+                                          Title="ការប្រាក់ត្រូវបង់" Sortable="false">
+                        <Template>
+                            @c.Interest.Format(c.CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Title="ប្រាក់ប្រសិទ្ធិភាពត្រូវបង់"
+                                          Context="c"
+                                          Sortable="false">
+                        <Template>
+                            @c.CollectionFee.Format(c.CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Title="ប្រាក់ពីន័យ"
+                                          Context="c"
+                                          Sortable="false">
+                        <Template>
+                            @if (c.Selected && c.DayArrea > 0)
+                            {
+                                <RadzenNumeric Min="0"
+                                               onclick="this.querySelector('.rz-numeric-input').select()"
+                                               ShowUpDown="false"
+                                               TextAlign="TextAlign.End"
+                                               class="w-100"
+                                               Format="#,##0.00"
+                                               TValue="decimal?"
+                                               @ref="tb"
+                                               Style="height:var(--input-text-sm)"
+                                               Change="@((arg)=>PenaltyTextChanged(arg,c))"
+                                               @bind-Value="c.PenaltyAmount" />
+                            }
+                            else
+                            {
+                                @c.PenaltyAmount.Format(c.CurrencyId)
+                            }
+
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Property="TotalPay"
+                                          Title="សរុបប្រាក់ត្រូវបង់"
+                                          Context="c"
+                                          Sortable="false">
+                        <Template>
+                            @c.TotalPay.Format(c.CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Context="c"
+                                          Property="LoanOutstanding"
+                                          Title="ប្រាក់ដើមនៅសល់"
+                                          Sortable="false">
+                        <Template>
+                            @c.LoanOutstanding.Format(c.CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </CardBody>
+        <CardFooter>
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.End"
+                         Gap="1rem"
+                         AlignItems="AlignItems.Center">
+                <RadzenButton Icon="save"
+                              Size="ButtonSize.Small"
+                              ButtonStyle="ButtonStyle.Success"
+                              Click="ApplySchedulePayment"
+                              Text="Applied Payment" />
+                <RadzenLink Path="@($"/Loans?BranchId={BranchId}&UserId={_userId}")"
+                            Text="Cancel" />
+            </RadzenStack>
+        </CardFooter>
+    </Card>
+
+</div>
+@code {
+    void ShowContextMenu(MouseEventArgs args, VSchedule p)
+    {
+        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Icon="money"
+                        Visible="!p.IsPaid"
+                        Click="@(()=>ShowPaymentDialogue(p))"
+                        Text="pay by schedule" />
+        <RadzenMenuItem Icon="info" Click="GetLoanDetails"
+                        Text="Detail" />
+        <RadzenMenuItem Icon="paid" Click="@(()=>OpenSideDialog(p))"
+                        Text="Schedule History" />
+    </RadzenMenu>
+    );
+    }
+}
+
+
+
+

@@ -1,0 +1,356 @@
+﻿@page "/App/Loans/{LoanId}/Disbursements/{BranchId:int}/Branches/Edit"
+@using Web.UI.Components.Actionbars
+@using Web.UI.Components.Buttons
+@using Web.UI.Components.Indicatros
+@using Web.UI.Pages.Transactions.LoanRequests
+<PageTitle>បង្កើតការបញ្ចេញប្រាក់កម្ចី</PageTitle>
+@inject Applications.Calculations.CalculatorSceduleService _calSceduleService
+@attribute [StreamRendering]
+@if (IsLoading)
+{
+
+    <Loading Text="កំពុងផ្ទុកការបញ្ចេញប្រាក់កម្ចី..." />
+}
+else
+{
+    <RadzenTabs @bind-SelectedIndex="selectedTabIndex" RenderMode="TabRenderMode.Client">
+        <Tabs>
+            <RadzenTabsItem Text="ព័ត៌មានប្រាក់កម្ចី" Icon="@IconNames.Info">
+                <EditForm Model="_model" @ref="editForm" OnValidSubmit="@HandleFormSubmit">
+                    <FluentValidator />
+                    <ValidationSummary />
+                    <input type="hidden" @bind-value="penaltyRate" />
+                    <input type="hidden" @bind="_model!.CustomerRefId" />
+                    <input type="hidden" @bind="_model!.LoanId" />
+                    @* ── Customer & Loan Summary ── *@
+                    <RadzenCard Variant="Variant.Flat" class="rz-my-2 rz-background-color-base-100">
+
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
+                                     class="rz-mb-3 rz-pb-2" style="border-bottom:2px solid var(--rz-success);">
+                            <RadzenIcon Icon="@IconNames.ReceiptLong" style="color:var(--rz-primary);font-size:1.1rem;" />
+                            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:700;color:var(--rz-primary);">អតិថិជន និង កម្ចី</RadzenText>
+                        </RadzenStack>
+                        <RadzenRow Gap="0.75rem">
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អតិថិជន</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1"><strong>@_model?.AltName</strong></RadzenText>
+                                <input type="hidden" @bind="_model.CustomerRefId" />
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">រូបិយប័ណ្ណ</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1">@_model?.CurrencyName</RadzenText>
+                                <input type="hidden" @bind="_model!.CurrencyId" />
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រាក់ដើម</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1"><strong>@_model?.Principle.WithSign(_model?.CurrencyId)</strong></RadzenText>
+                                <input type="hidden" @bind="_model!.Principle" />
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ខ្ចីលើកទី</RadzenText>
+                                <input type="hidden" @bind="_model!.Circle" />
+                                <RadzenText TextStyle="TextStyle.Body1">@_model?.Circle</RadzenText>
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow Gap="0.75rem" class="rz-mt-2">
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រភេទកម្ចី</RadzenText>
+                                <input type="hidden" @bind="_model!.LoanCategoryRefId" />
+                                <RadzenText TextStyle="TextStyle.Body1">@_model?.LoanCategoryName</RadzenText>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">មន្ត្រីស្នើរសុំ</RadzenText>
+                                <input type="hidden" @bind="_model!.CreditAgentRefId" />
+                                <RadzenText TextStyle="TextStyle.Body1">@_model?.CreditAgentName</RadzenText>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អនុម័តដោយ</RadzenText>
+                                <input type="hidden" @bind="_model!.AprovedUserId" />
+                                <RadzenText TextStyle="TextStyle.Body1">@_model?.ApprovedBy</RadzenText>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">សេវារដ្ឋបាល</RadzenText>
+                                <input type="hidden" @bind="_model!.AdminFeeRate" />
+                                <RadzenText TextStyle="TextStyle.Body1">@_model?.AdminFeeAmount.ToFormattedNumber()</RadzenText>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenCard>
+
+                    @* ── Repayment Terms ── *@
+                    <RadzenCard Variant="Variant.Flat" class="rz-my-2 rz-background-color-base-100">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
+                                     class="rz-mb-3 rz-pb-2" style="border-bottom:2px solid var(--rz-success);">
+                            <RadzenIcon Icon="@IconNames.ReceiptLong" style="color:var(--rz-primary);font-size:1.1rem;" />
+                            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:700;color:var(--rz-primary);">លក្ខខណ្ឌបង់សង</RadzenText>
+                        </RadzenStack>
+
+                        @* Info fields *@
+                        <RadzenRow Gap="1rem" class="rz-mb-3">
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenFormField Text="ប្រភេទបង់រំលោះ">
+                                        <ChildContent>
+                                            <RadzenTextBox @bind-Value="@_model!.InstallmentType" ReadOnly="true" />
+                                        </ChildContent>
+                                    </RadzenFormField>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenFormField Text="របៀបបង់សង">
+                                        <ChildContent>
+                                            <BlaPaymentModes @bind-Value="_model!.RepaymentModeRefId"
+                                                             SelectedChangeModeChanged="@RepaymentModeSelectedChanged" />
+                                        </ChildContent>
+                                    </RadzenFormField>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenFormField Text="រយៈពេលខ្ចីប្រាក់">
+                                        <ChildContent>
+                                            <RadzenNumeric @bind-Value="_model!.Installments" ReadOnly="true" ShowUpDown="false" />
+                                        </ChildContent>
+                                        <End>
+                                            <small class="rz-color-base-500">@_model?.InstallmentName</small>
+                                        </End>
+                                    </RadzenFormField>
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600"></RadzenText>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenFormField Text="បង់រៀងរាល់">
+                                        <ChildContent>
+                                            <RadzenNumeric Min="1" Max="150"
+                                                           ShowUpDown="false"
+                                                           ReadOnly="@( _model?.RepaymentModeRefId == 1 ? false : true)"
+                                                           @bind-Value="_model!.PayEvery"
+                                                           class="rz-w-100" />
+                                        </ChildContent>
+                                        <End>
+                                            <small class="rz-color-base-500">@_model?.InstallmentName</small>
+                                        </End>
+                                    </RadzenFormField>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+
+                        <hr style="border:none;border-top:1px solid var(--rz-base-300);margin:0 0 0.75rem;" />
+
+                        @* Editable rate & settings *@
+                        <RadzenRow Gap="1rem">
+                            <RadzenColumn SizeSM="6" SizeMD="3" Size="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenFormField Text="អត្រាការប្រាក់ (%)">
+                                        <ChildContent>
+                                            <RadzenNumeric @bind-Value="_model!.InterestRate"
+                                                           Format="#.00"
+                                                           ShowUpDown="false"
+                                                           Min="0" Max="100"
+                                                           class="rz-w-100" />
+                                        </ChildContent>
+                                        <End>(%)</End>
+                                    </RadzenFormField>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3" Size="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenFormField Text="អត្រាថ្លៃប្រសិទ្ធិភាព(%)">
+                                        <ChildContent>
+                                            <RadzenNumeric @bind-Value="_model!.CollectionFeeRate"
+                                                           Format="#.00"
+                                                           ShowUpDown="false"
+                                                           Min="0" Max="100"
+                                                           class="rz-w-100" />
+                                        </ChildContent>
+                                        <End>(%)</End>
+                                    </RadzenFormField>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3" Size="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenFormField Text="ប្រភេទថ្លៃប្រសិទ្ធិភាព">
+                                        <ChildContent>
+                                            <BlaCollectionFeeModes SelectedChangeModeChanged="SelectedChargeModeChanged"
+                                                                   @bind-Value="_model!.CollectionFeeModeId" />
+                                        </ChildContent>
+                                    </RadzenFormField>
+                                </RadzenStack>
+
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3" Size="3">
+                                <RadzenStack Gap="0.2rem">
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ការកែតម្រូវកាលវិភាគបង់ប្រាក់</RadzenText>
+                                    <RadzenRadioButtonList @bind-Value="_model!.PayementSechuleModeId"
+                                                           TValue="int"
+                                                           Change="OnScheduleChanged">
+                                        <Items>
+                                            <RadzenRadioButtonListItem Text="មុន" Value="1" />
+                                            <RadzenRadioButtonListItem Text="ក្រោយ" Value="2" />
+                                            <RadzenRadioButtonListItem Text="រំលង" Value="3" />
+                                        </Items>
+                                    </RadzenRadioButtonList>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenCard>
+
+                    @* ── Dates ── *@
+                    <RadzenCard Variant="Variant.Flat" class="rz-my-2 rz-background-color-base-100">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
+                                     class="rz-mb-3 rz-pb-2" style="border-bottom:2px solid var(--rz-success);">
+                            <RadzenIcon Icon="@IconNames.ReceiptLong" style="color:var(--rz-primary);font-size:1.1rem;" />
+                            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0" style="font-weight:700;color:var(--rz-primary);">កាលបរិច្ឆេទ</RadzenText>
+                        </RadzenStack>
+                        <RadzenRow Gap="0.75rem">
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenFormField Text="ថ្ងៃចុះឈ្មោះ">
+                                    <RadzenDatePicker DateFormat="dd/MM/yyyy"
+                                                      @bind-Value:format="yyyy/MMM/dd"
+                                                      @bind-Value="_model!.RegisterDate"
+                                                      ReadOnly="true"
+                                                      class="@Styles.W100" />
+                                </RadzenFormField>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenFormField Text="ថ្ងៃចាប់ផ្តើម">
+                                    <RadzenDatePicker DateFormat="dd/MM/yyyy"
+                                                      @bind-Value:format="yyyy/MMM/dd"
+                                                      Change="OnStartDateChanged"
+                                                      @bind-Value="_model!.StartDate"
+                                                      class="@Styles.W100" />
+                                </RadzenFormField>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenFormField Text="ថ្ងៃបង់ប្រាក់លើកដំបូង">
+                                    <RadzenDatePicker DateFormat="dd/MM/yyyy"
+                                                      @bind-Value:format="yyyy/MMM/dd"
+                                                      @bind-Value="_model!.FirstPaymentDate"
+                                                      class="@Styles.W100" />
+                                </RadzenFormField>
+                            </RadzenColumn>
+                            <RadzenColumn SizeSM="6" SizeMD="3">
+                                <RadzenFormField Text="ថ្ងៃបង់ប្រាក់ចុងក្រោយ">
+                                    <RadzenDatePicker DateFormat="dd/MM/yyyy"
+                                                      @bind-Value:format="yyyy/MMM/dd"
+                                                      ReadOnly="true"
+                                                      @bind-Value="_model!.LastPaymentDate"
+                                                      class="@Styles.W100" />
+                                </RadzenFormField>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenCard>
+
+                    @* ── Note ── *@
+                    <RadzenRow class="rz-my-3 rz-px-2" Gap="0.75rem">
+                        <RadzenColumn Size="12">
+                            <RadzenFormField Text="កំណត់សម្គាល់" class="rz-w-100">
+                                <RadzenTextArea Rows="3"
+                                                Placeholder="បញ្ចូលកំណត់សម្គាល់..."
+                                                class="@Styles.W100"
+                                                @bind-Value="_model!.Remark" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <AppActions>
+                        @if (resource is { RequestEdit: false, AllowEdit: false } && BState.CanRequestEditLoan)
+                        {
+                            <SaveButton IsBusy="@isWaiting"
+                                        BusyText="រង់ចាំ...."
+                                        ButtonType="ButtonType.Button"
+                                        OnClick="@HandleRequestEditLoan"
+                                        Title="ស្នើរសុំកែប្រែ" />
+                        }
+                        @if (resource is { AllowEdit: true, RequestEdit: true } && BState.IsAllowEditLoan)
+                        {
+                            <SaveButton IsBusy="@isWaiting"
+                                        BusyText="រង់ចាំ...."
+                                        Title="បញ្ចេញប្រាក់" />
+                            <RadzenButton Icon="@IconNames.Preview"
+                                          Click="@PrintPreview"
+                                          Size="@Styles.DefaultSize"
+                                          Text="បោះពុម្ភសាកល្បង" />
+
+                        }
+                        @if (resource is { RequestEdit: true, AllowEdit: false } && BState.CanApproveEditLoanRequest)
+                        {
+                            <SaveButton IsBusy="@isWaiting"
+                                        BusyText="រង់ចាំ...."
+                                        ButtonType="ButtonType.Button"
+                                        OnClick="@HandleApproveEditLoanRequest"
+                                        Title="អនុញ្ញាតិអោយកែ" />
+                        }
+
+                        <RadzenLink Icon="@IconNames.ArrowCircleLeft"
+                                    IconColor="@Colors.Danger"
+                                    Path="@_navService.PreviousUrl"
+                                    Text="ត្រឡប់ក្រោយ" />
+                    </AppActions>
+
+                </EditForm>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="អ្នកធានានិងទ្រព្យបញ្ចាំ" Icon="@IconNames.Inventory">
+                <LoanCollaterals Collaterals="@_model!.Collaterals" />
+                <LoanGaurantors Guarantors="@_model!.Guarantors" />
+                <LoanCoPawns Customers="_model!.CoPawCustomers" />
+                <LoanRequestDocument Documents="@req.Documents.ToList()" ShowUpload="false" />
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="តារាងសងប្រាក់" Icon="@IconNames.Schedule">
+                <LoanScheduleGrid Data="@_model!.LoanSchedules"
+                                  CurrencyId="@_model?.CurrencyId"
+                                  RowSelect="@OnRowSelected" />
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="កំណត់សម្គាល់" Icon="@IconNames.Comment">
+                <LoanRequestNotes Data="@req.Descriptions" />
+            </RadzenTabsItem>
+           
+            @foreach (var tab in _tabs)
+            {
+                <RadzenTabsItem Text="@tab.Title" Icon="@tab.Icon" @key="@tab.Key">
+                    <Template>
+                        <ClosedTab Title="@tab.Title" TabId="@tab.Key" Closed="() => CloseTab(tab.Key)" />
+                    </Template>
+                    <ChildContent>
+                        @tab.Content
+                    </ChildContent>
+                </RadzenTabsItem>
+            }
+        </Tabs>
+    </RadzenTabs>
+
+}
+
+@code {
+
+    void OnRowSelected(Applications.Features.Loans.Dtos.Requests.LoanScheduleDtoCreate arg)
+    {
+
+    }
+
+    void SelectedChargeModeChanged(object? e)
+    {
+        if (e is not null)
+        {
+            var selectedValue = (Items)e;
+        }
+        else
+        {
+            _model?.CollectionFeeModeId = 1;
+        }
+    }
+
+    void RepaymentModeSelectedChanged(object e)
+    {
+        var selectedValue = (Items)e;
+
+        if (selectedValue.Value == 1)
+        {
+            _model?.PayEvery = 4;
+        }
+        else
+        {
+            _model?.PayEvery = 1;
+        }
+    }
+}

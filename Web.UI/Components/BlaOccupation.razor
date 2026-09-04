@@ -1,0 +1,42 @@
+﻿@using Applications.Features.AdditionalInformations.Dto
+@using System.Linq.Expressions
+@using Applications.Features.AdditionalInformations.Queries.GetOccupations
+@using Domains.Shared.Enums
+<RadzenAutoComplete class="rz-w-100"
+                    Data="@_occupations"
+                    FilterOperator="StringFilterOperator.Contains"
+                    TextProperty="@nameof(OccupationDto.OccupationTitle)"
+                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    Placeholder="Search Occupations"
+                    OpenOnFocus="true"
+                    ValueChanged="@ValueChanged"
+                    ValueExpression="@ValueExpression"
+                    Value="@Value">
+</RadzenAutoComplete>
+@code {
+
+    [Parameter] public string? Value { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<string?>>? ValueExpression { get; set; }
+    [Parameter] public TypeOfEnum TypeOf { get; set; } = TypeOfEnum.Job;
+    private IEnumerable<OccupationDto> _occupations = [];
+   
+    private async Task GetOccupations()
+    {
+        var command = new GetOccupationsQuery(0, null, TypeOf);
+
+        var rsp = await mediator.Send(command);
+
+        _occupations = rsp.Items;
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetOccupations();
+
+        await base.OnInitializedAsync();
+    }
+
+
+}

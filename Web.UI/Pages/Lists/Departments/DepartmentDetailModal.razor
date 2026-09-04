@@ -1,0 +1,62 @@
+﻿<PageTitle>Department Details</PageTitle>
+<div class="container-fluid p-3">
+    <RadzenCard class="rz-border-radius-3 rz-shadow-2 p-0" style="overflow:hidden;">
+        <RadzenStack Gap="0">
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center"
+                         Gap="0.75rem"
+                         class="p-3"
+                         style="border-bottom: 1px solid var(--rz-border);">
+                <RadzenIcon Icon="apartment" Style="font-size: 1.75rem; color: var(--rz-primary);" />
+                <RadzenStack Gap="0">
+                    <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-mb-0" Text="@department?.DepartmentName" />
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-mb-0" Text="Department Information" />
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Gap="1rem" class="p-3">
+                <RadzenRow>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-mb-1" Text="Name" />
+                        <RadzenText TextStyle="TextStyle.Body1">@department?.DepartmentName</RadzenText>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-mb-1" Text="Description" />
+                        <RadzenText TextStyle="TextStyle.Body1">@department?.Description</RadzenText>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-mb-1" Text="Status" />
+                        <RadzenBadge BadgeStyle="@(department?.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                     Text="@(department?.IsActive == true ? "Active" : "Inactive")"
+                                     IsPill="true" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-mb-1" Text="In Use" />
+                        <RadzenBadge BadgeStyle="@(department?.Used == true ? BadgeStyle.Info : BadgeStyle.Light)"
+                                     Text="@(department?.Used == true ? "Yes" : "No")"
+                                     IsPill="true" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.End"
+                         class="p-3"
+                         style="border-top: 1px solid var(--rz-border);">
+                <RadzenButton ButtonStyle="ButtonStyle.Light"
+                              Icon="close"
+                              Text="Close"
+                              Click="@(()=>DialogService.Close(null))"
+                              Variant="Variant.Outlined"
+                              Size="ButtonSize.Medium">
+                </RadzenButton>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenCard>
+</div>
+
+

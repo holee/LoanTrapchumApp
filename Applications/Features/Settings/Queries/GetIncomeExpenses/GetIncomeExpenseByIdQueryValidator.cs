@@ -1,4 +1,4 @@
-using Applications.Commons.Messages.Settings;
+using SettingMessage = Applications.Commons.Messages.Settings.SettingMessage;
 using FluentValidation;
 
 namespace Applications.Features.Settings.Queries.GetIncomeExpenses;

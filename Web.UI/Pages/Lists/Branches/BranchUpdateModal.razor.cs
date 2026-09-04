@@ -1,0 +1,189 @@
+using Applications.Features.Addresses.Dto;
+using Applications.Features.Branches.Command.EditBranch;
+using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetUpdateBranch;
+using Applications.Features.Currencies.Dto;
+using Applications.Interfaces.Banks;
+using Domains.Models.Addresses;
+
+namespace Web.UI.Pages.Lists.Branches
+{
+    public partial class BranchUpdateModal(ILogger<BranchUpdateModal> logger)
+    {
+        [Parameter] public int Id { get; set; }
+        [Parameter] public EventCallback OnClose { get; set; }
+        [Parameter] public PageType PageType { get; set; }
+
+        private BranchDtoUpdate model = new();
+        [Inject] private IBankService? bankService { get; set; }
+        protected IEnumerable<ProvinceDto> ProvinceList = [];
+        protected IEnumerable<CommuneDto> CommuneList = [];
+        protected IEnumerable<DistrictDto> DistrictList = [];
+        protected IEnumerable<VillageDto> VillageList = [];
+        protected IEnumerable<BankResponse> bankList = [];
+        protected IEnumerable<string> Cities = [];
+        protected IEnumerable<string> filteredItems = [];
+        protected IEnumerable<Country> Countries = new List<Country>();
+        protected IEnumerable<string>? strCountries = new List<string>();
+        string? searchText = string.Empty;
+
+        protected override async Task OnInitializedAsync()
+        {
+            try
+            {
+
+                var command = new GetUpdateBranchQuery(Id);
+
+                var result = await mediator.Send(command);
+
+                if (result.IsError)
+                {
+                    _toastService.ShowError(result.GetMessage(), "Error");
+
+                    DialogService.Close();
+
+                    return;
+                }
+
+
+                model = result.Value;
+
+                model.ImagePath ??= tempPath;
+
+                ProvinceList = await _addressService!.GetsProvinces(string.Empty);
+
+                var rsp = await _addressService.GetCountries(105);
+
+                if (!rsp.IsError)
+                {
+                    Countries = rsp.Value;
+                }
+
+                Cities = await _addressService.GetCities();
+
+                if (result.IsSuccess())
+                {
+                    if (model.DistrictRefId.HasValue)
+                    {
+                        DistrictList = await _addressService.GetDistrictsByProvinceId(model?.ProvinceRefId);
+                    }
+                    if (model!.DistrictRefId.HasValue)
+                    {
+                        CommuneList = await _addressService.GetCommunesByDistrictId(model?.DistrictRefId);
+                    }
+                    if (model!.DistrictRefId.HasValue)
+                    {
+                        VillageList = await _addressService.GetVillagesByCommuneId(model?.CommuneRefId);
+                    }
+                }
+                await base.OnInitializedAsync();
+
+            }
+            catch (Exception ex)
+            {
+
+                _toastService.ShowError(ex.Message, "Exception");
+
+            }
+
+        }
+        async Task OnSubmit()
+        {
+            var command = new EditBranchCommand(model);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
+            {
+
+                _toastService.ShowSuccess("Branch updated successfully!", "Success");
+
+                await Close();
+
+                return;
+            }
+
+            _toastService.ShowError(rsp.GetMessage(), "Error");
+        }
+
+        async Task GetCities(string? filter = null)
+        {
+            Cities = await _addressService.GetCities(filter);
+
+            filteredItems = Cities;
+        }
+        protected async Task AddCity()
+        {
+            var city = new CityDtoCreate { CityName = model.City! };
+
+            var message = await _addressService!.AddCity(city);
+
+            if (!message.IsError)
+            {
+                await GetCities();
+                StateHasChanged();
+            }
+        }
+        async void SelectProvince(object e)
+        {
+            if (e is not null)
+            {
+                var id = ((ProvinceDto)e).ProvinceId;
+                DistrictList = await _addressService.GetDistrictsByProvinceId(id);
+                model.ProDescription = ((ProvinceDto)e).ProDescription;
+                model.ProInKhmer = ((ProvinceDto)e).ProInKhmer;
+            }
+            StateHasChanged();
+
+        }
+        async Task SelectDistrict(object e)
+        {
+            if (e is not null)
+            {
+                var id = ((DistrictDto)e).DistrictId;
+
+                CommuneList = await _addressService!.GetCommunesByDistrictId(id);
+
+                model.DisDescription = ((DistrictDto)e).DisDescription;
+
+                model.DisInKhmer = ((DistrictDto)e).DisInKhmer;
+            }
+            else
+            {
+                CommuneList = [];
+            }
+            StateHasChanged();
+        }
+        async Task SelectCommune(object e)
+        {
+            if (e is not null)
+            {
+                var id = ((CommuneDto)e).CommuneId;
+
+                VillageList = await _addressService!.GetVillagesByCommuneId(id);
+
+                model.ComDescription = ((CommuneDto)e).ComDescription;
+
+                model.ComInKhmer = ((CommuneDto)e).ComInKhmer;
+            }
+            else
+            {
+                VillageList = [];
+            }
+            StateHasChanged();
+        }
+
+        void SelectVillage(object e)
+        {
+            if (e is not null)
+            {
+                model.ComDescription = ((VillageDto)e)?.VillDescription;
+
+                model.ComInKhmer = ((VillageDto)e!)?.VilInKhmer;
+            }
+            StateHasChanged();
+        }
+
+
+    }
+}

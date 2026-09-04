@@ -9,105 +9,112 @@
 @inject NavigationManager NavigationManager
 @inject IUserServiceImpl _userService
 @inject IJSRuntime js
-<div class="fb-profile-wrap">
-<div class="fb-profile-trigger" @ref="_triggerRef" data-fb-trigger @onclick="ToggleMenu" @onclick:stopPropagation="true">
-    <div class="fb-avatar fb-avatar--sm">
-        @if (!string.IsNullOrWhiteSpace(_photoUrl))
-        {
-            <img src="@_photoUrl" alt="@_displayName" class="fb-avatar__img" />
-        }
-        else
-        {
-            @_initials
-        }
-    </div>
-    <span class="fb-trigger-name">@_displayName</span>
-    <span class="fb-trigger-chevron @(_open ? "fb-trigger-chevron--up" : "")">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M7 10l5 5 5-5z" />
-        </svg>
-    </span>
-</div>
 
-@if (_open)
-{
-    <div class="fb-backdrop" @onclick="CloseMenu"></div>
-    <div class="fb-dropdown" style="@_dropdownStyle" @onclick:stopPropagation="true">
-        <AuthorizeView Context="u">
-            <Authorized>
+<div class="pm-root" @onkeydown="OnKeyDown">
+    <button type="button"
+            class="pm-trigger @(_open ? "pm-trigger--active" : "")"
+            @ref="_triggerRef"
+            data-fb-trigger
+            aria-haspopup="menu"
+            aria-expanded="@(_open ? "true" : "false")"
+            @onclick="ToggleMenu"
+            @onclick:stopPropagation="true">
+        <span class="pm-avatar pm-avatar--sm">
+            @if (!string.IsNullOrWhiteSpace(_photoUrl))
+            {
+                <img src="@_photoUrl" alt="" class="pm-avatar__img" />
+            }
+            else
+            {
+                @_initials
+            }
+        </span>
+        <span class="pm-trigger__name">@_displayName</span>
+        <span class="pm-trigger__chevron @(_open ? "pm-trigger__chevron--up" : "")" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9l6 6 6-6" />
+            </svg>
+        </span>
+    </button>
 
-                @* ── Profile card ── *@
-                <a class="fb-profile-card" href="@($"App/Account/Profile/{_userId}/User")">
-                    <div class="fb-avatar fb-avatar--lg">
-                        @if (!string.IsNullOrWhiteSpace(_photoUrl))
-                        {
-                            <img src="@_photoUrl" alt="@_displayName" class="fb-avatar__img" />
-                        }
-                        else
-                        {
-                            @_initials
-                        }
+    @if (_open)
+    {
+        <div class="pm-backdrop" @onclick="CloseMenu"></div>
+        <div class="pm-panel" role="menu" style="@_dropdownStyle" @onclick:stopPropagation="true">
+            <AuthorizeView Context="u">
+                <Authorized>
+
+                    <a class="pm-identity" role="menuitem" href="@($"App/Account/Profile/{_userId}/User")">
+                        <span class="pm-avatar pm-avatar--lg">
+                            @if (!string.IsNullOrWhiteSpace(_photoUrl))
+                            {
+                                <img src="@_photoUrl" alt="" class="pm-avatar__img" />
+                            }
+                            else
+                            {
+                                @_initials
+                            }
+                        </span>
+                        <span class="pm-identity__text">
+                            <span class="pm-identity__name">@u.User.Identity!.Name</span>
+                            <span class="pm-identity__link">View profile</span>
+                        </span>
+                    </a>
+
+                    <div class="pm-group">
+                        <a class="pm-item" role="menuitem" href="@($"App/Account/Profile/{_userId}/User")">
+                            <span class="pm-item__icon pm-item__icon--accent">
+                                <RadzenIcon Icon="contact_page" />
+                            </span>
+                            <span class="pm-item__body">
+                                <span class="pm-item__title">My profile</span>
+                                <span class="pm-item__sub">Personal details and photo</span>
+                            </span>
+                            <span class="pm-item__arrow" aria-hidden="true">
+                                <RadzenIcon Icon="chevron_right" />
+                            </span>
+                        </a>
+
+                        <a class="pm-item" role="menuitem" href="/">
+                            <span class="pm-item__icon pm-item__icon--neutral">
+                                <RadzenIcon Icon="manage_accounts" />
+                            </span>
+                            <span class="pm-item__body">
+                                <span class="pm-item__title">Settings</span>
+                                <span class="pm-item__sub">Privacy, security &amp; preferences</span>
+                            </span>
+                            <span class="pm-item__arrow" aria-hidden="true">
+                                <RadzenIcon Icon="chevron_right" />
+                            </span>
+                        </a>
                     </div>
-                    <div class="fb-profile-card__info">
-                        <span class="fb-profile-card__name">@u.User.Identity!.Name</span>
-                        <span class="fb-profile-card__sub">See your profile →</span>
+
+                    <div class="pm-separator"></div>
+
+                    <form action="/Account/Logout" method="post" class="pm-logout-form">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@_currentUrl" />
+                        <button type="submit" class="pm-item pm-item--danger" role="menuitem">
+                            <span class="pm-item__icon pm-item__icon--danger">
+                                <RadzenIcon Icon="logout" />
+                            </span>
+                            <span class="pm-item__body">
+                                <span class="pm-item__title">Log out</span>
+                                <span class="pm-item__sub">@u.User.Identity!.Name</span>
+                            </span>
+                        </button>
+                    </form>
+
+                    <div class="pm-footer">
+                        <span>&copy; @DateTime.Now.Year LoanMS</span>
+                        <span>Privacy · Terms</span>
                     </div>
-                </a>
 
-                <div class="fb-divider"></div>
-
-                @* ── Quick actions ── *@
-                <div class="fb-section-label">Account</div>
-                <a class="fb-menu-item" href="@($"App/Account/Profile/{_userId}/User")">
-                    <span class="fb-menu-item__icon fb-menu-item__icon--blue">
-                        <RadzenIcon Icon="contact_page" />
-                    </span>
-                    <div class="fb-menu-item__body">
-                        <span class="fb-menu-item__title">My Profile</span>
-                        <span class="fb-menu-item__sub">View and edit your profile</span>
-                    </div>
-                    <RadzenIcon Icon="chevron_right" Style="color:var(--rz-text-secondary-color);font-size:1.1rem;" />
-                </a>
-                <a class="fb-menu-item" href="/">
-                    <span class="fb-menu-item__icon fb-menu-item__icon--gray">
-                        <RadzenIcon Icon="manage_accounts" />
-                    </span>
-                    <div class="fb-menu-item__body">
-                        <span class="fb-menu-item__title">Settings</span>
-                        <span class="fb-menu-item__sub">Privacy, security &amp; preferences</span>
-                    </div>
-                    <RadzenIcon Icon="chevron_right" Style="color:var(--rz-text-secondary-color);font-size:1.1rem;" />
-                </a>
-
-                <div class="fb-divider"></div>
-
-                @* ── Log out ── *@
-                <div class="fb-section-label">Session</div>
-                <div class="fb-menu-item fb-menu-item--logout">
-                    <span class="fb-menu-item__icon fb-menu-item__icon--red">
-                        <RadzenIcon Icon="logout" />
-                    </span>
-                    <div class="fb-menu-item__body">
-                        <form action="/Account/Logout" method="post" style="margin:0;">
-                            <AntiforgeryToken />
-                            <input type="hidden" name="ReturnUrl" value="@_currentUrl" />
-                            <button type="submit" class="fb-logout-btn">
-                                <span class="fb-menu-item__title">Log Out</span>
-                                <span class="fb-menu-item__sub">@u.User.Identity!.Name</span>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="fb-dropdown__footer">
-                    <span>Privacy · Terms · Advertising · Cookies</span>
-                    <span>&copy; @DateTime.Now.Year LoanMS</span>
-                </div>
-
-            </Authorized>
-        </AuthorizeView>
-    </div>
-}
+                </Authorized>
+            </AuthorizeView>
+        </div>
+    }
 </div>
 
 @code {
@@ -165,6 +172,12 @@
         }
     }
     private void CloseMenu() => _open = false;
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (_open && e.Key == "Escape")
+            CloseMenu();
+    }
 
     private static string BuildInitials(string name)
     {

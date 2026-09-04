@@ -1,0 +1,79 @@
+﻿<RadzenRow Gap="0.75rem" AlignItems="AlignItems.Stretch" class="rz-py-1">
+    <RadzenColumn Size="3">
+        <div class="ps-summary-card">
+            <span class="ps-card-label">
+                <span class="ps-card-icon ps-icon-principle">&#x1F4B0;</span>
+                ប្រាក់ដើម
+            </span>
+            <span class="ps-card-value ps-value-principle">
+                @if (SelectedSchedule is null)
+                {
+                    <span class="ps-value-principle">0.00</span>
+                }
+                else
+                {
+                    @SelectedSchedule?.LeftPrinciple.Format(SelectedSchedule.CurrencyId, 2)
+                }
+            </span>
+        </div>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+        <div class="ps-summary-card">
+            <span class="ps-card-label">
+                <span class="ps-card-icon ps-icon-interest">&#x25B2;</span>
+                ការប្រាក់
+            </span>
+            <span class="ps-card-value ps-value-interest">
+                @if (SelectedSchedule is null)
+                {
+                    <span class="ps-value-interest">0.00</span>
+                }
+                else
+                {
+                    @SelectedSchedule?.LeftInterestAmount.Format(SelectedSchedule.CurrencyId, 2)
+                }
+            </span>
+        </div>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+        <div class="ps-summary-card">
+            <span class="ps-card-label">
+                <span class="ps-card-icon ps-icon-fee">&#x2713;</span>
+                ប្រាក់ប្រសិទ្ធិភាព
+            </span>
+            <span class="ps-card-value ps-value-fee">
+                @if (SelectedSchedule is null)
+                {
+                    <span class="ps-value-fee">0.00</span>
+                }
+                else
+                {
+                    @SelectedSchedule?.LeftCollectionFeeAmount.Format(SelectedSchedule.CurrencyId, 2)
+                }
+            </span>
+        </div>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+        <div class="ps-summary-card" style="border-left: 3px solid #9333ea;">
+            <span class="ps-card-label">
+                <span class="ps-card-icon ps-icon-total">&#x3A3;</span>
+                ប្រាក់សរុប
+            </span>
+            <span class="ps-card-value ps-value-total">
+                @if (SelectedSchedule is null)
+                {
+                    <span class="ps-value-total">0.00</span>
+                }
+                else
+                {
+                    @SelectedSchedule?.LeftAmount.Format(SelectedSchedule.CurrencyId, 2)
+                }
+            </span>
+        </div>
+    </RadzenColumn>
+</RadzenRow>
+
+@code {
+    [Parameter, EditorRequired]
+    public VSchedule? SelectedSchedule { get; set; }
+}

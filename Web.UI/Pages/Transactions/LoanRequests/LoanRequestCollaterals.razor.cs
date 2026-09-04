@@ -1,0 +1,36 @@
+using Applications.Responses.ViewModels.Loans.Requests;
+using Radzen.Blazor;
+
+namespace Web.UI.Pages.Transactions.LoanRequests
+{
+    public partial class LoanRequestCollaterals
+    {
+        [Parameter, EditorRequired] public List<VLoanRequestCollateralLines> Collaterals { get; set; } = [];
+        [Parameter, EditorRequired] public string? CustomerId { get; set; }
+        [Parameter] public bool ShowAdd { get; set; } = false;
+        [Parameter] public bool ShowCommand { get; set; } = false;
+        [Parameter] public bool ShowRemove { get; set; } = false;
+        [Parameter] public EventCallback Add { get; set; }
+        [Parameter] public EventCallback<VLoanRequestCollateralLines> RemoveCollateral { get; set; }
+
+        RadzenDataGrid<VLoanRequestCollateralLines> gridColaterals = default!;
+        private async Task ClickedAdd()
+        {
+            await Add.InvokeAsync();
+
+            await gridColaterals.Reload();
+        }
+
+        private async Task ClickedRemove(VLoanRequestCollateralLines c)
+        {
+            await RemoveCollateral.InvokeAsync(c);
+        }
+
+
+        public async Task CollateralReload()
+        {
+            await gridColaterals.Reload();
+        }
+    }
+}
+

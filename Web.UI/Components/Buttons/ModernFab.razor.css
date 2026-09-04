@@ -1,0 +1,190 @@
+.modern-fab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    text-decoration: none;
+    border-radius: 50%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.02857em;
+    text-transform: uppercase;
+    transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+                box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+                border-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+                transform 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+                color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    box-shadow: 0px 3px 5px -1px rgba(0,0,0,0.2),
+                0px 6px 10px 0px rgba(0,0,0,0.14),
+                0px 1px 18px 0px rgba(0,0,0,0.12);
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.modern-fab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 4px 6px -1px rgba(0,0,0,0.25), 0px 8px 12px 1px rgba(0,0,0,0.18), 0px 4px 20px 3px rgba(0,0,0,0.15);
+    text-decoration: none;
+}
+
+.modern-fab:active {
+    transform: translateY(1px);
+    box-shadow: 0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12);
+}
+
+.fab-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+/* Extended FAB */
+.modern-fab.fab-extended {
+    border-radius: 28px;
+    padding: 0 20px;
+    width: auto;
+    min-height: 56px;
+}
+
+.fab-extended.fab-small {
+    border-radius: 20px;
+    padding: 0 16px;
+    min-height: 40px;
+}
+
+.fab-extended.fab-large {
+    border-radius: 32px;
+    padding: 0 28px;
+    min-height: 64px;
+}
+
+/* Disabled and Flat states */
+.modern-fab.fab-flat {
+    box-shadow: none !important;
+}
+
+.modern-fab.fab-flat:hover {
+    box-shadow: 0px 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.modern-fab.fab-disabled {
+    color: rgba(0, 0, 0, 0.26) !important;
+    background-color: rgba(0, 0, 0, 0.12) !important;
+    box-shadow: none !important;
+    cursor: default;
+    pointer-events: none;
+    transform: none !important;
+}
+
+/* Sizes (Standard FABs) */
+.fab-small {
+    width: 40px;
+    height: 40px;
+}
+.fab-small .fab-icon { font-size: 1.25rem; }
+.fab-small .fab-label { font-size: 0.8125rem; }
+
+.fab-medium {
+    width: 56px;
+    height: 56px;
+}
+.fab-medium .fab-icon { font-size: 1.5rem; }
+.fab-medium .fab-label { font-size: 0.875rem; }
+
+.fab-large {
+    width: 64px;
+    height: 64px;
+}
+.fab-large .fab-icon { font-size: 1.875rem; }
+.fab-large .fab-label { font-size: 0.9375rem; }
+
+/* Inner Content Spacing */
+.fab-label {
+    white-space: nowrap;
+}
+.fab-extended .fab-start-icon {
+    margin-right: 8px;
+}
+.fab-extended .fab-end-icon {
+    margin-left: 8px;
+}
+
+/* Colors */
+.fab-default { background-color: #e0e0e0; color: rgba(0, 0, 0, 0.87); }
+.fab-default:hover { background-color: #d5d5d5; }
+
+.fab-primary { background-color: #594ae2; color: #ffffff; }
+.fab-primary:hover { background-color: #4b3cc2; }
+
+.fab-secondary { background-color: #ff4081; color: #ffffff; }
+.fab-secondary:hover { background-color: #e03571; }
+
+.fab-tertiary { background-color: #1ec8a5; color: #ffffff; }
+.fab-tertiary:hover { background-color: #18a689; }
+
+.fab-info { background-color: #2196f3; color: #ffffff; }
+.fab-info:hover { background-color: #1d82d4; }
+
+.fab-success { background-color: #00c853; color: #ffffff; }
+.fab-success:hover { background-color: #00aa47; }
+
+.fab-warning { background-color: #ff9800; color: #ffffff; }
+.fab-warning:hover { background-color: #e08600; }
+
+.fab-error { background-color: #f44336; color: #ffffff; }
+.fab-error:hover { background-color: #d32f2f; }
+
+.fab-dark { background-color: #424242; color: #ffffff; }
+.fab-dark:hover { background-color: #303030; }
+
+.fab-surface { background-color: #ffffff; color: #424242; }
+.fab-surface:hover { background-color: #f5f5f5; }
+
+/* Ripple Effect */
+.fab-ripple {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: inherit;
+    z-index: 0;
+}
+
+.fab-ripple::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150%;
+    height: 150%;
+    background-color: rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+}
+
+.fab-default .fab-ripple::after,
+.fab-surface .fab-ripple::after {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.modern-fab:active .fab-ripple::after {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    transition: 0s;
+}

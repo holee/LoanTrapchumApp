@@ -1,0 +1,335 @@
+﻿@page "/App/Customers/Loans/{BranchId:int}/Branches"
+@using Applications.Features.Customers.Response
+@using Web.UI.Pages.Lists
+<PageTitle>Customers Loan Active</PageTitle>
+
+<div class="page-wrapper">
+
+    @* ── Header card ── *@
+    <div class="page-header">
+        <div class="header-top">
+            <div class="header-icon-wrap">
+                <RadzenIcon Icon="group" />
+            </div>
+            <div class="header-text">
+                <p class="header-title">Active Loan Customers</p>
+                <p class="header-subtitle">Browse and manage customers with active or pending loan records</p>
+            </div>
+            <div class="header-badge">
+                <RadzenBadge Text="@counts.ToString()"
+                             BadgeStyle="BadgeStyle.Secondary"
+                             IsPill="true" />
+            </div>
+        </div>
+        <div class="toolbar-area">
+            <GridToolbar SearchChanged="SearchCustomer"
+                         @bind-Value="@filterText"
+                         ShowAddCommand="false"
+                         Placeholder="Search customer name, phone...">
+            </GridToolbar>
+        </div>
+    </div>
+
+    @* ── Content card ── *@
+    <div class="content-card">
+        <div class="grid-wrapper">
+            <RadzenDataGrid Count="@counts"
+                            AllowColumnPicking="true"
+                            Responsive
+                            GridLines="DataGridGridLines.Both"
+                            Density="Density.Compact"
+                            AllowAlternatingRows="true"
+                            AllowRowSelectOnRowClick="true"
+                            AllowFiltering="true"
+                            AllowSorting="true"
+                            PageSize="@pageSize"
+                            @key="@counts"
+                            PagerPosition="PagerPosition.Bottom"
+                            ShowPagingSummary="true"
+                            AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Right"
+                            LoadData="@LoadData"
+                            TItem="VCustomerList"
+                            PageSizeOptions="@StorageConstant.PageSizeOptions"
+                            PageSizeChanged="PageSizeChanged"
+                            RowRender="OnRowRender"
+                            RowSelect="OnRowSelected"
+                            CellRender="@OnCellRender"
+                            RowDoubleClick="@OnRowDoubleClick"
+                            CellContextMenu="@ShowContextMenu"
+                            @ref="@_gridCustomer"
+                            Style="min-height: var(--min-height); height: var(--normal-height); max-height: var(--max-height); overflow: auto;"
+                            Data="@VCustomers">
+                <Columns>
+                    <RadzenDataGridColumn Title="#"
+                                          Width="3.5rem"
+                                          Context="c"
+                                          Property="@nameof(VCustomerDetails.CustomerId)"
+                                          TextAlign="TextAlign.Center"
+                                          Pickable="false"
+                                          Filterable="false"
+                                          Sortable="false">
+                        <Template>
+                            @(VCustomers?.IndexOf(c) + 1)
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn Property="@nameof(VCustomerDetails.AltName)"
+                                          Context="c"
+                                          Width="10rem"
+                                          Title="Name">
+                        <Template>
+                            <div class="customer-name-cell">
+                                <div class="customer-avatar">
+                                    <RadzenIcon Icon="person" />
+                                </div>
+                                <span class="customer-name-link" @onclick="@(() => OnRowDoubleClick(c))">
+                                    <KhmerName AltName="@c.AltName" />
+                                </span>
+                            </div>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn Property="@nameof(VCustomerDetails.FullName)"
+                                          Context="c"
+                                          Width="8rem"
+                                          Visible="false"
+                                          Title="Full Name">
+                        <Template>
+                            @c.FullName
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn Title="Phone"
+                                          Context="c"
+                                          Width="8rem"
+                                          Property="Phone"
+                                          Sortable="true">
+                        <HeaderTemplate>
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                                <RadzenIcon Icon="phone" Style="font-size:0.9rem;" />
+                                <span>Phone</span>
+                            </RadzenStack>
+                        </HeaderTemplate>
+                        <Template>
+                            @c.Phone
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn Title="Email"
+                                          Context="c"
+                                          Width="10rem"
+                                          Property="@nameof(VCustomerDetails.EmailAddress)"
+                                          Sortable="false">
+                        <HeaderTemplate>
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                                <RadzenIcon Icon="email" Style="font-size:0.9rem;" />
+                                <span>Email</span>
+                            </RadzenStack>
+                        </HeaderTemplate>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn Context="c"
+                                          Sortable="false"
+                                          Filterable="false"
+                                          Title="Address">
+                        <HeaderTemplate>
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                                <RadzenIcon Icon="location_on" Style="font-size:0.9rem;" />
+                                <span>Address</span>
+                            </RadzenStack>
+                        </HeaderTemplate>
+                        <Template>
+                            <AddressInfo ComInKhmer="@c.ComInKhmer"
+                                         ProInKhmer="@c.ProInKhmer"
+                                         DisInKhmer="@c.DisInKhmer"
+                                         VilInKhmer="@c.VilInKhmer" />
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn Context="c"
+                                          Width="7.5rem"
+                                          TextAlign="TextAlign.Center"
+                                          Sortable="false"
+                                          Filterable="false"
+                                          Property="@nameof(VCustomerDetails.IsLoanActive)"
+                                          Title="Loan Status">
+                        <Template>
+                            <RadzenBadge Text="@(c.IsLoanActive ? "Active" : "None")"
+                                         BadgeStyle="@(c.IsLoanActive ? BadgeStyle.Success : BadgeStyle.Light)"
+                                         Shade="Shade.Default"
+                                         IsPill="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn Context="c"
+                                          Width="6.5rem"
+                                          TextAlign="TextAlign.Center"
+                                          Sortable="false"
+                                          Filterable="false"
+                                          Property="@nameof(VCustomerDetails.IsActive)"
+                                          Title="Status">
+                        <Template>
+                            <RadzenBadge Text="@(c.IsActive ? "Active" : "Inactive")"
+                                         BadgeStyle="@(c.IsActive ? BadgeStyle.Primary : BadgeStyle.Danger)"
+                                         Shade="Shade.Default"
+                                         IsPill="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn Context="c"
+                                          Width="4.5rem"
+                                          Sortable="false"
+                                          TextAlign="TextAlign.Center"
+                                          Filterable="false"
+                                          Pickable="false"
+                                          Title="Actions">
+                        <Template>
+                            <div class="action-btn-wrap">
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
+                                              Icon="@IconNames.MoreVert"
+                                              ButtonStyle="ButtonStyle.Dark"
+                                              Variant="Variant.Text"
+                                              Click="@((args) => ShowContextMenu(args, c))" />
+                            </div>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    </div>
+
+</div>
+
+@code {
+
+    private int selectedValue = 0;
+    private RadzenDataGrid<VCustomerList> _gridCustomer = default!;
+    void ShowContextMenu(MouseEventArgs args, VCustomerList c)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;" Click="OnMenuItemClick">
+        <RadzenMenuItem Icon="add"
+                        Click="@(()=>AddLoanRequest(c.CustomerId))"
+                        Visible="@BState.CanRequest"
+                        Text="Request Loan"
+                        Value="@c.CustomerId"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(() => AddCollateral(c.CustomerId))" Icon="add" Text="Add Collateral" Value="@c.CustomerId" />
+        <RadzenMenuItem Click="@(() => AddInComeModal(c.CustomerId))" Icon="money" Text="Add Income" Value="@c.CustomerId" />
+        <RadzenMenuItem Click="@(() => AddExpenseModal(c.CustomerId))" Icon="paid" Text="Add Expense" Value="@c.CustomerId" />
+        <RadzenMenuItem Click="@(() => AddDetails(c.CustomerId))" Icon="info" Text="Customer Details" Value="@c.CustomerId" />
+    </RadzenMenu>
+    );
+    }
+
+    void OnMenuItemClick(MenuItemEventArgs args)
+    {
+        ContextMenuService.Close();
+    }
+
+
+    async Task PageSizeChanged(int page)
+    {
+        pageSize = page;
+
+        pageIndex = 0; // Reset to first page when page size changes
+
+        await FIlterCustomers(selectedValue);
+    }
+
+
+    private void ShowContextMenu(DataGridCellMouseEventArgs<VCustomerList> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem
+            {
+                Text = "Add Collateral",
+                Icon = "add",
+                Value = "1"
+            },
+            new ContextMenuItem
+            {
+                Text = "Request Loan",
+                Icon = "request_quote",
+                Value = "2",
+                Disabled = (!BState.CanRequest || args.Data.IsLoanActive)
+            },
+            new ContextMenuItem
+            {
+                Text = "Add Income",
+                Icon = "money",
+                Value = "3"
+            },
+             new ContextMenuItem
+            {
+                Text = "Add Expense",
+                Icon = "paid",
+                Value = "4"
+            },
+            new ContextMenuItem
+            {
+                Text = "Customer Details",
+                Icon = "info",
+                Value = "5"
+            },
+
+        }, DoShowCustomerActions(args));
+
+        
+    }
+
+    private Action<MenuItemEventArgs> DoShowCustomerActions(DataGridCellMouseEventArgs<VCustomerList> args)
+    {
+        if (args.Data is null) return (e) => { };
+
+        return (e) =>
+        {
+            ContextMenuService.Close();
+            
+            if (int.TryParse(e.Value?.ToString(), out int value))
+            {
+                switch (value)
+                {
+                    case 1:
+                        _ = AddCollateral(args.Data.CustomerId);
+                        break;
+                    case 2:
+                        _ = AddLoanRequest(args.Data.CustomerId);
+                        break;
+                    case 3:
+                        _ = AddInComeModal(args.Data.CustomerId);
+                        break;
+                    case 4:
+                        AddExpenseModal(args.Data.CustomerId);
+                        break;
+                    case 5:
+                        _ = AddDetails(args.Data.CustomerId);
+                        break;
+                }
+            };
+
+
+        };
+    }
+
+
+
+}
+
+@* <HeaderTemplate>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenLabel id="DropDownEditLabel" Text="Filter" Component="DropDownEdit" />
+                        <RadzenDropDown @bind-Value="selectedValue"
+                                        Placeholder="Filter by"
+                                        TValue="int"
+                                        Data="@Filters.CustomerFilters"
+                                        TextProperty="@nameof(ListItem.Name)"
+                                        ValueProperty="@nameof(ListItem.Id)"
+                                        SelectedItemChanged="@SelectedItemChanged"
+                                        Name="DropDownEdit">
+                        </RadzenDropDown>
+                    </RadzenStack>
+                </HeaderTemplate> *@

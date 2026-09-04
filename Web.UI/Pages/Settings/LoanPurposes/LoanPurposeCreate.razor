@@ -1,0 +1,64 @@
+@using Applications.Features.LoanPurposes
+
+<RadzenTemplateForm TItem="LoanPurposeDtoCreate" Data="@_model" Submit="@OnSubmit">
+    <RadzenStack Gap="1rem">
+
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12">
+                <RadzenFormField Text="Title *" Variant="Variant.Outlined" class="rz-w-100">
+                    <RadzenTextBox @bind-Value="@_model.Title" Name="Title" class="rz-w-100" />
+                </RadzenFormField>
+                <RadzenRequiredValidator Component="Title" Text="Title is required." Popup="false" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton ButtonType="ButtonType.Submit"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Success"
+                          Icon="@IconNames.Save"
+                          Text="Save"
+                          IsBusy="@_isBusy"
+                          BusyText="Saving..." />
+
+            <RadzenButton ButtonType="ButtonType.Button"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Icon="@IconNames.Cancel"
+                          Text="Cancel"
+                          Click="@(() => DialogService.Close(false))" />
+        </RadzenStack>
+
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+
+    [Inject] private ISettingApi SettingApi { get; set; } = default!;
+
+    private LoanPurposeDtoCreate _model = new();
+
+    private bool _isBusy;
+
+    private async Task OnSubmit()
+    {
+        _isBusy = true;
+
+        try
+        {
+            var created = await SettingApi.CreateLoanPurposeAsync(_model);
+
+            NotificationService.Notify(NotificationSeverity.Success, "Success", "Loan Purpose was created successfully.");
+
+            DialogService.Close(created);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+}

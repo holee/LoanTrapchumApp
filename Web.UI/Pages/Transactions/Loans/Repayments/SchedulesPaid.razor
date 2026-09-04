@@ -1,0 +1,104 @@
+<RadzenDataGrid AllowPaging="true"
+                AllowAlternatingRows="true"
+                AllowRowSelectOnRowClick="true"
+                AllowSorting="false"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                Density="Density.Compact"
+                IsLoading="@Tracker.IsLoading"
+                GridLines="DataGridGridLines.Both"
+                PageSize="pageSize"
+                ShowPagingSummary="true"
+                RowSelect="RowSelecting"
+                TItem="VSchedule"
+                Count="@counts"
+                Style="height:30rem;max-height:40rem;overflow:auto;margin:0;padding:0;"
+                Data="@_schedules">
+    <Columns>
+        <RadzenDataGridColumn Title="#"
+                              Width="2rem"
+                              Context="p">
+            <Template>
+                @p.InstallmentNo
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="ថ្ងៃបង់ប្រាក់"
+                              Width="8rem"
+                              Property="PaymentDate"
+                              Context="p">
+            <Template>
+                @p.PaymentDate.DayFirst()
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="ប្រាក់ដើម"
+                              Width="8rem"
+                              Property="Principal"
+                              Context="p">
+            <Template>
+                @p.Principle.As(CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="ការប្រាក់"
+                              Width="8rem"
+                              Property="Interest"
+                              Context="p">
+            <Template>
+                @p.Interest.As(CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="ប្រាក់ប្រសិទ្ធភាព"
+                              Width="8rem"
+                              Property="CollectionFee"
+                              Context="p">
+            <Template>
+                @p.CollectionFee.As(CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="ប្រាក់ពិន័យ"
+                              Width="8rem"
+                              Property="PenaltyAmount"
+                              Context="p">
+            <Template>
+                @if (p.PenaltyAmount > 0)
+                {
+                    <strong class="text-danger">
+                        @p.PenaltyAmount.As(CurrencyId)
+                    </strong>
+                }
+                else
+                {
+                    @p.PenaltyAmount.As(CurrencyId)
+                }
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Total"
+                              Width="8rem"
+                              Property="ទឹកប្រាក់បង់សរុប"
+                              Context="p">
+            <Template>
+                @p.TotalPay
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Actions"
+                              Width="5rem"
+                              TextAlign="TextAlign.Center"
+                              Context="p">
+            <Template>
+                <RadzenButton Size="ButtonSize.ExtraSmall"
+                              Icon="more_vert"
+                              Variant="Variant.Text"
+                              Click="@((args)=>ShowContextMenu(args,p))" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+@code {
+    void ShowContextMenu(MouseEventArgs args, VSchedule p)
+    {
+        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Icon="info_i"
+                    Click="@((args)=>ShowScheduleDetails(p))"
+                    Text="Show Details" />
+</RadzenMenu>
+    );
+    }
+}

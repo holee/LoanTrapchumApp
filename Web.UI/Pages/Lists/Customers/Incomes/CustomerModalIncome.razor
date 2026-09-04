@@ -1,0 +1,112 @@
+﻿<RadzenStack class="rz-my-2" AlignItems="AlignItems.Center"
+             Orientation="Orientation.Horizontal"
+             JustifyContent="JustifyContent.SpaceBetween">
+    <RadzenButton Variant="Variant.Flat"
+                  Click="InsertedRow"
+                  Text="Add"
+                  ButtonStyle="ButtonStyle.Primary"
+                  Icon="add_circle"
+                  Size="ButtonSize.ExtraSmall" />
+</RadzenStack>
+<RadzenStack AlignItems="AlignItems.Center"
+             Wrap="FlexWrap.Wrap"
+             Orientation="Orientation.Horizontal">
+
+    <RadzenDataGrid Data="@Incomes"
+                    Responsive
+                    TItem="VCustomerIncomes"
+                    @ref="incomeGrid"
+                    GridLines="DataGridGridLines.Both"
+                    ColumnWidth="8rem"
+                    Density="Density.Compact">
+        <Columns>
+            <RadzenDataGridColumn Context="c" Title="#" Width="2rem" TextAlign="TextAlign.Center">
+                <Template>
+                    <input type="hidden" value="@c.IncomeId" />
+                    @{
+                        var index = Incomes?.IndexOf(c) + 1;
+                    }
+                    @index
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Context="c" Title="IncomeSource" Property="IncomeSource">
+                <Template>
+                    @c.IncomeSource
+                </Template>
+                <EditTemplate>
+                    <RadzenTextBox @bind-Value="c.IncomeSource"
+                                   class="rz-w-100" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Width="8rem"
+                                  Context="c" TextAlign="TextAlign.Right"
+                                  Title="Amount"
+                                  Property="IncomeAmount">
+                <Template>
+                    @c.IncomeAmount
+                </Template>
+                <EditTemplate>
+                    <RadzenNumeric TValue="decimal?"
+                                   @bind-Value="c.IncomeAmount"
+                                   class="rz-w-100"
+                                   Format="#,##0.00"
+                                   ShowUpDown="false" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Context="c" Title="Description" Property="InDescription">
+                <Template>
+                    @c.InDescription
+                </Template>
+                <EditTemplate>
+                    <RadzenTextBox @bind-Value="c.InDescription" class="rz-w-100"/>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TextAlign="TextAlign.Center" Context="c" Title="Action" Width="4rem">
+                <Template>
+                    <RadzenButton Variant="Variant.Text"
+                                  Icon="edit"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Click="@(()=>EditRow(c))"
+                                  @onclick:stopPropagation="true"
+                                  Size="ButtonSize.ExtraSmall" />
+                    <RadzenButton Variant="Variant.Text"
+                                  Icon="delete"
+                                  ButtonStyle="ButtonStyle.Danger"
+                                  Click="@(()=>DeleteRow(c))"
+                                  @onclick:stopPropagation="true"
+                                  Size="ButtonSize.ExtraSmall" />
+                </Template>
+                <EditTemplate>
+                    <RadzenButton Variant="Variant.Flat"
+                                  Icon="@IconNames.Checked"
+                                  Click="@(()=>SaveRow(c))"
+                                  ButtonStyle="ButtonStyle.Success"
+                                  @onclick:stopPropagation="true"
+                                  Size="ButtonSize.ExtraSmall" />
+                    <RadzenButton Variant="Variant.Text"
+                                  Icon="@IconNames.Undo"
+                                  ButtonStyle="ButtonStyle.Warning"
+                                  Click="@(()=>CancelEdit(c))"
+                                  @onclick:stopPropagation="true"
+                                  Size="ButtonSize.ExtraSmall" />
+
+                </EditTemplate>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenStack>
+<RadzenStack Orientation="Orientation.Horizontal"
+             class="rz-mt-3"
+             AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+    <RadzenButton Text="Save"
+                  Click="SaveChanged"
+                  Icon="save"
+                  ButtonStyle="ButtonStyle.Success"
+                  Size="ButtonSize.Small" />
+    <RadzenButton Text="Close"
+                  Click="Close"
+                  Icon="cancel"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Size="ButtonSize.Small" />
+</RadzenStack>
+

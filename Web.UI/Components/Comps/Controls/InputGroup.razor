@@ -1,0 +1,16 @@
+﻿<div class="input-group input-group-@size @CssClass">
+    @if (Start is not null)
+    {
+        <span class="input-group-text">@Start</span>
+    }
+    @if (ChildContent is not null)
+    {
+        @ChildContent
+    }
+    @if (End is not null)
+    {
+        <span class="input-group-text">@End</span>
+    }
+</div>
+
+

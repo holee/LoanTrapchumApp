@@ -1,0 +1,205 @@
+﻿@using Applications.Commons.Messages.Activities
+@using Applications.Features.Activities.ActitvityQuery.GetActivityByCustomer
+@using Applications.Features.Activities.Command.DeleteActivity
+<RadzenStack Orientation="Orientation.Horizontal"
+             class="rz-mb-2"
+             Visible="ShowCommand"
+             AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+    <RadzenButton Text="Add Activity"
+                  Click="@AddNewActivity"
+                  Icon="add"
+                  Visible="@(ShowAdd && ShowCommand)"
+                  ButtonStyle="ButtonStyle.Primary"
+                  Size="ButtonSize.Small" />
+
+    <RadzenButton Click="RefreshActivity"
+                  Icon="refresh"
+                  ButtonStyle="ButtonStyle.Secondary"
+                  class="ml-2"
+                  Visible="@(ShowReload && ShowCommand)"
+                  Size="ButtonSize.Small" />
+
+</RadzenStack>
+<RadzenDataGrid Data="Items"
+                GridLines="DataGridGridLines.Both"
+                Responsive
+                IsLoading="isLoading"
+                TItem="VCustomerActivities"
+                RowRender="@OnRowRender"
+                Density="Density.Compact">
+    <Columns>
+        <RadzenDataGridColumn Context="c"
+                              Width="3rem"
+                              Property="@nameof(VCustomerActivities.ActivityId)"
+                              Title="#">
+            <Template>
+                @c.RowIndex
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="c"
+                              Width="8rem"
+                              Property="@nameof(VCustomerActivities.ActivityDate)"
+                              Title="Date">
+            <Template>
+                @c.ActivityDate.DayFirst()
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="c"
+                              Property="@nameof(VCustomerActivities.Description)"
+                              Title="Description">
+            <Template>
+                @c.Description
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="c"
+                              Width="5rem"
+                              TextAlign="TextAlign.Center"
+                              Property="@nameof(VCustomerActivities.Status)" Title="Status">
+            <Template>
+                <RadzenCheckBox Value="@c.Status" ReadOnly />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Width="5rem"
+                              Title="Action"
+                              TextAlign="TextAlign.Center"
+                              Context="c"
+                              Property="Created">
+            <Template>
+                <RadzenButton Size="ButtonSize.Small"
+                              Shade="Shade.Dark"
+                              Variant="Variant.Text"
+                              Icon="@IconNames.MoreVert"
+                              Click="@((arg) => ShowContextMenu(arg,c))"
+                              ButtonStyle="ButtonStyle.Info">
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+    <LoadingTemplate>
+        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    </LoadingTemplate>
+</RadzenDataGrid>
+
+
+
+@code {
+
+
+    void ShowContextMenu(MouseEventArgs args, VCustomerActivities c)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Click="@(() => Details(c))" Icon="add" Text="Details" Value="@c.ActivityId" Visible="false" />
+    <RadzenMenuItem Click="@(() => Edit(c))" Icon="money" Text="Edit" Value="@c.ActivityId" />
+    <RadzenMenuItem Click="@(() => Delete(c))" Icon="@IconNames.Delete" Text="Delete" Value="@c.ActivityId" />
+</RadzenMenu>
+    );
+    }
+
+
+    [Parameter] public string CustomerId { get; set; } = string.Empty;
+    [Parameter] public bool ShowAdd { get; set; } = false;
+    [Parameter] public bool ShowReload { get; set; } = false;
+    [Parameter] public bool ShowCommand { get; set; } = false;
+    private IEnumerable<VCustomerActivities> Items  = [];
+
+    bool isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+            await RefreshActivity();
+    
+        await base.OnInitializedAsync();
+    }
+
+
+    void Details(VCustomerActivities c)
+    {
+        var param = new Dictionary<string, object?>
+        {
+            {"ActivityId",c.ActivityId}
+        };
+    }
+
+    async Task Edit(VCustomerActivities c)
+    {
+        var param = new Dictionary<string, object?>
+        {
+            {"ActivityId",c.ActivityId},
+            {"CustomerId",CustomerId}
+        };
+
+        var dia = await DialogService.OpenAsync<CustomerActivitiesAdd>("Edit Activity", param);
+
+        if (dia is bool b && b == true)
+        {
+            await RefreshActivity();
+        }
+    }
+
+    async Task Delete(VCustomerActivities c)
+    {
+        var confirm = await DialogService.Confirm(ActivityMessage.ConfirmDelete, "Confirm Delete");
+
+        if (confirm == false) return;
+
+        var command = new DeleteActivityCommand(c.ActivityId, CustomerId);
+
+        var result = await mediator.Send(command);
+
+        if (!result.IsError)
+        {
+
+            await RefreshActivity();
+
+            _toastService.ShowSuccess("Success", ActivityMessage.DeleteSuccess);
+        }
+        else
+        {
+            _toastService.ShowError("Error", result.FirstError.Description);
+        }
+
+    }
+
+    async Task AddNewActivity()
+    {
+
+        var param = new Dictionary<string, object?>
+        {
+            {"CustomerId",CustomerId}
+        };
+
+
+        bool? addActivitieDialogue = await DialogService.OpenAsync<CustomerActivitiesAdd>("Activity", param);
+
+        if (addActivitieDialogue is not null && addActivitieDialogue == true)
+        {
+            await RefreshActivity();
+        }
+    }
+    async Task RefreshActivity()
+    {
+
+        isLoading = true;
+
+        var query = new GetActivityByCustomerIdQuery(CustomerId);
+
+        var rsp = await mediator.Send(query);
+
+        if (!rsp.IsError)
+        {
+            Items = rsp.Value;
+        }
+
+        isLoading = false;
+    }
+
+
+    void OnRowRender(RowRenderEventArgs<VCustomerActivities> args)
+    {
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1; // store 1-based index
+    }
+}

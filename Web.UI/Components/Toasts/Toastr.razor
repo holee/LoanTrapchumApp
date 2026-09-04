@@ -1,0 +1,29 @@
+﻿<div class="toast-container @PositionClass">
+    @foreach (var toast in _toasts)
+    {
+        <div class="toast toast-@toast.Level.ToString().ToLower() @(IsRemoving(toast.Id) ? "toast-removing" : "")"
+             @key="toast.Id"
+             @onmouseenter="() => OnMouseEnter(toast.Id)"
+             @onmouseleave="() => OnMouseLeave(toast.Id)">
+            @if (ToastService.Options.ShowCloseButton)
+            {
+                <button class="toast-close-button" @onclick="() => Dismiss(toast.Id)" @onclick:stopPropagation="true">×</button>
+            }
+            @if (!string.IsNullOrEmpty(toast.Title))
+            {
+                <div class="toast-title">@toast.Title</div>
+            }
+            @if (!string.IsNullOrEmpty(toast.Message))
+            {
+                <div class="toast-message">@toast.Message</div>
+            }
+            @if (ToastService.Options.ShowProgressBar && toast.DurationMs > 0)
+            {
+                <div class="toast-progress @(IsPaused(toast.Id) ? "toast-progress-paused" : "")"
+                     style="animation-duration: @(toast.DurationMs)ms;">
+                </div>
+            }
+        </div>
+    }
+</div>
+

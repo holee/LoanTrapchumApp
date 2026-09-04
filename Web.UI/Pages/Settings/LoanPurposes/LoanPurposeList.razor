@@ -1,0 +1,193 @@
+@page "/App/Settings/Loan-Purposes"
+
+<PageTitle>Loan Purposes</PageTitle>
+
+<GridToolbar SearchChanged="@TextChanged">
+    <LeftChildren>
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Icon="@IconNames.Add"
+                      Text="Add New"
+                      Click="@AddLoanPurpose" />
+    </LeftChildren>
+</GridToolbar>
+
+<RadzenDataGrid TItem="LoanPurposeDto"
+                @ref="@_gridRef"
+                Data="@_items"
+                Count="@_counts"
+                LoadData="@LoadData"
+                IsLoading="@_isLoading"
+                PageSize="@_pageSize"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PageSizeChanged="@PageSizeChanged"
+                PagerPosition="PagerPosition.Bottom"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="false"
+                AllowAlternatingRows="true"
+                Density="Density.Compact"
+                GridLines="DataGridGridLines.Both"
+                Responsive="true">
+    <Columns>
+        <RadzenDataGridColumn TItem="LoanPurposeDto" Title="#" Width="4rem" Sortable="false" Filterable="false">
+            <Template Context="c">
+                @(_items.IndexOf(c) + 1)
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="LoanPurposeDto" Property="@nameof(LoanPurposeDto.Title)" Title="Title" />
+
+        <RadzenDataGridColumn TItem="LoanPurposeDto" Title="Actions" Width="5rem" TextAlign="TextAlign.Center" Sortable="false" Filterable="false">
+            <Template Context="c">
+                <RadzenButton Icon="@IconNames.MoreVert"
+                              Variant="Variant.Text"
+                              Size="ButtonSize.ExtraSmall"
+                              Click="@((args) => ShowContextMenu(args, c))"
+                              @onclick:stopPropagation="true" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+
+    [Inject] private ISettingApi SettingApi { get; set; } = default!;
+
+    private List<LoanPurposeDto> _items = [];
+
+    private RadzenDataGrid<LoanPurposeDto> _gridRef = default!;
+
+    private int _pageIndex = 0;
+
+    private int _pageSize = 15;
+
+    private int _counts = 0;
+
+    private string? _filter = string.Empty;
+
+    private string _sortField = nameof(LoanPurposeDto.Id);
+
+    private bool _sortDescending = false;
+
+    private bool _isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetLoanPurposes(_filter);
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task GetLoanPurposes(string? filter)
+    {
+        _isLoading = true;
+
+        try
+        {
+            var pager = await SettingApi.GetLoanPurposesAsync(_pageIndex, _pageSize, _sortField, _sortDescending, filter);
+
+            _items = pager.Items ?? [];
+
+            _counts = pager.Count;
+        }
+        catch (Exception ex)
+        {
+            _items = [];
+
+            _counts = 0;
+
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadData(LoadDataArgs args)
+    {
+        _pageIndex = args.Skip ?? 0;
+
+        _pageSize = args.Top ?? _pageSize;
+
+        (_sortField, _sortDescending) = args.PageInfo(nameof(LoanPurposeDto.Id));
+
+        await GetLoanPurposes(_filter);
+    }
+
+    private async Task PageSizeChanged(int size)
+    {
+        _pageSize = size;
+
+        _pageIndex = 0;
+
+        await GetLoanPurposes(_filter);
+    }
+
+    private async Task TextChanged(string? value)
+    {
+        _filter = value;
+
+        _pageIndex = 0;
+
+        await GetLoanPurposes(_filter);
+    }
+
+    private async Task AddLoanPurpose()
+    {
+        var result = await DialogService.OpenAsync<LoanPurposeCreate>("Add Loan Purpose",
+            options: new DialogOptions { AutoFocusFirstElement = false });
+
+        if (result is LoanPurposeDto)
+        {
+            await GetLoanPurposes(_filter);
+        }
+    }
+
+    private async Task EditLoanPurpose(LoanPurposeDto item)
+    {
+        var result = await DialogService.OpenAsync<LoanPurposeEdit>("Edit Loan Purpose",
+            new Dictionary<string, object?> { { nameof(LoanPurposeEdit.Id), item.Id } },
+            new DialogOptions { AutoFocusFirstElement = false });
+
+        if (result is LoanPurposeDto)
+        {
+            await GetLoanPurposes(_filter);
+        }
+    }
+
+    private async Task DeleteLoanPurpose(LoanPurposeDto item)
+    {
+        var confirmed = await DialogService.Confirm($"Delete loan purpose '{item.Title}'?", "Confirm Delete",
+            new ConfirmOptions { OkButtonText = "Delete", CancelButtonText = "Cancel" });
+
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        try
+        {
+            await SettingApi.DeleteLoanPurposeAsync(item.Id);
+
+            NotificationService.Notify(NotificationSeverity.Success, "Deleted", $"Loan Purpose '{item.Title}' was deleted.");
+
+            await GetLoanPurposes(_filter);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+    }
+
+    private void ShowContextMenu(MouseEventArgs args, LoanPurposeDto item)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu>
+        <RadzenMenuItem Text="Edit" Icon="@IconNames.Edit" Click="@(() => EditLoanPurpose(item))" />
+        <RadzenMenuItem Text="Delete" Icon="@IconNames.Delete" Click="@(() => DeleteLoanPurpose(item))" />
+    </RadzenMenu>);
+    }
+}

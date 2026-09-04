@@ -1,0 +1,965 @@
+@page "/App/Loans/Schedules/{BranchId:int}/Branches"
+@using Web.UI.Pages.Transactions.Loans.Menu
+@using Web.UI.Pages.Transactions.RecievePayements
+@using Web.UI.Helpers.Enums
+@using Web.UI.Helpers.Options
+@using Web.UI.Pages.Lists
+@using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate
+<PageTitle>Payment Schedules</PageTitle>
+
+@* <RadzenFieldset AllowCollapse="true" Collapsed="true" Text="Payment Details">
+    @foreach (var grp in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+    {
+        var currLabel = grp.Key == 2 ? "USD $" : "KHR ៛";
+        <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.35rem;">
+            <RadzenIcon Icon="currency_exchange" Style="font-size:0.9rem;color:var(--rz-primary);" />
+            <span style="font-size:0.78rem;font-weight:700;color:var(--rz-primary);text-transform:uppercase;letter-spacing:0.05em;">@currLabel</span>
+            <hr style="flex:1;margin:0;border-color:var(--rz-border-disabled-color);" />
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:0.85rem;">
+            <div class="summary-card sc-principle">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <span class="s-label">Principle</span>
+                    <RadzenIcon Icon="account_balance_wallet" class="s-icon" />
+                </RadzenStack>
+                <span class="s-value">@grp.Sum(x => x.Principle ?? 0).ToString("N2")</span>
+                <span style="font-size:0.72rem;opacity:0.65;">Total due principle</span>
+            </div>
+            <div class="summary-card sc-interest">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <span class="s-label">Interest</span>
+                    <RadzenIcon Icon="percent" class="s-icon" />
+                </RadzenStack>
+                <span class="s-value">@grp.Sum(x => x.Interest ?? 0).ToString("N2")</span>
+                <span style="font-size:0.72rem;opacity:0.65;">Total due interest</span>
+            </div>
+            <div class="summary-card sc-paid">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <span class="s-label">Paid Principle</span>
+                    <RadzenIcon Icon="check_circle" class="s-icon" />
+                </RadzenStack>
+                <span class="s-value">@grp.Sum(x => x.PaidPrinciple ?? 0).ToString("N2")</span>
+                <span style="font-size:0.72rem;opacity:0.65;">Amount already paid</span>
+            </div>
+            <div class="summary-card sc-penalty">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <span class="s-label">Penalty</span>
+                    <RadzenIcon Icon="warning" class="s-icon" />
+                </RadzenStack>
+                <span class="s-value">@grp.Sum(x => x.PenaltyAmount ?? 0).ToString("N2")</span>
+                <span style="font-size:0.72rem;opacity:0.65;">Late payment charges</span>
+            </div>
+            <div class="summary-card sc-total">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <span class="s-label">Total Pay</span>
+                    <RadzenIcon Icon="payments" class="s-icon" />
+                </RadzenStack>
+                <span class="s-value">@grp.Sum(x => x.TotalPay ?? 0).ToString("N2")</span>
+                <span style="font-size:0.72rem;opacity:0.65;">Grand total payable</span>
+            </div>
+        </div>
+    }
+</RadzenFieldset> *@
+
+<RadzenTabs RenderMode="TabRenderMode.Client" SelectedIndex="@_selectedIndex" @ref="@refTabs">
+    <Tabs>
+        <RadzenTabsItem Icon="@IconNames.List">
+            <Template>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem" class="rz-ms-1">
+                    <span>All Schedules</span>
+                    <RadzenBadge BadgeStyle="BadgeStyle.Primary" IsPill="true" Text="@AllScheduleCounts" class="rz-ms-1" />
+                </RadzenStack>
+            </Template>
+            <ChildContent>
+                @* ── Grid Card ───────────────────────────────────────────────────── *@
+                <RadzenCard class="rz-shadow-3 rz-border-radius-3 rz-p-3">
+                    <div class="schedule-header">
+                        <RadzenIcon Icon="table_rows" Style="color:var(--rz-primary);" />
+                        <h5>Payment Schedule List</h5>
+                        <RadzenBadge BadgeStyle="BadgeStyle.Light" IsPill="true" Text="@($"{AllScheduleCounts} records")" />
+                    </div>
+
+                    <GridToolbar SearchChanged="@AllTab_TextSearchChanged">
+                        <LeftChildren>
+                            <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal" Gap="0.5rem" Wrap="FlexWrap.Wrap">
+                                <RadzenFormField Text="Filter By" Variant="Variant.Outlined">
+                                    <RadzenDropDown Data="@Filters.ScheduleFilters"
+                                                    @bind-Value="@_allTab_selectedFilter"
+                                                    ValueProperty="@nameof(ListItem.Id)"
+                                                    TextProperty="@nameof(ListItem.Name)"
+                                                    Change="@AllTab_OnFilterChanged"
+                                                    Style="min-width:160px;"
+                                                    TValue="int" />
+                                </RadzenFormField>
+                                @if (_allTab_selectedFilter == (int)ScheduleFilter.MonthToDate ||
+                                     _allTab_selectedFilter == (int)ScheduleFilter.NextWeek)
+                                {
+                                    <RadzenFormField Text="Start" AllowFloatingLabel="true" Variant="Variant.Outlined">
+                                        <RadzenDatePicker TValue="DateTime?"
+                                                          DateFormat="dd/MM/yyyy"
+                                                          Style="width:9rem;"
+                                                          Change="@AllTab_OnStartDateChanged"
+                                                          @bind-Value="@_allTab_start" />
+                                    </RadzenFormField>
+                                    <RadzenFormField Text="End" AllowFloatingLabel="true" Variant="Variant.Outlined">
+                                        <RadzenDatePicker TValue="DateTime?"
+                                                          DateFormat="dd/MM/yyyy"
+                                                          Style="width:9rem;"
+                                                          @bind-Value="@_allTab_end"
+                                                          Change="@AllTab_OnEndDateChanged" />
+                                    </RadzenFormField>
+                                }
+                            </RadzenStack>
+                        </LeftChildren>
+                    </GridToolbar>
+
+                    <RadzenDataGrid Data="@_allTab_scheduleItems"
+                                    TItem="VSchedule"
+                                    Count="@_allTab_counts"
+                                    PageSize="@_allTab_pageSize"
+                                    Density="Density.Compact"
+                                    GridLines="DataGridGridLines.Horizontal"
+                                    LoadData="@AllTab_LoadData"
+                                    AllowSorting="false"
+                                    RowSelect="AllTab_RowSelected"
+                                    Responsive="true"
+                                    PagerPosition="PagerPosition.Bottom"
+                                    ShowPagingSummary="true"
+                                    PagerHorizontalAlign="HorizontalAlign.Right"
+                                    AllowRowSelectOnRowClick="true"
+                                    PageSizeOptions="@StorageConstant.PageSizeOptions"
+                                    PageSizeChanged="@AllTab_ChangedPageSize"
+                                    RowRender="@AllTab_OnRowRender"
+                                    CellContextMenu="@AllTab_ContextMenuClick"
+                                    CellRender="@AllTab_RowRenderChanged"
+                                    AllowPaging="true"
+                                    class="rz-border-radius-2"
+                                    style="margin-top:0.5rem;">
+                        <Columns>
+                            @* # *@
+                            <RadzenDataGridColumn Context="p" Width="3rem" Title="#" Sortable="false" TextAlign="TextAlign.Center">
+                                <HeaderTemplate>
+                                    <span style="color:var(--rz-text-disabled-color);font-size:0.75rem;">#</span>
+                                </HeaderTemplate>
+                                <Template>
+                                    <span style="color:var(--rz-text-disabled-color);font-size:0.8rem;">@(_allTab_scheduleItems.IndexOf(p) + 1)</span>
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            @* Date *@
+                            <RadzenDataGridColumn Property="Payment" Context="p" Title="Due Date" Width="7rem" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.25rem">
+                                        <RadzenIcon Icon="event" Style="font-size:0.85rem;color:#1565c0;" />
+                                        <span>ថ្ងៃត្រូវបង់</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    <RadzenStack Gap="0.1rem">
+                                        <span style="font-weight:600;font-size:0.82rem;">@p.PaymentDate.DayFirst()</span>
+                                        @if (p.InstallmentNo.HasValue)
+                                        {
+                                            <span style="font-size:0.7rem;color:var(--rz-text-disabled-color);">Install #@p.InstallmentNo</span>
+                                        }
+                                    </RadzenStack>
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            @* Days Arrear *@
+                            <RadzenDataGridColumn Property="DayArrea" Context="p" Title="ចំនួនថ្ងៃជំពាក់" Width="5.5rem" TextAlign="TextAlign.Center" Sortable="true">
+                                <Template>
+                                    @if (p.DayArrea > 0)
+                                    {
+                                        <RadzenBadge BadgeStyle="@(p.DayArrea > 14 ? BadgeStyle.Danger : p.DayArrea > 7 ? BadgeStyle.Warning : BadgeStyle.Info)"
+                                                     IsPill="true" Text="@($"{p.DayArrea}d")" />
+                                    }
+                                    else
+                                    {
+                                        <RadzenBadge BadgeStyle="BadgeStyle.Success" IsPill="true" Text="OK" />
+                                    }
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            @* Client *@
+                            <RadzenDataGridColumn Context="p" Property="AltName" Title="Client" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
+                                        <RadzenIcon Icon="@IconNames.PersonPin" Style="font-size:0.85rem;color:#1565c0;" />
+                                        <span>ឈ្មោះអតិថិជន</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    <RadzenStack Gap="0.1rem">
+                                        <KhmerName AltName="@p.AltName" />
+                                    </RadzenStack>
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            @* Principle *@
+                            <RadzenDataGridColumn Context="p" Title="Principle" Property="Principle" TextAlign="TextAlign.Right" Width="8rem" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
+                                        <RadzenIcon Icon="account_balance_wallet" Style="font-size:0.85rem;color:#1565c0;" />
+                                        <span>ប្រាក់ដើមត្រូវបង់</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    <span style="font-weight:500;">@p.Principle.As(p.CurrencyId)</span>
+                                </Template>
+                                <FooterTemplate>
+                                    @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                    {
+                                        var sym = g.Key == 2 ? "$" : "៛";
+                                        <div><strong style="color:#1565c0;">@g.Sum(x => x.Principle ?? 0).ToString("N2") @sym</strong></div>
+                                    }
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            @* Interest *@
+                            <RadzenDataGridColumn Context="p" Title="Interest" Property="Interest" Width="7rem" TextAlign="TextAlign.Right" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
+                                        <RadzenIcon Icon="percent" Style="font-size:0.85rem;color:#2e7d32;" />
+                                        <span>ការប្រាក់</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    <span style="font-weight:500;">@p.Interest.As(p.CurrencyId)</span>
+                                </Template>
+                                <FooterTemplate>
+                                    @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                    {
+                                        var sym = g.Key == 2 ? "$" : "៛";
+                                        <div><strong style="color:#2e7d32;">@g.Sum(x => x.Interest ?? 0).ToString("N2") @sym</strong></div>
+                                    }
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            @* Paid Principle *@
+                            <RadzenDataGridColumn Context="p" Title="Paid Principle" Property="PaidPrinciple" Width="8rem" TextAlign="TextAlign.Right" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
+                                        <RadzenIcon Icon="check_circle" Style="font-size:0.85rem;color:#4527a0;" />
+                                        <span>ប្រាក់ដើមដែលបានបង់</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    @{
+                                        var ratio = (p.Principle ?? 0) > 0 ? (p.PaidPrinciple ?? 0) / (p.Principle ?? 1) * 100 : 0;
+                                    }
+                                    <RadzenStack Gap="0.1rem">
+                                        <span style="font-weight:500;color:#4527a0;">@p.PaidPrinciple.As(p.CurrencyId)</span>
+                                        @if (ratio > 0)
+                                        {
+                                            <RadzenProgressBar Value="@((double)ratio)" Max="100" ShowValue="false"
+                                                               Style="height:4px;" ProgressBarStyle="ProgressBarStyle.Info" />
+                                        }
+                                    </RadzenStack>
+                                </Template>
+                                <FooterTemplate>
+                                    @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                    {
+                                        var sym = g.Key == 2 ? "$" : "៛";
+                                        <div><strong style="color:#4527a0;">@g.Sum(x => x.PaidPrinciple ?? 0).ToString("N2") @sym</strong></div>
+                                    }
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            @* Penalty *@
+                            <RadzenDataGridColumn Context="p" Title="Penalty" Property="PenaltyAmount" Width="7rem" TextAlign="TextAlign.Right" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
+                                        <RadzenIcon Icon="warning" Style="font-size:0.85rem;color:#e65100;" />
+                                        <span>ប្រាក់ពិន័យ</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    @if (p.PenaltyAmount > 0)
+                                    {
+                                        <strong style="color:#c62828;">@p.PenaltyAmount.As(p.CurrencyId)</strong>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:var(--rz-text-disabled-color);">—</span>
+                                    }
+                                </Template>
+                                <FooterTemplate>
+                                    @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                    {
+                                        var sym = g.Key == 2 ? "$" : "៛";
+                                        <div><strong style="color:#c62828;">@g.Sum(x => x.PenaltyAmount ?? 0).ToString("N2") @sym</strong></div>
+                                    }
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            @* Total Pay *@
+                            <RadzenDataGridColumn Context="p" Title="Total Pay" Property="TotalPay" Width="9rem" TextAlign="TextAlign.Right" Sortable="true">
+                                <HeaderTemplate>
+                                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.25rem">
+                                        <RadzenIcon Icon="payments" Style="font-size:0.85rem;color:#006064;" />
+                                        <span>ប្រាក់សរុប</span>
+                                    </RadzenStack>
+                                </HeaderTemplate>
+                                <Template>
+                                    <RadzenStack Gap="0.1rem" AlignItems="AlignItems.End">
+                                        <strong style="font-size:0.88rem;color:#006064;">@p.TotalPay.As(p.CurrencyId)</strong>
+                                        @if (p.IsPaid)
+                                        {
+                                            <RadzenBadge BadgeStyle="BadgeStyle.Success" IsPill="true" Text="Paid" Style="font-size:0.65rem;" />
+                                        }
+                                        else if (p.IsPartialPaid)
+                                        {
+                                            <RadzenBadge BadgeStyle="BadgeStyle.Warning" IsPill="true" Text="Partial" Style="font-size:0.65rem;" />
+                                        }
+                                    </RadzenStack>
+                                </Template>
+                                <FooterTemplate>
+                                    @foreach (var g in _allTab_scheduleItems.GroupBy(x => x.CurrencyId))
+                                    {
+                                        var sym = g.Key == 2 ? "$" : "៛";
+                                        <div><strong style="color:#006064;font-size:0.9rem;">@g.Sum(x => x.TotalPay ?? 0).ToString("N2") @sym</strong></div>
+                                    }
+                                </FooterTemplate>
+                            </RadzenDataGridColumn>
+
+                            @* Actions *@
+                            <RadzenDataGridColumn Context="p" Title="Actions" Width="4rem" TextAlign="TextAlign.Center" Sortable="false">
+                                <Template>
+                                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                                  Icon="more_vert"
+                                                  Variant="Variant.Text"
+                                                  ButtonStyle="ButtonStyle.Secondary"
+                                                  Click="@((args) => AllTabShowContextMenu(args, p))" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                        <EmptyTemplate>
+                            <RadzenStack JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Style="padding:3rem;" Gap="0.5rem">
+                                <RadzenIcon Icon="inbox" Style="font-size:3rem;color:var(--rz-text-disabled-color);" />
+                                <span style="color:var(--rz-text-disabled-color);">No schedules found</span>
+                            </RadzenStack>
+                        </EmptyTemplate>
+                    </RadzenDataGrid>
+                </RadzenCard>
+            </ChildContent>
+        </RadzenTabsItem>
+
+        @foreach (var item in _tabs)
+        {
+            <RadzenTabsItem Icon="@item.Icon" Text="@item.Title" @key="@item.Key">
+                <Template>
+                    <CloseTabButton Title="@item.Title"
+                                    Closed="(() => CloseTab(item.Key))" />
+                </Template>
+                <ChildContent>
+                    @item.Content
+                </ChildContent>
+            </RadzenTabsItem>
+
+        }
+
+    </Tabs>
+</RadzenTabs>
+@code {
+
+    private List<VSchedule> _allTab_scheduleItems = [];
+
+    private string? _allTab_filter = string.Empty;
+
+    private int _allTab_counts = 0;
+
+    private int _allTab_pageSize = 15;
+
+    private int _allTab_pageIndex = 0;
+
+    private bool _allTab_isLoading = false;
+
+    private string _allTab_sortField = "LoanId";
+
+    private bool _allTab_sortDescending = true;
+
+    private DateTime? _allTab_start = DateTime.Now;
+
+    private DateTime? _allTab_end;
+
+    private int _allTab_selectedFilter = 0;
+
+    private string recievePaymentUrl = "/";
+
+    private string scheduleDetailsUrl = "/";
+
+    private string payOffUrl = "/";
+
+    private string? lateScheduleUrl = string.Empty;
+
+    private bool ShowOnTab { get; set; } = false;
+
+
+    void AllTab_OnStartDateChanged()
+    {
+        var daysToAdd = _allTab_selectedFilter switch
+        {
+            (int)ScheduleFilter.MonthToDate => 28,
+
+            (int)ScheduleFilter.NextWeek => 7,
+
+            _ => (int?)null
+        };
+
+        if (daysToAdd.HasValue)
+        {
+            _allTab_end = _allTab_start!.Value.AddDays(daysToAdd.Value);
+        }
+
+        _ = AllTab_OnFilterChanged();
+    }
+
+    void AllTab_OnEndDateChanged()
+    {
+        _ = AllTab_OnFilterChanged();
+    }
+
+    async Task AllTab_OnFilterChanged()
+    {
+        if (_allTab_selectedFilter == (int)ScheduleFilter.All)
+        {
+            await AllTab_GetLoansAsync();
+        }
+        else if (_allTab_selectedFilter == (int)ScheduleFilter.Today)
+        {
+            await AllTab_GetSchedulesDueDate();
+
+        }
+        else if (_allTab_selectedFilter == (int)ScheduleFilter.OverDueDate)
+        {
+            await AllTab_GetSchedulesOverDueDate();
+
+        }
+        else if (_allTab_selectedFilter == (int)ScheduleFilter.MonthToDate)
+        {
+            await AllTab_GetSchedulesMonthToDate();
+        }
+        else if (_allTab_selectedFilter == (int)ScheduleFilter.NextWeek)
+        {
+            await AllTab_GetSchedulesNextWeek();
+        }
+
+        AllScheduleCounts = _allTab_counts.ToString();
+
+        StateHasChanged();
+    }
+
+    async Task AllTab_ChangedPageSize(int page)
+    {
+        _allTab_pageSize = page;
+
+        _allTab_pageIndex = 0;
+
+        await AllTab_GetLoansAsync();
+    }
+
+    async void AllTab_TextSearchChanged(string f)
+    {
+        _allTab_filter = f;
+
+        // await AllTab_GetLoansAsync();
+
+        await AllTab_OnFilterChanged();
+    }
+
+    private async Task AllTab_LoadData(LoadDataArgs args)
+    {
+        _allTab_pageIndex = args.Skip!.Value;
+
+        if (!string.IsNullOrEmpty(args.OrderBy))
+        {
+            _allTab_sortField = args.OrderBy.Split(" ")[0];
+
+            _allTab_sortDescending = !args.OrderBy.Split(" ")[1].Contains("asc");
+        }
+        //await AllTab_GetLoansAsync();
+        await AllTab_OnFilterChanged();
+    }
+
+    private async Task AllTab_GetLoansAsync()
+    {
+        Tracker.Show();
+
+        var param = new QueryParam(_allTab_pageIndex, _allTab_pageSize, _allTab_sortField, false, _allTab_sortDescending, _allTab_filter);
+
+        var query = new GetLoanSchedulesByPaymentDateQuery(BranchId, paymentDate, true, false, param);
+
+        var res = await mediator.Send(query);
+
+        _allTab_scheduleItems = res.Items;
+
+        _allTab_counts = res.Count;
+
+        AllScheduleCounts = _allTab_counts.ToString();
+
+        Tracker.Hide();
+
+        StateHasChanged();
+    }
+
+    private async Task AllTab_GetSchedulesDueDate()
+    {
+        _allTab_isLoading = true;
+
+        var param = new QueryParam(_allTab_pageIndex, _allTab_pageSize, _allTab_sortField, false, _allTab_sortDescending, _allTab_filter);
+
+        var query = new GetLoanSchedulesByPaymentDateQuery(BranchId, DateTimeOffset.Now, false, false, param);
+
+        var res = await mediator.Send(query);
+
+        _allTab_scheduleItems = res.Items;
+
+        _allTab_counts = res.Count;
+
+        _allTab_isLoading = false;
+
+        StateHasChanged();
+    }
+
+    private async Task AllTab_GetSchedulesOverDueDate()
+    {
+        _allTab_isLoading = true;
+
+        var param = new QueryParam(_allTab_pageIndex, _allTab_pageSize, _allTab_sortField, false, _allTab_sortDescending, _allTab_filter);
+
+        var query = new GetLoanSchedulesByPaymentDateQuery(BranchId, paymentDate, true, true, param);
+
+        var res = await mediator.Send(query);
+
+        _allTab_scheduleItems = res.Items;
+
+        _allTab_counts = res.Count;
+
+        _allTab_isLoading = false;
+
+        StateHasChanged();
+    }
+
+    private async Task AllTab_GetSchedulesNextWeek()
+    {
+        _allTab_isLoading = true;
+
+        var param = new QueryParam(_allTab_pageIndex, _allTab_pageSize, _allTab_sortField, false, _allTab_sortDescending, _allTab_filter);
+
+        var query = new GetLoanSchedulesByPaymentDateQuery(BranchId, paymentDate, true, true, param);
+
+        var res = await mediator.Send(query);
+
+        _allTab_scheduleItems = res.Items;
+
+        _allTab_counts = res.Count;
+
+        _allTab_isLoading = false;
+
+        StateHasChanged();
+    }
+
+    private async Task AllTab_GetSchedulesMonthToDate()
+    {
+        _allTab_isLoading = true;
+
+        _allTab_end ??= _allTab_start?.AddDays(28);
+
+        var param = new QueryParam(_allTab_pageIndex, _allTab_pageSize, _allTab_sortField, false, _allTab_sortDescending, _allTab_filter);
+
+        var query = new GetLoanSchedulesMonthToDateQuery(BranchId, _allTab_start, _allTab_end, param);
+
+        var res = await mediator.Send(query);
+
+        _allTab_scheduleItems = res.Items;
+
+        _allTab_counts = res.Count;
+
+        _allTab_isLoading = false;
+
+        StateHasChanged();
+    }
+
+    void AllTab_RowSelected(VSchedule schedule) { }
+
+    private void AllTab_RowRenderChanged(DataGridCellRenderEventArgs<VSchedule> args)
+    {
+        if (args?.Data is null) return;
+        args.Attributes["style"] = args.Data.DayArrea switch
+        {
+            >= 1 and <= 7 => "background-color:#fff3cd;color:#856404;",
+            > 7 and <= 14 => "background-color:#ffe0b2;color:#6d4c41;",
+            > 14 => "background-color:#f8d7da;color:#721c24;",
+            _ => "background-color:#ffffff;color:#212529;"
+        };
+    }
+
+    void AllTab_OnRowRender(RowRenderEventArgs<VSchedule> args) { }
+
+    void AllTab_ShowContextMenu(MouseEventArgs args, VSchedule p)
+    {
+        ContextMenuService.Open(args, ds => @<AllScheduleMenu ShowOnTab="true"
+                                                              ShowLateScheduleDetails="@AllTab_ShowLateDetails"
+                                                              RecievePayment="@AllTab_ShowRecievePayment"
+                                                              Schedule="@p" />);
+    }
+
+    void AllTabShowContextMenu(MouseEventArgs args, VSchedule? p)
+    {
+        if (p is null) return;
+
+        recievePaymentUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
+
+        string getLoanDetailsUrl = $"/App/Loan/{p.LoanId}/Branches/{p.BranchId}/Currencies/{p.CurrencyId}";
+
+        ContextMenuService.Open(args, ds => @<AuthorizeView>
+            <Authorized>
+                <RadzenMenu Style="font-size:0.8rem;">
+                    <RadzenMenuItem Icon="@IconNames.MoneyBag"
+                                    Disabled="@(!p.IsPaid && !bState.CanRecievePayment)"
+                                    Path="@recievePaymentUrl"
+                                    Text="Receive Payment" />
+                    <RadzenMenuItem Icon="@IconNames.Paid"
+                                    Path="@getLoanDetailsUrl"
+                                    Text="Schedule Details" />
+                    <RadzenMenuItem Icon="@IconNames.Info"
+                                    Click="() => GetCustomerLateSchedules(p)"
+                                    Text="Show Late Schedule Details" />
+                </RadzenMenu>
+            </Authorized>
+        </AuthorizeView>
+);
+    }
+
+    async Task ShowPaymentOnTab(VSchedule? p)
+    {
+        if (p is
+            {
+                BranchId: > 0,
+                LoanId: not null,
+                CustomerId: not null
+            })
+        {
+            ShowPaymentSchedule(p);
+        }
+    }
+
+    async Task AllTab_ShowLateDetails(VSchedule p)
+    {
+        ContextMenuService.Close();
+        LateScheduleDetails(p);
+        StateHasChanged();
+    }
+
+    async Task AllTab_ShowRecievePayment(VSchedule? p)
+    {
+        ContextMenuService.Close();
+
+        if (p is null) return;
+
+        string recievePaymentUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
+
+        NavigationManager.NavigateTo(recievePaymentUrl);
+
+    }
+
+    void AllTab_ContextMenuClick(DataGridCellMouseEventArgs<VSchedule> args)
+    {
+        if (args?.Data is null) return;
+
+        var p = args.Data;
+
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem { Text = "Receive Payment",      Value = "1", Icon = "payments" },
+            new ContextMenuItem { Text = "Schedule Details",     Value = "2", Icon = "info" },
+            new ContextMenuItem { Text = "Show Late Schedules",  Value = "3", Icon = "credit_card_clock" }
+        }, e =>
+    {
+        ContextMenuService.Close();
+
+        if (int.TryParse(e.Value?.ToString(), out var id))
+        {
+            string paymentDate =string.Format("{0:yyyy-MM-dd}", p.PaymentDate);
+            string getLoanDetailsUrl = $"/App/Loan/{p.LoanId}/Branches/{p.BranchId}/Currencies/{p.CurrencyId}";
+            string recievePaymentUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
+            string multiUrl = $"/app/loans/{p.LoanId}/collection-repayment/{p.BranchId}/Branches?creditAgentId={p.CreditAgentId}&currencyId={p.CurrencyId}";
+            string lateScheduleUrl = $"/app/loans/{p.LoanId}/late-schedules/{p.BranchId}/Branches?PaymentDate={paymentDate}";
+            switch (id)
+            {
+                case 1: NavigationManager.NavigateTo(recievePaymentUrl); break;
+                case 2: NavigationManager.NavigateTo(getLoanDetailsUrl); break;
+                case 3: GetCustomerLateSchedules(p); break;
+            }
+        }
+    });
+    }
+
+    // ── Tab host state ─────────────────────────────────────────────────────
+    private List<CustomTab> _tabs = [];
+
+    private RadzenTabs refTabs = default!;
+
+    void AllTab_ShowCollectionPayment(VSchedule? p)
+    {
+
+        if (p is null) return;
+
+        var multiUrl = $"/app/loans/{p.LoanId}/collection-repayment/{p.BranchId}/Branches?creditAgentId={p.CreditAgentId}&currencyId={p.CurrencyId}";
+
+        NavigationManager.NavigateTo(multiUrl);
+
+
+    }
+
+  
+    private void ShowLateScheduleDetails(string? loanId)
+    {
+        var existingIndex = _tabs.FindIndex(t => t.Key == loanId);
+
+        if (existingIndex != -1)
+        {
+
+            _selectedIndex = existingIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(LateScheduleDetail));
+            builder.AddAttribute(1, "LoanId", loanId);
+            builder.AddAttribute(2, "PaymentDate", paymentDate);
+            builder.AddAttribute(3, "BranchId", BranchId);
+            builder.AddAttribute(4, "Close", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(loanId);
+
+            }));
+
+            builder.SetKey(loanId);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(loanId!, "Late Schedule Details", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        _selectedIndex = _tabs.Count;
+
+    }
+
+    private void LateScheduleDetails(VSchedule? schedule)
+    {
+
+        if (schedule is null) return;
+
+        var existingIndex = _tabs.FindIndex(t => t.Key == schedule.LoanId);
+
+        if (existingIndex != -1)
+        {
+
+            _selectedIndex = existingIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(LateScheduleDetail));
+            builder.AddAttribute(1, "LoanId", schedule.LoanId);
+            builder.AddAttribute(2, "PaymentDate", paymentDate);
+            builder.AddAttribute(3, "BranchId", BranchId);
+            builder.AddAttribute(4, "Close", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(schedule.LoanId!);
+
+            }));
+
+            builder.SetKey(schedule.LoanId);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(schedule.LoanId!, $"Customer:{schedule.AltName}", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        _selectedIndex = _tabs.Count;
+
+    }
+
+    private void ShowDueDateScheduleTab(string? key)
+    {
+
+        var newKey = $"{key}_DueDateSchedules";
+
+        var existingIndex = _tabs.FindIndex(t => t.Key == newKey);
+
+        if (existingIndex != -1)
+        {
+
+            _selectedIndex = existingIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        int counts = 0;
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(ClientDuePayTab));
+
+            builder.AddAttribute(1, "BranchId", BranchId);
+
+            builder.AddAttribute(2, "GetCounts", EventCallback.Factory.Create(this, (int x) =>
+            {
+                counts = x;
+            }));
+
+            builder.SetKey(newKey);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(newKey, $"Client Due Day({counts})", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        _selectedIndex = _tabs.Count;
+    }
+
+    private void ShowLateSchedule()
+    {
+
+        var newKey = $"{BranchId}_LateSchedules";
+
+        var existingIndex = _tabs.FindIndex(t => t.Key == newKey);
+
+        if (existingIndex != -1)
+        {
+
+            _selectedIndex = existingIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(ClientLateSchedules));
+
+            builder.AddAttribute(1, "BranchId", BranchId);
+
+            builder.AddAttribute(2, "GetScheduleChanged", EventCallback.Factory.Create(this, (VSchedule x) =>
+            {
+                ShowLateScheduleDetails(x.LoanId);
+            }));
+
+            builder.AddAttribute(3, "GetCounts", EventCallback.Factory.Create(this, (int x) =>
+           {
+               GetLateScheduleCount(newKey, x);
+           }));
+            builder.SetKey(newKey);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(newKey, $"Late Schedules({AllLateScheduleCounts})", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        _selectedIndex = _tabs.Count;
+
+    }
+
+    private void ShowPaymentSchedule(VSchedule schedule)
+    {
+
+        var newKey = $"{schedule.LoanId}_RecievePayment";
+
+        var existingIndex = _tabs.FindIndex(t => t.Key == newKey);
+
+        if (existingIndex != -1)
+        {
+            _selectedIndex = existingIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(CollectionPaymentPage));
+
+            builder.AddAttribute(1, "LoanId", schedule.LoanId);
+
+            builder.AddAttribute(2, "BranchId", BranchId);
+
+            builder.AddAttribute(3, "CreditAgentId", schedule.CreditAgentId);
+
+            builder.AddAttribute(4, "CurrencyId", schedule.CurrencyId);
+
+            builder.AddAttribute(5, "OnClose", EventCallback.Factory.Create(this, (string x) =>
+            {
+                CloseTab(schedule.LoanId!);
+
+            }));
+
+            builder.AddAttribute(6, "ReloadTab", EventCallback.Factory.Create(this, () =>
+            {
+                refTabs.Reload();
+            }));
+
+            builder.AddAttribute(7, "AltName", schedule.AltName);
+
+            builder.SetKey(schedule.LoanId);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(newKey, $"Receive From: {schedule.AltName}", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        _selectedIndex = _tabs.Count;
+
+    }
+
+
+    void CloseTab(string? tabId)
+    {
+        var tabIndex = _tabs.FirstOrDefault(t => t.Key == tabId);
+
+        if (tabIndex is not null)
+        {
+            _tabs.Remove(tabIndex);
+
+            _selectedIndex = _tabs.Count;
+        }
+    }
+
+
+
+
+    void ShowContextMenu(MouseEventArgs args, VSchedule p)
+    {
+        ContextMenuService.Open(args, ds => @<AllScheduleMenu ShowLateScheduleDetails="@GetCustomerLateSchedules"
+                                                              Schedule="@p" />);
+    }
+
+
+   
+
+
+}
+

@@ -1,0 +1,37 @@
+@page "/Customers/{CustomerId}/Update"
+@using Web.UI.Components.Indicatros
+<PageTitle>Edit Customer</PageTitle>
+@attribute [StreamRendering]
+
+@if (IsLoading)
+{
+    <Loading Text="កំពុងទាញយកព័ត៌មាន..." />
+}
+else
+{
+    <EditForm Model="model" @ref="editForm">
+        <input type="hidden" @bind="model.CustomerId" />
+        <Blazilla.FluentValidator />
+        <CreateCustomerInfo Model="@model" @key="@(Guid.NewGuid().ToString("N"))" />
+        <RadzenCard Variant="Variant.Flat" class="@($"rz-mt-4 rz-p-3 {Styles.Bg200}")">
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.End"
+                         Gap="0.75rem">
+                <RadzenButton Click="@FormSubmit"
+                              Size="ButtonSize.Small"
+                              ButtonStyle="ButtonStyle.Success"
+                              Text="Save"
+                              Icon="@IconNames.Save"
+                              IsBusy="isSaving"
+                              BusyText="Saving..." />
+                <RadzenButton Click="ClickCloseTab"
+                              Size="ButtonSize.Small"
+                              Text="Close"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Icon="@IconNames.Cancel"
+                              Disabled="isSaving" />
+            </RadzenStack>
+        </RadzenCard>
+    </EditForm>
+}

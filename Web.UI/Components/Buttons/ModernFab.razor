@@ -1,0 +1,129 @@
+@namespace Web.UI.Components.Buttons
+
+@if (string.IsNullOrEmpty(Href))
+{
+    <button type="@(ButtonType)"
+            class="@GetCssClass()"
+            style="@Style"
+            disabled="@Disabled"
+            @onclick="OnClickHandler"
+            @attributes="UserAttributes">
+        <span class="fab-content">
+            @if (!string.IsNullOrEmpty(StartIcon))
+            {
+                <i class="@StartIcon fab-icon fab-start-icon" aria-hidden="true"></i>
+            }
+            @if (IconContent != null)
+            {
+                <span class="fab-custom-icon">@IconContent</span>
+            }
+            @if (!string.IsNullOrEmpty(Label))
+            {
+                <span class="fab-label">@Label</span>
+            }
+            @if (!string.IsNullOrEmpty(EndIcon))
+            {
+                <i class="@EndIcon fab-icon fab-end-icon" aria-hidden="true"></i>
+            }
+        </span>
+        @if (!DisableRipple)
+        {
+            <span class="fab-ripple"></span>
+        }
+    </button>
+}
+else
+{
+    <a href="@Href"
+       target="@Target"
+       class="@GetCssClass()"
+       style="@Style"
+       disabled="@Disabled"
+       @onclick="OnClickHandler"
+       @attributes="UserAttributes">
+        <span class="fab-content">
+            @if (!string.IsNullOrEmpty(StartIcon))
+            {
+                <i class="@StartIcon fab-icon fab-start-icon" aria-hidden="true"></i>
+            }
+            @if (IconContent != null)
+            {
+                <span class="fab-custom-icon">@IconContent</span>
+            }
+            @if (!string.IsNullOrEmpty(Label))
+            {
+                <span class="fab-label">@Label</span>
+            }
+            @if (!string.IsNullOrEmpty(EndIcon))
+            {
+                <i class="@EndIcon fab-icon fab-end-icon" aria-hidden="true"></i>
+            }
+        </span>
+        @if (!DisableRipple)
+        {
+            <span class="fab-ripple"></span>
+        }
+    </a>
+}
+
+@code {
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? StartIcon { get; set; }
+    [Parameter] public string? EndIcon { get; set; }
+    [Parameter] public RenderFragment? IconContent { get; set; }
+    [Parameter] public FabColor Color { get; set; } = FabColor.Primary;
+    [Parameter] public FabSize Size { get; set; } = FabSize.Medium;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool DisableElevation { get; set; }
+    [Parameter] public bool DisableRipple { get; set; }
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public string? Target { get; set; }
+    [Parameter] public string ButtonType { get; set; } = "button";
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+    
+    [Parameter] public EventCallback<Microsoft.AspNetCore.Components.Web.MouseEventArgs> OnClick { get; set; }
+    
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> UserAttributes { get; set; } = new();
+
+    private async Task OnClickHandler(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    {
+        if (Disabled) return;
+        
+        if (OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync(args);
+        }
+    }
+
+    private string GetCssClass()
+    {
+        var classNames = new List<string> { "modern-fab" };
+
+        classNames.Add($"fab-{Color.ToString().ToLower()}");
+        classNames.Add($"fab-{Size.ToString().ToLower()}");
+
+        if (!string.IsNullOrEmpty(Label))
+        {
+            classNames.Add("fab-extended");
+        }
+
+        if (DisableElevation)
+        {
+            classNames.Add("fab-flat");
+        }
+
+        if (Disabled)
+        {
+            classNames.Add("fab-disabled");
+        }
+
+        if (!string.IsNullOrEmpty(Class))
+        {
+            classNames.Add(Class);
+        }
+
+        return string.Join(" ", classNames);
+    }
+}

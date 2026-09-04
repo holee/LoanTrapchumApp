@@ -1,0 +1,67 @@
+﻿@using System.Linq.Expressions
+<RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                FilterOperator="StringFilterOperator.Contains"
+                AllowFiltering="true"
+                Data="@Items"
+                AllowClear="@AllowClear"
+                TValue="string"
+                Value="@Value"
+                ValueChanged="@ValueChanged"
+                ValueExpression="@ValueExpression"
+                Style="width: 100%;"
+                Name="DropDownFiltering2"
+                Placeholder="@Placeholder"
+                Change="@OnChanged">
+    <HeaderTemplate>
+        @if (ShowHeader)
+        {
+            <div class="rz-dropdown-filter-container">
+                <input aria-label="Search" id="search-@Guid.NewGuid().ToString("N")"
+                       tabindex="0"
+                       placeholder="type to search..."
+                       class="rz-dropdown-filter rz-inputtext"
+                       autocomplete="Off"
+                       aria-autocomplete="none"
+                       autofocus="true"
+                       @bind="@SearchText"
+                       @oninput="@OnSearchTextChanged"
+                       @onkeypress="@OnKeyPress"
+                       type="search">
+                <span class="notranslate rz-dropdown-filter-icon rzi rzi-search"></span>
+            </div>
+        }
+    </HeaderTemplate>
+</RadzenDropDown>
+
+@code {
+    [Parameter] public IEnumerable<string> Items { get; set; } = [];
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public EventCallback<object> OnChanged { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Select an option...";
+    [Parameter] public string SearchText { get; set; } = string.Empty;
+    [Parameter] public EventCallback<KeyboardEventArgs> AddOnEnter { get; set; }
+    [Parameter] public Expression<Func<string>> ValueExpression { get; set; } = default!;
+    [Parameter] public EventCallback<string> SearchTextChanged { get; set; }
+    [Parameter] public bool ShowHeader { get; set; } = false;
+    [Parameter] public bool AllowClear { get; set; } = false;
+    private async Task OnValueChanged(object? newValue)
+    {
+        Value = newValue?.ToString() ?? string.Empty;
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+    private void OnSearchTextChanged(ChangeEventArgs e)
+    {
+        SearchText = e.Value?.ToString() ?? string.Empty;
+        SearchTextChanged.InvokeAsync(SearchText);
+    }
+
+    private void OnKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            AddOnEnter.InvokeAsync(e);
+        }
+    }
+}

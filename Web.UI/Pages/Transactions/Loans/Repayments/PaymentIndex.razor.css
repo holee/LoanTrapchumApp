@@ -1,0 +1,69 @@
+.summary-card {
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+    .summary-card .s-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        opacity: 0.72;
+    }
+
+    .summary-card .s-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .summary-card .s-icon,
+    .summary-card .s-icon .rzi {
+        font-size: 1.5rem !important;
+        opacity: 0.55;
+    }
+
+.sc-principle {
+    background: linear-gradient(135deg,#e3f2fd,#bbdefb);
+    color: #1565c0;
+}
+
+.sc-interest {
+    background: linear-gradient(135deg,#e8f5e9,#c8e6c9);
+    color: #2e7d32;
+}
+
+.sc-paid {
+    background: linear-gradient(135deg,#ede7f6,#d1c4e9);
+    color: #4527a0;
+}
+
+.sc-penalty {
+    background: linear-gradient(135deg,#fff3e0,#ffe0b2);
+    color: #e65100;
+}
+
+.sc-total {
+    background: linear-gradient(135deg,#e0f7fa,#b2ebf2);
+    color: #006064;
+}
+
+.schedule-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+    .schedule-header h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--rz-text-title-color);
+    }

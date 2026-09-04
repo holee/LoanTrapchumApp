@@ -1,0 +1,32 @@
+@using Web.UI.Components.Indicatros
+<PageTitle>Edit Guarantor</PageTitle>
+@if (_isPageLoading)
+{
+    <Loading Text="Loading Guarantor Details..." />
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="OnSaveChanges">
+        <input type="hidden" @bind="model.Id" />
+        <Blazilla.FluentValidator />
+        <GaurantorCreateComPage Model="@model" />
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     class="rz-my-2"
+                     Gap="1rem"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton ButtonStyle="ButtonStyle.Success"
+                          Icon="save"
+                          Text="Save"
+                          ButtonType="ButtonType.Submit"
+                          Size="ButtonSize.Small" />
+            <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                          Icon="cancel"
+                          Text="Close"
+                          Click="TabClosing"
+                          Size="ButtonSize.Small" />
+        </RadzenStack>
+    </EditForm>
+
+
+}

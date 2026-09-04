@@ -1,0 +1,40 @@
+﻿@page "/counter"
+
+<PageTitle>Counter</PageTitle>
+
+<RadzenCard>
+    <RadzenStack Gap="1.5rem">
+        <div>
+            <RadzenText TextStyle="TextStyle.H4" class="mb-1">Counter Application</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body2" class="text-muted">Click the button to increment the counter</RadzenText>
+        </div>
+
+        <RadzenStack AlignItems="AlignItems.Center" Gap="1rem">
+            <RadzenText TextStyle="TextStyle.H5">Current Count: <strong>@currentCount</strong></RadzenText>
+            <RadzenButton Click="@IncrementCount" Text="Increment" Icon="add" 
+                ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Large" />
+        </RadzenStack>
+
+        <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenButton Click="@ResetCount" Text="Reset" Icon="refresh" 
+                ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Medium" />
+        </RadzenStack>
+
+        <RadzenProgressBar Value="currentCount" Max="100" Style="width: 100%;" />
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+
+    private void ResetCount()
+    {
+        currentCount = 0;
+    }
+}
+

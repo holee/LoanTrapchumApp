@@ -1,0 +1,140 @@
+﻿@using Web.UI.Pages.Lists.Collaterals
+@using Web.UI.Pages.Lists.Customers
+
+<div class="customer-card">
+
+    <!-- Header: Avatar + Name -->
+    <div class="customer-header">
+        <div class="customer-avatar">
+            @if (!string.IsNullOrWhiteSpace(Customer?.Photo))
+            {
+                <img src="@Customer.Photo" alt="@Customer.AltName" class="customer-avatar-img" />
+            }
+            else
+            {
+                <RadzenIcon Icon="person" />
+            }
+        </div>
+        <div class="customer-header-info">
+            <div class="customer-name">@Customer?.AltName</div>
+            <div class="customer-sub">@Customer?.FullName</div>
+            @if (!string.IsNullOrWhiteSpace(Customer?.Salutation))
+            {
+                <span class="customer-badge">@Customer.Salutation</span>
+            }
+        </div>
+    </div>
+
+    <!-- Section 1: ព័ត៌មានផ្ទាល់ខ្លួន -->
+    <div class="info-section">
+        <div class="info-section-title">
+            <RadzenIcon Icon="badge" />
+            <span>ព័ត៌មានផ្ទាល់ខ្លួន</span>
+        </div>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-icon"><RadzenIcon Icon="phone" /></span>
+                <div>
+                    <label class="info-label">ទូរស័ព្ទ</label>
+                    <span class="info-value">@Customer?.Phone</span>
+                </div>
+            </div>
+            <div class="info-item">
+                <span class="info-icon"><RadzenIcon Icon="cake" /></span>
+                <div>
+                    <label class="info-label">ថ្ងៃខែឆ្នាំកំណើត</label>
+                    <span class="info-value">@Customer?.DateOfBirth.DayFirst()</span>
+                </div>
+            </div>
+            <div class="info-item">
+                <span class="info-icon"><RadzenIcon Icon="credit_card" /></span>
+                <div>
+                    <label class="info-label">អត្តសញ្ញាណប័ណ្ណ</label>
+                    <span class="info-value">@Customer?.IdCard</span>
+                </div>
+            </div>
+            <div class="info-item">
+                <span class="info-icon"><RadzenIcon Icon="work" /></span>
+                <div>
+                    <label class="info-label">មុខរបរ</label>
+                    <span class="info-value">@Customer?.Occupation</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: ហិរញ្ញវត្ថុ -->
+    <div class="info-section">
+        <div class="info-section-title">
+            <RadzenIcon Icon="account_balance" />
+            <span>ហិរញ្ញវត្ថុ</span>
+        </div>
+        <div class="finance-grid">
+            <div class="finance-card circle-card">
+                <RadzenIcon Icon="group" />
+                <label class="info-label">ខួប</label>
+                <span class="info-value">@Customer?.Circle</span>
+            </div>
+            <div class="finance-card income-card">
+                <RadzenIcon Icon="trending_up" />
+                <label class="info-label">ចំណូល</label>
+                <span class="info-value income">@_income</span>
+            </div>
+            <div class="finance-card expense-card">
+                <RadzenIcon Icon="trending_down" />
+                <label class="info-label">ចំណាយ</label>
+                <span class="info-value expense">@_expense</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: អាសយដ្ឋាន -->
+    <div class="info-section">
+        <div class="info-section-title">
+            <RadzenIcon Icon="location_on" />
+            <span>អាសយដ្ឋាន</span>
+        </div>
+        <div class="address-block">
+            <RadzenIcon Icon="place" />
+            <span class="info-value">@Customer?.ToString()</span>
+        </div>
+    </div>
+
+    <!-- Section 4: ព័ត៌មានបន្ថែម -->
+    @if (ShowAdditionalInfo)
+    {
+        <div class="info-section">
+            <div class="info-section-title">
+                <RadzenIcon Icon="account_balance_wallet" />
+                <span>ព័ត៌មានបន្ថែម</span>
+            </div>
+            <RadzenRow RowGap="1rem">
+                <RadzenColumn Size="12">
+                    <CustomerProfit CustomerId="@CustomerId"
+                                    ShowCommand="true"
+                                    ShowAction="true"
+                                    GetIncomeAndExpense="UpdateIncomeAndExpense" />
+                </RadzenColumn>
+                <RadzenColumn Size="12">
+                    <CollateralsCustomer CustomerId="@CustomerId"
+                                         ShowAdd="true"
+                                         ShowCommand="true" />
+                </RadzenColumn>
+            </RadzenRow>
+        </div>
+    }
+</div>
+@code {
+    async Task UpdateIncomeAndExpense((decimal? income, decimal? expense) args)
+    {
+        _income = args.income ?? 0;
+
+        _expense = args.expense ?? 0;
+
+        decimal? profit = _income - _expense;
+
+        await GetIncomeOrExpense.InvokeAsync(profit);
+
+        StateHasChanged();
+    }
+}

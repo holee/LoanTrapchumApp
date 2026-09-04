@@ -1,0 +1,130 @@
+﻿<EditForm Model="model" @ref="editForm" OnValidSubmit="@FormSubmit">
+    <Blazilla.FluentValidator />
+    <RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-2">
+        <HeaderTemplate>
+            <RadzenIcon Icon="person" /><strong>Customer</strong>
+        </HeaderTemplate>
+        <ChildContent>
+            <RadzenRow class="rz-my-2">
+                <RadzenColumn Size="2">
+                    <RadzenLabel>Khmer Name</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="3">
+                    <RadzenDropDown Chips="true"
+                                    AllowFiltering="true"
+                                    Name="DropDownSalutions"
+                                    Style="width: 100%;"
+                                    TValue="string"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    Placeholder="Salutation"
+                                    @bind-Value="model.Salutation"
+                                    Data="Salutations">
+                    </RadzenDropDown>
+                </RadzenColumn>
+                <RadzenColumn Size="5">
+                    <RadzenTextBox @bind-Value="model.AltName"
+                                   class="w-100"
+                                   Placeholder="ឈ្មោះខ្មែរ..." />
+                    <ValidationMessage For="@(() => model.AltName)" />
+                </RadzenColumn>
+                <RadzenColumn Size="2">
+                    <div class="text-start">
+                        <RadzenCheckBox TValue="bool?" @bind-Value="model.IsActive" />
+                        <RadzenLabel Text="@(model.IsActive == true ? "Active" : "In Active")" />
+                    </div>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow class="rz-my-2">
+                <RadzenColumn Size="2">
+                    <RadzenLabel>Name</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="5">
+                    <RadzenTextBox @bind-Value="model.FirstName"
+                                   class="w-100"
+                                   Placeholder="First name..." />
+                    <ValidationMessage For="@(() => model.FirstName)" />
+                </RadzenColumn>
+                <RadzenColumn Size="5">
+                    <RadzenTextBox @bind-Value="model.LastName"
+                                   class="w-100"
+                                   Placeholder="Last Name.." />
+                    <ValidationMessage For="@(() => model.LastName)" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow class="rz-my-2">
+                <RadzenColumn Size="2">Phone</RadzenColumn>
+                <RadzenColumn Size="10">
+                    <RadzenTextBox class="w-100"
+                                   @bind-Value="model.Phone"
+                                   Placeholder="Mobile phone..." />
+                </RadzenColumn>
+                <RadzenColumn Size="2">
+                    <RadzenLabel>ID Card</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="10">
+                    <RadzenTextBox @bind-Value="model.IdCard" Placeholder="ID Card" class="w-100" />
+                </RadzenColumn>
+                <RadzenColumn Size="2">Email</RadzenColumn>
+                <RadzenColumn Size="10">
+                    <RadzenTextBox class="w-100"
+                                   @bind-Value="model.EmailAddress"
+                                   Placeholder="Email Address" />
+                </RadzenColumn>
+                <RadzenColumn Size="2">
+                    <RadzenLabel>Birth Date</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="10">
+                    <RadzenDatePicker TValue="DateTime?"
+                                      @bind-Value="model.DateOfBirth"
+                                      @bind-Value:format="yyyy-MMM-dd"
+                                      DateFormat="dd/MM/yyyy"
+                                      class="w-100"
+                                      Placeholder="Date Of Birth">
+                    </RadzenDatePicker>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow>
+                <RadzenColumn Size="2">
+                    <RadzenLabel>Nationality</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="10">
+                    <RadzenDropDown Data="Nationalities"
+                                    class="w-100"
+                                    TextProperty="@nameof(Nationality.NationalityName)"
+                                    ValueProperty="@nameof(Nationality.NationalityName)"
+                                    @bind-Value="model.Nationality">
+                    </RadzenDropDown>
+                </RadzenColumn>
+                <RadzenColumn Size="2">Occupation</RadzenColumn>
+                <RadzenColumn Size="10">
+                    <RadzenDropDown class="w-100"
+                                    Data="@Occupations"
+                                    AllowFiltering="true"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    TextProperty="OccupationTitle"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    ValueProperty="OccupationTitle"
+                                    @bind-Value="model.Occupation">
+                    </RadzenDropDown>
+                </RadzenColumn>
+            </RadzenRow>
+        </ChildContent>
+    </RadzenFieldset>
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 Gap="1rem"
+                 class="rz-mt-2"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Success"
+                      ButtonType="ButtonType.Submit"
+                      Text="Save"
+                      Icon="save" />
+        <RadzenButton Click="Close"
+                      Size="ButtonSize.Small"
+                      Text="Close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel" />
+    </RadzenStack>
+</EditForm>

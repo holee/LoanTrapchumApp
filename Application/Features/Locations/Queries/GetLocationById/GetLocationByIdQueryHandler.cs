@@ -1,0 +1,14 @@
+using Application.Features.Locations.Dtos;
+using Application.Interfaces.Lists;
+using ErrorOr;
+
+namespace Application.Features.Locations.Queries.GetLocationById;
+
+public sealed class GetLocationByIdQueryHandler(ILocationService locationService)
+    : IRequestHandler<GetLocationByIdQuery, ErrorOr<LocationDto>>
+{
+    public async Task<ErrorOr<LocationDto>> Handle(GetLocationByIdQuery request, CancellationToken cancellationToken)
+    {
+        return await locationService.GetByIdAsync(request.Id, cancellationToken);
+    }
+}

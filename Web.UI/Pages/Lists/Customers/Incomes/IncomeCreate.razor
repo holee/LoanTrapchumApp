@@ -1,0 +1,99 @@
+﻿@using Applications.Features.Incomes.Dto
+@using Applications.Features.Incomes.Command.CreateIncomeExpenseSource
+<EditForm Model="@model" OnValidSubmit="HandleFormSubmit">
+    <FluentValidationValidator DisableAssemblyScanning="true" />
+    <input type="hidden" @bind="model.CustomerId" />
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="6">
+            <RadzenFormField class="rz-w-100" Text="Income Source($)" AllowFloatingLabel="true">
+                <ChildContent>
+                    <RadzenAutoComplete Data="@_incomeExpenses"
+                                        TextProperty="@nameof(IncomeExpenseDto.Description)"
+                                        LoadData="@LoadData"
+                                        class="rz-w-100"
+                                        Placeholder="Type to search or add new…"
+                                        MinLength="0"
+                                        @bind-Value="model.IncomeSource"
+                                        OpenOnFocus="true"/>
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="() => model.IncomeSource" />
+                </Helper>
+            </RadzenFormField>
+
+        </RadzenColumn>
+        <RadzenColumn Size="6">
+            <RadzenFormField class="rz-w-100" Text="Amount" AllowFloatingLabel="true">
+                <ChildContent>
+                    <TCNumbers @bind-Value="model.Amount" Min="0" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="() => model.Amount" />
+                </Helper>
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenFormField class="rz-w-100 rz-mt-2" Text="Description" AllowFloatingLabel="true">
+        <ChildContent>
+            <RadzenTextArea @bind-Value="model.Description" class="rz-w-100" />
+        </ChildContent>
+    </RadzenFormField>
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 class="rz-mt-2"
+                 Gap="1rem"
+                 AlignItems="AlignItems.Center">
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Success"
+                      ButtonType="ButtonType.Submit"
+                      Text="Save" Icon="@IconNames.Save" />
+
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Text="Close"
+                      Click="CloseModal"
+                      Icon="@IconNames.Close" />
+    </RadzenStack>
+</EditForm>
+@code {
+
+    private async Task OnIncomeSourceChange(object value)
+    {
+        var text = value?.ToString() ?? string.Empty;
+
+        await AddIfNotExists(text);
+    }
+
+    private async Task AddIfNotExists(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
+        var exists = _incomeExpenses
+            .Any(x => x.Description.Equals(text, StringComparison.OrdinalIgnoreCase));
+
+        if (!exists)
+        {
+            var command = new CreateIncomeExpenseCommand(new CreateIncomeExpenseDto
+            {
+                Description = text,
+                Types = nameof(Domains.Enumerations.IncomeExpenseTypes.Income)
+            });
+
+            var result = await mediator.Send(command);
+
+            if (!result.IsError)
+            {
+                _incomeExpenses.Insert(0, new IncomeExpenseDto { Description = text });
+                NotificationService.Notify(NotificationSeverity.Success, $"'{text}' added to income sources.");
+                StateHasChanged();
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, result.FirstError.Description);
+            }
+        }
+    }
+
+}

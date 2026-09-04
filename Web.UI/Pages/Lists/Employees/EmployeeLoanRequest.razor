@@ -1,0 +1,45 @@
+@using Applications.Responses.ViewModels.Loans.Requests
+<RadzenDataGrid Density="Density.Compact"
+                AllowAlternatingRows="true"
+                TItem="VLoanRequests"
+                Responsive="true"
+                AllowColumnPicking="true"
+                Data="@LoanRequests">
+    <HeaderTemplate>
+
+    </HeaderTemplate>
+    <Columns>
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AltName)"
+                              Context="c"
+                              Width="5rem"
+                              TextAlign="TextAlign.Center"
+                              Pickable="false"
+                              Title="#">
+            <Template>
+                @(LoanRequests.IndexOf(c) + 1)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AltName)"
+                              Title="Name" />
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.RequestDate)"
+                              Title="Request Date" FormatString="{0:dd/MM/yyyy}" />
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.RequestAmount)"
+                              Title="Request Amount" />
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AprovedAmount)"
+                              Title="Aproved Amount" />
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AprovedBy)"
+                              Title="Aproved By" />
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AprovedDate)"
+                              Title="Aproved Date" FormatString="{0:dd/MM/yyyy}" />
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.Status)"
+                              Title="Status" />
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.LoanRequestId)"
+                              Title="Actions" />
+    </Columns>
+</RadzenDataGrid>
+@code {
+    [Parameter]
+    public List<VLoanRequests> LoanRequests { get; set; } = [];
+    [Parameter]
+    public string? EmployeeId { get; set; } = string.Empty;
+}

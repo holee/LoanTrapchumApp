@@ -1,0 +1,129 @@
+﻿@using Applications.Features.Loans.Dtos.Responses
+@if (Data is not null)
+{
+    <RadzenMenu Style="font-size:0.8rem;">
+
+        <RadzenMenuItem Icon="money"
+                        Path="@_getPaymentSchedulesUrl"
+                        Visible="@bState.CanRecievePayment"
+                        Text="Recieve Payment"></RadzenMenuItem>
+
+        <RadzenMenuItem Icon="paid"
+                        Path="@_getSchedulePayOffUrl"
+                        Visible="@bState.CanPayOff"
+                        Text="Pay Off"></RadzenMenuItem>
+
+        <RadzenMenuItem Icon="paid"
+                        Path="@_getLoanWriteOffUrl"
+                        Visible="@bState.CanWriteOff"
+                        Text="Write Off"></RadzenMenuItem>
+
+        <RadzenMenuItem Icon="change_circle"
+                        Path="@_getChangeCreditAgentUrl"
+                        Visible="@bState.IsManager"
+                        Text="Change Credit Agent"></RadzenMenuItem>
+
+        <RadzenMenuItem Icon="info"
+                        Click="(()=>GetLoanDetails(Data))"
+                        Text="Details"></RadzenMenuItem>
+
+        <RadzenMenuItem Icon="file_download"
+                        Click="@DownLoadScheduleAsExcel"
+                        Text="Export Loan to Excel" />
+
+        <RadzenMenuItem Icon="picture_as_pdf"
+                        Click="@DownLoadScheduleAsPdf"
+                        Text="Export Loan to Pdf" />
+    </RadzenMenu>
+
+}
+
+@code {
+
+    [Parameter]
+    public VLoanDisbursments? Data { get; set; }
+    [CascadingParameter]
+    Task<AuthenticationState> AuthState { get; set; } = default!;
+    [CascadingParameter] CascadingAppState bState { get; set; } = default!;
+    [Parameter]
+    public EventCallback<VLoanDisbursments> OpenDetailTab { get; set; }
+
+    private string _getPaymentSchedulesUrl = "";
+    private string _getSchedulePayOffUrl = "";
+    private string _getChangeCreditAgentUrl = "";
+    private string _getLoanDetailsUrl = "";
+    private string _getLoanWriteOffUrl = "";
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthState;
+
+        await bState.GetAuthenticatedUser(auth.User);
+
+        if (Data is not null)
+        {
+
+            _getSchedulePayOffUrl = $"/Loan/CreditAgent/{Data!.LoanId}/{Data.CreditAgentRefId}?CustomerId={Data.CustomerId}&BranchId={Data.BranchId}&CurrencyId={Data.CurrencyId}";
+
+            _getPaymentSchedulesUrl = $"/App/Loans/{Data!.BranchId}/Branches/{Data.LoanId}/Schedules?CreditAgentId={Data.CreditAgentRefId}&CurrencyId={Data.CurrencyId}";
+
+            _getLoanDetailsUrl = $"/App/Loan/{Data!.LoanId}/Branches/{Data!.BranchId}/Currencies/{Data.CurrencyId}";
+
+            _getChangeCreditAgentUrl = $"/App/Loan/{Data!.LoanId}/CreditAgent/{Data.CreditAgentRefId}?CustomerId={Data.CustomerId}&BranchId={Data.BranchId}&CurrencyId={Data.CurrencyId}";
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    void GetLoanDetails(VLoanDisbursments item)
+    {
+        ContextMenuService.Close();
+        //NavigationManager.NavigateTo($"/App/Loan/{Data!.LoanId}/Branches/{Data!.BranchId}/Currencies/{Data.CurrencyId}");
+        if (OpenDetailTab.HasDelegate)
+        {
+            OpenDetailTab.InvokeAsync(item);
+        }
+        ;
+
+    }
+    void GetPaymentSchedules()
+    {
+        ContextMenuService.Close();
+        NavigationManager.NavigateTo($"/App/Loans/{Data!.BranchId}/Branches/{Data.LoanId}/Schedules?CreditAgentId={Data.CreditAgentRefId}&CurrencyId={Data.CurrencyId}");
+    }
+
+    void ChangeCreditAgent()
+    {
+        ContextMenuService.Close();
+        NavigationManager.NavigateTo($"/App/Loan/{Data!.LoanId}/CreditAgent/{Data.CreditAgentRefId}?CustomerId={Data.CustomerId}&BranchId={Data.BranchId}&CurrencyId={Data.CurrencyId}");
+    }
+    void CustomerPayOff()
+    {
+        ContextMenuService.Close();
+        NavigationManager.NavigateTo($"/Loan/CreditAgent/{Data!.LoanId}/{Data.CreditAgentRefId}?CustomerId={Data.CustomerId}&BranchId={Data.BranchId}&CurrencyId={Data.CurrencyId}");
+    }
+
+    async Task DownLoadScheduleAsExcel()
+    {
+        ContextMenuService.Close();
+
+        if (Data is not null)
+        {
+            if (Data.LoanId.IsNotNullOrEmpty() && Data.BranchId > 0)
+            {
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{Data.LoanId}/{Data.BranchId}/Exel", "_blank");
+            }
+        }
+    }
+    private async Task DownLoadScheduleAsPdf()
+    {
+        if (Data is not null)
+        {
+            var fileName = $"Loan_Schedule_{Guid.CreateVersion7()}.pdf";
+
+            if (Data.LoanId.IsNotNullOrEmpty() && Data.BranchId > 0)
+            {
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{Data.LoanId}/{Data.BranchId}/{fileName}", "_blank");
+            }
+        }
+    }
+}

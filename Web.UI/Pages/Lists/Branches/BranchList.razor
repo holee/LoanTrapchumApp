@@ -1,0 +1,510 @@
+﻿@page "/App/Branches"
+@using Applications.Features.Branches.Dtos
+@attribute [StreamRendering]
+<PageTitle>Branches</PageTitle>
+
+<RadzenTabs RenderMode="TabRenderMode.Client" Change="TabChanged" @bind-SelectedIndex="@selectedIndex">
+    <Tabs>
+        <RadzenTabsItem Text="Branches" Icon="list">
+            <RadzenCard class="branch-page-card rz-background-color-base-200" Variant="Variant.Outlined">
+                <div class="branch-page-header">
+                    <div>
+                        <h3 class="branch-title">Branches</h3>
+                        <div class="branch-subtitle">Manage branch information in a clean and modern table view.</div>
+                    </div>
+                </div>
+
+                <GridToolbar SearchChanged="SearchChanged">
+                    <LeftChildren>
+                        <AuthorizeView>
+                            <Authorized>
+                                <RadzenButton Click="OnCreate"
+                                              Text="New Branch"
+                                              Icon="add"
+                                              ButtonStyle="ButtonStyle.Primary"
+                                              Size="ButtonSize.Small" />
+                            </Authorized>
+                        </AuthorizeView>
+                    </LeftChildren>
+                    <RightChildren>
+                        <div class="branch-filter-toggle ml-2">
+                            <RadzenCheckBox TValue="bool" @bind-Value="@InActive" Change="ex => OnIncludeInactive(ex)" Name="InActive" />
+                            <RadzenLabel Text="Include inactive" Component="InActive" Style="margin-left:6px; vertical-align: middle;" />
+                        </div>
+                    </RightChildren>
+                </GridToolbar>
+
+                <RadzenDataGrid class="branch-grid"
+                                GridLines="DataGridGridLines.None"
+                                Count="@counts"
+                                PageSize="@pageSize"
+                                AllowPaging="true"
+                                ShowPagingSummary="true"
+                                Density="Density.Compact"
+                                AllowColumnPicking="true"
+                                AllowAlternatingRows="true"
+                                AllowRowSelectOnRowClick="true"
+                                PagerHorizontalAlign="HorizontalAlign.Right"
+                                AllowSorting="true"
+                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                LogicalFilterOperator="LogicalFilterOperator.Or"
+                                AllowFiltering="true"
+                                LoadData="@LoadData"
+                                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                                PageSizeChanged="PageSizeChanged"
+                                CellContextMenu="@ShowContextMenu"
+                                Data="@Branches"
+                                @ref="@_grid"
+                                RowRender="@OnRowRender"
+                                RowDoubleClick="@OnRowDoubleClick"
+                                TItem="VBranch">
+                    <Columns>
+                        <RadzenDataGridColumn Property="@nameof(VBranch.BranchId)"
+                                              Width="4rem"
+                                              Title="#"
+                                              TextAlign="TextAlign.Center"
+                                              Pickable="false"
+                                              Filterable="false"
+                                              Sortable="false"
+                                              Context="h">
+                            <Template>
+                                @h.RowIndex
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Width="20rem"
+                                              Title="ឈ្មោះសាខា"
+                                              Property="@nameof(VBranch.BranchName)"
+                                              Context="b">
+                            <Template>
+                                <div class="branch-identity">
+                                    @if (!string.IsNullOrWhiteSpace(b.ImagePath))
+                                    {
+                                        <img src="@b.ImagePath" alt="@b.BranchName" class="branch-image" />
+                                    }
+                                    else
+                                    {
+                                        <div class="branch-image branch-image--placeholder">
+                                            <RadzenIcon Icon="account_balance" />
+                                        </div>
+                                    }
+                                    <div>
+                                        <div class="branch-name">@b.BranchName</div>
+                                    </div>
+                                </div>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Title="លេខកូដសាខា"
+                                              Sortable="false"
+                                              Filterable="false"
+                                              Property="@nameof(VBranch.BranchCode)" />
+
+                        <RadzenDataGridColumn Title="ពិពណ៌នា"
+                                              Sortable="false"
+                                              Filterable="false"
+                                              Property="@nameof(VBranch.Description)" />
+
+                        <RadzenDataGridColumn Title="អាសយដ្ឋាន"
+                                              Sortable="false"
+                                              Filterable="false"
+                                              Context="b">
+                            <Template>
+                                @b.ToString()
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Width="7rem"
+                                              Title="ស្ថានភាព"
+                                              TextAlign="TextAlign.Center"
+                                              Filterable="false"
+                                              Property="@nameof(VBranch.IsActive)"
+                                              Sortable="false"
+                                              Context="c">
+                            <Template>
+                                <span class="branch-status-badge @(c.IsActive == true ? "is-active" : "is-inactive")">
+                                    <span class="branch-status-dot"></span>
+                                    @(c.IsActive == true ? "សកម្ម" : "មិនសកម្ម")
+                                </span>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <AuthorizeView>
+                            <Authorized>
+                                <RadzenDataGridColumn Width="5rem"
+                                                      Title="សកម្មភាព"
+                                                      Filterable="false"
+                                                      Sortable="false"
+                                                      Pickable="false"
+                                                      TextAlign="TextAlign.Center"
+                                                      Context="c">
+                                    <Template>
+                                        <RadzenButton Size="ButtonSize.ExtraSmall"
+                                                      Icon="more_vert"
+                                                      Variant="Variant.Text"
+                                                      Click="@((args) => ShowContextMenuWithItems(args, c))" />
+                                    </Template>
+                                </RadzenDataGridColumn>
+                            </Authorized>
+                        </AuthorizeView>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenCard>
+        </RadzenTabsItem>
+
+        @foreach (var item in _tabs)
+        {
+            <RadzenTabsItem Text="@item.Title" Icon="@item.Icon" @key="item.Key">
+                <Template>
+                    <ClosedTab TabId="@item.Key" Title="@item.Title" Closed="@(() => CloseTab(item.Key))" />
+                </Template>
+                <ChildContent>
+                    @item.Content
+                </ChildContent>
+            </RadzenTabsItem>
+        }
+    </Tabs>
+</RadzenTabs>
+
+@code {
+    private RadzenDataGrid<VBranch> _grid = default!;
+    private int selectedIndex = 0;
+    private List<CustomTab> _tabs = [];
+
+    void ShowContextMenuWithItems(MouseEventArgs args, VBranch branch)
+    {
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem { Text = "Details",    Icon = "info",   Value = "1" },
+            new ContextMenuItem { Text = "Edit",       Icon = "edit",   Value = "2" },
+            new ContextMenuItem { Text = "Delete",     Icon = "delete", Value = "3" },
+        }, e =>
+    {
+        ContextMenuService.Close();
+        HandleBranchAction(e.Value?.ToString(), branch);
+    });
+    }
+
+    void ShowContextMenu(DataGridCellMouseEventArgs<VBranch> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem { Text = "Details",    Icon = "info",   Value = "1" },
+            new ContextMenuItem { Text = "Edit",       Icon = "edit",   Value = "2" },
+            new ContextMenuItem { Text = "Delete",     Icon = "delete", Value = "3" },
+        }, e =>
+    {
+        ContextMenuService.Close();
+        HandleBranchAction(e.Value?.ToString(), args.Data);
+    });
+    }
+
+    void HandleBranchAction(string? value, VBranch branch)
+    {
+        switch (value)
+        {
+            case "1": AddDetailsTab(branch); break;
+            case "2": AddEditTab(branch); break;
+            case "3": _ = OnDelete(branch); break;
+        }
+    }
+
+    private void OnRowRender(RowRenderEventArgs<VBranch> args)
+    {
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
+
+        if (args.Data.IsActive != true)
+        {
+            args.Attributes["class"] = "branch-row-inactive";
+        }
+    }
+
+    private void OnRowDoubleClick(DataGridRowMouseEventArgs<VBranch> args)
+    {
+        if (args.Data is null) return;
+
+        AddDetailsTab(args.Data);
+    }
+
+    void OnCreate()
+    {
+        CreateNewBranchTab();
+    }
+
+    void CreateNewBranchTab()
+    {
+        var newTabId = Guid.NewGuid().ToString("N");
+
+        RenderFragment childContent = builder =>
+        {
+            builder.OpenComponent(0, typeof(BranchCreatePage));
+
+            builder.AddAttribute(2, "OnClose", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(newTabId);
+            }));
+
+            builder.AddAttribute(4, "OnCreated", EventCallback.Factory.Create(this, async (VBranch branch) =>
+            {
+                await GetBranches(searchText);
+
+                CloseTab(newTabId);
+
+            }));
+
+            builder.SetKey(newTabId);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab
+        {
+            Key = newTabId,
+            Title = "New Branch",
+            TabAction = TabActions.Create,
+            Content = childContent,
+        };
+
+        _tabs.Add(newTab);
+        selectedIndex = _tabs.Count;
+        StateHasChanged();
+    }
+
+    void AddDetailsTab(VBranch branch)
+    {
+        ContextMenuService.Close();
+
+        var detailsTabId = $"{branch.BranchId}_details";
+        var existingTabIndex = _tabs.FindIndex(t => t.Key == detailsTabId);
+
+        if (existingTabIndex != -1)
+        {
+            selectedIndex = existingTabIndex + 1;
+            return;
+        }
+
+        RenderFragment childContent = builder =>
+        {
+            builder.OpenComponent(0, typeof(BranchDetailsPage));
+            builder.AddAttribute(1, "BranchId", branch.BranchId.ToString());
+
+            builder.AddAttribute(2, "OnClose", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(detailsTabId);
+            }));
+
+            builder.AddAttribute(3, "OnEdit", EventCallback.Factory.Create(this, async (int branchId) =>
+            {
+                AddEditTab(new VBranch { BranchId = branchId });
+            }));
+
+            builder.SetKey(detailsTabId);
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab
+        {
+            Key = detailsTabId,
+            Title = "Details",
+            TabAction = TabActions.Details,
+            Content = childContent,
+        };
+
+        _tabs.Add(newTab);
+        selectedIndex = _tabs.Count;
+        StateHasChanged();
+    }
+
+    void AddEditTab(VBranch branch)
+    {
+        ContextMenuService.Close();
+
+        var editTabId = $"{branch.BranchId}_edit";
+        var existingTabIndex = _tabs.FindIndex(t => t.Key == editTabId);
+
+        if (existingTabIndex != -1)
+        {
+            selectedIndex = existingTabIndex + 1;
+            return;
+        }
+
+        RenderFragment childContent = builder =>
+        {
+            builder.OpenComponent(0, typeof(BranchEditPage));
+            builder.AddAttribute(1, "BranchId", branch.BranchId.ToString());
+
+            builder.AddAttribute(2, "OnClose", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(editTabId);
+            }));
+
+            builder.AddAttribute(3, "OnUpdated", EventCallback.Factory.Create(this, async (VBranch updatedBranch) =>
+            {
+                CloseTab(editTabId);
+                await GetBranches(searchText);
+            }));
+
+            builder.SetKey(editTabId);
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab
+        {
+            Key = editTabId,
+            Title = "Edit",
+            TabAction = TabActions.Edit,
+            Content = childContent,
+        };
+
+        _tabs.Add(newTab);
+        selectedIndex = _tabs.Count;
+        StateHasChanged();
+    }
+
+    private void CloseTab(string? id)
+    {
+        var tab = _tabs.FirstOrDefault(t => t.Key == id);
+
+        if (tab != null)
+        {
+            var idx = _tabs.IndexOf(tab);
+            _tabs.Remove(tab);
+            selectedIndex = Math.Max(0, idx);
+        }
+    }
+
+    void TabChanged(int e)
+    {
+        selectedIndex = e;
+        StateHasChanged();
+    }
+}
+
+<style>
+    .branch-page-card {
+        border-radius: 16px;
+        padding: 0.5rem;
+    }
+
+    .branch-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        padding: 0.25rem 0.25rem 0;
+    }
+
+    .branch-title {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+    .branch-subtitle {
+        margin-top: 0.2rem;
+        color: var(--rz-text-secondary-color, #6b7280);
+        font-size: 0.82rem;
+    }
+
+    .branch-filter-toggle {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .branch-grid {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .branch-identity {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .branch-image {
+        width: 2.4rem;
+        height: 2.4rem;
+        border-radius: 0.75rem;
+        object-fit: cover;
+        border: 1px solid var(--rz-base-300, #e5e7eb);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        background: #fff;
+    }
+
+    .branch-image--placeholder {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--rz-text-secondary-color, #6b7280);
+        background: var(--rz-base-200, #f3f4f6);
+    }
+
+    .branch-name {
+        font-weight: 600;
+    }
+
+    .branch-mini-text {
+        font-size: 0.76rem;
+        color: var(--rz-text-secondary-color, #6b7280);
+    }
+
+    .branch-row-inactive {
+        opacity: 0.68;
+    }
+
+    .branch-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 84px;
+        justify-content: center;
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        line-height: 1;
+        border: 1px solid transparent;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+        .branch-status-badge:hover {
+            transform: translateY(-1px);
+        }
+
+        .branch-status-badge.is-active {
+            color: #067647;
+            background: linear-gradient(180deg, #ecfdf5 0%, #d3f8e5 100%);
+            border-color: #a7f0cb;
+            box-shadow: 0 1px 2px rgba(6, 118, 71, 0.12);
+        }
+
+        .branch-status-badge.is-inactive {
+            color: #b42318;
+            background: linear-gradient(180deg, #fef3f2 0%, #fee4e2 100%);
+            border-color: #fecdca;
+            box-shadow: 0 1px 2px rgba(180, 35, 24, 0.1);
+        }
+
+    .branch-status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .branch-status-badge.is-active .branch-status-dot {
+        background: #12b76a;
+        box-shadow: 0 0 0 2px rgba(18, 183, 106, 0.25);
+    }
+
+    .branch-status-badge.is-inactive .branch-status-dot {
+        background: #f04438;
+        box-shadow: 0 0 0 2px rgba(240, 68, 56, 0.2);
+    }
+</style>

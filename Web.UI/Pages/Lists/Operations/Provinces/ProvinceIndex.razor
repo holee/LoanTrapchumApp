@@ -1,0 +1,75 @@
+﻿@using Applications.Responses.ViewModels.Addresses
+@page "/App/Operation-Area/Provinces" 
+<PageTitle>Provinces</PageTitle>
+<div class="rz-background-color-base-200">
+    <GridToolbar SearchChanged="@TextChanged">
+        <LeftChildren>
+            <RadzenButton Text="New Province"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Size="ButtonSize.Small"
+                          Icon="@IconNames.Add"
+                          Click="ShowCreate" />
+        </LeftChildren>
+        <RightChildren>
+
+        </RightChildren>
+    </GridToolbar>
+    <RadzenDataGrid Responsive="true"
+                    AllowSorting="true"
+                    Count="@counts"
+                    PageSize="@pageSize"
+                    PagerPosition="PagerPosition.Bottom"
+                    ShowPagingSummary="true"
+                    AllowPaging="true"
+                    AllowFiltering="true"
+                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    TItem="ProvinceViewModel"
+                    Density="Density.Compact"
+                    LoadData="@LoadData"
+                    PagerHorizontalAlign="HorizontalAlign.Right"
+                    PageSizeOptions="@StorageConstant.PageSizeOptions"
+                    PageSizeChanged="PageSizeChanged"
+                    Data="@ProvincesList">
+        <Columns>
+            <RadzenDataGridColumn Width="4rem" Title="#" Filterable="false" Sortable="false" Property="@nameof(ProvinceViewModel.ProvinceId)" />
+            <RadzenDataGridColumn Property="@nameof(ProvinceViewModel.ProvinceCode)"
+                                  Title="Code"
+                                  Width="14rem"
+                                  Sortable="true" />
+            <RadzenDataGridColumn Property="@nameof(ProvinceViewModel.ProDescription)"
+                                  Title="Province-Engish"
+                                  Filterable="true"
+                                  Sortable="true" />
+            <RadzenDataGridColumn Property="@nameof(ProvinceViewModel.ProInKhmer)"
+                                  Title="Province-Khmer"
+                                  Sortable="true" />
+
+            <RadzenDataGridColumn Title="Actions"
+                                  TextAlign="TextAlign.Center"
+                                  Filterable="false" Sortable="false" Context="c" Width="7rem">
+                <Template>
+                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                  Icon="more_vert"
+                                  Variant="Variant.Text"
+                                  Click="@((args)=>ShowContextMenuWithContent(args,c.ProvinceId))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+
+    </RadzenDataGrid>
+</div>
+
+@code {
+
+    void ShowContextMenuWithContent(MouseEventArgs args, int? id)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu>
+    <RadzenMenuItem Icon="@IconNames.Add" Click="@(() => AddDistrict(id))" Text="Add District" Value="@id"></RadzenMenuItem>
+    <RadzenMenuItem Icon="edit" Click="@(() => Edit(id ?? default))" Text="Edit" Value="@id"></RadzenMenuItem>
+    <RadzenMenuItem Icon="delete" Click="@(() => Delete(id ?? default))" Text="Delete" Value="@id"></RadzenMenuItem>
+</RadzenMenu>
+    );
+    }
+}
+

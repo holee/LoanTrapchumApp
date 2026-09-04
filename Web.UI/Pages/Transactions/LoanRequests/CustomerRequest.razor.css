@@ -1,0 +1,240 @@
+/* ── Base font ── */
+::deep .customer-card {
+    font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif;
+    background: var(--rz-base-background-color);
+    border: 1px solid var(--rz-base-200);
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+/* ── Header ── */
+::deep .customer-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    width: 100%;
+    background: linear-gradient(135deg, var(--rz-primary-dark) 0%, var(--rz-primary-dark, color-mix(in srgb, var(--rz-primary) 75%, #000)) 100%);
+    color: #fff;
+}
+
+::deep .customer-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(4px);
+    flex-shrink: 0;
+}
+
+::deep .customer-avatar .rzi {
+    font-size: 1.6rem;
+    color: #fff;
+}
+
+::deep .customer-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+}
+
+::deep .customer-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+::deep .customer-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+::deep .customer-sub {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+::deep .customer-badge {
+    display: inline-block;
+    margin-top: 0.2rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    letter-spacing: 0.03em;
+}
+
+/* ── Sections ── */
+::deep .info-section {
+    padding: 0.9rem 1.25rem;
+}
+
+::deep .info-section + .info-section {
+    border-top: 1px solid var(--rz-base-200);
+}
+
+::deep .info-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--rz-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.85rem;
+}
+
+::deep .info-section-title .rzi {
+    font-size: 1rem;
+    color: var(--rz-primary);
+}
+
+/* ── Personal info grid ── */
+::deep .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem 1rem;
+}
+
+@media (min-width: 768px) {
+    ::deep .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+::deep .info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.5rem 0.65rem;
+    background: var(--rz-base-100, rgba(0,0,0,0.03));
+    border-radius: 0.5rem;
+    border: 1px solid var(--rz-base-200);
+}
+
+::deep .info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.4rem;
+    background: color-mix(in srgb, var(--rz-primary) 12%, transparent);
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+}
+
+::deep .info-icon .rzi {
+    font-size: 0.95rem;
+    color: var(--rz-primary);
+}
+
+/* ── Finance cards ── */
+::deep .finance-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.65rem;
+}
+
+::deep .finance-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.75rem 0.5rem;
+    border-radius: 0.6rem;
+    border: 1px solid var(--rz-base-200);
+    text-align: center;
+}
+
+::deep .finance-card .rzi {
+    font-size: 1.25rem;
+    margin-bottom: 0.1rem;
+}
+
+::deep .circle-card {
+    background: color-mix(in srgb, var(--rz-info, #3b82f6) 8%, transparent);
+    border-color: color-mix(in srgb, var(--rz-info, #3b82f6) 25%, transparent);
+}
+
+::deep .circle-card .rzi {
+    color: var(--rz-info, #3b82f6);
+}
+
+::deep .income-card {
+    background: color-mix(in srgb, var(--rz-success) 8%, transparent);
+    border-color: color-mix(in srgb, var(--rz-success) 25%, transparent);
+}
+
+::deep .income-card .rzi {
+    color: var(--rz-success);
+}
+
+::deep .expense-card {
+    background: color-mix(in srgb, var(--rz-danger) 8%, transparent);
+    border-color: color-mix(in srgb, var(--rz-danger) 25%, transparent);
+}
+
+::deep .expense-card .rzi {
+    color: var(--rz-danger);
+}
+
+/* ── Address block ── */
+::deep .address-block {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    background: var(--rz-base-100, rgba(0,0,0,0.03));
+    border-radius: 0.5rem;
+    border: 1px solid var(--rz-base-200);
+}
+
+::deep .address-block .rzi {
+    font-size: 1rem;
+    color: var(--rz-primary);
+    margin-top: 0.05rem;
+    flex-shrink: 0;
+}
+
+/* ── Shared label / value ── */
+::deep .info-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--rz-text-secondary-color);
+    margin-bottom: 0.1rem;
+    font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif;
+}
+
+::deep .info-value {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--rz-text-color);
+    min-height: 1.25rem;
+}
+
+::deep .info-value.income {
+    color: var(--rz-success);
+    font-weight: 700;
+}
+
+::deep .info-value.expense {
+    color: var(--rz-danger);
+    font-weight: 700;
+}

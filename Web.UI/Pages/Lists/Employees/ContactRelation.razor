@@ -1,0 +1,42 @@
+@using Applications.Features.Customers.Dto
+<RadzenFieldset AllowCollapse="true" Collapsed="true" class="rz-my-2">
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="contact_emergency" /><strong>Emergency Contact</strong>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenStack Gap="1rem">
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4" SizeSM="12">
+                    <RadzenFormField Text="ឈ្មោះទំនាក់ទំនង" class="rz-w-100">
+                        <RadzenTextBox Placeholder="Enter contact name" class="rz-w-100" @bind-Text="@Contact.ContactName" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4" SizeSM="12">
+                    <RadzenFormField Text="លេខទំនាក់ទំនង" class="rz-w-100">
+                        <RadzenTextBox Placeholder="Enter contact phone" class="rz-w-100" @bind-Text="@Contact.ContactNumber" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4" SizeSM="12">
+                    <RadzenFormField Text="ត្រូវជា" class="rz-w-100">
+                        <RadzenTextBox Placeholder="Enter relation" class="rz-w-100" @bind-Text="Contact.Relationship" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="12" SizeSM="12">
+                    <RadzenFormField Text="កំណត់ចំណាំ" class="rz-w-100">
+                        <RadzenTextArea Placeholder="Enter notes" class="rz-w-100" @bind-Text="Contact.Description">
+
+                        </RadzenTextArea>
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenStack>
+    </ChildContent>
+</RadzenFieldset>
+
+@code {
+    [Parameter]
+    public EmergencyContactDtoCreate Contact { get; set; } = new EmergencyContactDtoCreate();
+  
+}

@@ -1,0 +1,273 @@
+/* ── Journals – modern card redesign ── */
+
+/* Page shell */
+.journal-page {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0.25rem;
+    gap: 1rem;
+}
+
+/* ── Top Summary Stats Grid ── */
+.journal-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.journal-stat-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.journal-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card-body {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.stat-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.stat-icon-total {
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.stat-icon-type {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.stat-card-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.stat-card-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stat-card-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.stat-card-footer {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    border-top: 1px solid #f3f4f6;
+    padding-top: 0.35rem;
+}
+
+::deep .journal-tabs .rz-tabview-nav {
+    background: transparent;
+    border-bottom: none;
+}
+
+/* Outer card */
+.journal-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Header ── */
+.journal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem 0.875rem;
+    gap: 1rem;
+}
+
+.journal-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.journal-header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: #4f46e5;
+    background: #eef2ff;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+::deep .journal-header-icon .rz-icon {
+    font-size: 1.5rem;
+    color: #4f46e5;
+}
+
+.journal-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 0.1rem;
+    line-height: 1.2;
+}
+
+.journal-subtitle {
+    font-size: 0.78rem;
+    color: #6b7280;
+    display: block;
+}
+
+.journal-add-btn {
+    flex-shrink: 0;
+}
+
+/* Thin divider */
+.journal-divider {
+    height: 1px;
+    background: #f3f4f6;
+    margin: 0;
+}
+
+/* ── Grid ── */
+::deep .journal-grid {
+    background: #fff;
+    border: none !important;
+    border-radius: 0;
+}
+
+::deep .journal-grid .rz-grid-table {
+    background: #fff;
+}
+
+::deep .journal-grid .rz-grid-table thead th {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #9ca3af;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.55rem 0.75rem;
+}
+
+::deep .journal-grid .rz-grid-table tbody td {
+    font-size: 0.84rem;
+    color: #1f2937;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    background: #fff;
+    vertical-align: middle;
+}
+
+::deep .journal-grid .rz-grid-table tbody tr:hover td {
+    background: #eef2ff;
+}
+
+::deep .journal-grid .rz-datapager {
+    background: #fafafa;
+    border-top: 1px solid #f0f0f0;
+    padding: 0.4rem 1rem;
+    font-size: 0.82rem;
+}
+
+/* ── Cell content styles ── */
+.journal-name {
+    font-weight: 600;
+    color: #111827;
+}
+
+.journal-type-badge {
+    display: inline-block;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 0.1rem 0.38rem;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    white-space: nowrap;
+}
+
+.journal-amount {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+.journal-amount.debit {
+    color: #b91c1c;
+}
+
+.journal-amount.credit {
+    color: #15803d;
+}
+
+/* ── Adjustment status badge ── */
+.journal-status-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.1rem 0.42rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+}
+
+.journal-status-badge.active {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.journal-status-badge.inactive {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border: 1px solid #e5e7eb;
+}
+
+/* ── Row action button – fade in on hover ── */
+.row-actions {
+    display: flex;
+    justify-content: center;
+    opacity: 1;
+    transition: opacity 0.15s ease;
+}
+
+::deep .journal-grid .rz-grid-table tbody tr:hover .row-actions {
+    opacity: 1;
+}

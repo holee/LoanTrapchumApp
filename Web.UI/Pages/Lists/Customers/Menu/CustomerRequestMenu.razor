@@ -1,0 +1,47 @@
+﻿@using Applications.Responses.ViewModels.Loans.Requests
+<AuthorizeView>
+    <Authorized>
+        @if (LoanRequest is not null)
+        {
+            <RadzenMenu Style="font-size:0.8rem;">
+                <RadzenMenuItem Visible="@AppState.CanRequest"
+                                Icon="@IconNames.Approval"
+                                Text="Request Now"
+                                Path="@($"/app/loan/{LoanRequest.LoanRequestId}/request/{LoanRequest.BranchId}/branches/{LoanRequest.CustomerId}/details")"
+                                Value="@LoanRequest.CustomerId" />
+                <RadzenMenuItem Visible="@(AppState.CanRequest && LoanRequest.StatusId == (int)RequestStatus.New)"
+                                Icon="@IconNames.Edit"
+                                Text="Edit Loan Request"
+                                Path="@($"/app/loan/{LoanRequest.LoanRequestId}/request/{LoanRequest.BranchId}/branches/{LoanRequest.CustomerId}/edit")"
+                                Value="@LoanRequest.CustomerId" />
+                <RadzenMenuItem Visible="@(AppState.CanDisbursed && LoanRequest.StatusId == (int)RequestStatus.Approved)"
+                                Icon="@IconNames.Paid"
+                                Text="Disburse Now"
+                                Value="@LoanRequest.CustomerId" />
+                <RadzenMenuItem Icon="@IconNames.Info"
+                                Text="Details"
+                                Path="@($"/app/loan/{LoanRequest.LoanRequestId}/request/{LoanRequest.BranchId}/branches/{LoanRequest.CustomerId}/details")"
+                                Value="@LoanRequest.CustomerId" />
+            </RadzenMenu>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+  
+    
+    [Parameter] public VLoanRequests? LoanRequest { get; set; }
+    [CascadingParameter]
+    Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+    [CascadingParameter]
+    public CascadingAppState AppState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateTask;
+
+        await AppState.GetAuthenticatedUser(authState.User);
+
+        await base.OnInitializedAsync();
+    }
+}

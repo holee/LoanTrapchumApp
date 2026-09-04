@@ -1,0 +1,29 @@
+﻿<RadzenButton Size="@Size"
+              Text="@Text"
+              Click="@HandleClick"
+              ButtonStyle="ButtonStyle.Danger"
+              ButtonType="@ButtonType"
+              Disabled="@Disabled"
+              Icon="@Icon"></RadzenButton>
+@code {
+    [Parameter]
+    public string Text { get; set; } = "Cancel";
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+    [Parameter]
+    public string Icon { get; set; } = "cancel";
+    [Parameter]
+    public ButtonType ButtonType { get; set; } = ButtonType.Button;
+    [Parameter]
+    public ButtonSize Size { get; set; } = ButtonSize.ExtraSmall;
+    [Parameter]
+    public bool Disabled { get; set; } = false;
+
+    private void HandleClick()
+    {
+        if (OnClick.HasDelegate && ButtonType == ButtonType.Button)
+        {
+            OnClick.InvokeAsync();
+        }
+    }
+}

@@ -1,0 +1,87 @@
+@page "/App/Setting/occupations/Create"
+
+@using Applications.Features.AdditionalInformations.Dto
+
+<RadzenTemplateForm TItem="OccupationDtoCreate" Data="@occupation" Submit="@OnSubmit">
+    <RadzenStack Gap="1rem">
+
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12">
+                <RadzenFormField Text="Occupation Title *" Variant="Variant.Outlined" class="rz-w-100">
+                    <RadzenTextBox @bind-Value="@occupation.OccupationTitle" Name="OccupationTitle" class="rz-w-100" />
+                </RadzenFormField>
+                <RadzenRequiredValidator Component="OccupationTitle" Text="Occupation Title is required." Popup="false" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenFormField Text="Khmer" Variant="Variant.Outlined" class="rz-w-100">
+                    <RadzenTextBox @bind-Value="@occupation.Khmer" Name="Khmer" class="rz-w-100" />
+                </RadzenFormField>
+            </RadzenColumn>
+
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenFormField Text="Type Of" Variant="Variant.Outlined" class="rz-w-100">
+                    <RadzenDropDown @bind-Value="@occupation.TypeOf"
+                                    Data="@StorageConstant.TypeOfOptions"
+                                    Name="TypeOf"
+                                    TValue="string"
+                                    AllowClear="true"
+                                    class="rz-w-100" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton ButtonType="ButtonType.Submit"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Success"
+                          Icon="@IconNames.Save"
+                          Text="Save"
+                          IsBusy="@_isBusy"
+                          BusyText="Saving..." />
+
+            <RadzenButton ButtonType="ButtonType.Button"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Icon="@IconNames.Cancel"
+                          Text="Cancel"
+                          Click="@CloseForm" />
+        </RadzenStack>
+
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+
+    [Inject] private ISettingApi SettingApi { get; set; } = default!;
+
+    private OccupationDtoCreate occupation = new();
+
+    private bool _isBusy;
+
+    private async Task OnSubmit()
+    {
+        _isBusy = true;
+
+        try
+        {
+            var created = await SettingApi.CreateOccupationAsync(occupation);
+
+            NotificationService.Notify(NotificationSeverity.Success, "Success", "Occupation was created successfully.");
+
+            DialogService.Close(created);
+        }
+        catch (Exception ex)
+        {
+            await DialogService.Alert(ex.Message, "Error", new AlertOptions { OkButtonText = "Close" });
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private void CloseForm() => DialogService.Close(false);
+}

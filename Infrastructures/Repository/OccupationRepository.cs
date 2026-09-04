@@ -1,0 +1,272 @@
+﻿using Applications.Commons.Mappers;
+using Applications.Exceptions;
+using Applications.Extensions;
+using Applications.Features.AdditionalInformations.Dto;
+using Applications.Interfaces.Lists;
+using Applications.Responses.Paginations;
+using Domains.Models.Lists;
+using Domains.Shared.Enums;
+using ErrorOr;
+using Infrastructures.DataAccess;
+using Infrastructures.Repository.Extensions;
+using Mapster;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+namespace Infrastructures.Repository
+{
+    public class OccupationRepository(DataContext contextFactory, ILogger<OccupationRepository> logger) : IOccupationService
+    {
+        public async Task<ErrorOr<OccupationDto>> CreateAsync(Occupation occupation, CancellationToken cancellation = default)
+        {
+
+            logger.LogInformation("Creating a new occupation: {OccupationTitle}", occupation.OccupationTitle);
+
+            if (await IsOccupationExist(occupation.OccupationTitle, cancellation))
+            {
+                logger.LogWarning("Occupation with title {OccupationTitle} already exists.", occupation.OccupationTitle);
+
+                return Error.Conflict(description: "Occupation with title already exists");
+            }
+
+            var context = contextFactory;
+
+            context.Occupations.Add(occupation);
+
+            await context.SaveChangesAsync();
+
+            var created = occupation.Map();
+
+            return created;
+        }
+
+
+
+        public async Task<Occupation?> GetOccupationByIdAsync(int? id, CancellationToken cancellation = default)
+        {
+            logger.LogInformation("Fetching occupation with ID: {Id}", id);
+
+            var _context = contextFactory;
+
+            var occ = await _context.Occupations.FindAsync(id, cancellation);
+
+            return occ;
+        }
+
+        public async Task<Pager<OccupationDto>> GetOccupationsAsync(int? id, QueryParam? param,
+            TypeOfEnum ofOption = TypeOfEnum.Position,
+            CancellationToken cancellation = default)
+        {
+            logger.LogInformation("Fetching occupations with expression");
+
+            var _context = contextFactory;
+
+            var baseQueries = _context.Occupations.AsQueryable();
+
+            if (param is null)
+            {
+                param = new QueryParam();
+            }
+
+            var queries = ofOption switch
+            {
+                TypeOfEnum.Position => baseQueries.Where(o => o.TypeOf == TypeOfEnum.Position.ToString()),
+
+                TypeOfEnum.Job => baseQueries.Where(o => o.TypeOf == TypeOfEnum.Job.ToString()),
+
+                _ => baseQueries
+            };
+
+            queries = ApplyFilter(param, queries);
+
+            if (id.HasValue && id > 0)
+            {
+                queries = queries.Where(x => x.OccupationId == id);
+            }
+
+            queries = Applyorder(param, queries);
+
+            var counts = await queries.CountAsync(cancellation);
+
+            if (param.Take > 0)
+            {
+                queries = queries.Skip(param.Page).Take(param.Take);
+            }
+
+            var items = await queries
+                                    .AsNoTracking()
+                                    .Select(x => new OccupationDto
+                                    {
+                                        OccupationId = x.OccupationId,
+                                        OccupationTitle = x.OccupationTitle!,
+                                        Khmer = x.Khmer,
+                                        TypeOf = x.TypeOf
+                                    }).ToListAsync(cancellation);
+
+            return new Pager<OccupationDto>(items, counts);
+
+
+
+
+
+        }
+
+        private static IQueryable<Occupation> Applyorder(QueryParam param, IQueryable<Occupation> queries)
+        {
+            if (param.SortDescending && !string.IsNullOrEmpty(param.SortColumn))
+            {
+                queries = queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn!));
+            }
+
+            return queries;
+        }
+
+        private static IQueryable<Occupation> ApplyFilter(QueryParam param, IQueryable<Occupation> queries)
+        {
+
+            if (string.IsNullOrEmpty(param.Filter)) return queries;
+
+            var filter = param.Filter.Trim();
+
+            if (string.IsNullOrEmpty(param.FilterColumn))
+            {
+
+                var columns = new[] { nameof(Occupation.OccupationTitle), nameof(Occupation.Khmer), nameof(Occupation.TypeOf) };
+
+                queries = queries.StartWiths(filter, columns);
+
+                return queries;
+            }
+
+
+            var filterColumn = typeof(Occupation).MapField(param.FilterColumn);
+
+            if (!string.IsNullOrEmpty(filterColumn))
+            {
+                queries = queries.StartWiths(filter, filterColumn);
+            }
+
+            return queries;
+        }
+
+
+        private async Task<bool> IsOccupationExist(string occupationTitle, CancellationToken cancellation)
+        {
+            logger.LogInformation("Checking if occupation with title {OccupationTitle} exists", occupationTitle);
+
+            var _context = contextFactory;
+
+            return await _context.Occupations
+                                 .AsNoTracking()
+                                 .AnyAsync(x => x.OccupationTitle!.ToLower() == occupationTitle.ToLower(), cancellation);
+        }
+
+        public async Task<ErrorOr<OccupationDto>> UpdateAsync(OccupationDtoUpate request, CancellationToken cancellation = default)
+        {
+            logger.LogInformation("Updating occupation with ID: {OccupationId}", request.OccupationId);
+
+            var context = contextFactory;
+
+            var existing = await context.Occupations.FirstOrDefaultAsync(x => x.OccupationId == request.OccupationId, cancellation);
+
+            if (existing is null)
+            {
+                return Error.NotFound(description: $"Occupation with ID {request.OccupationId} was not found.");
+            }
+
+            existing.OccupationTitle = request.OccupationTitle;
+            existing.Khmer = request.Khmer;
+            existing.TypeOf = request.TypeOf;
+
+            await context.SaveChangesAsync(cancellation);
+
+            return existing.Map();
+        }
+
+        public async Task<OccupationDto?> GetOccupationDetailByIdAsync(int? id,CancellationToken cancellation = default)
+        {
+            logger.LogInformation("Fetching occupation with ID: {Id}", id);
+
+            var _context = contextFactory;
+
+            var occ = await _context.Occupations
+                                    .AsNoTracking()
+                                    .Select(x=> new OccupationDto
+                                    {
+                                        OccupationId = x.OccupationId,
+                                        OccupationTitle = x.OccupationTitle!,
+                                        Khmer = x.Khmer,
+                                        TypeOf = x.TypeOf
+                                    })
+                                    .FirstOrDefaultAsync(x => x.OccupationId == id, cancellation);
+
+            if(occ is null)
+            {
+                logger.LogWarning("Occupation with ID {Id} was not found", id);
+
+                throw new NotFoundExceptions($"Occupation with ID {id} was not found");
+            }
+
+            return occ;
+        }
+    }
+}
+
+
+//public async Task<IEnumerable<Occupation>> GetOccupationsAsync(string? expression = null)
+//{
+//    logger.LogInformation("Fetching occupations with expression: {Expression}", expression);
+
+//    var _context = contextFactory;
+
+//    IQueryable<Occupation> occupations = _context.Occupations;
+
+//    if (expression is not null)
+//    {
+//        occupations = occupations.Where(x => x.OccupationTitle != null && x.OccupationTitle.ToLower().StartsWith(expression)
+//                                    || x.Khmer != null && x.Khmer.ToLower().StartsWith(expression)
+//                                    || x.TypeOf!.ToLower().Contains(expression));
+//    }
+
+//    return await occupations.AsNoTracking().ToListAsync() ?? Enumerable.Empty<Occupation>();
+
+//}
+
+//public async Task<Pager<T>> GetOccupations<T>(int? id, string? term = null, CancellationToken cancellation = default)
+//{
+//    logger.LogInformation("Fetching occupations with ID: {Id} and term: {Term}", id, term);
+
+//    var _context = contextFactory;
+
+//    var queries = ofOption switch
+//    {
+//        TypeOfEnum.Position => _context.Occupations.Where(o => o.TypeOf == TypeOfEnum.Position.ToString()),
+
+//        TypeOfEnum.Job => _context.Occupations.Where(o => o.TypeOf == TypeOfEnum.Job.ToString()),
+
+//        _ => _context.Occupations.AsNoTracking()
+//    };
+
+
+//    if (id.HasValue && id > 0)
+//    {
+//        queries = queries.Where(o => o.OccupationId != id);
+//    }
+
+//    if (!string.IsNullOrEmpty(term))
+//    {
+//        queries = queries.Where(x => EF.Functions.Like(x.OccupationTitle!, $"%{term}%") ||
+//                                     EF.Functions.Like(x.Khmer, $"%{term}%") ||
+//                                     EF.Functions.Like(x.TypeOf, $"%{term}%"));
+//    }
+
+//    int counts = queries.Count();
+
+//    var items = await queries
+//                           .AsNoTracking()
+//                           .ProjectToType<T>()
+//                           .ToListAsync();
+
+//    return new Pager<T>(items, counts);
+//}
+

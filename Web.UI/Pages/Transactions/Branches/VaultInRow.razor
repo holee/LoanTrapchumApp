@@ -1,0 +1,29 @@
+﻿<tr @key="@Item" class="align-middle" id="@Id">
+    <td class="text-end">@Item.CurrencyNoteValue</td>
+    <td class="text-end">
+        @Item.QOnHand
+    </td>
+    <td>
+        <RadzenNumeric TValue="int?"
+                       ShowUpDown="false"
+                       TextAlign="TextAlign.Right"
+                       Change="@CalculateByQuantity"
+                       class="@Styles.W100"
+                       onclick="this.querySelector('.rz-numeric-input').select()"
+                       @bind-Value="Item!.Quantity" Min="0" />
+    </td>
+    <td>
+        <TCNumbers Min="0"
+                   Format="@sp"
+                   OnValueChanged="@CalculateByAmount"
+                   MouseLeave="MouseLeaved"
+                   @bind-Value="Item.TotalValue" />
+
+    </td>
+    <td class="text-end">
+        @Item.TotalQuantity
+    </td>
+    <td class="text-end">
+         @Item.Value.Format(CurrencyId)
+    </td>
+</tr>

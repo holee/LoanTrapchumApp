@@ -1,0 +1,144 @@
+﻿@page "/App/Loans/Requests/{BranchId:int}/Branches"
+@using Applications.Enumerations
+@using Applications.Responses.Paginations
+@using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging
+@using Web.UI.Components.Indicatros
+<PageTitle>Loan Request</PageTitle>
+@attribute [MustHasPermission(Resources.LoanRequest, Actions.Read)]
+<RadzenStack Gap="1rem">
+    @if (_isPageLoading)
+    {
+        <Loading Text="Loading status summary..." />
+    }
+    else
+    {
+        <RadzenFieldset AllowCollapse="true" Collapsed="true">
+            <HeaderTemplate>
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+                    <RadzenIcon Icon="@IconNames.RequestQuote" /><b>Request Summary</b>
+                </RadzenStack>
+            </HeaderTemplate>
+            <ChildContent>
+                <RadzenRow Gap="0.75rem">
+                    @foreach (var card in _statusCards)
+                    {
+                        <RadzenColumn Size="12" SizeSM="6" SizeMD="4" SizeLG="3" SizeXL="2">
+                            <RadzenCard class="rz-border-radius-2 rz-p-3"
+                                        Style="@($"border-left:4px solid {card.Color};cursor:default;")">
+                                <RadzenStack Gap="0.25rem">
+                                    <RadzenStack Orientation="Orientation.Horizontal"
+                                                 AlignItems="AlignItems.Center"
+                                                 JustifyContent="JustifyContent.SpaceBetween">
+                                        <RadzenText TextStyle="TextStyle.Caption"
+                                                    Style="@($"color:{card.Color};font-weight:600;text-transform:uppercase;letter-spacing:.05em;")">
+                                            @card.Label
+                                        </RadzenText>
+                                        <RadzenIcon Icon="@card.Icon"
+                                                    Style="@($"color:{card.Color};font-size:1.3rem;opacity:.8;")" />
+                                    </RadzenStack>
+                                    <RadzenText TextStyle="TextStyle.H4" class="rz-m-0" Style="font-weight:700;">
+                                        @card.Count
+                                    </RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Caption" Style="color:var(--rz-text-secondary-color);">
+                                        requests
+                                    </RadzenText>
+                                </RadzenStack>
+                            </RadzenCard>
+                        </RadzenColumn>
+                    }
+                </RadzenRow>
+            </ChildContent>
+        </RadzenFieldset>
+
+    }
+
+    @* Tabs *@
+    <RadzenCard class="rz-p-0 rz-border-radius-2 rz-shadow-3" Style="overflow:hidden;">
+        <RadzenTabs SelectedIndexChanged="SelectedIndexChanged" RenderMode="TabRenderMode.Server">
+            <Tabs>
+                <RadzenTabsItem Icon="list" Text="All Requests">
+                    <LoanRequestAll BranchId="@BranchId" />
+                </RadzenTabsItem>
+                @foreach (var item in _tabs)
+                {
+                    <RadzenTabsItem Icon="@item.Icon" Text="@item.Title" @key="@item.Key">
+                        <Template>
+                            <CloseTabButton Title="@item.Title"
+                                            Closed="(() => CloseTab(item.Key))" />
+                        </Template>
+                        <ChildContent>
+                            @item.Content
+                        </ChildContent>
+                    </RadzenTabsItem>
+                }
+            </Tabs>
+        </RadzenTabs>
+    </RadzenCard>
+
+</RadzenStack>
+
+@code {
+
+    private List<CustomTab> _tabs = [];
+
+    private int _selectedIndex = 0;
+
+    private record StatusCard(string Label, int Count, string Icon, string Color);
+
+    private List<StatusCard> _statusCards = [];
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadStatusCountsAsync();
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadStatusCountsAsync()
+    {
+        _isPageLoading = true;
+
+        var statuses = new (RequestStatus Status, string Label, string Icon, string Color)[]
+        {
+            (RequestStatus.New,       "New",         "fiber_new",       "#6366f1"),
+            (RequestStatus.Requested, "Requested",   "send",            "#f59e0b"),
+            (RequestStatus.Checking,  "Checking",    "manage_search",   "#3b82f6"),
+            (RequestStatus.Approved,  "Approved",    "check_circle",    "#10b981"),
+            (RequestStatus.Denied,    "Denied",      "cancel",          "#ef4444"),
+            (RequestStatus.Disbursed, "Disbursed",   "payments",        "#8b5cf6"),
+            (RequestStatus.Rejected,  "Rejected",    "block",           "#f43f5e"),
+            ((RequestStatus)9,        "In Progress", "pending_actions", "#0ea5e9"),
+        };
+
+        var cards = new List<StatusCard>();
+
+        foreach (var (status, label, icon, color) in statuses)
+        {
+            var param = new QueryParam(0, 1, "RequestDate", false, true, "");
+
+            var query = new GetLoanRequestAsPagingQuery(null, BranchId == 0 ? null : BranchId, status, param);
+
+            var rsp = await mediator.Send(query);
+
+            cards.Add(new StatusCard(label, rsp.Count, icon, color));
+        }
+
+        _statusCards = cards;
+        _isPageLoading = false;
+    }
+
+    void CloseTab(string tabId)
+    {
+        var tabIndex = _tabs.FirstOrDefault(t => t.Key == tabId);
+
+        if (tabIndex is not null)
+        {
+            _tabs.Remove(tabIndex);
+            _selectedIndex = _tabs.Count;
+        }
+    }
+
+}

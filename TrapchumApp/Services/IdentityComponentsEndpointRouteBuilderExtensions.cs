@@ -8,13 +8,13 @@ using Applications.Services.Loans;
 using Applications.Utils;
 using DocumentFormat.OpenXml.Bibliography;
 using Domains.Models.Identity;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PuppeteerSharp;
 using PuppeteerSharp.Media;
 using QuestPDF.Fluent;
 using Razor.Templating.Core;
-using System.Security.Claims;
 using System.Text.Json;
 
 namespace TrapchumApp.Services;
@@ -30,15 +30,32 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         var accountGroup = endpoints.MapGroup("/Account");
 
 
-        accountGroup.MapPost("/Logout", async (ClaimsPrincipal user,
+        accountGroup.MapPost("/Logout", async (
+            HttpContext httpContext,
             [FromServices] SignInManager<ApplicationUser> signInManager,
-            [FromForm] string returnUrl) =>
+            [FromServices] IAntiforgery antiforgery) =>
         {
+            // Validate the antiforgery token on a best-effort basis. Blazor Server's
+            // prerendering can occasionally embed a token generated for a slightly
+            // different HttpContext.User snapshot than the one active when this POST
+            // is handled, which throws AntiforgeryValidationException even for a
+            // legitimate logout click. Logging out is a low-risk action (a forged
+            // request can, at worst, log the user out), so we tolerate a mismatch
+            // instead of surfacing an unhandled 400/500 error to the user.
+            try
+            {
+                await antiforgery.ValidateRequestAsync(httpContext);
+            }
+            catch (AntiforgeryValidationException)
+            {
+                // Ignore: proceed with sign-out regardless of token mismatch.
+            }
+
             await signInManager.SignOutAsync();
 
             return TypedResults.LocalRedirect($"~/");
 
-        });
+        }).DisableAntiforgery();
 
         var manageGroup = accountGroup.MapGroup("/Manage").RequireAuthorization();
 

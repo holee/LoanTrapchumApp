@@ -58,45 +58,50 @@ namespace Infrastructures.Implements
                 return Result.Failure(ErrorResponse.Validation("Selected Branch is already vault in."));
             }
 
-            await using var dbTransaction = await context.Database.BeginTransactionAsync(cancellation);
+            var strategy = context.Database.CreateExecutionStrategy();
 
-            try
+            return await strategy.ExecuteAsync(async () =>
             {
+                await using var dbTransaction = await context.Database.BeginTransactionAsync(cancellation);
 
-                // Set FK values before saving
-                if (trnx?.CashManagements is not null)
+                try
                 {
-                    foreach (var cash in trnx.CashManagements)
+
+                    // Set FK values before saving
+                    if (trnx?.CashManagements is not null)
                     {
-                        cash.TransactionRefId = trnx.TransactionsId;
-
-                        if (cash.CashManagementDetails!.Any())
+                        foreach (var cash in trnx.CashManagements)
                         {
-                            foreach (var detail in cash.CashManagementDetails!)
-                            {
-                                detail.TransactionsRefId = trnx.TransactionsId;
+                            cash.TransactionRefId = trnx.TransactionsId;
 
-                                detail.CachmanagementRefId = cash.Id;
+                            if (cash.CashManagementDetails!.Any())
+                            {
+                                foreach (var detail in cash.CashManagementDetails!)
+                                {
+                                    detail.TransactionsRefId = trnx.TransactionsId;
+
+                                    detail.CachmanagementRefId = cash.Id;
+                                }
                             }
                         }
                     }
+
+                    // Add root entity (cascades children because of lists)
+                    await context.LoanTransaction.AddAsync(trnx!, cancellation);
+
+                    await context.SaveChangesAsync(cancellation);
+
+                    await dbTransaction.CommitAsync(cancellation);
+
+                    return Result.Success("Cash vault transaction succeed");
                 }
+                catch (Exception ex)
+                {
+                    await dbTransaction.RollbackAsync(cancellation);
 
-                // Add root entity (cascades children because of lists)
-                await context.LoanTransaction.AddAsync(trnx!, cancellation);
-
-                await context.SaveChangesAsync(cancellation);
-
-                await dbTransaction.CommitAsync(cancellation);
-
-                return Result.Success("Cash vault transaction succeed");
-            }
-            catch (Exception ex)
-            {
-                await dbTransaction.RollbackAsync(cancellation);
-
-                return Result.Failure(ErrorResponse.ServerError($"Failed to create cash vault: {ex.Message}"));
-            }
+                    return Result.Failure(ErrorResponse.ServerError($"Failed to create cash vault: {ex.Message}"));
+                }
+            });
         }
 
 
@@ -111,45 +116,50 @@ namespace Infrastructures.Implements
                 return ErrorOr.Error.Validation("Selected Branch is already vault in.");
             }
 
-            await using var dbTransaction = await context.Database.BeginTransactionAsync(cancellation);
+            var strategy = context.Database.CreateExecutionStrategy();
 
-            try
+            return await strategy.ExecuteAsync(async () =>
             {
+                await using var dbTransaction = await context.Database.BeginTransactionAsync(cancellation);
 
-                // Set FK values before saving
-                if (trnx?.CashManagements is not null)
+                try
                 {
-                    foreach (var cash in trnx.CashManagements)
+
+                    // Set FK values before saving
+                    if (trnx?.CashManagements is not null)
                     {
-                        cash.TransactionRefId = trnx.TransactionsId;
-
-                        if (cash.CashManagementDetails!.Any())
+                        foreach (var cash in trnx.CashManagements)
                         {
-                            foreach (var detail in cash.CashManagementDetails!)
-                            {
-                                detail.TransactionsRefId = trnx.TransactionsId;
+                            cash.TransactionRefId = trnx.TransactionsId;
 
-                                detail.CachmanagementRefId = cash.Id;
+                            if (cash.CashManagementDetails!.Any())
+                            {
+                                foreach (var detail in cash.CashManagementDetails!)
+                                {
+                                    detail.TransactionsRefId = trnx.TransactionsId;
+
+                                    detail.CachmanagementRefId = cash.Id;
+                                }
                             }
                         }
                     }
+
+                    // Add root entity (cascades children because of lists)
+
+                    await context.LoanTransaction.AddAsync(trnx!, cancellation);
+
+                    await context.SaveChangesAsync(cancellation);
+
+                    await dbTransaction.CommitAsync(cancellation);
+
+                    return "Cash vault transaction succeed";
                 }
-
-                // Add root entity (cascades children because of lists)
-
-                await context.LoanTransaction.AddAsync(trnx!, cancellation);
-
-                await context.SaveChangesAsync(cancellation);
-
-                await dbTransaction.CommitAsync(cancellation);
-
-                return "Cash vault transaction succeed";
-            }
-            catch (Exception ex)
-            {
-                await dbTransaction.RollbackAsync(cancellation);
-                return ErrorOr.Error.Unexpected($"Failed to create cash vault: {ex.Message}");
-            }
+                catch (Exception ex)
+                {
+                    await dbTransaction.RollbackAsync(cancellation);
+                    return (ErrorOr.ErrorOr<string>)ErrorOr.Error.Unexpected($"Failed to create cash vault: {ex.Message}");
+                }
+            });
         }
 
 

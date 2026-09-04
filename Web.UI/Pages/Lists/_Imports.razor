@@ -1,0 +1,94 @@
+@using System.Net.Http
+@using System.Net.Http.Json
+@using Applications.Constants
+@using Applications.Constants.Authorizations
+@using Applications.Extensions
+@using Applications.Extensions.DateTimes
+@using Applications.Extensions.Identity
+@using Applications.Extensions.Identity.Authorizations.Attributes
+@using Applications.Extensions.Identity.Enumerations
+@using Applications.Extensions.Identity.Policies
+@using Applications.Extensions.Maths
+@using Applications.Features.Addresses
+@using Applications.Features.Addresses.Interfaces
+@using Applications.Features.Branches
+@using Applications.Features.Branches.Interfaces
+@using Applications.Features.Currencies
+@using Applications.Features.Customers.Services
+@using Applications.Features.Employees
+@using Applications.Responses.ViewModels.Auths
+@using Applications.Responses.ViewModels.Customers
+@using Applications.Responses.ViewModels.Loans.Schedules
+@using Applications.Responses.ViewModels.Options
+@using Applications.Services.Identity
+@using Applications.Services.Lists
+@using Applications.Services.Loans
+@using Blazilla
+@using Domains.Models.Lists
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using Radzen
+@using Radzen.Blazor
+@using Web.UI
+@using Web.UI.Components
+@using Web.UI.Components.Buttons
+@using Web.UI.Components.Comps
+@using Web.UI.Components.Comps.Cards
+@using Web.UI.Components.Comps.Controls
+@using Web.UI.Components.Toasts
+@using Web.UI.Components.Messageboxes
+@using Web.UI.Components.Modals.SweetAlerts
+@using Web.UI.Components.Actionbars
+@using Web.UI.Components.Indicatros
+@using Web.UI.Helpers.Constants
+@using Web.UI.Services
+@using Web.UI.Shared
+@using Applications.Utils
+@using Applications.Enumerations
+@using Applications.Responses.Paginations
+@using Web.UI.Pages.Lists
+@using Web.UI.Pages.Lists.Bases
+@using Web.UI.Pages.Lists.Branches
+@using Web.UI.Pages.Lists.Collaterals
+@using Web.UI.Pages.Lists.CollateralValuations
+@using Web.UI.Pages.Lists.CreditAgents
+@using Web.UI.Pages.Lists.Customers
+@using Web.UI.Pages.Lists.Customers.Activties
+@using Web.UI.Pages.Lists.Customers.Expenses
+@using Web.UI.Pages.Lists.Customers.Incomes
+@using Web.UI.Pages.Lists.Customers.Notes
+@using Web.UI.Pages.Lists.Departments
+@using Web.UI.Pages.Lists.Employees
+@using Web.UI.Pages.Lists.Holidays
+@using Web.UI.Pages.Lists.Items
+@using Web.UI.Pages.Lists.Operations.Areas
+@using Web.UI.Pages.Lists.Operations.Communes
+@using Web.UI.Pages.Lists.Operations.Districts
+@using Web.UI.Pages.Lists.Operations.Provinces
+@using Web.UI.Pages.Lists.Operations.Villages
+@using Web.UI.Pages.Lists.OtherNames
+@using Web.UI.Pages.Lists.OtherNames.Guarantors
+@using Web.UI.Pages.Lists.Vendors
+
+@inject IJSRuntime js
+@inject LoadingTrackerService Tracker
+@inject NotificationService NotificationService
+@inject DialogService DialogService 
+@inject ContextMenuService ContextMenuService
+@inject TooltipService tooltipService
+@inject NavigationManager NavigationManager
+@inject IAddressServiceImpl _addressService
+@inject IUserServiceImpl _userService
+@inject IMediator mediator
+@inject NotificationServices _notiService
+@inject ToastService _toastService
+@inject MessageBoxService MsgBox
+@inject SwalService Swal
+@inject BranchService branchService 
+@inject UserServices userServices
+@inject CurrencyServices currencyServices

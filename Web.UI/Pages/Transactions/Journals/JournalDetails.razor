@@ -1,0 +1,188 @@
+@using Applications.Features.Journals.Dtos
+<PageTitle>Journal Details</PageTitle>
+
+<div class="jd-page">
+
+        <div class="jd-header">
+            <div class="jd-header-icon">
+                <RadzenIcon Icon="receipt_long" Style="font-size:1.2rem;" />
+            </div>
+            <div>
+                <h2>Journal Details</h2>
+                <p>@(JournalEntry?.ReferrenceNum ?? "—")</p>
+            </div>
+            <div style="margin-left:auto; display:flex; align-items:center; gap:0.5rem;">
+                @{
+                    var isBalanced = JournalEntry is not null && JournalEntry.TotalDr == JournalEntry.TotalCr;
+                }
+                @if (isBalanced)
+                {
+                    <span class="jd-balance-badge ok">
+                        <RadzenIcon Icon="check_circle" Style="font-size:0.9rem;" /> Balanced
+                    </span>
+                }
+                else
+                {
+                    <span class="jd-balance-badge error">
+                        <RadzenIcon Icon="error" Style="font-size:0.9rem;" /> Out of Balance
+                    </span>
+                }
+                <RadzenButton Text="Edit" ButtonType="ButtonType.Button"
+                              Icon="edit"
+                              ButtonStyle="ButtonStyle.Light"
+                              Variant="Variant.Flat"
+                              Click="@ShowEditTab"
+                              Size="ButtonSize.Small" />
+            </div>
+        </div>
+
+        <div class="jd-card">
+            <input type="hidden" @bind="JournalEntry!.TransactionsId" />
+            <div class="jd-card-title">
+                <RadzenIcon Icon="info" CssClass="rzi" />
+                Entry Information
+            </div>
+            <div class="jd-info-grid">
+                <div>
+                    <div class="jd-info-label">Reference #</div>
+                    <div class="jd-info-value">@(JournalEntry?.ReferrenceNum ?? "—")</div>
+                </div>
+                <div>
+                    <div class="jd-info-label">Journal Date</div>
+                    <div class="jd-info-value">@Applications.Extensions.DateTimeExtensions.DayFirst(JournalEntry?.JournalDate)</div>
+                </div>
+                <div>
+                    <div class="jd-info-label">Journal Type</div>
+                    <div class="jd-info-value">@(JournalEntry?.JournalType ?? "—")</div>
+                </div>
+                <div>
+                    <div class="jd-info-label">Description</div>
+                    <div class="jd-info-value">@(JournalEntry?.Description ?? "—")</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jd-card">
+            <div class="jd-card-title">
+                <RadzenIcon Icon="account_balance_wallet" CssClass="rzi" />
+                Financial Summary
+            </div>
+            <div class="jd-summary-grid">
+                <div class="jd-summary-item">
+                    <div class="jd-summary-label">Total Debit</div>
+                    <div class="jd-summary-value debit">
+                        @if (JournalEntry?.TotalDr is not null)
+                        {
+                            @JournalEntry.TotalDr.Format(JournalEntry?.CurrencyId)
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </div>
+                </div>
+                <div class="jd-summary-item">
+                    <div class="jd-summary-label">Total Credit</div>
+                    <div class="jd-summary-value credit">
+                        @if (JournalEntry?.TotalCr is not null)
+                        {
+                            @JournalEntry.TotalCr.Format(JournalEntry?.CurrencyId)
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </div>
+                </div>
+                <div class="jd-summary-item">
+                    <div class="jd-summary-label">Balance</div>
+                    <div class="jd-summary-value @(JournalEntry?.TotalDr == JournalEntry?.TotalCr ? "balanced" : (JournalEntry?.TotalDr > JournalEntry?.TotalCr ? "debit" : "credit"))">
+                        @(((JournalEntry?.TotalDr ?? 0) - (JournalEntry?.TotalCr ?? 0)).Format(JournalEntry?.CurrencyId))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <div class="jd-card">
+        <div class="jd-card-title">
+            <RadzenIcon Icon="list_alt" CssClass="rzi" />
+            Journal Lines
+        </div>
+        <RadzenDataGrid GridLines="DataGridGridLines.Both"
+                        Density="Density.Compact"
+                        AllowAlternatingRows="true"
+                        AllowFiltering="false"
+                        AllowSorting="false"
+                        RowSelect="RowSelecting"
+                        TItem="JournalEntryLineDto"
+                        RowRender="@OnRowRender"
+                        Data="@_journalEntryLines">
+            <Columns>
+                <RadzenDataGridColumn Width="4rem" Context="j" Title="#" Sortable="false" TextAlign="TextAlign.Center">
+                    <Template>
+                        <span class="jd-line-num">@j.RowIndex</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="LedgerName" Title="Account" Sortable="false" />
+                <RadzenDataGridColumn Width="9rem" Property="Debit" Title="Debit" TextAlign="TextAlign.Right" Sortable="false">
+                    <Template Context="j">
+                        @if (j.Debit is > 0)
+                        {
+                            @j.Debit.Format(JournalEntry?.CurrencyId)
+                        }
+                        else
+                        {
+                            <span class="rz-color-secondary-light">—</span>
+                        }
+                    </Template>
+                    <FooterTemplate>
+                        <strong>@(_journalEntryLines.Sum(x => x.Debit ?? 0).Format(JournalEntry?.CurrencyId))</strong>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Width="9rem" Property="Credit" Title="Credit" TextAlign="TextAlign.Right" Sortable="false">
+                    <Template Context="j">
+                        @if (j.Credit is > 0)
+                        {
+                            @j.Credit.Format(JournalEntry?.CurrencyId)
+                        }
+                        else
+                        {
+                            <span class="rz-color-secondary-light">—</span>
+                        }
+                    </Template>
+                    <FooterTemplate>
+                        <strong>@(_journalEntryLines.Sum(x => x.Credit ?? 0).Format(JournalEntry?.CurrencyId))</strong>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Width="9rem" Property="Amount"
+                                      Title="Amount"
+                                      TextAlign="TextAlign.Right" Sortable="false"
+                                      Context="journal">
+                    <Template>
+                        @Math.Abs(journal.Amount!.Value).Format(JournalEntry?.CurrencyId)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="JournalLineDesc" Title="Description" Sortable="false" />
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 class="rz-my-2"
+                 AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+        <RadzenButton Icon="close"
+                      Click="@ClosedTabEvent"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="ButtonSize.Small"
+                      Text="Close" />
+    </RadzenStack>
+
+</div>
+@code {
+    private void OnRowRender(RowRenderEventArgs<JournalEntryLineDto> args)
+    {
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
+    }
+}

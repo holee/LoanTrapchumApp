@@ -1,0 +1,199 @@
+@page "/App/Setting/Occupations"
+
+<PageTitle>Occupations</PageTitle>
+
+<GridToolbar SearchChanged="@TextChanged">
+    <LeftChildren>
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Icon="@IconNames.Add"
+                      Text="Add New"
+                      Click="@AddOccupations" />
+    </LeftChildren>
+</GridToolbar>
+
+<RadzenDataGrid TItem="OccupationDto"
+                @ref="@gridRef"
+                Data="@_occupations"
+                Count="@_counts"
+                LoadData="@LoadOccupation"
+                IsLoading="@_isLoading"
+                PageSize="@pageSize"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PageSizeChanged="@PageSizeChanged"
+                PagerPosition="PagerPosition.Bottom"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                ShowPagingSummary="true"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true"
+                AllowAlternatingRows="true"
+                Density="Density.Compact"
+                GridLines="DataGridGridLines.Both"
+                Responsive="true">
+    <Columns>
+        <RadzenDataGridColumn TItem="OccupationDto" Title="#" Width="5rem" Sortable="false" Filterable="false">
+            <Template Context="c">
+                @(_occupations.IndexOf(c) + 1)
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="OccupationDto" Property="@nameof(OccupationDto.OccupationTitle)" Title="Title" />
+
+        <RadzenDataGridColumn TItem="OccupationDto" Property="@nameof(OccupationDto.Khmer)" Title="Khmer" />
+
+        <RadzenDataGridColumn TItem="OccupationDto" Property="@nameof(OccupationDto.TypeOf)" Title="TypeOf" />
+
+        <RadzenDataGridColumn TItem="OccupationDto" Title="Actions" Width="5rem" TextAlign="TextAlign.Center" Sortable="false" Filterable="false">
+            <Template Context="c">
+                <RadzenButton Icon="@IconNames.MoreVert"
+                              Variant="Variant.Text"
+                              Size="ButtonSize.ExtraSmall"
+                              Click="@((args) => ShowContextMenu(args, c))"
+                              @onclick:stopPropagation="true" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+
+    [Inject] private ISettingApi SettingApi { get; set; } = default!;
+
+    private List<OccupationDto> _occupations = [];
+
+    private RadzenDataGrid<OccupationDto> gridRef = default!;
+
+    private int pageIndex = 0;
+
+    private int pageSize = 15;
+
+    private int _counts = 0;
+
+    private string? _filter = string.Empty;
+
+    private string sortField = nameof(OccupationDto.OccupationId);
+
+    private bool sortDescending = false;
+
+    private bool isIncludeInActive = false;
+
+    private bool _isLoading = false;
+
+    private readonly string[] props =
+    [
+        nameof(OccupationDto.OccupationTitle),
+        nameof(OccupationDto.Khmer),
+        nameof(OccupationDto.TypeOf)
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetOccupations(_filter);
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task GetOccupations(string? filter)
+    {
+        _isLoading = true;
+
+        try
+        {
+            var pager = await SettingApi.GetOccupationsAsync(0, pageIndex, pageSize, sortField, sortDescending,
+                isIncludeInActive, filter, TypeOfEnum.All);
+
+            _occupations = pager.Items ?? [];
+
+            _counts = pager.Count;
+        }
+        catch (Exception ex)
+        {
+            _occupations = [];
+
+            _counts = 0;
+
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadOccupation(LoadDataArgs args)
+    {
+        pageIndex = args.Skip ?? 0;
+
+        pageSize = args.Top ?? pageSize;
+
+        (sortField, sortDescending) = args.PageInfo(nameof(OccupationDto.OccupationId));
+
+        _filter = args.FilterValue(props);
+
+        await GetOccupations(_filter);
+    }
+
+    private async Task PageSizeChanged(int size)
+    {
+        pageSize = size;
+
+        pageIndex = 0;
+
+        await GetOccupations(_filter);
+    }
+
+    private async Task TextChanged(string? value)
+    {
+        _filter = value;
+
+        pageIndex = 0;
+
+        await GetOccupations(_filter);
+    }
+
+    private async Task AddOccupations()
+    {
+        var result = await DialogService.OpenAsync<OccupationCreate>("Add Occupation",
+            options: new DialogOptions { AutoFocusFirstElement = false });
+
+        if (result is OccupationDto created)
+        {
+            await gridRef.InsertRow(created);
+
+            NotificationService.Notify(NotificationSeverity.Success, "Success", "Occupation was created successfully.");
+
+            await gridRef.Reload();
+        }
+    }
+
+    private async Task EditOccupation(OccupationDto item)
+    {
+        var result = await DialogService.OpenAsync<OccupationEdit>("Edit Occupation",
+            new Dictionary<string, object?> { { nameof(OccupationEdit.Id), item.OccupationId } },
+            new DialogOptions { AutoFocusFirstElement = false });
+
+        if (result is OccupationDto)
+        {
+            await GetOccupations(_filter);
+        }
+    }
+
+    private async Task ViewDetail(OccupationDto item)
+    {
+        await DialogService.OpenAsync<OccupationDetail>("Occupation Details",
+            new Dictionary<string, object?> { { nameof(OccupationDetail.Id), item.OccupationId } },
+            new DialogOptions { AutoFocusFirstElement = false });
+
+        await GetOccupations(_filter);
+    }
+
+    private void ShowContextMenu(MouseEventArgs args, OccupationDto item)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu>
+        <RadzenMenuItem Text="View Details" Icon="@IconNames.View" Click="@(() => ViewDetail(item))" />
+        <RadzenMenuItem Text="Edit" Icon="@IconNames.Edit" Click="@(() => EditOccupation(item))" />
+    </RadzenMenu>);
+    }
+}

@@ -1,0 +1,121 @@
+@using Applications.Features.Customers.Queries.GetCustomerDetailById
+@using Applications.Features.Customers.Response
+@using Web.UI.Helpers.Extensions
+
+<RadzenCard Variant="Variant.Flat" Style="padding:0;overflow:hidden;border-radius:0.75rem;box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid var(--rz-base-200);">
+
+    @* Header *@
+    <div style="background:var(--rz-primary);padding:1rem 1.25rem;">
+        <div style="display:flex;align-items:center;gap:1rem;">
+            <RadzenImage Path="@Customer?.Photo"
+                         Style="width:3.5rem;height:3.5rem;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.6);flex-shrink:0;"
+                         AlternateText="Customer" />
+            <div style="flex:1;min-width:0;">
+                <div style="color:#fff;font-size:1rem;font-weight:700;font-family:'Khmer OS Siemreap',kh_siemreap,sans-serif;
+                            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    @Customer?.AltName
+                </div>
+                <div style="color:rgba(255,255,255,0.75);font-size:0.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    @Customer?.FullName
+                </div>
+            </div>
+            @if (Customer?.IsLoanActive == true)
+            {
+                <span style="flex-shrink:0;background:#ff4d4f;color:#fff;border-radius:2rem;
+                             padding:0.18rem 0.75rem;font-size:0.75rem;font-weight:600;">
+                    Active Loan
+                </span>
+            }
+            else
+            {
+                <span style="flex-shrink:0;background:#52c41a;color:#fff;border-radius:2rem;
+                             padding:0.18rem 0.75rem;font-size:0.75rem;font-weight:600;">
+                    No Active Loan
+                </span>
+            }
+        </div>
+    </div>
+
+    @* Body *@
+    <div style="padding:1rem 1.25rem 1.25rem;">
+
+        @SectionHeader("person", "Personal")
+        <RadzenRow RowGap="0.5rem" class="rz-mb-1">
+            @InfoField("badge", "Name", Customer?.AltName, khmerFont: true)
+            @InfoField("translate", "En-Name", Customer?.FullName)
+            @InfoField("person", "Salutation", Customer?.Salutation)
+            @InfoField("cake", "Date of Birth", Customer?.DateOfBirth?.ToShortDateString())
+        </RadzenRow>
+
+        @SectionHeader("contact_phone", "Contact")
+        <RadzenRow RowGap="0.5rem" class="rz-mb-1">
+            @InfoField("phone", "Phone", Customer?.Phone)
+            @InfoField("phone_android", "Alt Phone", Customer?.AltPhone)
+            @InfoField("email", "Email", Customer?.EmailAddress)
+            @InfoField("work", "Occupation", Customer?.Occupation)
+        </RadzenRow>
+
+        @SectionHeader("family_restroom", "Family")
+        <RadzenRow RowGap="0.5rem" class="rz-mb-1">
+            @InfoField("favorite", "Spouse Name", Customer?.SpouseName, khmerFont: true)
+            @InfoField("wc", "Marital Status", Customer?.MarritalStatus)
+            @InfoField("child_care", "Children", Customer?.NoOfChildren?.ToString())
+            @InfoField("group", "Circle", Customer?.Circle?.ToString())
+        </RadzenRow>
+
+        @SectionHeader("location_on", "Address & ID")
+        <RadzenRow RowGap="0.5rem">
+            @InfoField("credit_card", "ID Card", Customer?.IdCard, 6)
+            @InfoField("location_on", "Address", Customer?.ToString(), 6)
+        </RadzenRow>
+
+    </div>
+
+</RadzenCard>
+
+@code
+{
+    [Parameter] public VCustomerDetails? Customer { get; set; }
+    [Parameter] public string? CustomerId { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Customer is null && !string.IsNullOrEmpty(CustomerId))
+        {
+            var rsp = await mediator.Send(new GetCustomerDetailByIdQuery(CustomerId, false));
+
+            if (rsp.IsSuccess())
+            {
+                Customer = rsp.Value;
+            }
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    static RenderFragment SectionHeader(string icon, string title) => __builder =>
+    {
+        <div style="display:flex;align-items:center;gap:0.4rem;margin:0.9rem 0 0.45rem;">
+            <RadzenIcon Icon="@icon" Style="font-size:0.95rem;color:var(--rz-primary);" />
+            <span style="font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--rz-primary);">@title</span>
+            <div style="flex:1;height:1px;background:var(--rz-base-300);"></div>
+        </div>
+    };
+
+    static RenderFragment InfoField(string icon, string label, string? value, int sizeSM = 3, bool khmerFont = false) => __builder =>
+    {
+        var fontStyle = khmerFont ? "font-family:'Khmer OS Siemreap',kh_siemreap,sans-serif;" : "";
+
+        <RadzenColumn Size="6" SizeSM="@sizeSM">
+            <div style="padding:0.45rem 0.6rem;border-left:3px solid var(--rz-primary-lighter);background:var(--rz-base-50);border-radius:0 0.4rem 0.4rem 0;">
+                <div style="display:flex;align-items:center;gap:0.25rem;margin-bottom:0.1rem;">
+                    <RadzenIcon Icon="@icon" Style="font-size:0.8rem;color:var(--rz-primary);" />
+                    <span style="font-size:0.67rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--rz-base-500);font-weight:600;">@label</span>
+                </div>
+                <div style="@($"font-size:0.85rem;font-weight:600;color:var(--rz-base-900);{fontStyle}")">
+                    @(string.IsNullOrWhiteSpace(value) ? "—" : value)
+                </div>
+            </div>
+        </RadzenColumn>
+    };
+}

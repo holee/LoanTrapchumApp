@@ -1,0 +1,8 @@
+::deep .rz-tabview-panels {
+    padding: 0.5rem 0;
+}
+
+.action-toolbar {
+    border-top: 1px solid var(--rz-base-200);
+    background: linear-gradient(180deg,var(--rz-secondary-dark),var(--rz-primary-dark));
+}

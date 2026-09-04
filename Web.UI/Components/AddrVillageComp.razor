@@ -1,0 +1,49 @@
+﻿@using System.Linq.Expressions
+@using Applications.Features.Addresses.Dto
+@using Applications.Features.Addresses.Queries.GetVillages
+<RadzenDropDown AllowFiltering="false"
+                AllowClear="false"
+                Name="@Name"
+                Style="width: 100%;"
+                Data="villages"
+                Disabled="@(!CommuneId.HasValue)"
+                Value="@Value"
+                TValue="int?"
+                ValueChanged="@ValueChanged"
+                ValueExpression="@ValueExpression"
+                TextProperty="@nameof(VillageDto.VilInKhmer)"
+                ValueProperty="@nameof(VillageDto.VillageId)"
+                FilterOperator="StringFilterOperator.Contains"
+                Placeholder="@(!CommuneId.HasValue ? "Select commune first..." : "Select your village...")">
+</RadzenDropDown>
+
+@code {
+
+    [Parameter] public int? Value { get; set; }
+    [Parameter] public string? Name { get; set; } = "VillageRefId";
+    [Parameter] public int? CommuneId { get; set; }
+    [Parameter] public EventCallback<int?> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<int?>>? ValueExpression { get; set; }
+    private IEnumerable<VillageDto> villages = [];
+
+    private async Task GetVillages(int? communeId)
+    {
+        var query = new GetVillagesQuery(communeId ?? 0, 0, new());
+
+        var rsp = await mediator.Send(query);
+
+        villages = rsp.Items;
+    }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (CommuneId.HasValue && CommuneId > 0)
+        {
+            await GetVillages(CommuneId);
+        }
+        await base.OnParametersSetAsync();
+    }
+
+
+}

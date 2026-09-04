@@ -1,0 +1,74 @@
+@page "/App/Settings/Income-Expense"
+
+<PageTitle>Income &amp; Expense</PageTitle>
+
+<GridToolbar @bind-Value="_filter">
+    <LeftChildren>
+        <RadzenButton Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Icon="@IconNames.Add"
+                      Text="Add"
+                      Click="@ClickAdd" />
+    </LeftChildren>
+</GridToolbar>
+
+<RadzenDataGrid TItem="IncomeExpenseDto"
+                @ref="@_gridRef"
+                Data="@_incomeExpense"
+                Count="@_counts"
+                LoadData="@OnLoadData"
+                IsLoading="@isLoading"
+                PageSize="@_take"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PageSizeChanged="@PageSizeChanged"
+                PagerPosition="PagerPosition.Bottom"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                ShowPagingSummary="true"
+                SelectionMode="DataGridSelectionMode.Single"
+                RowRender="@OnRowRender"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowAlternatingRows="true"
+                Density="Density.Compact"
+                GridLines="DataGridGridLines.Both"
+                Responsive="true">
+    <LoadingTemplate>
+        <RadzenProgressBar Value="100"
+                           ShowValue="false"
+                           Mode="ProgressBarMode.Indeterminate"
+                           Visible="@isLoading" />
+    </LoadingTemplate>
+    <Columns>
+        <RadzenDataGridColumn TItem="IncomeExpenseDto" Title="#" Width="3rem" Frozen="true" Sortable="false" Filterable="false">
+            <Template Context="s">
+                @s.RowIndex
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="IncomeExpenseDto" Property="@nameof(IncomeExpenseDto.Description)" Title="Description" Frozen="true" />
+
+        <RadzenDataGridColumn TItem="IncomeExpenseDto" Property="@nameof(IncomeExpenseDto.Types)" Title="Types" Width="6rem" />
+
+        <RadzenDataGridColumn TItem="IncomeExpenseDto" Title="Action" Width="4rem" TextAlign="TextAlign.Center" Sortable="false" Filterable="false">
+            <Template Context="s">
+                <RadzenButton Icon="@IconNames.MoreVert"
+                              Variant="Variant.Text"
+                              Size="ButtonSize.ExtraSmall"
+                              Click="@((arg) => OpenContextMenu(arg, s))"
+                              @onclick:stopPropagation="true" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+
+    private void OpenContextMenu(MouseEventArgs args, IncomeExpenseDto dto)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<IncomeExpenseMenu Id="@dto.Id"
+                        ClickEdit="@ClickEdit"
+                        ClickDelete="@ClickDelete"
+                        ClickDetails="@ClickDetails" />);
+    }
+}

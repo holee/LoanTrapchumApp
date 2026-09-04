@@ -1,0 +1,346 @@
+@using Applications.Features.AdditionalInformations.Dto
+@using Applications.Features.Documents.Dto
+@using System.Text.Json
+
+<style>
+    .status-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 2px 10px;
+        border-radius: 12px;
+    }
+
+    .status-active {
+        background-color: var(--rz-success-lighter);
+        color: var(--rz-success-dark);
+    }
+
+    .status-inactive {
+        background-color: var(--rz-danger-lighter);
+        color: var(--rz-danger-dark);
+    }
+</style>
+
+<RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-2">
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+            <RadzenIcon Icon="person" Style="color:var(--rz-primary)" />
+            <strong>ព័ត៌មានអតិថិជន</strong>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenRow AlignItems="AlignItems.End" class="rz-mb-2">
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="10" SizeMD="10" SizeSM="12">
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="2" SizeSM="12">
+                            <RadzenFormField Text="គោរម្យងារ" AllowFloatingLabel="true" class="rz-w-100">
+                                <ChildContent>
+                                    <RadzenDropDown TValue="string"
+                                                    Data="@_filteredSalutations"
+                                                    TextProperty="@nameof(SalutationDto.Title)"
+                                                    ValueProperty="@nameof(SalutationDto.Title)"
+                                                    FilterAsYouType="true"
+                                                    AllowFiltering="true"
+                                                    class="rz-w-100"
+                                                    SearchText="@_salutationText"
+                                                    SearchTextChanged="SalutationSearchChanged"
+                                                    Placeholder="លោក/លោកស្រី..."
+                                                    @bind-Value="Model.Salutation" />
+                                </ChildContent>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="4" SizeSM="12">
+                            <RadzenFormField Text="ឈ្មោះជាភាសាខ្មែរ *" AllowFloatingLabel="true" class="rz-w-100">
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="Model.AltName"
+                                                   class="rz-w-100"
+                                                   AutoCompleteType="AutoCompleteType.Off"
+                                                   Placeholder="ឈ្មោះជាភាសាខ្មែរ..." />
+                                </ChildContent>
+                            </RadzenFormField>
+                        </RadzenColumn>
+
+                        <RadzenColumn Size="12" SizeMD="2" SizeSM="12">
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                                <RadzenCheckBox TValue="bool?" @bind-Value="Model.IsActive" Name="IsActive" />
+                                <span class="status-badge @(Model.IsActive == true ? "status-active" : "status-inactive")">
+                                    <RadzenIcon Icon="@(Model.IsActive == true ? "check_circle" : "cancel")"
+                                                Style="font-size:0.72rem;vertical-align:middle" />
+                                    @(Model.IsActive == true ? "សកម្ម" : "អសកម្ម")
+                                </span>
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow class="rz-my-3">
+                        <RadzenColumn Size="12" SizeMD="4">
+                            <RadzenFormField Text="នាមត្រកូលជាឡាតាំង *" AllowFloatingLabel="true" class="rz-w-100">
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="Model.FirstName"
+                                                   class="rz-w-100"
+                                                   AutoCompleteType="AutoCompleteType.Off"
+                                                   Change="@LastNameChanged"
+                                                   Placeholder="នាមត្រកូលជាឡាតាំង..." />
+                                </ChildContent>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="4" SizeSM="12">
+                            <RadzenFormField Text="នាមខ្លួនជាឡាតាំង *" AllowFloatingLabel="true" class="rz-w-100">
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="Model.LastName"
+                                                   class="rz-w-100"
+                                                   AutoCompleteType="AutoCompleteType.Off"
+                                                   Change="@FirstNameChanged"
+                                                   Placeholder="នាមខ្លួនជាឡាតាំង..." />
+                                </ChildContent>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow AlignItems="AlignItems.End" class="rz-my-3">
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenFormField Text="អត្តសញ្ញាណប័ណ្ណ" AllowFloatingLabel="true" class="rz-w-100">
+                                <Start>
+                                    <RadzenIcon Icon="badge" Style="color:var(--rz-warning)" />
+                                </Start>
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="Model.IdCard"
+                                                   class="rz-w-100"
+                                                   AutoCompleteType="AutoCompleteType.Off"
+                                                   Placeholder="លេខអត្តសញ្ញាណប័ណ្ណ..." />
+                                </ChildContent>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenFormField Text="លិខិតឆ្លងដែន" AllowFloatingLabel="true" class="rz-w-100">
+                                <Start>
+                                    <RadzenIcon Icon="card_travel" Style="color:var(--rz-info)" />
+                                </Start>
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="Model.PassportId"
+                                                   class="rz-w-100"
+                                                   AutoCompleteType="AutoCompleteType.Off"
+                                                   Placeholder="លេខលិខិតឆ្លងដែន..." />
+                                </ChildContent>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenFormField Text="លេខទូរស័ព្ទ" AllowFloatingLabel="true" class="rz-w-100">
+                                <Start>
+                                    <RadzenIcon Icon="phone" Style="color:var(--rz-success)" />
+                                </Start>
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="Model.Phone"
+                                                   class="rz-w-100"
+                                                   AutoCompleteType="AutoCompleteType.Off"
+                                                   Placeholder="០១២ ៣៤៥ ៦៧៨" />
+                                </ChildContent>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenFormField Text="អ៊ីមែល" AllowFloatingLabel="true" class="rz-w-100">
+                                <Start>
+                                    <RadzenIcon Icon="email" Style="color:var(--rz-warning)" />
+                                </Start>
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="Model.EmailAddress"
+                                                   class="rz-w-100"
+                                                   AutoCompleteType="AutoCompleteType.Off"
+                                                   Placeholder="email@example.com" />
+                                </ChildContent>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow AlignItems="AlignItems.End">
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenFormField Text="ស្ថានភាពអាពាហ៍ពិពាហ៍" AllowFloatingLabel="true" class="rz-w-100">
+                                <ChildContent>
+                                    <RadzenDropDown @bind-Value="Model.MarritalStatus"
+                                                    class="rz-w-100"
+                                                    Data="@StorageConstant.MarritalOptions" />
+                                </ChildContent>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenFormField Text="ថ្ងៃខែឆ្នាំកំណើត" AllowFloatingLabel="true" class="rz-w-100">
+                                <Start>
+                                    <RadzenIcon Icon="cake" Style="color:var(--rz-primary)" />
+                                </Start>
+                                <ChildContent>
+                                    <RadzenDatePicker TValue="DateTime?"
+                                                      @bind-Value="Model.DateOfBirth"
+                                                      @bind-Value:format="yyyy-MMM-dd"
+                                                      DateFormat="dd/MM/yyyy"
+                                                      class="rz-w-100"
+                                                      Placeholder="dd/MM/yyyy" />
+                                </ChildContent>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenFormField Text="សញ្ជាតិ" AllowFloatingLabel="true" class="rz-w-100">
+                                <ChildContent>
+                                    <BlaNationality @bind-Value="Model.Nationality" />
+                                </ChildContent>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="3">
+                            
+                            <RadzenFormField Text="មុខរបរ" AllowFloatingLabel="true" class="rz-w-100">
+                                <ChildContent>
+                                    <BlaOccupation @bind-Value="Model.Occupation" TypeOf="TypeOfEnum.Job" />
+                                </ChildContent>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="2">
+                    <RadzenCard Style="display:flex;align-items:center;justify-content:center;padding:0.5rem;">
+                        <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                            <input type="hidden" @bind="@tempUrl" />
+                            <RadzenImage Path="@Model.Photo"
+                                         Style="width:7rem;height:7rem;object-fit:cover;border-radius:50%;border:3px solid var(--rz-primary);" />
+                            <RadzenUpload Auto="true"
+                                          Multiple="false"
+                                          Accept=".jpg,.png"
+                                          Url="upload/customers/profiles"
+                                          Complete="@OnFileUploadComplete"
+                                          Progress="@UploadProgress"
+                                          Error="@OnUploadError"
+                                          Style="width:100%"
+                                          ChooseText="@(Model.Photo == null ? "បញ្ចូលរូបថត" : "ផ្លាស់ប្តូររូបថត")"
+                                          InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})">
+                                <ChildContent>
+                                    <RadzenText TextStyle="TextStyle.Caption" TextAlign="TextAlign.Center"
+                                                Style="color:var(--rz-text-tertiary-color);">
+                                        .jpg / .png
+                                    </RadzenText>
+                                </ChildContent>
+                            </RadzenUpload>
+                        </RadzenStack>
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenRow>
+    </ChildContent>
+</RadzenFieldset>
+
+@if (Model.MarritalStatus != MarritalStateEnum.Single.ToString())
+{
+    <SpouseInformation model="@Model" />
+}
+<CustomerAddress model="@Model" />
+
+<EmergencyContactComp model="@Model.EmergencyContact" />
+
+@code {
+
+    private string _errorMessage = string.Empty;
+    private bool _isError = false;
+    private int _progress = 0;
+    private bool _isUploading = false;
+
+    private string _salutationText = string.Empty;
+    private IEnumerable<SalutationDto> _filteredSalutations = [];
+
+    void SalutationSearchChanged(string? args)
+    {
+        _salutationText = args ?? string.Empty;
+
+        if (string.IsNullOrEmpty(args))
+        {
+            _filteredSalutations = _salutations;
+            StateHasChanged();
+            return;
+        }
+
+        var matches = _salutations
+                        .Where(x => x.Title!.Contains(args, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
+        if (matches.Count == 0)
+        {
+            _filteredSalutations = [new SalutationDto { Id = -1, Title = args }];
+            Model.Salutation = args;
+        }
+        else
+        {
+            _filteredSalutations = matches;
+        }
+
+        StateHasChanged();
+    }
+
+    void OnFileUploadComplete(UploadCompleteEventArgs args)
+    {
+        if (string.IsNullOrEmpty(args.RawResponse))
+        {
+            Model.Photo = tempUrl;
+
+            return;
+        }
+
+        try
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            var fileModels = JsonSerializer.Deserialize<DocumentDto>(args.RawResponse!, options);
+
+            if (fileModels is not null)
+            {
+                Model.Photo = fileModels.FileUrl;
+            }
+            else
+            {
+                _isError = true;
+                Model.Photo = tempUrl;
+                _errorMessage = "Failed to parse upload response.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error parsing upload response: {ex.Message}";
+            logger.LogError(ex, "Error parsing upload response: {Message}", ex.Message);
+        }
+    }
+
+    void OnUploadError(UploadErrorEventArgs args)
+    {
+        _isError = true;
+        _errorMessage = $"Upload failed: {args.Message}";
+        logger.LogError("Upload failed: {Message}", args.Message);
+    }
+
+    void UploadProgress(UploadProgressArgs args)
+    {
+        _isUploading = true;
+        _progress = args.Progress;
+        logger.LogInformation("Upload progress: {Progress}%", args.Progress);
+    }
+
+    void FirstNameChanged(string? value)
+    {
+        if (string.IsNullOrEmpty(Model.LastName))
+        {
+            Model.Name = value;
+        }
+        else
+        {
+            Model.Name = $"{value} {Model.LastName}";
+        }
+    }
+
+    void LastNameChanged(string? value)
+    {
+        if (string.IsNullOrEmpty(Model.FirstName))
+        {
+            Model.Name = value;
+        }
+        else
+        {
+            Model.Name = $"{Model.FirstName} {value}";
+        }
+    }
+}

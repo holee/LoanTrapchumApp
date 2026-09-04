@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\**" />
+    <EmbeddedResource Remove="Migrations\**" />
+    <None Remove="Migrations\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.79" />
     <PackageReference Include="Dapper.SqlBuilder" Version="2.1.66" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="2.3.11" />
@@ -36,7 +42,6 @@
 
   <ItemGroup>
     <Folder Include="Implements\Addresses\" />
-    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

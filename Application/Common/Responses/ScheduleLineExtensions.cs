@@ -1,0 +1,50 @@
+using Application.Enumerations;
+using Application.Features.Loans.Dtos.Requests;
+using Domains.Models.Loans;
+namespace Application.Responses;
+
+public static class ScheduleLineExtensions
+{
+    public static IEnumerable<LoanScheduleDtoCreate> ToSchedules(this IEnumerable<ScheduleLine> source, int? branchId, string? creditAgentId, int? repaymentModeId = 2, ScheduleStatus status = ScheduleStatus.Unpaid)
+    {
+
+        ArgumentNullException.ThrowIfNull(source, nameof(source));
+        ArgumentNullException.ThrowIfNull(creditAgentId, nameof(creditAgentId));
+        ArgumentNullException.ThrowIfNull(repaymentModeId, nameof(repaymentModeId));
+        return source.Select(x => new LoanScheduleDtoCreate
+        {
+            BranchId = branchId,
+            InstallmentNo = x.InstallmentNo,
+            PaymentDate = x.PaymentDate,
+            Principal = x.Principal,
+            Interest = x.Interest,
+            CollectionFee = x.CollectionFeeAmount,
+            LoanOutstanding = x.OutStanding,
+            TotalDay = x.TotalDay,
+            TotalPay = x.TotalPay,
+            AgentRefId = creditAgentId ?? string.Empty,
+            RepaymentModeRefId = repaymentModeId ?? (int)RepaymentOption.Balloon,//1
+            ScheduleStatusRefId = (int)status,
+        });
+    }
+
+    public static IEnumerable<LoanScheduleDtoCreate> ToSchedules(this IEnumerable<ScheduleLine> source, int repaymentModeId = 2, ScheduleStatus status = ScheduleStatus.Unpaid)
+    {
+
+        ArgumentNullException.ThrowIfNull(source, nameof(source));
+        return source.Select(x => new LoanScheduleDtoCreate
+        {
+            InstallmentNo = x.InstallmentNo,
+            PaymentDate = x.PaymentDate,
+            Principal = x.Principal,
+            Interest = x.Interest,
+            CollectionFee = x.CollectionFeeAmount,
+            LoanOutstanding = x.OutStanding,
+            TotalDay = x.TotalDay,
+            TotalPay = x.TotalPay,
+            AgentRefId = string.Empty,
+            RepaymentModeRefId = repaymentModeId,
+            ScheduleStatusRefId = (int)status,
+        });
+    }
+}

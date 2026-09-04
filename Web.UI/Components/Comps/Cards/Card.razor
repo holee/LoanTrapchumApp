@@ -1,0 +1,11 @@
+﻿<div class="card @(CssClass)">
+   @ChildContent
+</div>
+@code {
+    [Parameter] public string? CssClass { get; set; } = null;
+    [Parameter] public RenderFragment? ChildContent { set; get; } = null;
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+    }
+}

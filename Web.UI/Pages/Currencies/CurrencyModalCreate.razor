@@ -1,0 +1,116 @@
+<PageTitle>Create Currency</PageTitle>
+<div class="currency-modal-shell @Styles.W100">
+    <EditForm Model="model" OnValidSubmit="@FormSubmit">
+        <DataAnnotationsValidator />
+        <div class="currency-section-card">
+            <div class="currency-section-header">
+                <div class="currency-header-left">
+                    <div class="currency-section-icon">
+                        <RadzenIcon Icon="payments" Style="font-size:1rem;" />
+                    </div>
+                    <div>
+                        <div class="currency-section-title">Currency details</div>
+                        <div class="currency-section-subtitle">Define the currency code, exchange rates and limits.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="currency-section-body">
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenFormField AllowFloatingLabel="true" Text="Currency Code" class="@Styles.W100">
+                            <ChildContent>
+                                <RadzenTextBox @bind-Value="model.CurrencyCode"
+                                               Placeholder="Currency code"
+                                               class="@Styles.W100" />
+                            </ChildContent>
+                            <Helper>
+                                <ValidationMessage For="@(() => model.CurrencyCode)" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenFormField AllowFloatingLabel="true" Text="Currency Type" class="@Styles.W100">
+                            <ChildContent>
+                                <RadzenTextBox @bind-Value="model.CurrencyType"
+                                               Placeholder="Currency type"
+                                               class="@Styles.W100" />
+                            </ChildContent>
+                            <Helper>
+                                <ValidationMessage For="@(() => model.CurrencyType)" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow AlignItems="AlignItems.Center" class="@Styles.Mt2">
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenFormField AllowFloatingLabel="true" Text="Exchange Rate" class="@Styles.W100">
+                            <ChildContent>
+                                <RadzenNumeric TValue="decimal?"
+                                               @bind-Value="model.ExchangeRate"
+                                               Placeholder="Exchange rate amount"
+                                               class="@Styles.W100" />
+                            </ChildContent>
+                            <Helper>
+                                <ValidationMessage For="@(() => model.ExchangeRate)" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenFormField AllowFloatingLabel="true" Text="Spot Rate" class="@Styles.W100">
+                            <ChildContent>
+                                <RadzenNumeric TValue="decimal?"
+                                               @bind-Value="model.SpotRate"
+                                               Placeholder="Spot rate"
+                                               class="@Styles.W100" />
+                            </ChildContent>
+                            <Helper>
+                                <ValidationMessage For="@(() => model.SpotRate)" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow AlignItems="AlignItems.Center" class="@Styles.Mt2">
+                    <RadzenColumn Size="12" SizeMD="8">
+                        <RadzenFormField AllowFloatingLabel="true" Text="Limit" class="@Styles.W100">
+                            <ChildContent>
+                                <RadzenNumeric TValue="decimal?"
+                                               @bind-Value="model.Limited"
+                                               Placeholder="Limit"
+                                               class="@Styles.W100" />
+                            </ChildContent>
+                            <Helper>
+                                <ValidationMessage For="@(() => model.Limited)" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="4">
+                        <div class="currency-base-toggle">
+                            <RadzenCheckBox @bind-Value="model.IsBaseCurrency" Name="IsBaseCurrencyCheckBox" />
+                            <RadzenLabel Text="Is Base Currency" Component="IsBaseCurrencyCheckBox" />
+                        </div>
+                    </RadzenColumn>
+                </RadzenRow>
+            </div>
+        </div>
+
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     class="@($"currency-footer {Styles.Mt2}")"
+                     Gap="1rem"
+                     AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton Icon="save"
+                          Text="Save"
+                          ButtonType="ButtonType.Submit"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="Defaults.Save" />
+            <RadzenButton Icon="cancel"
+                          Click="Close"
+                          Text="Close"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="Defaults.Cancel" />
+        </RadzenStack>
+    </EditForm>
+</div>

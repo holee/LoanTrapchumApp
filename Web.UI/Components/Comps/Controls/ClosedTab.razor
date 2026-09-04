@@ -1,0 +1,26 @@
+﻿<span style="display: flex;">
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        @Title
+    }
+    <RadzenButton Icon="@IconNames.Close" @onclick:stopPropagation
+                  Variant="Variant.Text"
+                  Shade="Shade.Lighter"
+                  Click="@CloseTab" 
+                  Size="ButtonSize.ExtraSmall" />
+</span>
+@code {
+
+    [Parameter] public string? TabId { get; set; }
+    [Parameter] public EventCallback<string> Closed { get; set; }
+    [Parameter] public string? Title { get; set; } = string.Empty;
+
+    async Task CloseTab()
+    {
+        if(Closed.HasDelegate && !string.IsNullOrEmpty(TabId))
+        {
+            await Closed.InvokeAsync(TabId);
+        }
+
+    }
+}

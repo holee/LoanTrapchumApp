@@ -1,0 +1,221 @@
+﻿@page "/App/Account/Journals/{BranchId:int}/Branches"
+@attribute [Authorize(Policy = "AccountOnly")]
+@using Applications.Features.Journals.Dtos
+<PageTitle>Journal list</PageTitle>
+<div class="journal-page">
+
+    <!-- Top Summary Cards (Journal Types & Total) -->
+    <div class="journal-stats-grid">
+        <div class="journal-stat-card journal-stat-total">
+            <div class="stat-card-body">
+                <div class="stat-card-icon stat-icon-total">
+                    <RadzenIcon Icon="menu_book" />
+                </div>
+                <div class="stat-card-content">
+                    <span class="stat-card-label">Total Entries</span>
+                    <h3 class="stat-card-value">@counts</h3>
+                </div>
+            </div>
+            <div class="stat-card-footer">
+                <span>All Journal Records</span>
+            </div>
+        </div>
+
+        @if (JournalTypes != null)
+        {
+            @foreach (var type in JournalTypes)
+            {
+                var typeCount = JournalItems?.Count(x => x.JournalType == type.Code || x.JournalType == type.Description) ?? 0;
+                <div class="journal-stat-card">
+                    <div class="stat-card-body">
+                        <div class="stat-card-icon stat-icon-type">
+                            <RadzenIcon Icon="receipt_long" />
+                        </div>
+                        <div class="stat-card-content">
+                            <span class="stat-card-label" title="@type.Description">@(type.Description ?? type.Code)</span>
+                            <h3 class="stat-card-value">@type.Code</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card-footer">
+                        <span>Journal Type #@type.Id</span>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <RadzenTabs RenderMode="TabRenderMode.Client"
+                SelectedIndex="@selectedIndex"
+                Change="e => TabChanged(e)"
+                @ref="tb" class="journal-tabs">
+        <Tabs>
+            <RadzenTabsItem Text="Journals">
+                <div class="journal-card">
+                    <div class="journal-header">
+                        <div class="journal-header-left">
+                            <span class="journal-header-icon"><RadzenIcon Icon="menu_book" /></span>
+                            <div>
+                                <h3 class="journal-title">Journals</h3>
+                                <span class="journal-subtitle">Review and manage transaction journal entries</span>
+                            </div>
+                        </div>
+                        <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                      Size="ButtonSize.Small"
+                                      Click="ShowCreatedTab"
+                                      Icon="add"
+                                      ButtonType="ButtonType.Button"
+                                      Text="New Journal"
+                                      class="journal-add-btn" />
+                    </div>
+
+                    <div class="journal-divider"></div>
+                    <div class="rz-px-2">
+                        <GridToolbar SearchChanged="@PerformSearch" />
+                    </div>
+
+                    <RadzenDataGrid GridLines="DataGridGridLines.None"
+                                    AllowAlternatingRows="false"
+                                    Density="Density.Compact"
+                                    AllowPaging="true"
+                                    AllowSorting="true"
+                                    LoadData="@LoadData"
+                                    PagerHorizontalAlign="HorizontalAlign.Right"
+                                    Count="@counts"
+                                    TItem="JournalEntryVm"
+                                    RowSelect="RowSelecting"
+                                    CellContextMenu="@ShowContextMenu"
+                                    PageSizeOptions="@StorageConstant.PageSizeOptions"
+                                    Style="min-height:50dvh"
+                                    Data="@JournalItems">
+                        <Columns>
+                            <RadzenDataGridColumn Property="TransactionDate" Title="Transaction Date" Context="j">
+                                <Template>
+                                    <span>@j.TransactionDate.DayFirst()</span>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Property="TransactionTypeName" Title="Name" Context="j">
+                                <Template>
+                                    <span class="journal-name">@j.TransactionTypeName</span>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Property="JournalType" Title="Journal Type" Context="j">
+                                <Template>
+                                    <span class="journal-type-badge">@j.JournalType</span>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Property="TotalDr" Title="Debit" TextAlign="TextAlign.Right" Context="j">
+                                <Template>
+                                    <span class="journal-amount debit">@j.TotalDr</span>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Property="TotalCr" Title="Credit" TextAlign="TextAlign.Right" Context="j">
+                                <Template>
+                                    <span class="journal-amount credit">@j.TotalCr</span>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Property="IsAdjustment" TextAlign="TextAlign.Center"
+                                                  Context="c"
+                                                  Sortable="false" Title="Adjustment">
+                                <Template>
+                                    <span class="@(c.IsAdjustment ? "journal-status-badge active" : "journal-status-badge inactive")">
+                                        @(c.IsAdjustment ? "Yes" : "No")
+                                    </span>
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn Property="IsAdjustment" TextAlign="TextAlign.Center"
+                                                  Context="c"
+                                                  Sortable="false" Title="Actions">
+                                <Template>
+                                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                                  Icon="more_vert"
+                                                  Variant="Variant.Text"
+                                                  ButtonStyle="ButtonStyle.Light"
+                                                  Click="@((args) => ShowContextMenu(args, c))" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </div>
+            </RadzenTabsItem>
+
+            @foreach (var tab in _tabs)
+            {
+                <RadzenTabsItem Text="@tab.Title" @Key="@tab.Key">
+                    <Template>
+                        <CloseTabButton Title="@tab.Title"
+                                        Closed="(() => CloseTab(tab.Key))" />
+                    </Template>
+                    <ChildContent>
+                        @tab.Content
+                    </ChildContent>
+                </RadzenTabsItem>
+            }
+        </Tabs>
+    </RadzenTabs>
+</div>
+
+@code {
+
+
+    private List<CustomTab> _tabs = new();
+
+
+    private void ShowDetailsTab(JournalEntryVm entryVm)
+    {
+
+        ContextMenuService.Close();
+
+        var newKey = "details-" + entryVm.JournalEntryId;
+
+        var existingIndex = _tabs.FindIndex(t => t.Key == newKey);
+
+        if (existingIndex != -1)
+        {
+
+            selectedIndex = existingIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(JournalDetails));
+
+            builder.AddAttribute(1, "JournalId", entryVm.JournalEntryId);
+
+            //builder.AddAttribute(1, "BranchId", BranchId);
+
+            builder.AddAttribute(2, "Close", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(newKey);
+            }));
+
+            builder.SetKey(newKey);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(newKey, $"BranchName:{entryVm.BranchName}", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        selectedIndex = _tabs.Count;
+
+    }
+
+
+    void CloseTab(string? tabId)
+    {
+        var tabIndex = _tabs.FirstOrDefault(t => t.Key == tabId);
+
+        if (tabIndex is not null)
+        {
+            _tabs.Remove(tabIndex);
+
+            selectedIndex = _tabs.Count;
+        }
+    }
+}

@@ -1,0 +1,29 @@
+﻿@using System.Linq.Expressions
+<RadzenDropDown Value="@Value"
+                Data="@_items"
+                Style="width: 100%;"
+                AllowClear="@AllowClear"
+                TValue="string"
+                ValueChanged="@ValueChanged"
+                ValueExpression="@ValueExpression"
+                Placeholder="@Placeholder"
+                Name="@Name">
+</RadzenDropDown>
+@code {
+    private IEnumerable<string> _items { get; set; } = [];
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public string Name { get; set; } = "Genders";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Select Gender";
+    [Parameter] public Expression<Func<string>> ValueExpression { get; set; } = default!;
+    [Parameter] public bool AllowClear { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+
+        _items = ["F", "Female", "M", "Male", "Other"];
+
+        base.OnInitialized();
+    }
+
+}

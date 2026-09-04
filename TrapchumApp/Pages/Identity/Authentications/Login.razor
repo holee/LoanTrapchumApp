@@ -5,41 +5,137 @@
 @attribute [ExcludeFromInteractiveRouting]
 @layout EmptyLayout
 @inject NavigationManager NavigationManager
-<div class="login-box">
-    <div class="logo">
-        <img src="/assets/logo/tch_Logo.png" alt="Trapchum Logo" style="width: 160px;">
-    </div>
-    <h2 class="login-heading">Welcome Back</h2>
-    <p class="login-subtitle">Sign in to your account to continue</p>
-    <StatusMessage Message="@errorMessage" />
-    <EditForm Model="@Input" OnValidSubmit="@LoginUser" FormName="login" method="post">
-        <DataAnnotationsValidator />
-        <div class="form-group">
-            <label for="Input.Email">Your Email</label>
-            <InputText id="Input.Email"
-                       @bind-Value="@Input.Email"
-                       placeholder="abc@email.com"
-                       class="form-input" />
-            <ValidationMessage For="() => Input.Email" />
+
+<div class="auth-card">
+    <aside class="auth-brand">
+        <div class="auth-brand-inner">
+            <span class="auth-logo">
+                <img src="/assets/logo/tch_Logo.png" alt="Trapchum Logo" />
+            </span>
+            <h1 class="auth-brand-title">Loan Management<br />made simple</h1>
+            <p class="auth-brand-text">
+                Manage customers, loans, repayments and reports from one secure workspace.
+            </p>
         </div>
-        <div class="form-group">
-            <label for="Input.Password">Password</label>
-            <InputText id="Input.Password"
-                       @bind-Value="@Input.Password"
-                       type="password"
-                       placeholder="Enter password"
-                       class="form-input" />
-            <ValidationMessage For="() => Input.Password" />
+        <ul class="auth-points">
+            <li>
+                <span class="auth-point-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="2" y="6" width="20" height="12" rx="2" />
+                        <circle cx="12" cy="12" r="2.5" />
+                    </svg>
+                </span>
+                Loan &amp; repayment tracking
+            </li>
+            <li>
+                <span class="auth-point-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 3v18h18" />
+                        <path d="M7 15l4-5 3 3 4-6" />
+                    </svg>
+                </span>
+                Real-time ledger &amp; reports
+            </li>
+            <li>
+                <span class="auth-point-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" />
+                        <path d="M9 12l2 2 4-4" />
+                    </svg>
+                </span>
+                Role-based secure access
+            </li>
+        </ul>
+    </aside>
+
+    <section class="auth-panel">
+        <p class="auth-eyebrow">Trapchum Cash Pawn Shop</p>
+        <h2 class="auth-title">Welcome back</h2>
+        <p class="auth-subtitle">Sign in to your account to continue</p>
+
+        <StatusMessage Message="@errorMessage" />
+
+        <EditForm Model="@Input" OnValidSubmit="@LoginUser" FormName="login" method="post">
+            <DataAnnotationsValidator />
+
+            <div class="field">
+                <label class="field-label" for="Input.Email">Email or username</label>
+                <span class="field-control">
+                    <InputText id="Input.Email"
+                               @bind-Value="@Input.Email"
+                               placeholder="abc@email.com"
+                               autocomplete="username"
+                               class="field-input" />
+                    <svg class="field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                        <path d="M3 7l9 6 9-6" />
+                    </svg>
+                </span>
+                <ValidationMessage For="() => Input.Email" />
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="Input.Password">Password</label>
+                <span class="field-control">
+                    <InputText id="Input.Password"
+                               @bind-Value="@Input.Password"
+                               type="password"
+                               placeholder="Enter password"
+                               autocomplete="current-password"
+                               class="field-input has-toggle" />
+                    <svg class="field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="4" y="10" width="16" height="10" rx="2" />
+                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                    </svg>
+                    <button type="button" class="field-toggle" aria-label="Show password" onclick="toggleLoginPassword(this)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z" />
+                            <circle cx="12" cy="12" r="2.5" />
+                        </svg>
+                    </button>
+                </span>
+                <ValidationMessage For="() => Input.Password" />
+            </div>
+
+            <div class="auth-options">
+                <label class="auth-remember">
+                    <InputCheckbox @bind-Value="@Input.RememberMe" />
+                    Remember me
+                </label>
+            </div>
+
+            <button type="submit" class="auth-submit" disabled="@_isBusy">
+                @if (_isBusy)
+                {
+                    <span class="auth-spinner" aria-hidden="true"></span>
+                    <span>Signing in…</span>
+                }
+                else
+                {
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M10 17l5-5-5-5" />
+                        <path d="M15 12H3" />
+                        <path d="M15 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" />
+                    </svg>
+                    <span>Sign In</span>
+                }
+            </button>
+        </EditForm>
+
+        <div class="auth-footer">
+            &copy; @DateTime.Now.Year Trapchum Cash Pawn Shop. All rights reserved.
         </div>
-        <RadzenButton ButtonType="ButtonType.Submit"
-                      Text="Sign In"
-                      Icon="login"
-                      ButtonStyle="ButtonStyle.Primary"
-                      IsBusy="@_isBusy"
-                      class="btn-login-full" />
-    </EditForm>
-    <div class="login-footer">
-        &copy; @DateTime.Now.Year Trapchum Cash Pawn Shop
-    </div>
+    </section>
 </div>
+
+<script suppress-error="BL9992">
+    function toggleLoginPassword(btn) {
+        const input = document.getElementById('Input.Password');
+        if (!input) return;
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        btn.style.color = show ? '#6366f1' : '';
+    }
+</script>
 

@@ -1,0 +1,21 @@
+﻿@using Applications.Responses.Lists.Entities
+<RadzenDropDownDataGrid Value="@Value"
+                        TValue="string"
+                        class="rz-w-100"
+                        TextProperty="@nameof(OcupationResponse.OccupationTitle)"
+                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                        ValueProperty="@nameof(OcupationResponse.OccupationTitle)"
+                        ShowAdd="@ShowAdd"
+                        Add="@AddOccupation"
+                        ShowSearch="false"
+                        Density="Density.Compact"
+                        @bind-SearchText="@Value"
+                        Placeholder="Search Occupation.."
+                        ValueChanged="@ValueChanged"
+                        AllowClear="@AllowClear"
+                        ValueExpression="@ValueExpression"
+                        Data="@Occuptions">
+    <Columns>
+        <RadzenDropDownDataGridColumn Title="Title" Property="@nameof(OcupationResponse.OccupationTitle)" />
+    </Columns>
+</RadzenDropDownDataGrid>

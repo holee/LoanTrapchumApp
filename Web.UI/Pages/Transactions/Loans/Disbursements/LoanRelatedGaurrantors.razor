@@ -1,0 +1,80 @@
+﻿@using Applications.Features.Loans.Dtos.Responses
+@using Applications.Features.Loans.Queries.GetLoanRelatedGuarantors
+<RadzenDataGrid Data="@_loanGaurantors"
+                TItem="VLoanDisbursementGuarantors"
+                AllowAlternatingRows="true"
+                GridLines="DataGridGridLines.Both"
+                AllowFiltering="false"
+                Density="Density.Compact"
+                AllowPaging="false"
+                PageSize="10"
+                AllowSorting="false"
+                Responsive="true"
+                RowRender="@OnRowRender"
+                Class="rz-mt-2">
+    <Columns>
+        <RadzenDataGridColumn TItem="VLoanGuarantors"
+                              Property="@nameof(VLoanGuarantors.Id)"
+                              Title="#"
+                              Width="8rem"
+                              TextAlign="TextAlign.Center">
+            <Template>
+                @context.RowIndex
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="VLoanGuarantors"
+                              Property="@nameof(VLoanGuarantors.GuarantorName)"
+                              Title="Customer"
+                              Width="150px" />
+        <RadzenDataGridColumn TItem="VLoanGuarantors"
+                              Property="@nameof(VLoanGuarantors.Gender)"
+                              Width="8rem"
+                              Title="Gender" />
+        <RadzenDataGridColumn TItem="VLoanGuarantors"
+                              Property="@nameof(VLoanGuarantors.Phone)"
+                              Title="Phone"
+                              Width="10rem" />
+        <RadzenDataGridColumn TItem="VLoanGuarantors"
+                              Property="@nameof(VLoanGuarantors.Address)"
+                              Title="Address">
+            <Template>
+                <AddressInformation>
+                    <ProInKhmer>
+                        @context.ProInKhmer
+                    </ProInKhmer>
+                    <DisInKhmer>
+                        @context.DisInKhmer
+                    </DisInKhmer>
+                    <ComInKhmer>
+                        @context.ComInKhmer
+                    </ComInKhmer>
+                    <VilInKhmer>
+                        @context.VilInKhmer
+                    </VilInKhmer>
+                </AddressInformation>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+@code {
+    [Parameter] public string LoanId { get; set; } = string.Empty;
+    [Parameter] public int? BranchId { get; set; } = 0;
+
+    private string[] _address = [];
+
+    private IEnumerable<VLoanDisbursementGuarantors> _loanGaurantors = Array.Empty<VLoanDisbursementGuarantors>();
+
+    void OnRowRender(RowRenderEventArgs<VLoanDisbursementGuarantors> args)
+    {
+        args.Data.RowIndex = args.Index + 1;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var query = new GetLoanRelatedGuarantorsQuery(LoanId, BranchId);
+
+        _loanGaurantors = await mediator.Send(query);
+
+        await base.OnInitializedAsync();
+    }
+}

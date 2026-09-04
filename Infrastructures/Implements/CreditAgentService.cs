@@ -251,54 +251,59 @@ public class CreditAgentService : ICreditAgentService
     {
         await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
 
-        var trx = await context.Database.BeginTransactionAsync(cancellation);
+        var strategy = context.Database.CreateExecutionStrategy();
 
-        try
+        return await strategy.ExecuteAsync(async () =>
         {
+            var trx = await context.Database.BeginTransactionAsync(cancellation);
 
-            context.LoanChangedCa.AddRange(req);
+            try
+            {
 
-            await context.SaveChangesAsync(cancellation);
+                context.LoanChangedCa.AddRange(req);
 
-            var firstRequest = req[0];
+                await context.SaveChangesAsync(cancellation);
 
-            var oldCreditAgentId = firstRequest.OldCreditAgentRefId;
+                var firstRequest = req[0];
 
-            var newCreditAgentRefId = firstRequest.NewCreditAgentRefId;
+                var oldCreditAgentId = firstRequest.OldCreditAgentRefId;
 
-            var currentDateTime = DateTime.Now;
+                var newCreditAgentRefId = firstRequest.NewCreditAgentRefId;
 
-            // Build query based on count
-            var disbursmentsQuery = context.LoanDisbursments
-                                            .Where(x => x.BranchRefId == branchId &&
-                                                        x.CreditAgentRefId == oldCreditAgentId);
+                var currentDateTime = DateTime.Now;
 
-            // Get relevant LoanIds from request
-            var loanIds = req.Select(r => r.LoanRefId).Distinct().ToList();
+                // Build query based on count
+                var disbursmentsQuery = context.LoanDisbursments
+                                                .Where(x => x.BranchRefId == branchId &&
+                                                            x.CreditAgentRefId == oldCreditAgentId);
 
-            // Build query for affected disbursements
-            var disbursementsQuery = context.LoanDisbursments
-                                            .Where(x => x.BranchRefId == branchId &&
-                                                        x.CreditAgentRefId == oldCreditAgentId &&
-                                                        loanIds.Contains(x.LoanId));
-            // Batch update
-            await disbursementsQuery.ExecuteUpdateAsync(prop => prop
-                .SetProperty(p => p.CreditAgentRefId, newCreditAgentRefId)
-                .SetProperty(p => p.ModifiedDt, currentDateTime), cancellation);
+                // Get relevant LoanIds from request
+                var loanIds = req.Select(r => r.LoanRefId).Distinct().ToList();
 
-            await trx.CommitAsync(cancellation);
+                // Build query for affected disbursements
+                var disbursementsQuery = context.LoanDisbursments
+                                                .Where(x => x.BranchRefId == branchId &&
+                                                            x.CreditAgentRefId == oldCreditAgentId &&
+                                                            loanIds.Contains(x.LoanId));
+                // Batch update
+                await disbursementsQuery.ExecuteUpdateAsync(prop => prop
+                    .SetProperty(p => p.CreditAgentRefId, newCreditAgentRefId)
+                    .SetProperty(p => p.ModifiedDt, currentDateTime), cancellation);
 
-            return Result.Success<string>(new("Loan has changed new credit agent."));
+                await trx.CommitAsync(cancellation);
 
-        }
-        catch (DbUpdateException ex)
-        {
-            await trx.RollbackAsync(cancellation);
+                return Result.Success<string>(new("Loan has changed new credit agent."));
 
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-        }
+            }
+            catch (DbUpdateException ex)
+            {
+                await trx.RollbackAsync(cancellation);
+
+                return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+            }
 
 
+        });
     }
 
 

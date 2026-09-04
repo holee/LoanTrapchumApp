@@ -1,0 +1,110 @@
+@page "/App/Items"
+@using Applications.Features.Items.Dto
+<PageTitle>Items</PageTitle>
+
+<div class="rz-background-color-base-200 p-2 rounded">
+    <GridToolbar SearchChanged="SearchChanged" Placeholder="Search items...">
+        <LeftChildren>
+            <RadzenButton Text="New Item"
+                          Click="ShowCreate"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Size="ButtonSize.Small"
+                          Icon="add" />
+        </LeftChildren>
+        <RightChildren>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="6px" AlignItems="AlignItems.Center">
+                <RadzenCheckBox TValue="bool" @bind-Value="includeInactive" Change="ShowInactiveAndActive" Name="ckItemInactive" />
+                <RadzenLabel Text="Include inactive" Component="ckItemInactive" />
+            </RadzenStack>
+        </RightChildren>
+    </GridToolbar>
+
+    <RadzenDataGrid TItem="ItemDto"
+                    Data="Items"
+                    Responsive="true"
+                    Density="Density.Compact"
+                    AllowPaging="true"
+                    AllowFiltering="true"
+                    AllowSorting="true"
+                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    ShowPagingSummary="true"
+                    PagerPosition="PagerPosition.Bottom"
+                    PagerHorizontalAlign="HorizontalAlign.Right"
+                    PageSize="@pageSize"
+                    Count="@counts"
+                    LoadData="LoadItemData"
+                    CellContextMenu="ShowCellContextMenu"
+                    IsLoading="@isLoading"
+                    PageSizeOptions="@StorageConstant.PageSizeOptions">
+        <Columns>
+            <RadzenDataGridColumn TItem="ItemDto" Width="5rem" Title="#" Sortable="false" Filterable="false">
+                <Template Context="c">@(Items.IndexOf(c) + 1)</Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="ItemDto" Property="@nameof(ItemDto.ItemName)" Title="Item Name" Width="16rem" />
+            <RadzenDataGridColumn TItem="ItemDto" Property="@nameof(ItemDto.Description)" Title="Description" />
+            <RadzenDataGridColumn TItem="ItemDto" Property="@nameof(ItemDto.LedgerRefId)" Title="Ledger Ref" Width="8rem" />
+            <RadzenDataGridColumn TItem="ItemDto" Title="Active" Width="6rem" Filterable="false" Sortable="false">
+                <Template Context="c">
+                    <RadzenBadge BadgeStyle="@(c.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                 Shade="Shade.Light"
+                                 Text="@(c.IsActive ? "Active" : "Inactive")"
+                                 class="rz-border-radius-6" />
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="ItemDto" Title="Actions" Width="5rem" Filterable="false" Sortable="false">
+                <Template Context="c">
+                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                  Icon="more_vert"
+                                  Variant="Variant.Text"
+                                  Click="@((args)=>ShowContextMenuWithContent(args,c.Id))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+
+        <LoadingTemplate>
+            <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate"
+                                       ShowValue="false"
+                                       Value="100"
+                                       ProgressBarStyle="ProgressBarStyle.Primary" />
+        </LoadingTemplate>
+    </RadzenDataGrid>
+</div>
+
+@code {
+    void ShowContextMenuWithContent(MouseEventArgs args, int id)
+    {
+        ContextMenuService.Open(args, BuildItemMenuItems(), me =>
+        {
+            ContextMenuService.Close();
+            HandleItemAction(me.Value?.ToString(), id);
+        });
+    }
+
+    void ShowCellContextMenu(DataGridCellMouseEventArgs<ItemDto> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, BuildItemMenuItems(), me =>
+        {
+            ContextMenuService.Close();
+            HandleItemAction(me.Value?.ToString(), args.Data.Id);
+        });
+    }
+
+    List<ContextMenuItem> BuildItemMenuItems() =>
+    [
+        new ContextMenuItem { Text = "Details", Icon = "info",   Value = "1" },
+        new ContextMenuItem { Text = "Edit",    Icon = "edit",   Value = "2" },
+        new ContextMenuItem { Text = "Delete",  Icon = "delete", Value = "3" },
+    ];
+
+    void HandleItemAction(string? value, int id)
+    {
+        switch (value)
+        {
+            case "1": _ = Details(id); break;
+            case "2": _ = Edit(id);    break;
+            case "3": _ = Delete(id);  break;
+        }
+    }
+}

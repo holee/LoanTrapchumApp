@@ -1,0 +1,186 @@
+@using Applications.Features.Guarantor.Dtos
+@using Radzen.Blazor.Rendering
+@using Web.UI.Components.Buttons
+
+<style>
+    .guarantor-popup {
+        display: none;
+        position: absolute;
+        overflow: hidden;
+        height: 340px;
+        width: 60%;
+        border: var(--rz-panel-border);
+        background-color: var(--rz-panel-background-color);
+        box-shadow: var(--rz-panel-shadow);
+        border-radius: var(--rz-border-radius);
+        z-index: 1000;
+    }
+
+    .guarantor-search-grid .rz-column-title,
+    .guarantor-search-grid .rz-sortable-column .rz-column-title,
+    .guarantor-search-grid .kh-header {
+        font-family: kh_siemreap, "Khmer OS Siemreap", sans-serif;
+    }
+
+    .guarantor-search-grid .kh-header {
+        font-size: 0.85rem;
+    }
+</style>
+
+<RadzenStack Orientation="Orientation.Horizontal"
+             AlignItems="AlignItems.Center" Gap="4px"
+             class="rz-my-1">
+    <RadzenTextBox @ref="@_guarantorSearchText"
+                   @oninput="@OnGuarantorSearchText"
+                   @onkeydown="@OnKeyDown"
+                   @onclick="@OpenPopup"
+                   Style="width:30rem;"
+                   Placeholder="Search guarantor by name or phone..." />
+
+</RadzenStack>
+<Popup @ref="@_guarantorPopup"
+       id="guarantorPopup"
+       autoFocusFirstElement="false"
+       class="guarantor-popup">
+    <RadzenStack Style="height:100%;width:100%;" Gap="0">
+        <RadzenDataGrid @ref="@_gridGuarantors"
+                        id="gridGuarantors"
+                        TItem="VGuarantor"
+                        Data="@_guarantors"
+                        Count="@counts"
+                        IsLoading="@isLoading"
+                        Density="Density.Compact"
+                        AllowAlternatingRows="true"
+                        GridLines="DataGridGridLines.Both"
+                        AllowSorting="true"
+                        AllowPaging="true"
+                        PageSize="@pageSize"
+                        ShowPagingSummary="true"
+                        AllowRowSelectOnRowClick="true"
+                        SelectionMode="DataGridSelectionMode.Multiple"
+                        @bind-Value="@SelectedGuarantors"
+                        RowDoubleClick="@(args => GetSelectedGuarantor(args.Data))"
+                        RowRender="@OnRowRender"
+                        class="guarantor-search-grid"
+                        Style="height:290px;width:100%;border-radius:0.5rem;overflow:hidden;">
+            <EmptyTemplate>
+                <RadzenStack AlignItems="AlignItems.Center" class="rz-p-4" Gap="4px">
+                    <RadzenIcon Icon="search_off" Style="font-size:2rem;color:var(--rz-text-disabled-color);" />
+                    <RadzenText TextStyle="TextStyle.Caption" style="color:var(--rz-text-disabled-color);">
+                        No guarantors found. Try a different search term.
+                    </RadzenText>
+                </RadzenStack>
+            </EmptyTemplate>
+            <Columns>
+                <RadzenDataGridColumn Width="4rem"
+                                      TextAlign="TextAlign.Center"
+                                      Property="@nameof(VGuarantor.Id)" Title="ល.រ">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="@IconNames.Numbers" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ល.រ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template>
+                        <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@context.RowIndex.ToString()" Style="font-size:0.7rem;padding:0.1rem 0.4rem;" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="ជ្រើស" Width="3rem" Sortable="false"
+                                      TextAlign="TextAlign.Center"
+                                      Property="@nameof(VGuarantor.Id)"
+                                      Context="g">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.2rem">
+                            <RadzenIcon Icon="check_box" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ជ្រើស</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template>
+                        <RadzenCheckBox TValue="bool"
+                                        TriState="false"
+                                        InputAttributes="@(new Dictionary<string,object>{ {"aria-label","Select item"} })"
+                                        Value="@(SelectedGuarantors.Contains(g))"
+                                        Change="@(_ => _gridGuarantors.SelectRow(g))" />
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Property="@nameof(VGuarantor.GuarantorName)" Title="ឈ្មោះ">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="person" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ឈ្មោះ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VGuarantor.Gender)" Title="ភេទ" Width="7rem">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="wc" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ភេទ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VGuarantor.Phone)" Title="លេខទូរស័ព្ទ" Width="8rem">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="phone" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">លេខទូរស័ព្ទ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VGuarantor.NumberOfLoan)" Title="ចំនួនកម្ចី"
+                                      Width="5rem" TextAlign="TextAlign.Center">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="account_balance" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ចំនួនកម្ចី</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VGuarantor.Id)" Title="សកម្មភាព" Width="4rem"
+                                      TextAlign="TextAlign.Center" Sortable="false" Context="g">
+                    <HeaderTemplate>
+                        <span class="kh-header">សកម្មភាព</span>
+                    </HeaderTemplate>
+                    <Template>
+                        <RadzenButton Icon="@IconNames.Add"
+                                      ButtonStyle="ButtonStyle.Success"
+                                      Size="ButtonSize.ExtraSmall"
+                                      Variant="Variant.Outlined"
+                                      Click="@(() => GetSelectedGuarantor(g))" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+            <FooterTemplate>
+                <RadzenStack Orientation="Orientation.Horizontal"
+                             AlignItems="AlignItems.Center"
+                             JustifyContent="JustifyContent.End"
+                             class="rz-px-2 rz-py-1">
+                    <RadzenText TextStyle="TextStyle.Caption">
+                        @(SelectedGuarantors.Count) selected
+                    </RadzenText>
+                </RadzenStack>
+            </FooterTemplate>
+        </RadzenDataGrid>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     Gap="0.5rem"
+                     class="rz-mt-2 rz-mr-2"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton Icon="done_all"
+                          Text="Accept Selected"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Size="ButtonSize.ExtraSmall"
+                          Disabled="@(!SelectedGuarantors.Any())"
+                          Click="@(() => GetSelectedGuarantors(SelectedGuarantors))" />
+            <CancelButton OnClick="@ClosePopup" />
+        </RadzenStack>
+    </RadzenStack>
+</Popup>
+@code {
+    private void OnRowRender(RowRenderEventArgs<VGuarantor> args)
+    {
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
+    }
+}

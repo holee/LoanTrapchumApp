@@ -1,0 +1,14 @@
+@page "/App/Vendor/CreateNew"
+@using Web.UI.Components.Buttons
+<EditForm Model="model" OnValidSubmit="FormSubmit" FormName="FormVendorCreate">
+    <Blazilla.FluentValidator />
+    <CreateComp model="model" />
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 Gap="1rem"
+                 class="rz-mt-2"
+                 JustifyContent="JustifyContent.End">
+        <SaveButton />
+        <CancelButton OnClick="@Close" />
+    </RadzenStack>
+</EditForm>

@@ -1,0 +1,88 @@
+﻿@page "/App/Operation-Area/Villages"
+@using Applications.Responses.ViewModels.Addresses
+<PageTitle>Villages</PageTitle>
+ 
+<RadzenCard>
+    <GridToolbar PlaceHolder="Search village"
+                 SearchChanged="TextChanged">
+        <LeftChildren>
+            <RadzenButton Text="New Village"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Size="ButtonSize.Small"
+                          Icon="add"
+                          Click="ShowCreate" />
+        </LeftChildren>
+        <RightChildren>
+            <RadzenStack Orientation="Orientation.Horizontal">
+
+            </RadzenStack>
+        </RightChildren>
+    </GridToolbar>
+    <RadzenDataGrid Responsive="true"
+                    AllowSorting="true"
+                    Count="@counts"
+                    PageSize="@pageSize"
+                    PagerPosition="PagerPosition.Bottom"
+                    ShowPagingSummary="true"
+                    AllowPaging="true"
+                    AllowFiltering="true"
+                    PageSizeChanged="PageSizeChanged"
+                    PageSizeOptions="@StorageConstant.PageSizeOptions"
+                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    TItem="VVillages"
+                    Density="Density.Compact"
+                    LoadData="LoadData"
+                    PagerHorizontalAlign="HorizontalAlign.Right"
+                    Data="vVillageList">
+        <Columns>
+            <RadzenDataGridColumn Width="7rem"
+                                  Filterable="false"
+                                  Title="#" Property="@nameof(VVillages.VillageId)" />
+            <RadzenDataGridColumn Property="@nameof(VVillages.VillDescription)"
+                                  Title="Village-English"
+                                  Sortable="true" />
+            <RadzenDataGridColumn Property="@nameof(VVillages.VilInKhmer)"
+                                  Title="Village-Khmer"
+                                  Sortable="true" />
+            <RadzenDataGridColumn Property="@nameof(VVillages.ComDescription)"
+                                  Title="Commune-English"
+                                  Width="14rem"
+                                  Sortable="true" />
+            <RadzenDataGridColumn Property="@nameof(VVillages.ComInKhmer)"
+                                  Title="Commune-Khmer"
+                                  Width="14rem"
+                                  Sortable="true" />
+            <RadzenDataGridColumn Title="Actions" 
+                        TextAlign="TextAlign.Center"
+                        Sortable="false" Filterable="false" Context="c" Width="7rem">
+                <Template>
+                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                  Icon="more_vert"
+                                  Variant="Variant.Text"
+                                  Click="@((args)=>ShowContextMenuWithContent(args,c.VillageId))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+
+    </RadzenDataGrid>
+</RadzenCard>
+
+@code {
+    void PageSizeChanged(int page)
+    {
+        pageSize = page;
+    }
+    void ShowContextMenuWithContent(MouseEventArgs args, int? id)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu>
+    <RadzenMenuItem Icon="@IconNames.Info" Click="@(() => Details(id ?? default))" Text="Details" Value="@id"></RadzenMenuItem>
+    <RadzenMenuItem Icon="edit" Click="@(() => Edit(id ?? default))" Text="Edit" Value="@id"></RadzenMenuItem>
+    <RadzenMenuItem Icon="delete" Click="@(() => Delete(id ?? default))" Text="Delete" Value="@id"></RadzenMenuItem>
+</RadzenMenu>
+    );
+    }
+}
+
+
+

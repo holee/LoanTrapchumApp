@@ -1,0 +1,29 @@
+﻿<EditForm Model="_activity" OnValidSubmit="@HandleFormSubmit">
+    <input type="hidden" @bind="_activity.Id" />
+    <FluentValidationValidator DisableAssemblyScanning="true" />
+    <RadzenFormField Text="Activity Date" AllowFloatingLabel="true" class="rz-w-100">
+        <RadzenDatePicker @bind-Value="@_activity.ActivityDate"
+                          @bind-Value:format="yyyy-MMM-dd"
+                          DateFormat="dd-MM-yyyy"
+                          class="rz-w-100"></RadzenDatePicker>
+    </RadzenFormField>
+    <RadzenFormField Text="Description" AllowFloatingLabel="true" class="rz-w-100">
+        <RadzenTextArea @bind-Value="@_activity.Description" class="rz-w-100" />
+    </RadzenFormField>
+    <RadzenStack class="rz-mt-2" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+        <RadzenButton Size="ButtonSize.ExtraSmall" class="rz-mt-2"
+                      ButtonType="ButtonType.Submit"
+                      Text="Save"
+                      Icon="@IconNames.Save"
+                      ButtonStyle="ButtonStyle.Success" />
+        <RadzenButton Size="ButtonSize.ExtraSmall" class="rz-mt-2"
+                      ButtonType="ButtonType.Button"
+                      Text="Close"
+                      Icon="@IconNames.Close"
+                      Click="() => DialogService.Close(false)"
+                      ButtonStyle="ButtonStyle.Danger" />
+
+    </RadzenStack>
+
+</EditForm>
+

@@ -1,0 +1,129 @@
+﻿@using Applications.Features.Holidays.Dtos
+<PageTitle>New Holiday</PageTitle>
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25">
+            <RadzenIcon Icon="event" /> <span>New Holiday</span>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenRow>
+            <RadzenColumn Size="6" SizeSM="12" SizeMD="6">
+                <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
+                    <RadzenDatePicker Inline
+                                      TValue="DateTime ?"
+                                      AllowInput="true"
+                                      CurrentDateChanged="ChangedDate"
+                                      DateFormat="dd/MM/yyyy"
+                                      Placeholder="select holiday date"
+                                      @bind-Value="SelectedDate"
+                                      Change="SelectedDateChanged"
+                                      @bind-Value:format="yyyy/MM/dd">
+                        <FooterTemplate>
+                            <RadzenButton Icon="today" Click=@(args => SelectedDate = DateTime.Now) Text="Today" Style="width: 100%;" class="rz-my-1" />
+                        </FooterTemplate>
+                    </RadzenDatePicker>
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
+                <RadzenRow class="rz-mb-2" AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="2">
+                        Description
+                    </RadzenColumn>
+                    <RadzenColumn Size="10">
+                        <RadzenTextArea Placeholder="Enter event or holiday title..."
+                                        @bind-Value="modelDTO.Description"
+                                        class="rz-h-100 rz-w-100"
+                                        aria-label="TextArea with placeholder" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+                    <RadzenColumn Size="2">
+                        <RadzenLabel Text="Is Active" Component="IsActive"
+                                     Style="margin-right: 12px; vertical-align: middle;" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="10">
+                        <RadzenCheckBox @bind-Value="modelDTO.Status" Name="IsActive" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenStack AlignItems="AlignItems.Center"
+                     Orientation="Orientation.Horizontal"
+                     class="rz-m-2"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton Text="Set"
+                          Icon="add"
+                          ButtonStyle="ButtonStyle.Success"
+                          Click="@FormValidSubmit"
+                          Size="ButtonSize.Small" />
+        </RadzenStack>
+        <RadzenDataGrid Data="listvm"
+                        Responsive="true"
+                        TItem="HolidayDto"
+                        RowSelect="RowSelectedChanged"
+                        RowRender="@OnRowRedner"
+                        @ref="@_gridHolidy"
+                        Density="Density.Compact">
+            <Columns>
+                <RadzenDataGridColumn Property="Id"
+                                      Context="h"
+                                      Title="#"
+                                      Width="50px">
+                    <Template>
+                        @h.RowIndex
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(HolidayDto.HolidayDt)"
+                                      Title="Date"
+                                      Context="h"
+                                      Width="100px">
+                    <Template>
+                        @h.HolidayDt.DayFirst()
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(HolidayDto.HolidayName)"
+                                      Title="Holiday" />
+                <RadzenDataGridColumn Property="@nameof(HolidayDto.Description)"
+                                      Title="Description" />
+                <RadzenDataGridColumn Property="@nameof(HolidayDto.Status)"
+                                      Context="h"
+                                      Title="Status">
+                    <Template>
+                        <RadzenCheckBox TValue="bool?"
+                                        @bind-Value="h.Status" Disabled />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Context="h"
+                                      TextAlign="TextAlign.Center"
+                                      Width="5rem"
+                                      Title="Action">
+                    <Template>
+                        <RadzenButton Icon="delete"
+                                      Click="@(() => DeleteHoliday(h.Id))"
+                                      ButtonStyle="ButtonStyle.Danger"
+                                      Variant="Variant.Text"
+                                      Size="ButtonSize.ExtraSmall" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+
+        </RadzenDataGrid>
+        <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End"
+                     class="rz-m-2"
+                     Orientation="Orientation.Horizontal">
+            <RadzenButton Text="Close"
+                          Icon="close"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Click="CloseTab"
+                          Size="ButtonSize.Small" />
+        </RadzenStack>
+    </ChildContent>
+</RadzenFieldset>
+@code {
+
+    void OnRowRedner(RowRenderEventArgs<HolidayDto> args)
+    {
+        args.Data?.RowIndex = args.Index​ + 1;
+    }
+}

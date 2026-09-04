@@ -1,0 +1,40 @@
+<RadzenMenu>
+    <RadzenMenuItem Text="Details" Icon="@IconNames.View" Click="@OnDetails" />
+    <RadzenMenuItem Text="Edit" Icon="@IconNames.Edit" Click="@OnEdit" />
+    <RadzenMenuItem Text="Delete" Icon="@IconNames.Delete" Click="@OnDelete" />
+</RadzenMenu>
+
+@code {
+
+    [Parameter] public int? Id { get; set; } = 0;
+
+    [Parameter] public EventCallback<int?> ClickEdit { get; set; }
+
+    [Parameter] public EventCallback<int?> ClickDelete { get; set; }
+
+    [Parameter] public EventCallback<int?> ClickDetails { get; set; }
+
+    private async Task OnEdit()
+    {
+        if (ClickEdit.HasDelegate)
+        {
+            await ClickEdit.InvokeAsync(Id);
+        }
+    }
+
+    private async Task OnDelete()
+    {
+        if (ClickDelete.HasDelegate)
+        {
+            await ClickDelete.InvokeAsync(Id);
+        }
+    }
+
+    private async Task OnDetails()
+    {
+        if (ClickDetails.HasDelegate)
+        {
+            await ClickDetails.InvokeAsync(Id);
+        }
+    }
+}

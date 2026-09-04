@@ -1,0 +1,25 @@
+﻿<span style="display: flex;">
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        @Title
+    }
+    <RadzenButton Icon="@IconNames.Close" @onclick:stopPropagation
+                  Variant="Variant.Text"
+                  Shade="Shade.Lighter"
+                  Click="@CloseTabe"
+                  Size="ButtonSize.ExtraSmall" />
+</span>
+@code {
+
+    private int selectedIndex = 0;
+
+    [Parameter]
+    public EventCallback<int> Closed { get; set; }
+    [Parameter]
+    public string? Title { get; set; } = string.Empty;
+
+    void CloseTabe()
+    {
+        Closed.InvokeAsync(selectedIndex);
+    }
+}

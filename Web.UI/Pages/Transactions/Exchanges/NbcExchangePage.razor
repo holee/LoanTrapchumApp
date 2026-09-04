@@ -1,0 +1,191 @@
+﻿@page "/App/Exchanges/NbcRates"
+@using Applications.Features.NbcBank.Dto
+@using Applications.Features.NbcBank.Services
+@inject INbcExchangeRateService _nbcService
+
+<PageTitle>@T("title")</PageTitle>
+
+<div class="nbc-page">
+    <div class="nbc-container">
+        <header class="nbc-header">
+            <div class="brand-section">
+                <div class="brand-icon">៛</div>
+                <div class="brand-title">
+                    <h1>@T("title")</h1>
+                    <p>@T("subtitle")</p>
+                </div>
+            </div>
+
+            <div class="header-controls">
+                <button type="button" class="lang-btn @(_lang == "en" ? "active" : "")" @onclick="@(() => SetLanguageAsync("en"))">🇺🇸 English</button>
+                <button type="button" class="lang-btn @(_lang == "km" ? "active" : "")" @onclick="@(() => SetLanguageAsync("km"))">🇰🇭 ភាសាខ្មែរ</button>
+
+                <button type="button" class="refresh-btn" disabled="@_isLoading" @onclick="RefreshAsync">
+                    <svg class="@(_isLoading ? "spin" : "")" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                    </svg>
+                    <span>@T("refresh")</span>
+                </button>
+            </div>
+        </header>
+
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="error-banner">@_errorMessage</div>
+        }
+
+        <div class="top-grid">
+            <div class="nbc-card official-card">
+                <div>
+                    <div class="official-header">
+                        <span class="badge badge-official">@T("officialBadge")</span>
+                        <span class="official-emoji">🏦</span>
+                    </div>
+                    <div class="official-label">@T("officialLabel")</div>
+                    <div class="official-rate-val">
+                        @FormatNumber(_data?.OfficialRate.Rate ?? 0)
+                        <span class="currency-unit">KHR / USD</span>
+                    </div>
+                    <div class="official-date">@T("asOf") @(string.IsNullOrEmpty(_data?.Date) ? "-" : _data!.Date)</div>
+                </div>
+
+                <div>
+                    <div class="popular-caption">@T("popular")</div>
+                    <div class="popular-list">
+                        @foreach (var chip in PopularChips())
+                        {
+                            <button type="button" class="popular-chip" @onclick="@(() => UsePopular(chip.Code))">
+                                <span>@Flag(chip.Code) @chip.Code</span>
+                                <strong>@FormatNumber(chip.Rate) ៛</strong>
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="nbc-card converter-card">
+                <h2>💱 @T("converterTitle")</h2>
+                <div class="converter-form">
+                    <div class="input-group">
+                        <label for="nbcAmount">@T("amount")</label>
+                        <input id="nbcAmount" type="number" class="input-control" min="0" step="any"
+                               value="@AmountText"
+                               @oninput="OnAmountChanged" />
+                    </div>
+
+                    <div class="converter-row">
+                        <div class="input-group">
+                            <label for="nbcFrom">@T("from")</label>
+                            <select id="nbcFrom" class="input-control" @bind="_fromCurrency" @bind:after="StateHasChanged">
+                                @foreach (var c in CurrencyOptions())
+                                {
+                                    <option value="@c.Code">@Flag(c.Code) @c.Code - @c.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <button type="button" class="swap-btn" title="@T("swap")" @onclick="Swap">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
+                            </svg>
+                        </button>
+
+                        <div class="input-group">
+                            <label for="nbcTo">@T("to")</label>
+                            <select id="nbcTo" class="input-control" @bind="_toCurrency" @bind:after="StateHasChanged">
+                                @foreach (var c in CurrencyOptions())
+                                {
+                                    <option value="@c.Code">@Flag(c.Code) @c.Code - @c.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="converter-result">
+                        <div class="result-main">
+                            @FormatNumber(ConvertedAmount, 4)
+                            <span class="result-unit">@_toCurrency @Flag(_toCurrency)</span>
+                        </div>
+                        <div class="result-rate">1 @_fromCurrency = @FormatNumber(EffectiveRate, 6) @_toCurrency</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nbc-card">
+            <div class="table-header-bar">
+                <h2>@T("ratesTitle")</h2>
+                <div class="search-box">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <input type="text" class="search-input" placeholder="@T("searchPlaceholder")"
+                           value="@_search" @oninput="OnSearchChanged" />
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="nbc-table">
+                    <thead>
+                        <tr>
+                            <th>@T("colCurrency")</th>
+                            <th class="text-center">@T("colSymbol")</th>
+                            <th class="text-center">@T("colUnit")</th>
+                            <th class="num-cell">@T("colBid")</th>
+                            <th class="num-cell">@T("colAsk")</th>
+                            <th class="num-cell">@T("colAverage")</th>
+                            <th class="num-cell">@T("colRate1")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (_data is null)
+                        {
+                            <tr>
+                                <td colspan="7" class="loading-box">@T("loading")</td>
+                            </tr>
+                        }
+                        else if (FilteredRates().Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7" class="loading-box">@T("empty")</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var r in FilteredRates())
+                            {
+                                <tr @key="r.Symbol">
+                                    <td>
+                                        <div class="currency-cell">
+                                            <span class="flag">@Flag(r.CurrencyCode)</span>
+                                            <div>
+                                                <div>@r.CurrencyName</div>
+                                                <small class="currency-code">@r.CurrencyCode</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center"><strong>@r.Symbol</strong></td>
+                                    <td class="text-center"><span class="badge-unit">@FormatNumber(r.Unit)</span></td>
+                                    <td class="num-cell">@FormatNumber(r.Bid)</td>
+                                    <td class="num-cell">@FormatNumber(r.Ask)</td>
+                                    <td class="num-cell"><strong>@FormatNumber(r.Average)</strong></td>
+                                    <td class="num-cell rate-cell">@FormatNumber(r.RatePerOneUnit) ៛</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer class="nbc-footer">
+            <p>
+                @T("dataSource")
+                <a href="https://www.nbc.gov.kh/economic_research/exchange_rate.php" target="_blank" rel="noopener noreferrer">
+                    @T("sourceName")
+                </a>
+            </p>
+        </footer>
+    </div>
+</div>

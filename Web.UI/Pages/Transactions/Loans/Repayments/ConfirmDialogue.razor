@@ -1,0 +1,47 @@
+﻿<div class="p-4" style="font-family: 'Khmer OS Siemreap', Arial;">
+    <RadzenRow Gap="10">
+        <RadzenColumn Size="6">
+            <b>ឈ្មោះអតិថិជន</b><br />
+            <span class="text-muted">Customer Name</span>
+        </RadzenColumn>
+        <RadzenColumn Size="6" class="text-end">
+            @CustomerName
+        </RadzenColumn>
+        <RadzenColumn Size="6">
+            <b>ចំនួនទឹកប្រាក់</b><br />
+            <span>Amount</span>
+        </RadzenColumn>
+        <RadzenColumn Size="6" class="text-end text-success">
+            <b>@Amount.Format(CurrencyId)</b>
+        </RadzenColumn>
+        <RadzenColumn Size="12" class="rz-mt-3">
+            <RadzenCard Variant="Variant.Flat" class="rz-background-color-warning-lighter">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Style="font-family:'Khmer OS Siemreap'">សូមពិនិត្យព័ត៌មានមុននឹងបញ្ជាក់</RadzenText>
+                <p>Please review the payment before confirming.</p>
+            </RadzenCard>
+        </RadzenColumn>
+    </RadzenRow>
+    <Radzen.Blazor.Rendering.Line />
+    <RadzenStack AlignItems="AlignItems.Center"
+                 class="rz-mt-3"
+                 JustifyContent="JustifyContent.End"
+                 Orientation="Orientation.Horizontal">
+        <RadzenButton Text="បញ្ជាក់ / Confirm"
+                      ButtonStyle="ButtonStyle.Success"
+                      Size="ButtonSize.ExtraSmall"
+                      Click="@(() => DialogService.Close(true))" />
+        <RadzenButton Text="បោះបង់/Cancel"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="ButtonSize.ExtraSmall"
+                      Click="@(() => DialogService.Close(false))" />
+    </RadzenStack>
+</div>
+
+@code {
+    [Parameter]
+    public string? CustomerName { get; set; } = string.Empty;
+    [Parameter]
+    public decimal? Amount { get; set; } = 0.00M;
+    [Parameter]
+    public int? CurrencyId { get; set; } = 1;
+}

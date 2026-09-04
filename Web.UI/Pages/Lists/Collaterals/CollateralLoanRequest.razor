@@ -1,0 +1,72 @@
+﻿@using Applications.Features.Collaterals.Dtos
+<RadzenDataGrid GridLines="DataGridGridLines.Both"
+                Responsive
+                TItem="VCollateralLines"
+                Density="Density.Compact"
+                ColumnWidth="10rem"
+                @ref="grid"
+                @bind-Value="SelectedCollateralLines"
+                SelectionMode="DataGridSelectionMode.Multiple"
+                AllowRowSelectOnRowClick="@allowRowSelectOnRowClick"
+                Style="min-height:20rem;height:20rem;max-height:20rem;"
+                Data="CollateralLines">
+    <HeaderTemplate>
+        <RadzenButton Size="ButtonSize.Small"
+                      Click="Add"
+                      Icon="add"
+                      Text="Add New"
+                      ButtonStyle="ButtonStyle.Primary" />
+    </HeaderTemplate>
+    <Columns>
+        <RadzenDataGridColumn Title="#"
+                              TextAlign="TextAlign.Center"
+                              Context="g"
+                              Width="3rem"
+                              Property="@(nameof(VCollateralLines.CollateralId))">
+            <Template>
+                @(CollateralLines.ToList().IndexOf(g) + 1)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="#"
+                              TextAlign="TextAlign.Center"
+                              Context="g"
+                              Width="3rem"
+                              Property="@(nameof(VCollateralLines.CollateralId))">
+            <HeaderTemplate>
+                <RadzenCheckBox InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select item" }})"
+                                Value="@HeaderChecked"
+                                TValue="bool"
+                                Change="@(args => SelectedCollateralLines = args == true ? CollateralLines!.ToList() : [])"
+                                TriState="false" />
+            </HeaderTemplate>
+            <Template>
+                <RadzenCheckBox InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select item" }})"
+                                TriState="false"
+                                Value="@(SelectedCollateralLines.Any() && SelectedCollateralLines.Contains(g))"
+                                Change=@(args => { if(!allowRowSelectOnRowClick) { grid.SelectRow(g); }})
+                                TValue="bool" />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@(nameof(VCollateralLines.ReferenceNo))" Title="ReferenceNo" />
+        <RadzenDataGridColumn Property="@(nameof(VCollateralLines.OwnerName))" Title="Owner" />
+        <RadzenDataGridColumn Property="@(nameof(VCollateralLines.TypeName))" Title="Type" />
+        <RadzenDataGridColumn Property="@(nameof(VCollateralLines.RegisterDate))" Title="Register Date" FormatString="{0:dd/MM/yyyy}" />
+        <RadzenDataGridColumn Width="3rem" Title="Qty" Property="Quantity" Sortable="false" />
+    </Columns>
+</RadzenDataGrid>
+<RadzenStack AlignItems="AlignItems.Center"
+             Orientation="Orientation.Horizontal"
+             class="my-2"
+             JustifyContent="JustifyContent.End">
+    <RadzenButton Size="ButtonSize.ExtraSmall"
+                  ButtonStyle="ButtonStyle.Success"
+                  Icon="check"
+                  Click="@(()=>DialogService.Close(SelectedCollateralLines))"
+                  Text="Accept" />
+    <RadzenButton Size="ButtonSize.ExtraSmall"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Icon="cancel"
+                  Click="@(()=>DialogService.Close(SelectedCollateralLines))"
+                  Text="Close" />
+</RadzenStack>
+

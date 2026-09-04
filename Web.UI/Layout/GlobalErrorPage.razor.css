@@ -1,0 +1,106 @@
+.ge-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 2rem;
+}
+
+.ge-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 3rem 2.5rem;
+  max-width: 35rem;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+}
+
+.ge-icon {
+  font-size: 56px;
+  color: #ef4444;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.ge-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.5rem;
+}
+
+.ge-subtitle {
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+}
+
+.ge-details {
+  text-align: left;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.ge-details summary {
+  font-weight: 600;
+  color: #dc2626;
+  user-select: none;
+}
+
+.ge-message {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: #374151;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.ge-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  transition: opacity 0.15s;
+}
+
+.ge-btn .rzi {
+  font-size: 16px;
+}
+
+.ge-btn:hover {
+  opacity: 0.85;
+}
+
+.ge-btn-primary {
+  background: #ef4444;
+  color: #fff;
+}
+
+.ge-btn-outline {
+  background: transparent;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}

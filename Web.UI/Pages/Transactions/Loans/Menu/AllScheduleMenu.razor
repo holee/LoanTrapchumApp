@@ -1,0 +1,102 @@
+﻿<AuthorizeView>
+    <Authorized>
+        @if (Schedule is not null)
+        {
+            <RadzenMenu Style="font-size:0.8rem;">
+
+                @if (bState.CanRecievePayment && !ShowOnTab)
+                {
+                    <RadzenMenuItem Icon="@IconNames.MoneyBag"
+                                    Visible="!Schedule!.IsPaid"
+                                    Path="@recievePaymentUrl"
+                                    Text="Receive Payment" />
+                }
+
+                @if (bState.CanRecievePayment && ShowOnTab)
+                {
+                    <RadzenMenuItem Icon="@IconNames.MoneyBag"
+                                    Visible="!Schedule!.IsPaid"
+                                    Click="@ShowPaymentOnTab"
+                                    Text="Receive Payment" />
+                }
+
+
+                @if (bState.CanPayOff)
+                {
+                    <RadzenMenuItem Icon="@IconNames.Paid"
+                                    Path="@payOffUrl"
+                                    Text="Pay Off" />
+                }
+
+
+                <RadzenMenuItem Icon="@IconNames.Info"
+                                Click="@GetCustomerLateSchedules"
+                                Text="Show Late Schedule Details" />
+            </RadzenMenu>
+        }
+    </Authorized>
+</AuthorizeView>
+@code {
+
+    [Parameter] public VSchedule? Schedule { get; set; }
+    [Parameter] public bool ShowOnTab { get; set; } = false;
+    [Parameter] public EventCallback<VSchedule?> GetSchedule { get; set; }
+    [Parameter] public EventCallback<VSchedule?> RecievePayment { get; set; }
+    [Parameter] public EventCallback<VSchedule?> ShowLateScheduleDetails { get; set; }
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [CascadingParameter] CascadingAppState bState { get; set; } = default!;
+    private string recievePaymentUrl = "/";
+    private string scheduleDetailsUrl = "/";
+    private string payOffUrl = "/";
+    private string? lateScheduleUrl = string.Empty;
+    protected override void OnInitialized()
+    {
+        if (Schedule is not null)
+        {
+            recievePaymentUrl = $"/App/Loans/{Schedule.BranchId}/Branches/{Schedule.LoanId}/Schedules?CreditAgentId={Schedule.CreditAgentId}&CurrencyId={Schedule.CurrencyId}";
+            payOffUrl = $"/Loan/CreditAgent/{Schedule.LoanId}/Changed?CustomerId={Schedule.CustomerId}&BranchId={Schedule.BranchId}&CreditAgentId={Schedule.CreditAgentId}&CurrencyId={Schedule.CurrencyId}";
+        }
+        base.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var authState = await AuthenticationState;
+
+        if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
+        {
+            await bState.GetAuthenticatedUser(authState.User);
+        }
+
+
+        await base.OnInitializedAsync();
+    }
+
+    async Task ShowPaymentOnTab()
+    {
+        if (RecievePayment.HasDelegate && Schedule is
+            {
+                BranchId: > 0,
+                LoanId: not null,
+                CustomerId: not null
+            })
+        {
+            await RecievePayment.InvokeAsync(Schedule);
+        }
+    }
+
+
+    async Task GetCustomerLateSchedules()
+    {
+        if (ShowLateScheduleDetails.HasDelegate && Schedule is
+            {
+                BranchId: > 0,
+                LoanId: not null,
+                CustomerId: not null
+            })
+        {
+            await ShowLateScheduleDetails.InvokeAsync(Schedule);
+        }
+    }
+}

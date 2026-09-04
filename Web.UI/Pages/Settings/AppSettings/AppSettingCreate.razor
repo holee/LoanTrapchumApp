@@ -1,0 +1,84 @@
+@using Applications.Features.Settings.Dto
+
+<RadzenTemplateForm TItem="AppSettingDtoCreate" Data="@_model" Submit="@OnSubmit">
+    <RadzenStack Gap="1rem">
+
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenFormField Text="Code *" Variant="Variant.Outlined" class="rz-w-100">
+                    <RadzenTextBox @bind-Value="@_model.Code" Name="Code" class="rz-w-100" />
+                </RadzenFormField>
+                <RadzenRequiredValidator Component="Code" Text="Code is required." Popup="false" />
+            </RadzenColumn>
+
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenFormField Text="Value *" Variant="Variant.Outlined" class="rz-w-100">
+                    <RadzenTextBox @bind-Value="@_model.Value" Name="Value" class="rz-w-100" />
+                </RadzenFormField>
+                <RadzenRequiredValidator Component="Value" Text="Value is required." Popup="false" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12">
+                <RadzenFormField Text="Description" Variant="Variant.Outlined" class="rz-w-100">
+                    <RadzenTextArea @bind-Value="@_model.Description" Name="Description" Rows="3" class="rz-w-100" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+            <RadzenCheckBox @bind-Value="@_model.IsActive" Name="IsActive" TValue="bool?" />
+            <RadzenLabel Text="Active" Component="IsActive" class="rz-ms-2" />
+        </RadzenStack>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton ButtonType="ButtonType.Submit"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Success"
+                          Icon="@IconNames.Save"
+                          Text="Save"
+                          IsBusy="@_isBusy"
+                          BusyText="Saving..." />
+
+            <RadzenButton ButtonType="ButtonType.Button"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Icon="@IconNames.Cancel"
+                          Text="Cancel"
+                          Click="@(() => DialogService.Close(false))" />
+        </RadzenStack>
+
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+
+    [Inject] private ISettingApi SettingApi { get; set; } = default!;
+
+    private AppSettingDtoCreate _model = new() { IsActive = true };
+
+    private bool _isBusy;
+
+    private async Task OnSubmit()
+    {
+        _isBusy = true;
+
+        try
+        {
+            var created = await SettingApi.CreateAppSettingAsync(_model);
+
+            NotificationService.Notify(NotificationSeverity.Success, "Success", "Setting was created successfully.");
+
+            DialogService.Close(created);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+}

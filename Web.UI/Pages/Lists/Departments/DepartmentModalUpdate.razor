@@ -1,0 +1,54 @@
+﻿@using Applications.Features.Branches.Dtos
+@using Applications.Features.Departments.Dto
+<div class="p-3">
+    <RadzenTemplateForm TItem="DepartmentDtoUpdate" Data=@model Submit=@Update>
+        <RadzenStack Gap="1rem">
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Department Name*" Variant="Variant.Outlined" Style="width:100%">
+                        <RadzenTextBox Name="DepartmentName" @bind-Value="model.DepartmentName" Style="width:100%" />
+                        <RadzenRequiredValidator Component="DepartmentName" Text="Department name is required" Style="position: absolute" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Branch Name*" Variant="Variant.Outlined" Style="width:100%">
+                        <ChildContent>
+                            <RadzenDropDown Name="BranchId"
+                                            @bind-Value="model.BranchId"
+                                            Data="@vBranches"
+                                            ValueProperty="@nameof(VBranch.BranchId)"
+                                            TextProperty="@nameof(VBranch.BranchName)"
+                                            AllowFiltering="true"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            Style="width:100%">
+                            </RadzenDropDown>
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="BranchId" Text="Branch is required" Style="position: absolute" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="12">
+                    <RadzenFormField Text="Description" Variant="Variant.Outlined" Style="width:100%">
+                        <RadzenTextBox Name="Description" @bind-Value="model.Description" Style="width:100%" />
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal" class="rz-mt-4" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton Click="@((args) => DialogService!.Close(true))"
+                          Text="Close"
+                          Icon="cancel"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Danger" />
+            <RadzenButton ButtonType="ButtonType.Submit"
+                          Text="Save"
+                          ButtonStyle="ButtonStyle.Success"
+                          Size="ButtonSize.ExtraSmall"
+                          Icon="save"></RadzenButton>
+        </RadzenStack>
+    </RadzenTemplateForm>
+</div>
+

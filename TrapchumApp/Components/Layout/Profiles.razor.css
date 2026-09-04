@@ -1,286 +1,306 @@
-/* ═══════════════════════════════════════════════════════════
-   Facebook-style Profile Menu
-   ═══════════════════════════════════════════════════════════ */
+/* Profile menu — trigger in the top bar + anchored dropdown panel */
 
-/* ── Wrapper ─────────────────────────────────────────────── */
-.fb-profile-wrap {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
+.pm-root {
+  --pm-radius: 14px;
+  --pm-surface: var(--rz-base-background-color, #fff);
+  --pm-border: var(--rz-border-color, #e5e7eb);
+  --pm-text: var(--rz-text-color, #111827);
+  --pm-muted: var(--rz-text-secondary-color, #6b7280);
+  --pm-hover: var(--rz-base-200, #f3f4f6);
+  --pm-accent: var(--rz-primary, #2563eb);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 }
 
-/* ── Trigger button ───────────────────────────────────────── */
-.fb-profile-trigger {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.25rem 0.55rem 0.25rem 0.25rem;
-    border-radius: 2rem;
-    background: rgba(255,255,255,0.13);
-    border: 1px solid rgba(255,255,255,0.22);
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.15s;
+/* ── Trigger ─────────────────────────────────────────────── */
+.pm-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.6rem 0.25rem 0.25rem;
+  font: inherit;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 
-    .fb-profile-trigger:hover {
-        background: rgba(255,255,255,0.22);
-    }
-
-.fb-trigger-name {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: #fff;
-    max-width: 9rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+.pm-trigger:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
-.fb-trigger-chevron {
-    display: flex;
-    align-items: center;
-    color: rgba(255,255,255,0.8);
-    transition: transform 0.2s;
+.pm-trigger--active {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.38);
 }
 
-    .fb-trigger-chevron--up {
-        transform: rotate(180deg);
-    }
-
-/* ── Avatar ───────────────────────────────────────────────── */
-.fb-avatar {
-    border-radius: 50%;
-    background: var(--rz-success, #4caf50);
-    color: #fff;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    letter-spacing: 0.03em;
-    overflow: hidden;
+.pm-trigger:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
-.fb-avatar__img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-    display: block;
+.pm-trigger__name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-    .fb-avatar--sm {
-        width: 2.05rem;
-        height: 2.05rem;
-        font-size: 0.82rem;
-        background: #fff;
-        color: var(--rz-success, #4caf50);
-        box-shadow: 0 1px 4px rgba(0,0,0,0.18);
-    }
-
-    .fb-avatar--lg {
-        width: 3.2rem;
-        height: 3.2rem;
-        font-size: 1.2rem;
-        flex-shrink: 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.14);
-    }
-
-/* ── Backdrop ─────────────────────────────────────────────── */
-.fb-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 1040;
+.pm-trigger__chevron {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.85);
+  transition: transform 0.2s ease;
 }
 
-/* ── Dropdown panel ───────────────────────────────────────── */
-.fb-dropdown {
-    position: fixed;
-    width: 22rem;
-    background: var(--rz-base-background-color, #fff);
-    border-radius: 0.75rem;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
-    z-index: 1050;
-    overflow: hidden;
-    animation: fb-dropdown-in 0.15s ease;
+.pm-trigger__chevron--up {
+  transform: rotate(180deg);
 }
 
-@keyframes fb-dropdown-in {
-    from {
-        opacity: 0;
-        transform: translateY(-6px) scale(0.97);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+/* ── Avatar ──────────────────────────────────────────────── */
+.pm-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: var(--pm-accent);
+  color: #fff;
 }
 
-/* ── Profile card (top of dropdown) ─────────────────────── */
-.fb-profile-card {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.9rem 1rem;
-    text-decoration: none;
-    border-radius: 0.6rem;
-    margin: 0.5rem 0.5rem 0;
-    transition: background 0.15s;
+.pm-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-    .fb-profile-card:hover {
-        background: var(--rz-base-300, #f0f2f5);
-    }
-
-.fb-profile-card__info {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+.pm-avatar--sm {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.78rem;
+  background: #fff;
+  color: var(--pm-accent);
 }
 
-.fb-profile-card__name {
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: var(--rz-text-color, #050505);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.pm-avatar--lg {
+  width: 3rem;
+  height: 3rem;
+  font-size: 1.05rem;
 }
 
-.fb-profile-card__sub {
-    font-size: 0.75rem;
-    color: var(--rz-text-secondary-color, #65676b);
-    margin-top: 0.1rem;
+/* ── Backdrop + panel ────────────────────────────────────── */
+.pm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1040;
 }
 
-/* ── Divider ──────────────────────────────────────────────── */
-.fb-divider {
-    height: 1px;
-    background: var(--rz-border-color, #e4e6eb);
-    margin: 0.4rem 0;
+.pm-panel {
+  position: fixed;
+  z-index: 1050;
+  width: 20rem;
+  padding: 0.4rem;
+  background: var(--pm-surface);
+  border: 1px solid var(--pm-border);
+  border-radius: var(--pm-radius);
+  box-shadow:
+    0 12px 32px rgb(15 23 42 / 12%),
+    0 2px 6px rgb(15 23 42 / 6%);
+  animation: pm-panel-in 0.14s ease-out;
 }
 
-/* ── Section label ────────────────────────────────────────── */
-.fb-section-label {
-    padding: 0.45rem 1rem 0.15rem;
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--rz-text-secondary-color, #65676b);
+@keyframes pm-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* ── Menu item ────────────────────────────────────────────── */
-.fb-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
-    margin: 0.15rem 0.5rem;
-    border-radius: 0.55rem;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background 0.13s;
-    color: var(--rz-text-color, #050505);
+/* ── Identity header ─────────────────────────────────────── */
+.pm-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background 0.13s ease;
 }
 
-    .fb-menu-item:hover {
-        background: var(--rz-base-300, #f0f2f5);
-    }
-
-    .fb-menu-item--logout {
-        cursor: default;
-    }
-
-.fb-menu-item__icon {
-    width: 2.2rem;
-    height: 2.2rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+.pm-identity:hover {
+  background: var(--pm-hover);
 }
 
-    /* Make RadzenIcon (rzi) inside the icon circle the right size/colour */
-    .fb-menu-item__icon :deep(i.rzi),
-    .fb-menu-item__icon :deep(.rzi) {
-        font-size: 1.2rem;
-        line-height: 1;
-    }
-
-    .fb-menu-item__icon--blue {
-        background: #e7f3ff;
-        color: #1877f2;
-    }
-
-    .fb-menu-item__icon--gray {
-        background: #e4e6eb;
-        color: #444;
-    }
-
-    .fb-menu-item__icon--red {
-        background: #ffebe8;
-        color: #e53935;
-    }
-
-.fb-menu-item__body {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-    min-width: 0;
+.pm-identity__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
-.fb-menu-item__title {
-    font-weight: 600;
-    font-size: 0.88rem;
-    color: var(--rz-text-color, #050505);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.pm-identity__name {
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: var(--pm-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.fb-menu-item__sub {
-    font-size: 0.72rem;
-    color: var(--rz-text-secondary-color, #65676b);
-    margin-top: 0.05rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.pm-identity__link {
+  margin-top: 0.1rem;
+  font-size: 0.75rem;
+  color: var(--pm-accent);
 }
 
-.fb-menu-item__arrow {
-    font-size: 1.1rem;
-    color: var(--rz-text-secondary-color, #65676b);
-    flex-shrink: 0;
+/* ── Items ───────────────────────────────────────────────── */
+.pm-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-/* ── Logout button ────────────────────────────────────────── */
-.fb-logout-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
+.pm-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  color: var(--pm-text);
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.13s ease;
 }
 
-    .fb-logout-btn:hover .fb-menu-item__title {
-        color: #e53935;
-    }
+.pm-item:hover {
+  background: var(--pm-hover);
+}
 
-/* ── Footer ───────────────────────────────────────────────── */
-.fb-dropdown__footer {
-    padding: 0.6rem 1rem 0.75rem;
-    font-size: 0.68rem;
-    color: var(--rz-text-secondary-color, #65676b);
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    margin-top: 0.25rem;
+.pm-item:focus-visible {
+  outline: 2px solid var(--pm-accent);
+  outline-offset: -2px;
+}
+
+.pm-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 9px;
+}
+
+.pm-item__icon ::deep .rzi {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.pm-item__icon--accent {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.pm-item__icon--neutral {
+  background: var(--pm-hover);
+  color: #4b5563;
+}
+
+.pm-item__icon--danger {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.pm-item__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.pm-item__title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pm-item__sub {
+  margin-top: 0.05rem;
+  font-size: 0.72rem;
+  color: var(--pm-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pm-item__arrow {
+  display: flex;
+  flex: none;
+  color: var(--pm-muted);
+}
+
+.pm-item__arrow ::deep .rzi {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.pm-item--danger .pm-item__title {
+  color: #dc2626;
+}
+
+.pm-item--danger:hover {
+  background: #fef2f2;
+}
+
+.pm-logout-form {
+  margin: 0;
+}
+
+/* ── Separator + footer ──────────────────────────────────── */
+.pm-separator {
+  height: 1px;
+  margin: 0.4rem 0.3rem;
+  background: var(--pm-border);
+}
+
+.pm-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.7rem 0.35rem;
+  font-size: 0.68rem;
+  color: var(--pm-muted);
+}
+
+@media (max-width: 480px) {
+  .pm-panel {
+    width: calc(100vw - 1.5rem);
+  }
+
+  .pm-trigger__name {
+    display: none;
+  }
 }

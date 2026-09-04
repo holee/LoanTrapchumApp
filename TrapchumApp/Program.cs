@@ -70,6 +70,20 @@ builder.Services.AddScoped<AppSettingService>();
 builder.Services.AddScoped<ManagerRedirectMiddleware>();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient<INbcExchangeRateService, NbcExchangeRateService>();
+
+// Allows the standalone Blazor WebAssembly client (Web.UI) to call /api/* from its own origin.
+// Origins are read from configuration ("Cors:AllowedOrigins"); no wildcard is used because the
+// policy allows credentials.
+var webUiOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(CorsPolicies.WebUiClient, policy =>
+        policy.WithOrigins(webUiOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials());
+});
+
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 104857600; // 100 MB
@@ -106,6 +120,8 @@ else
 
 app.UseHttpsRedirection();
 
+app.UseCors(CorsPolicies.WebUiClient);
+
 app.UseAntiforgery();
 
 app.UseMiddleware<ManagerRedirectMiddleware>();
@@ -125,6 +141,10 @@ await app.MapAdditionalIdentityEndpoints();
 app.MapUploadFileEndpoints();
 
 app.MapNbcExchangeRateEndpoints();
+
+app.MapCurrencyEndpoints();
+
+app.MapSettingEndpoints();
 
 app.MapHub<AppNotificationHub>("/hubs/notifications");
 

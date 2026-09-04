@@ -1,0 +1,62 @@
+﻿@using Applications.Features.Loans.Dtos.Responses
+<table class="table table-sm table-bordered">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th class="text-end">Principle</th>
+            <th class="text-end">Interest</th>
+            <th class="text-end">OtherInterest</th>
+            <th class="text-end">SubTotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in VLoanRepaymentLines!)
+        {
+            var index = VLoanRepaymentLines!.ToList().IndexOf(item) + 1;
+            <tr>
+                <td>@index</td>
+                <td class="text-end">@item.PaidPrinciple.Format(CurrencyId)</td>
+                <td class="text-end">@item.PaidInterest.Format(CurrencyId)</td>
+                <td class="text-end">@item.PaidCollectionFee.Format(CurrencyId)</td>
+                <td class="text-end">@item.SubTotal.Format(CurrencyId)</td>
+            </tr>
+        }
+        <tr>
+            <th colspan="4" class="text-end">Total</th>
+            <th class="text-end">@VLoanRepaymentLines.Sum(x => x.SubTotal).Format(CurrencyId)</th>
+        </tr>
+        <tr>
+            <th></th>
+            <th class="text-end">Left Principle</th>
+            <th class="text-end">Left Interest</th>
+            <th class="text-end">Left AdminFee</th>
+        </tr>
+        <tr>
+            <th></th>
+            <th class="text-end">
+                @SelectedRepayment?.LeftPrinciple!.Value.Format(CurrencyId)
+            </th>
+            <th class="text-end">
+                @SelectedRepayment?.LeftInterestAmount!.Value.Format(CurrencyId)
+            </th>
+            <th class="text-end">
+                @SelectedRepayment?.LeftCollectionFeeAmount!.Value.Format(CurrencyId)
+            </th>
+            <th></th>
+        </tr>
+    </tbody>
+
+</table>
+
+@code {
+    [Parameter] public long LoanId { get; set; } = 0;
+    [Parameter] public int BranchId { get; set; } = 0;
+    [Parameter] public int InstallmentNo { get; set; }
+    [Parameter] public int CurrencyId { get; set; } = 1;
+    VSchedule SelectedRepayment { get; set; } = new();
+    IEnumerable<VLoanRepaymentLine> VLoanRepaymentLines = [];
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+}

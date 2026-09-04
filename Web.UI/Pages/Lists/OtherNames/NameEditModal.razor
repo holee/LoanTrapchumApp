@@ -1,0 +1,28 @@
+@using Web.UI.Components.Buttons
+
+<EditForm Model="model" OnValidSubmit="OnSaveChanges">
+    <FluentValidationValidator DisableAssemblyScanning="true" />
+    <input type="hidden" @bind="model!.Id" />
+    <NameCreateInfo model="model" />
+    <AddressCreate model="model" />
+    <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End" Gap="1rem">
+        <SaveButton ButtonType="ButtonType.Submit" />
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      Size="ButtonSize.ExtraSmall"
+                      Icon="cancel"
+                      Click="Close"
+                      Text="Close" />
+    </RadzenStack>
+</EditForm>
+@code {
+
+
+
+
+
+    void SetFirstName()
+    {
+        model.FirstName = model.Name;
+    }
+}

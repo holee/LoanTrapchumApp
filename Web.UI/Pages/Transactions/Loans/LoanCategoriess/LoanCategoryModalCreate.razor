@@ -1,0 +1,103 @@
+﻿<EditForm Model="model" OnValidSubmit="OnSaveNew">
+    <DataAnnotationsValidator />
+
+    <RadzenRow Gap="0.75rem">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel Component="LoanCategoryCode">
+                    Category Name <span class="text-danger">*</span>
+                </RadzenLabel>
+                <RadzenTextBox @bind-Value="model.LoanCategoryCode"
+                               Style="width:100%;"
+                               Placeholder="Enter Category Name..."
+                               Name="LoanCategoryCode" />
+                <ValidationMessage For="@(() => model.LoanCategoryCode)" />
+                @if (!string.IsNullOrEmpty(messageName))
+                {
+                    <small class="text-danger">@messageName</small>
+                }
+            </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel Component="Code">Code</RadzenLabel>
+                <RadzenTextBox @bind-Value="model.Code"
+                               Style="width:100%;"
+                               Placeholder="Enter Code..."
+                               Name="Code" />
+                <ValidationMessage For="@(() => model.Code)" />
+                @if (!string.IsNullOrEmpty(messageCode))
+                {
+                    <small class="text-danger">@messageCode</small>
+                }
+            </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel Component="DesInKhmer">Description (Khmer)</RadzenLabel>
+                <RadzenTextBox @bind-Value="model.DesInKhmer"
+                               Style="width:100%;"
+                               Placeholder="Enter Description in Khmer..."
+                               Name="DesInKhmer" />
+                <ValidationMessage For="@(() => model.DesInKhmer)" />
+            </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel>Status</RadzenLabel>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                    <RadzenCheckBox @bind-Value="model.IsActive" Name="IsActive" />
+                    <RadzenLabel Component="IsActive">
+                        @(model.IsActive == true ? "Active" : "Inactive")
+                    </RadzenLabel>
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel Component="Description">Description</RadzenLabel>
+                <RadzenTextArea @bind-Value="model.Description"
+                                Placeholder="Enter Description..."
+                                Style="width:100%;resize:none;"
+                                Rows="3"
+                                Name="Description" />
+                <ValidationMessage For="@(() => model.Description)" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.End"
+                 Gap="0.5rem"
+                 class="rz-mt-3">
+        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                      Icon="save"
+                      Text="Save"
+                      Size="ButtonSize.Small"
+                      ButtonType="ButtonType.Submit" />
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      Icon="close"
+                      Text="Cancel"
+                      Click="@ClosedTab"
+                      Size="ButtonSize.Small" />
+    </RadzenStack>
+</EditForm>
+
+@code {
+    [Parameter] public EventCallback<int> CloseTab { get; set; }
+
+    void ClosedTab()
+    {
+        DialogService.Close(false);
+    }
+}
+
+
+
+
+

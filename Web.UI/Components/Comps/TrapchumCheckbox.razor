@@ -1,0 +1,27 @@
+﻿@using System.Linq.Expressions
+
+<div class="@CssClass">
+    <RadzenCheckBox TValue="bool"
+                    Value="Value"
+                    Name="@Name"
+                    ValueExpression="@ValueExpression"
+                    Change="@HandleChange" />
+    <RadzenLabel Text="@Title" Component="@Name" class="rz-ms-2" />
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter] public bool Value { get; set; }
+    [Parameter] public EventCallback<bool> ValueChanged { get; set; }
+    [Parameter] public EventCallback<bool> OnChanged { get; set; }
+    [Parameter] public Expression<Func<bool>>? ValueExpression { get; set; }
+    [Parameter] public string Name { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string CssClass { get; set; } = "rz-p-0 rz-text-align-center";
+
+    private async Task HandleChange(bool value)
+    {
+        Value = value;
+        await ValueChanged.InvokeAsync(value);
+        await OnChanged.InvokeAsync(value);
+    }
+}

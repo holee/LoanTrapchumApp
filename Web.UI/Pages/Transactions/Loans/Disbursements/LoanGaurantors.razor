@@ -1,0 +1,192 @@
+﻿@using Applications.Features.Loans.Dtos
+
+<style>
+    .guarantor-card {
+        border-radius: 12px;
+        border: 1px solid var(--rz-base-200);
+        background: var(--rz-base-200);
+        box-shadow: 0 2px 8px rgba(0,0,0,.06);
+        overflow: hidden;
+    }
+
+    .guarantor-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: .75rem 1.25rem;
+        background: linear-gradient(135deg, var(--rz-primary) 0%, var(--rz-primary-darker) 100%);
+        color: #fff;
+        gap: .5rem;
+    }
+
+        .guarantor-card-header .header-title {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: .01em;
+        }
+
+    .guarantor-card-body {
+        padding: .0rem 1rem;
+    }
+
+    .guarantor-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .5rem;
+        margin-bottom: .0rem;
+        flex-wrap: wrap;
+    }
+
+        .guarantor-toolbar .search-slot {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+    .guarantor-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--rz-primary-lighter);
+        color: var(--rz-primary-darker);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .7rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .guarantor-name-cell {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .rz-datatable .rz-datatable-data td {
+        vertical-align: middle !important;
+    }
+
+    .badge-count {
+        background: rgba(255,255,255,.22);
+        color: #fff;
+        font-size: .7rem;
+        font-weight: 600;
+        padding: .1rem .5rem;
+        border-radius: 999px;
+        margin-left: .25rem;
+    }
+</style>
+
+<div class="guarantor-card">
+    <div class="guarantor-card-header">
+        <span class="header-title">
+            <RadzenIcon Icon="group" Style="font-size:1.2rem;" />
+            Guarantors Information
+            @if (Guarantors?.Any() == true)
+            {
+                <span class="badge-count">@Guarantors.Count()</span>
+            }
+        </span>
+    </div>
+    <div class="guarantor-card-body">
+        <RadzenDataGrid Data="Guarantors"
+                        GridLines="DataGridGridLines.Horizontal"
+                        TItem="LoanGuarantorDtoEdit"
+                        Density="Density.Compact"
+                        @ref="gridGuarantors"
+                        PagerHorizontalAlign="HorizontalAlign.Right"
+                        EmptyText="No guarantors added yet."
+                        RowRender="@OnRowRender"
+                        Style="min-height:14rem;height:14rem;max-height:14rem;border-radius:8px;overflow:hidden;">
+            <Columns>
+                <RadzenDataGridColumn Context="g"
+                                      Property="@(nameof(LoanGuarantorDtoEdit.GuarantorId))"
+                                      Width="3rem"
+                                      Title="#"
+                                      Sortable="false"
+                                      TextAlign="TextAlign.Center">
+                    <HeaderTemplate>
+                        <span style="color:var(--rz-text-tertiary-color);font-size:.75rem;">#</span>
+                    </HeaderTemplate>
+                    <Template>
+                        <span style="color:var(--rz-text-tertiary-color);font-size:.8rem;">@g.RowIndex</span>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Width="16rem"
+                                      Property="@(nameof(LoanGuarantorDtoEdit.GuarantorName))"
+                                      Title="ឈ្មោះ"
+                                      Sortable="false">
+                    <HeaderTemplate>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">ឈ្មោះ</span>
+                    </HeaderTemplate>
+                    <Template Context="g">
+                        <div class="guarantor-name-cell">
+                            <div class="guarantor-avatar">
+                                @(string.IsNullOrWhiteSpace(g.FullName) ? "?" : g.FullName.Trim()[0].ToString().ToUpper())
+                            </div>
+                            <span style="font-weight:500;font-size:.85rem;">@g.GuarantorName</span>
+                        </div>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Width="10rem"
+                                      Property="@(nameof(LoanGuarantorDtoEdit.Phone))"
+                                      Title="លេខទូរស័ព្ទ"
+                                      Sortable="false">
+                    <HeaderTemplate>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">លេខទូរស័ព្ទ</span>
+                    </HeaderTemplate>
+                    <Template Context="g">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="phone" Style="font-size:.85rem;color:var(--rz-text-tertiary-color);" />
+                            <span style="font-size:.82rem;">@g.Phone</span>
+                        </RadzenStack>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Width="10rem"
+                                      Property="@(nameof(LoanGuarantorDtoEdit.IdCard))"
+                                      Title="អត្តសញ្ញាណប័ណ្ណ"
+                                      Sortable="false">
+                    <HeaderTemplate>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">អត្តសញ្ញាណប័ណ្ណ</span>
+                    </HeaderTemplate>
+                    <Template Context="g">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="badge" Style="font-size:.85rem;color:var(--rz-text-tertiary-color);" />
+                            <span style="font-size:.82rem;">@g.IdCard</span>
+                        </RadzenStack>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Context="g" Title="អាសយដ្ឋាន" Sortable="false">
+                    <HeaderTemplate>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">អាសយដ្ឋាន</span>
+                    </HeaderTemplate>
+                    <Template>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="location_on" Style="font-size:.85rem;color:var(--rz-text-tertiary-color);" />
+                            <span style="font-size:.82rem;">@g.Address</span>
+                        </RadzenStack>
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+</div>
+
+@code {
+
+    private void OnRowRender(RowRenderEventArgs<LoanGuarantorDtoEdit> args)
+    {
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
+
+    }
+}

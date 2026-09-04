@@ -1,0 +1,51 @@
+@namespace Web.UI.Components.Buttons
+
+<div class="modern-fab-menu @(_isOpen ? "is-open" : "") direction-@Direction.ToString().ToLower() @Class" style="@Style">
+    @if (_isOpen)
+    {
+        <div class="fab-menu-overlay" @onclick="Close" @onclick:stopPropagation="true"></div>
+    }
+    
+    <div class="fab-menu-items">
+        <CascadingValue Value="this" IsFixed="true">
+            @ChildContent
+        </CascadingValue>
+    </div>
+
+    <div class="fab-menu-main" @onclick="ToggleMenu">
+        <ModernFab StartIcon="@(_isOpen && !string.IsNullOrEmpty(ActiveIcon) ? ActiveIcon : StartIcon)" 
+                   Color="Color" 
+                   Size="Size" 
+                   DisableElevation="DisableElevation"
+                   DisableRipple="DisableRipple" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? StartIcon { get; set; }
+    [Parameter] public string? ActiveIcon { get; set; } = "la la-times";
+    [Parameter] public FabColor Color { get; set; } = FabColor.Primary;
+    [Parameter] public FabSize Size { get; set; } = FabSize.Medium;
+    [Parameter] public FabDirection Direction { get; set; } = FabDirection.Up;
+    [Parameter] public bool DisableElevation { get; set; }
+    [Parameter] public bool DisableRipple { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+
+    private bool _isOpen;
+
+    private void ToggleMenu()
+    {
+        _isOpen = !_isOpen;
+    }
+
+    public void Close()
+    {
+        if (_isOpen)
+        {
+            _isOpen = false;
+            StateHasChanged();
+        }
+    }
+}

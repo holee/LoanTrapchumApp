@@ -1,0 +1,210 @@
+using Applications.Features.Guarantor.Dtos;
+using Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
+using Radzen.Blazor;
+
+namespace Web.UI.Pages.Lists.OtherNames.Guarantors
+{
+    public partial class GuarantorsList
+    {
+        [Parameter]
+        public List<VGuarantor> SelectedGuarantors { get; set; } = [];
+        string? filterText = "";
+        int pageSize = 10;
+        string sortColumn = nameof(VGuarantor.GuarantorName);
+        int counts = 0;
+        bool isLoading = false;
+        bool allowRowSelectOnRowClick = true;
+
+        IEnumerable<VGuarantor> Guarantors = [];
+
+        IEnumerable<VGuarantor> newGuarantors = [];
+
+        RadzenDataGrid<VGuarantor> grid = default!;
+
+        protected override async Task OnInitializedAsync()
+        {
+            await GetGuarantors();
+
+            await base.OnInitializedAsync();
+
+        }
+        async Task GetGuarantors()
+        {
+            isLoading = true;
+
+            var command = new GetGuarantorsAsPagingQuery(null, new QueryParam(0, 0));
+
+            var rsp = await mediator.Send(command); 
+
+            Guarantors = rsp.Items;
+
+            isLoading = false;
+
+            StateHasChanged();
+        }
+
+
+        async void GuarantorCheckedChanged(bool args, VGuarantor g)
+        {
+            if (args && !allowRowSelectOnRowClick)
+            {
+                await grid.SelectRow(g);
+            }
+        }
+
+
+        void AcceptSelectedGuarantors()
+        {
+            if (!SelectedGuarantors.Any())
+            {
+                NotificationService.Notify(NotificationSeverity.Info, "There is no any gaurator selected.");
+                return;
+            }
+            DialogService.Close(SelectedGuarantors);
+        }
+
+        void Cancel()
+        {
+            DialogService.Close(SelectedGuarantors);
+        }
+
+
+        // async Task LoadGuarantors(LoadDataArgs e)
+        // {
+        //     pageIndex = e.Skip!.Value;
+        //     if (!string.IsNullOrEmpty(e.OrderBy))
+        //     {
+        //         sortColumn = e.OrderBy.Split(" ")[0];
+        //         string dir = e.OrderBy.Split(" ")[1];
+        //         sortDescending = dir.Contains("asc") ? false : true;
+        //     }
+        //     await GetGuarantors();
+
+        // }
+
+        // async Task IncludeInactiveCheckedChanged()
+        // {
+        //     await GetGuarantors();
+        // }
+
+        // async Task ShowGuarantorModal()
+        // {
+        //     var options = new DialogOptions
+        //         {
+        //             Width = "60rem",
+        //             Height = "30rem",
+        //             Draggable = true,
+        //             AutoFocusFirstElement = true
+        //         };
+        //     var modalResult = await DialogService.OpenAsync<GuarantorAddModal>("Guarantor", options: options);
+
+        //     if (bool.TryParse(modalResult, out bool result) && result == true)
+        //     {
+        //         await GetGuarantors();
+        //     }
+
+        // }
+
+        // protected async Task OnSaveChanges()
+        // {
+        //     Model.EntType = "Other Name";
+        //     var resultResponse = await _gService.CreateGaurantorAsync(Model);
+
+        //     if (resultResponse.IsSuccess)
+        //     {
+        //         NotificationService.Notify(NotificationSeverity.Success, resultResponse.Data!.message);
+        //         ShowAddTab = false;
+        //         selectedTabIndex = 0;
+        //         //tabs.Reload();
+        //     }
+        //     else
+        //     {
+        //         var error = resultResponse.Errors!.FirstOrDefault();
+        //         NotificationService.Notify(NotificationSeverity.Error, error);
+        //     }
+        // }
+
+
+
+        // protected async Task DeleteGuarantorAsync(long id)
+        // {
+
+        //     if (id <= 0)
+        //     {
+        //         NotificationService.Notify(NotificationSeverity.Warning, "there is no any data selected.");
+        //         return;
+        //     }
+
+        //     var confirm = await DialogService.Confirm($"do you want to delete guarantor with #{id}",
+        //                                         "Delete", new ConfirmOptions
+        //                                             {
+        //                                                 OkButtonText = "Ok",
+        //                                                 CancelButtonText = "Cancel"
+        //                                             });
+        //     if (confirm == false) return;
+
+        //     var resultResponse = await _gService.DeleteAsync(id);
+
+        //     if (resultResponse.IsSuccess)
+        //     {
+        //         NotificationService.Notify(NotificationSeverity.Success, resultResponse.Data!.message);
+        //         ShowAddTab = false;
+        //         selectedTabIndex = 0;
+        //         await GetGuarantors();
+        //         tabs.Reload();
+        //     }
+        //     else
+        //     {
+        //         var error = resultResponse.Errors!.FirstOrDefault();
+        //         NotificationService.Notify(NotificationSeverity.Error, error);
+        //     }
+        // }
+
+        // async void GetDistrictByProvince(object e)
+        // {
+        //     if (e is not null)
+        //     {
+        //         Model.ProInKhmer = ((ProvinceDto)e).ProInKhmer;
+        //         var id = ((ProvinceDto)e).ProvinceID;
+        //         districtList = await _addressService!.GetDistrictByProvinceAsync(id);
+        //     }
+        //     StateHasChanged();
+        // }
+        // async void GeCommunesByDistrict(object e)
+        // {
+        //     if (e is not null)
+        //     {
+        //         Model.DisInKhmer = ((DistrictDto)e).DisInKhmer;
+        //         var id = ((DistrictDto)e).DistrictId;
+        //         communeList = await _addressService!.GetCommuneByDistricteAsync(id);
+        //     }
+        //     StateHasChanged();
+        // }
+
+
+
+        // async void GetVillagesByCommune(object e)
+        // {
+        //     if (e is not null)
+        //     {
+        //         Model.ComInKhmer = ((CommuneDto)e).ComInKhmer;
+        //         var id = ((CommuneDto)e).CommuneId;
+        //         villageList = await _addressService!.GetVillageByCommuneAsync(id);
+        //     }
+        //     StateHasChanged();
+        // }
+        // void GetVillagesName(object e)
+        // {
+        //     if (e is not null)
+        //     {
+        //         Model.VilInKhmer = ((VillageDto)e).VilInKhmer;
+        //     }
+        //     StateHasChanged();
+        // }
+        // void SetFirstName()
+        // {
+        //     Model.FirstName = Model.Name;
+        // }
+
+    }
+}

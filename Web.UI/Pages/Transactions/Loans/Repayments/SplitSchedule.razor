@@ -1,0 +1,309 @@
+﻿@using Applications.Features.Loans.Dtos.Responses
+@using Mapster;
+
+<RadzenCard class="rz-border-radius-3 rz-shadow-3 rz-mb-4" style="overflow:hidden; border: 1px solid var(--rz-border-disabled-color);">
+
+    @* Header bar *@
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.SpaceBetween"
+                 class="rz-px-4 rz-py-3"
+                 style="background: var(--rz-base-background-color); border-bottom: 1px solid var(--rz-border-disabled-color);">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenIcon Icon="event_note" style="color: var(--rz-primary); font-size:1.2rem;" />
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-mb-0">
+                <strong>Schedule @ScheduleNum</strong>
+            </RadzenText>
+            <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@($"of {TotalScedules}")" class="rz-ml-1" />
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+            <RadzenButton Click="() => DownLoadScheduleAsPdf(ScheduleNum)"
+                          Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Variant="Variant.Outlined"
+                          Text="PDF"
+                          Icon="picture_as_pdf" />
+            <RadzenButton Click="() => ExportToExcel(ScheduleNum)"
+                          Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Success"
+                          Variant="Variant.Outlined"
+                          Text="Excel"
+                          Icon="file_download" />
+        </RadzenStack>
+    </RadzenStack>
+
+    @* Info grid *@
+    <div class="rz-px-4 rz-py-3">
+        <RadzenRow Gap="1rem" RowGap="0.75rem">
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Name", LoanSchedule?.AltName)
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Phone", LoanSchedule?.Phone)
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Address", LoanSchedule?.Address)
+            </RadzenColumn>
+
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Account Number", LoanSchedule?.LoanAccount)
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Amount", LoanSchedule?.Principle.Format(_currencyId).ToString())
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Outstanding", LoanSchedule?.OutStanding.Format(_currencyId).ToString())
+            </RadzenColumn>
+
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Date", LoanSchedule?.RegisterDate.DayFirst())
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Expiry Date", LoanSchedule?.LastPaymentDate.DayFirst())
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Interest Rate", LoanSchedule?.InterestRate?.ToString())
+            </RadzenColumn>
+
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Agent", LoanSchedule?.CreditAgentKhmer)
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Agent Phone", LoanSchedule?.AgentPhone)
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Period", LoanSchedule?.PeriodName)
+            </RadzenColumn>
+
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Office", "Trapchum")
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                @InfoField("Circle", LoanSchedule?.Circle?.ToString())
+            </RadzenColumn>
+        </RadzenRow>
+    </div>
+
+    @* Schedule data grid *@
+    <RadzenDataGrid Data="@LoanSchedule?.Schedules"
+                    Density="Density.Compact"
+                    Responsive
+                    AllowAlternatingRows="true"
+                    GridLines="DataGridGridLines.Both"
+                    RowSelect="@OnRowSelect"
+                    TItem="ScheduleResponse"
+                    class="rz-border-radius-0"
+                    style="border-top: 1px solid var(--rz-border-disabled-color);">
+        <Columns>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.RowNum))"
+                                  Title="#"
+                                  Width="2rem"
+                                  Context="c"
+                                  Sortable="false">
+                <Template>
+                    @(LoanSchedule?.Schedules.IndexOf(c) + 1)
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.PaymentDate))"
+                                  Title="Date"
+                                  Width="5rem"
+                                  Sortable="false">
+                <Template>
+                    @context.PaymentDate.DayFirst()
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.TotalDay))"
+                                  Title="ចំនួនថ្ងៃ"
+                                  Width="3rem"
+                                  Context="c"
+                                  TextAlign="TextAlign.Center"
+                                  Sortable="false">
+                <Template>
+                    @c.TotalDay
+                </Template>
+                <FooterTemplate>
+                    @(LoanSchedule?.Schedules.Sum(x => x.TotalDay))
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.Principle))"
+                                  Title="ប្រាក់ដើម"
+                                  TextAlign="TextAlign.Right"
+                                  Width="6rem"
+                                  Context="c"
+                                  Sortable="false">
+                <Template>
+                    @c.Principle.As(_currencyId)
+                </Template>
+                <FooterTemplate>
+                    <strong>
+                        @(LoanSchedule!.Schedules.Sum(x => x.Principle).As(_currencyId))
+                    </strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.Interest))"
+                                  Title="ការប្រាក់"
+                                  TextAlign="TextAlign.Right"
+                                  Width="6rem"
+                                  Sortable="false">
+                <Template>
+                    @context.Interest.As(_currencyId)
+                </Template>
+                <FooterTemplate>
+                    <strong>
+                        @(LoanSchedule!.Schedules.Sum(x => x.Interest).As(_currencyId))
+                    </strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.CollectionFee))"
+                                  Title="ប្រាក់ប្រសិទ្ធភាព"
+                                  Width="6rem"
+                                  TextAlign="TextAlign.Right"
+                                  Sortable="false">
+                <Template>
+                    @context.CollectionFee.As(_currencyId)
+                </Template>
+                <FooterTemplate>
+                    <strong>
+                        @(LoanSchedule!.Schedules.Sum(x => x.CollectionFee).As(_currencyId))
+                    </strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.TotalPay))"
+                                  Title="ចំនួនទឹកប្រាក់"
+                                  TextAlign="TextAlign.Right"
+                                  Width="6rem"
+                                  Context="c"
+                                  Sortable="false">
+                <Template>
+                    @c.TotalPay.As(_currencyId)
+                </Template>
+                <FooterTemplate>
+                    <strong>
+                        @(LoanSchedule!.Schedules.Sum(x => x.TotalPay).As(_currencyId))
+                    </strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.LoanOutstanding))"
+                                  Title="ចំនួនទឹកប្រាក់ចុងគ្រា"
+                                  Width="7rem"
+                                  TextAlign="TextAlign.Right"
+                                  Sortable="false">
+                <Template>
+                    @context.LoanOutstanding.As(_currencyId)
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenCard>
+
+@code {
+
+    [Parameter] public LoanResponse? LoanSchedule { get; set; } = new();
+    [Parameter] public int? BranchId { get; set; }
+    [Parameter] public string? LoanId { get; set; }
+    [Parameter] public int? ScheduleNum { get; set; } = 0;
+    [Parameter] public int TotalScedules { get; set; } = 0;
+    private int _currencyId = 0;
+    private bool isProgess = false;
+    
+    [Inject] ExcelExportService _excelExportService { get; set; } = default!;
+
+    RenderFragment InfoField(string label, string? value) =>
+        @<div style="display:flex; flex-direction:column; gap:2px;">
+            <RadzenText TextStyle="TextStyle.Overline"
+                        style="color:var(--rz-text-secondary-color); font-size:0.68rem; letter-spacing:.06em; text-transform:uppercase; line-height:1;">
+                @label
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Body2" style="font-weight:500;">
+                @(string.IsNullOrWhiteSpace(value) ? "—" : value)
+            </RadzenText>
+        </div>;
+
+    protected override void OnParametersSet()
+    {
+        _currencyId = LoanSchedule?.CurrencyId ?? 0;
+
+        base.OnParametersSet();
+    }
+
+    async Task DownLoadScheduleAsPdf(int? schuduleNum)
+    {
+        Tracker.Show();
+
+        if (string.IsNullOrEmpty(LoanId) || BranchId <= 0 || schuduleNum <= 0)
+        {
+            _toastService.ShowError("LoanId and BranchId are required to download the schedule as PDF.", "Warning");
+
+            Tracker.Hide();
+
+            return;
+        }
+
+        await js.InvokeVoidAsync("open", $"/reports/pdf/loans/schedules/{LoanId}/{BranchId}/{schuduleNum}", "_blank");
+
+        Tracker.Hide();
+    }
+
+    async Task ExportToExcel(int? schuduleNum = 1)
+    {
+        Tracker.Show();
+
+        if (string.IsNullOrEmpty(LoanId) || BranchId <= 0)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = "Warning",
+                Detail = "LoanId and BranchId are required to download the schedule as PDF.",
+                Duration = 3000
+            });
+
+            Tracker.Hide();
+
+            return;
+        }
+
+        isProgess = true;
+
+        var loanId = Guid.NewGuid().ToString("N");
+
+        var fileName = $"Loan_{loanId}_Schedule_{schuduleNum}.xlsx";
+
+        var sheetName = $"Schedule_{schuduleNum}";
+
+        var stream = _excelExportService.ScheduleExportAll(LoanSchedule.Adapt<VLoanDisbursments>(),LoanSchedule?.Schedules.Adapt<List<VSchedule>>(),
+            sheetName
+        );
+
+        if (stream == null)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Error",
+                Detail = "Failed to generate the Excel file.",
+                Duration = 3000
+            });
+
+            Tracker.Hide();
+
+            return;
+        }
+
+        var base64 = Convert.ToBase64String(stream!.ToArray());
+
+        if (!string.IsNullOrEmpty(base64))
+        {
+            await js.InvokeVoidAsync("downloadFile", fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", base64);
+        }
+
+        await Task.Delay(1000); // Optional: Adjust the delay as needed to ensure the file is downloaded before hiding the tracker
+
+        Tracker.Hide();
+
+    }
+    void OnRowSelect(ScheduleResponse s)
+    {
+
+    }
+}

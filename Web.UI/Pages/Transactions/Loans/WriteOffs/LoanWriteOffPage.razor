@@ -1,0 +1,27 @@
+﻿@page "/App/Loans/Disbursements/{BranchId:int}/Write-Off"
+@using Web.UI.Pages.Transactions.Loans.Disbursements
+<PageTitle>Loan Write Off</PageTitle>
+<RadzenTabs>
+    <Tabs>
+        <RadzenTabsItem Text="All">
+            <TabAllLoans BranchId="@BranchId" />
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+@code {
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [CascadingParameter] CascadingAppState bState { get; set; } = default!;
+    [Parameter] public int BranchId { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string? LoanId { get; set; } = string.Empty;
+    [Parameter, SupplyParameterFromQuery] public string? CustomerId { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var authState = await AuthenticationState;
+
+        await bState.GetBranchIdByUser();
+
+        await base.OnInitializedAsync();
+    }
+}

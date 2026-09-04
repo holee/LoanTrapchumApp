@@ -1,0 +1,82 @@
+@using Applications.Features.Addresses.Dto
+<RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-2">
+    <HeaderTemplate>
+        <RadzenIcon Icon="home" /><strong>អាសយដ្ឋាន</strong>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="3" SizeMD="3" SizeSM="12">
+                <RadzenFormField class="rz-w-100" Text="ប្រទេស">
+                    <RadzenDropDown class="rz-w-100"
+                                    Data="Countries"
+                                    Disabled="true"
+                                    AllowFiltering="true"
+                                    Placeholder="ស្វែងរកប្រទេស..."
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    @bind-Value="model.CountryName" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="3" SizeMD="3" SizeSM="12">
+                <RadzenFormField Text="ខេត្ត/រាជធានី" class="rz-w-100">
+                    <RadzenDropDown class="rz-w-100"
+                                    Data="Provinces"
+                                    Placeholder="ស្វែងរកខេត្ត/រាជធានី..."
+                                    AllowFiltering="true"
+                                    TextProperty="@nameof(ProvinceDto.ProInKhmer)"
+                                    ValueProperty="@nameof(ProvinceDto.ProvinceId)"
+                                    SelectedItemChanged="SelectedProvinceChanged"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    @bind-Value="model.ProvinceRefId">
+                    </RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="2" SizeMD="2" SizeSM="12">
+                <RadzenFormField Text="ស្រុក/ខណ្ឌ" class="rz-w-100">
+                    <RadzenDropDown class="rz-w-100"
+                                    Data="Districts"
+                                    Placeholder="ស្វែងរកស្រុក/ខណ្ឌ..."
+                                    AllowFiltering="true"
+                                    TextProperty="@nameof(DistrictDto.DisInKhmer)"
+                                    ValueProperty="@nameof(DistrictDto.DistrictId)"
+                                    SelectedItemChanged="SelectedDistrictChanged"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    @bind-Value="model.DistrictRefId">
+                    </RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="2" SizeSM="12" SizeMD="2">
+                <RadzenFormField Text="ឃុំ/សង្កាត់" class="rz-w-100">
+                    <RadzenDropDown class="rz-w-100"
+                                    Data="Communes"
+                                    Placeholder="ស្វែងរកឃុំ/សង្កាត់..."
+                                    AllowFiltering="true"
+                                    TextProperty="@nameof(CommuneDto.ComInKhmer)"
+                                    ValueProperty="@nameof(CommuneDto.CommuneId)"
+                                    SelectedItemChanged="SelectedCommuneChanged"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    @bind-Value="model.CommuneRefId">
+                    </RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="2" SizeSM="12" SizeMD="2">
+                <RadzenFormField Text="ភូមិ" class="rz-w-100">
+                    <RadzenDropDown class="rz-w-100"
+                                    Data="Villages"
+                                    Placeholder="ស្វែងរកភូមិ..."
+                                    AllowFiltering="true"
+                                    TextProperty="@nameof(VillageDto.VilInKhmer)"
+                                    ValueProperty="@nameof(VillageDto.VillageId)"
+                                    SelectedItemChanged="SelectedVillageChanged"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    @bind-Value="model.VillageRefId"></RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+    </ChildContent>
+</RadzenFieldset>
+

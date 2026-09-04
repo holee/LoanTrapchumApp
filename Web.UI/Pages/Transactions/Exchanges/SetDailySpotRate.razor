@@ -1,0 +1,127 @@
+﻿@page "/App/SetDailySpotRates"
+<PageTitle>Daily Set Spot Rate</PageTitle>
+
+@* Page Header *@
+<div class="sdr-page-header rz-mb-4">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.75rem">
+        <div class="sdr-header-icon">
+            <RadzenIcon Icon="currency_exchange" />
+        </div>
+        <div>
+            <h4 class="sdr-page-title rz-mb-0">Daily Spot Rate</h4>
+            <span class="sdr-page-subtitle">Set the exchange rates for all currencies for the selected date.</span>
+        </div>
+    </RadzenStack>
+</div>
+
+@* Filter Bar *@
+<RadzenCard class="sdr-filter-card rz-mb-4">
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.SpaceBetween"
+                 Gap="1rem"
+                 Wrap="FlexWrap.Wrap">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenIcon Icon="event" class="sdr-label-icon" />
+            <span class="sdr-field-label">Rate Date</span>
+            <RadzenDatePicker @bind-Value:format="yyyy-MMM-dd"
+                              TValue="DateTime"
+                              DateFormat="dd/MM/yyyy"
+                              Max="@(DateTime.Now)"
+                              @bind-Value="reqDate"
+                              class="sdr-datepicker" />
+        </RadzenStack>
+        <RadzenLink Target="_blank"
+                    Path="https://www.nbc.gov.kh/english/economic_research/exchange_rate.php"
+                    class="sdr-nbc-link">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.35rem">
+                <RadzenIcon Icon="open_in_new" />
+                <span>NBC Exchange Rate</span>
+            </RadzenStack>
+        </RadzenLink>
+    </RadzenStack>
+</RadzenCard>
+
+@* Rate Table Card *@
+<RadzenCard class="sdr-table-card">
+    <EditForm Model="model">
+        <RadzenTable GridLines="DataGridGridLines.Both" AllowAlternatingRows="false" class="sdr-table">
+            <RadzenTableHeader>
+                <RadzenTableHeaderRow>
+                    <RadzenTableHeaderCell class="sdr-th sdr-th-index">#</RadzenTableHeaderCell>
+                    <RadzenTableHeaderCell class="sdr-th">Currency Name</RadzenTableHeaderCell>
+                    <RadzenTableHeaderCell class="sdr-th">Code</RadzenTableHeaderCell>
+                    <RadzenTableHeaderCell class="sdr-th sdr-th-rate">Spot Rate</RadzenTableHeaderCell>
+                    <RadzenTableHeaderCell class="sdr-th sdr-th-rate">Buying Rate</RadzenTableHeaderCell>
+                    <RadzenTableHeaderCell class="sdr-th sdr-th-rate">Selling Rate</RadzenTableHeaderCell>
+                </RadzenTableHeaderRow>
+            </RadzenTableHeader>
+            <RadzenTableBody>
+                @foreach (var item in Currencies ?? [])
+                {
+                    var index = Currencies?.ToList().IndexOf(item);
+                    <RadzenTableRow class="@(item.IsBaseCurrency ? "sdr-base-row" : "")">
+                        <RadzenTableCell class="sdr-td-index">@(index + 1)</RadzenTableCell>
+                        <RadzenTableCell>
+                            <input type="hidden" @bind="item.CurrencyId" />
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                <span class="sdr-currency-name">@item.CurrencyName</span>
+                                @if (item.IsBaseCurrency)
+                                {
+                                    <RadzenBadge Text="Base" BadgeStyle="BadgeStyle.Info" Shade="Shade.Lighter" class="sdr-base-badge" />
+                                }
+                            </RadzenStack>
+                        </RadzenTableCell>
+                        <RadzenTableCell>
+                            <span class="sdr-currency-code">@item.CurrencyCode</span>
+                        </RadzenTableCell>
+                        <RadzenTableCell>
+                            <RadzenNumeric ShowUpDown="false"
+                                           Disabled="@(item.IsBaseCurrency)"
+                                           TextAlign="TextAlign.End"
+                                           @bind-Value="item.SpotRate"
+                                           class="sdr-numeric rz-w-100"
+                                           TValue="decimal?" />
+                        </RadzenTableCell>
+                        <RadzenTableCell>
+                            <RadzenNumeric ShowUpDown="false"
+                                           Disabled="@(item.IsBaseCurrency)"
+                                           @bind-Value="item.BuyingRate"
+                                           TextAlign="TextAlign.End"
+                                           TValue="decimal?"
+                                           class="sdr-numeric rz-w-100" />
+                        </RadzenTableCell>
+                        <RadzenTableCell>
+                            <RadzenNumeric ShowUpDown="false"
+                                           Disabled="@(item.IsBaseCurrency)"
+                                           @bind-Value="item.SellingRate"
+                                           TextAlign="TextAlign.End"
+                                           TValue="decimal?"
+                                           class="sdr-numeric rz-w-100"
+                                           @onfocusout="CheckSellingRate" />
+                        </RadzenTableCell>
+                    </RadzenTableRow>
+                }
+            </RadzenTableBody>
+        </RadzenTable>
+    </EditForm>
+</RadzenCard>
+
+@* Action Bar *@
+<RadzenCard class="sdr-action-bar rz-mt-3">
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 AlignItems="AlignItems.Center"
+                 Gap="0.75rem">
+        <span class="sdr-action-hint">
+            <RadzenIcon Icon="info" class="sdr-info-icon" />
+            Rates marked <strong>Base</strong> are locked and cannot be edited.
+        </span>
+        <RadzenButton Icon="@IconNames.Save"
+                      Text="Save Spot Rates"
+                      ButtonStyle="ButtonStyle.Success"
+                      Click="SetSpotRate"
+                      Size="ButtonSize.ExtraSmall" />
+    </RadzenStack>
+</RadzenCard>
+

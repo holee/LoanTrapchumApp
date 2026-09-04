@@ -1,0 +1,23 @@
+﻿<div class="nav-scrollable">
+    <RadzenPanelMenu DisplayStyle="@(Expanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)">
+        <RadzenPanelMenuItem Text="Loan Management System" Icon="dashboard" Path="/" />
+    </RadzenPanelMenu>
+    <RadzenPanelMenu DisplayStyle="@(Expanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)"
+                     ShowArrow="Expanded">
+        <RadzenPanelMenuItem Text="Loans" Icon="credit_card">
+            <RadzenPanelMenuItem Text="Counter" Icon="add_circle" Path="/counter" />
+        </RadzenPanelMenuItem>
+        <RadzenPanelMenuItem Text="Reports" Icon="assessment">
+            <RadzenPanelMenuItem Text="Weather" Icon="cloud" Path="/weather" />
+        </RadzenPanelMenuItem>
+        <RadzenPanelMenuItem Text="Currencies" Icon="attach_money">
+            <RadzenPanelMenuItem Text="Currency List" Icon="paid" Path="/App/Currencies" />
+            <RadzenPanelMenuItem Text="Currency Notes" Icon="payments" Path="/App/Notes/CurrencyCounter" />
+        </RadzenPanelMenuItem>
+    </RadzenPanelMenu>
+</div>
+
+@code {
+    [Parameter] public bool Expanded { get; set; } = true;
+}
+

@@ -1,0 +1,93 @@
+﻿@using Web.UI.Pages.Transactions.Loans.Repayments
+@if (Schedule is not null)
+{
+    <RadzenMenu Style="font-size:0.8rem;">
+        <AuthorizeView Policy="@Policies.RecievePayment">
+            <Authorized>
+                <RadzenMenuItem Icon="schedule"
+                                Visible="@(!Schedule.IsPaid || Schedule.IsPartialPaid)"
+                                Click="@(()=>PayBySchedules(Schedule))"
+                                Text="Payment By Schedule"></RadzenMenuItem>
+                <RadzenMenuItem Icon="money"
+                                Visible="@(!Schedule.IsPaid || Schedule.IsPartialPaid)"
+                                Path="@_getPaymentSchedulesUrl"
+                                Text="Recieve Payment"></RadzenMenuItem>
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView>
+            <Authorized>
+                <RadzenMenuItem Icon="paid"
+                                Visible="Schedule.IsPaid"
+                                Click="ShowPaidSchedules"
+                                Text="Payment History"></RadzenMenuItem>
+                <RadzenMenuItem Icon="paid"
+                                Click="@(()=>ShowScheduleDetails(Schedule))"
+                                Text="Details"></RadzenMenuItem>
+            </Authorized>   
+        </AuthorizeView>
+    </RadzenMenu>
+}
+@code {
+    [Parameter] public VSchedule? Schedule { get; set; }
+
+    [Parameter] public EventCallback<VSchedule?> ScheduleChanged { get; set; }
+
+    [Parameter] public string? CreditAgentId { get; set; } = string.Empty;
+
+    private string _getPaymentSchedulesUrl = "";
+
+    async Task PayBySchedules(VSchedule p)
+    {
+        ContextMenuService.Close();
+
+        if (ScheduleChanged.HasDelegate)
+        {
+            await ScheduleChanged.InvokeAsync(Schedule);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if (Schedule is not null)
+        {
+            _getPaymentSchedulesUrl = $"/App/Loans/{Schedule.BranchId}/Branches/{Schedule.LoanId}/Schedules?CreditAgentId={CreditAgentId}&CurrencyId={Schedule.CurrencyId}";
+            //_getPaymentSchedulesUrl = $"/App/Loans/{Schedule.BranchId}/Branches/{Schedule.LoanId}/Schedules?CreditAgentId={CreditAgentId}&CurrencyId={Schedule.CurrencyId}";
+        }
+
+        base.OnInitialized();
+    }
+
+    void ShowPaidSchedules()
+    {
+        ContextMenuService.Close();
+
+        //_selectedTabIndex = 1;
+    }
+
+
+    async Task ShowScheduleDetails(VSchedule p)
+    {
+        //await popup.ToggleAsync(buttonItem.Element);
+        ContextMenuService.Close();
+        var param = new Dictionary<string, object?>
+            {
+                {"LoanId",p.LoanId },
+                {"CurrencyId",p.CurrencyId },
+                {"BranchId",p.BranchId },
+                {"ScheduleId",p.LoanScheduleId },
+            };
+        var options = new SideDialogOptions
+        {
+            Position = DialogPosition.Right,
+            ShowMask = true,
+            CloseDialogOnOverlayClick = true,
+            Width = "60vw"
+        };
+        await DialogService.OpenSideAsync<ScheduleDetailsPage>($"Schedule-{p.LoanScheduleId}", parameters: param, options);
+
+
+    }
+
+
+}

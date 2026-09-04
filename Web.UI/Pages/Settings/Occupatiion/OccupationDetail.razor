@@ -1,0 +1,59 @@
+@using Applications.Features.AdditionalInformations.Dto
+@using Web.UI.Components.Indicatros
+
+<RadzenStack Gap="1rem">
+    <RadzenFieldset AllowCollapse="false">
+        <HeaderTemplate>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" AlignItems="AlignItems.Center">
+                <RadzenIcon Icon="info" />
+                <strong>Occupation Details</strong>
+            </RadzenStack>
+        </HeaderTemplate>
+        <ChildContent>
+            @if (_isPageLoading)
+            {
+                <Loading Text="កំពុងផ្ទុក....." />
+            }
+            else if (_occupation is not null)
+            {
+                <RadzenRow Gap="0.75rem">
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-color-secondary">Occupation Title</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1"><b>@_occupation.OccupationTitle</b></RadzenText>
+                    </RadzenColumn>
+
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-color-secondary">Khmer</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1">@(_occupation.Khmer ?? "—")</RadzenText>
+                    </RadzenColumn>
+
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-color-secondary">Type Of</RadzenText>
+                        <div>
+                            <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@(_occupation.TypeOf ?? "—")" IsPill="true" />
+                        </div>
+                    </RadzenColumn>
+
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenText TextStyle="TextStyle.Overline" class="rz-color-secondary">ID</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1">@_occupation.OccupationId</RadzenText>
+                    </RadzenColumn>
+                </RadzenRow>
+            }
+        </ChildContent>
+    </RadzenFieldset>
+
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Success"
+                      Icon="@IconNames.Edit"
+                      Text="Edit"
+                      Click="@OnEditClick" />
+
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Icon="@IconNames.Close"
+                      Text="Close"
+                      Click="@(() => DialogService.Close(false))" />
+    </RadzenStack>
+</RadzenStack>

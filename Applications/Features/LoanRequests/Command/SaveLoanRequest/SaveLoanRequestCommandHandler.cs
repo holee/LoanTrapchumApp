@@ -15,10 +15,19 @@ public sealed class SaveLoanRequestCommandHandler : IRequestHandler<SaveLoanRequ
     public async Task<ErrorOr<RequestResult>> Handle(SaveLoanRequestCommand request, CancellationToken cancellationToken)
     {
 
-        var req = request.MapToLoanRequestSave();
+        try
+        {
+            var req = request.MapToLoanRequestSave();
 
-        req.LoanRequestStatusRefId = (int)RequestStatus.New;
+            req.LoanRequestStatusRefId = (int)RequestStatus.New;
 
-        return await _loanRequestService.CreateNewOrSaveLoanRequestAsync(req, cancellationToken);
+            return await _loanRequestService.CreateOrSaveLoanRequestAsync(req, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+
+            throw new Exception("An error occurred while saving the loan request.", ex);
+        }
+
     }
 }

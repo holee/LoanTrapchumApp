@@ -1,0 +1,129 @@
+@page "/Account/Currencies/{Id:int}"
+<PageTitle>Currency Details</PageTitle>
+
+<div class="currency-details-page">
+    <div class="cd-card cd-header-card">
+        <div class="cd-header">
+            <div class="cd-header-title">
+                <span class="cd-header-icon">
+                    <RadzenIcon Icon="paid" />
+                </span>
+                <div>
+                    <h5>ព័ត៌មានរូបិយប័ណ្ណ</h5>
+                    <span class="cd-header-subtitle">Currency Details</span>
+                </div>
+            </div>
+            <RadzenButton Text="បិទ"
+                          Size="ButtonSize.Small"
+                          Icon="arrow_back"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Class="cd-close-btn"
+                          Click="Close"></RadzenButton>
+        </div>
+
+        <div class="cd-info-card">
+            <RadzenRow RowGap="12px" Gap="16px" AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="4">
+                            <div class="cd-field-label">ឈ្មោះរូបិយប័ណ្ណ</div>
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenTextBox @bind-Text="_currency.Description" Disabled Class="cd-input" Style="width:100%;" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenColumn>
+
+                <RadzenColumn Size="12" SizeMD="4" AlignItems="AlignItems.Center">
+                    <RadzenRow>
+                        <RadzenColumn Size="4">
+                            <div class="cd-field-label">កូដរូបិយប័ណ្ណ</div>
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenTextBox @bind-Text="_currency.CurrencyCode" Disabled Class="cd-input" Style="width:100%;" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenColumn>
+
+                <RadzenColumn Size="12" SizeMD="4" class="d-flex flex-column justify-content-end align-items-start">
+                    <span class="cd-badge @(_currency.IsActive ? "cd-badge-success" : "cd-badge-muted")">
+                        <RadzenIcon Icon="@(_currency.IsActive ? "check_circle" : "cancel")" class="cd-badge-icon" />
+                        @(_currency.IsActive ? "រូបិយប័ណ្ណសកម្ម" : "រូបិយប័ណ្ណមិនសកម្ម")
+                    </span>
+                    <span class="cd-badge @(_currency.IsBaseCurrency ? "cd-badge-primary" : "cd-badge-light")">
+                        <RadzenIcon Icon="stars" class="cd-badge-icon" />
+                        @(_currency.IsBaseCurrency ? "រូបិយប័ណ្ណមូលដ្ឋាន" : "រូបិយប័ណ្ណរង")
+                    </span>
+                </RadzenColumn>
+            </RadzenRow>
+        </div>
+    </div>
+
+    <div class="cd-card cd-table-card">
+        @if (!_currency!.IsBaseCurrency)
+        {
+            <div class="cd-table-header">
+                <RadzenIcon Icon="history" class="cd-table-header-icon" />
+                <b>ប្រវត្តិអត្រាប្តូរប្រាក់</b>
+            </div>
+            <div class="cd-table-wrapper">
+                <RadzenDataGrid Data="@currencySpotRates"
+                                TItem="CurrencyDtoSpotRate"
+                                AllowPaging="true"
+                                PageSize="@pagSize"
+                                IsLoading="@isLoading"
+                                Density="Density.Compact"
+                                RowSelect="@(row => SelectedRow(row))"
+                                ShowPagingSummary="true"
+                                PagerPosition="PagerPosition.Top"
+                                PagerHorizontalAlign="HorizontalAlign.Right"
+                                ShowEmptyMessage="true"
+                                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                                PageSizeChanged="@OnPageSizeChanged"
+                                RowRender="@((RowRenderEventArgs<CurrencyDtoSpotRate> args) => args.Attributes.Add("class", args.Data == selectedSpotRate ? "cd-row-selected" : ""))">
+                    <EmptyTemplate>
+                        <div class="cd-empty-row">
+                            <RadzenIcon Icon="inbox" class="cd-empty-icon" />
+                            <div>មិនមានទិន្នន័យអត្រាប្តូរប្រាក់</div>
+                        </div>
+                    </EmptyTemplate>
+                    <Columns>
+                        <RadzenDataGridColumn TItem="CurrencyDtoSpotRate" Title="#" Width="60px">
+                            <Template Context="row">
+                                @(currencySpotRates.ToList().IndexOf(row) + 1)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="CurrencyDtoSpotRate" Property="TransactionDate" Title="កាលបរិច្ឆេទ">
+                            <Template Context="row">
+                                @row.TransactionDate?.ToString("dd/MM/yyyy")
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="CurrencyDtoSpotRate" Property="SpotRate" Title="អត្រាស្ពត" TextAlign="TextAlign.Right" />
+                        <RadzenDataGridColumn TItem="CurrencyDtoSpotRate" Property="BuyingRate" Title="អត្រាទិញ" TextAlign="TextAlign.Right" />
+                        <RadzenDataGridColumn TItem="CurrencyDtoSpotRate" Property="SellingRate" Title="អត្រាលក់" TextAlign="TextAlign.Right" />
+                    </Columns>
+                </RadzenDataGrid>
+            </div>
+        }
+        else
+        {
+            <div class="cd-alert-info">
+                <RadzenIcon Icon="info" />
+                <span>រូបិយប័ណ្ណមូលដ្ឋានមិនបង្ហាញតារាងអត្រាប្តូរប្រាក់។</span>
+            </div>
+        }
+    </div>
+</div>
+
+
+@code {
+
+    private void OnPageSizeChanged(int newPageSize)
+    {
+        pageIndex = 0;
+
+        pagSize = newPageSize;
+
+        _ = ChangePageIndex(pageIndex, pagSize);
+    }
+}

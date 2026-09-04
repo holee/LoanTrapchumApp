@@ -1,0 +1,260 @@
+/* ── Chart of Accounts – modern card redesign ── */
+
+/* Page shell */
+.ledger-page {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 0.5rem;
+}
+
+/* Outer card */
+.ledger-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Header ── */
+.ledger-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem 0.875rem;
+    gap: 1rem;
+}
+
+.ledger-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ledger-header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: #16a34a;
+    background: #f0fdf4;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+::deep .ledger-header-icon .rz-icon {
+    font-size: 1.5rem;
+    color: #16a34a;
+}
+
+/* ── Main GL badge ── */
+.ledger-main-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.1rem 0.35rem;
+    border-radius: 999px;
+    background: #fef9c3;
+    color: #a16207;
+    border: 1px solid #fde68a;
+    white-space: nowrap;
+    text-transform: uppercase;
+}
+
+.ledger-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 0.1rem;
+    line-height: 1.2;
+}
+
+.ledger-subtitle {
+    font-size: 0.78rem;
+    color: #6b7280;
+    display: block;
+}
+
+/* Thin divider */
+.ledger-divider {
+    height: 1px;
+    background: #f3f4f6;
+    margin: 0;
+}
+
+/* ── Toolbar ── */
+.ledger-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.toolbar-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.toolbar-toggle-label {
+    font-size: 0.82rem;
+    color: #4b5563;
+}
+
+.toolbar-right {
+    display: flex;
+    align-items: center;
+}
+
+/* ── Grid ── */
+::deep .ledger-grid {
+    background: #fff;
+    border: none !important;
+    border-radius: 0;
+}
+
+::deep .ledger-grid .rz-grid-table {
+    background: #fff;
+}
+
+::deep .ledger-grid .rz-grid-table thead th {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #9ca3af;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.55rem 0.75rem;
+}
+
+::deep .ledger-grid .rz-grid-table tbody td {
+    font-size: 0.84rem;
+    color: #1f2937;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    background: #fff;
+    vertical-align: middle;
+}
+
+::deep .ledger-grid .rz-grid-table tbody tr:hover td {
+    background: #f0fdf4;
+}
+
+::deep .ledger-grid .rz-datapager {
+    background: #fafafa;
+    border-top: 1px solid #f0f0f0;
+    padding: 0.4rem 1rem;
+    font-size: 0.82rem;
+}
+
+/* ── Account name hierarchy ── */
+.ledger-parent-name {
+    font-weight: 600;
+    color: #111827;
+}
+
+.ledger-child-indent {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-left: calc(var(--ledger-level, 1) * 0.8rem);
+    color: #374151;
+    font-size: 0.83rem;
+    font-weight: 500;
+}
+
+.ledger-name-text {
+    line-height: 1.2;
+}
+
+.ledger-child-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #9ca3af;
+    flex-shrink: 0;
+}
+
+/* ── Type badge ── */
+.ledger-type-badge {
+    display: inline-block;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 0.1rem 0.38rem;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    white-space: nowrap;
+}
+
+/* ── Currency chip ── */
+.ledger-currency-chip {
+    display: inline-block;
+    font-size: 0.62rem;
+    font-weight: 600;
+    padding: 0.1rem 0.35rem;
+    border-radius: 6px;
+    background: #f3f4f6;
+    color: #374151;
+    letter-spacing: 0.03em;
+}
+
+/* ── Row action button – fade in on hover ── */
+.row-actions {
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+::deep .ledger-grid .rz-grid-table tbody tr:hover .row-actions {
+    opacity: 1;
+}
+
+/* ── Active / Inactive status badge ── */
+.ledger-status-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.1rem 0.42rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.15s ease;
+}
+
+.ledger-status-badge.active {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.ledger-status-badge.inactive {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border: 1px solid #e5e7eb;
+}
+
+.ledger-status-badge:hover {
+    opacity: 0.75;
+}
+

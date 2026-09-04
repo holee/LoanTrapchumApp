@@ -1,0 +1,10 @@
+﻿<div class="info-item @(Full ? "full" : "")">
+    <div class="label">@Label</div>
+    <div class="value">@Value</div>
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; }=string.Empty;
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public bool Full { get; set; } = false;
+}

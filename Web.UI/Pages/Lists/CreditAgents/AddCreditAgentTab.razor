@@ -1,0 +1,191 @@
+@using Applications.Features.CreditAgents.Requests
+@using Applications.Responses.ViewModels.Employees;
+@using Web.UI.Helpers.Extensions
+<GridToolbar Placeholder="Search Employee"
+             @bind-Value="@_filter"
+             SearchChanged="SearchCreditAgent" />
+<RadzenDataGrid TItem="VEmployeeCreditAgent"
+                PageSize="@_pageSize"
+                Count="@_counts"
+                ColumnWidth="10rem"
+                ShowPagingSummary="true"
+                AllowAlternatingRows="true"
+                AllowPaging="true"
+                AllowFiltering="true"
+                Density="Density.Compact"
+                PagerPosition="PagerPosition.Bottom"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PageSizeChanged="@PageSizeChanged"
+                LoadData="@LoanCreditData"
+                GridLines="DataGridGridLines.Both"
+                AllowColumnPicking="true"
+                Data="@empCreditAgents">
+    <HeaderTemplate>
+
+    </HeaderTemplate>
+    <Columns>
+        <RadzenDataGridColumn Width="5rem"
+                              TextAlign="TextAlign.Center"
+                              Property="@nameof(VEmployeeCreditAgent.EmployeeId)"
+                              Sortable="false"
+                              Filterable="false"
+                              Title="#">
+            <Template>
+                <strong>
+                    @(empCreditAgents.IndexOf(context) + 1)
+                </strong>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(VEmployeeCreditAgent.AltName)" Title="Name" Context="c">
+            <Template>
+                <KhmerName AltName="@c.AltName" />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="FirstName" Title="First Name" Visible="false" />
+        <RadzenDataGridColumn Property="LastName" Title="Last Name" Visible="false" />
+        <RadzenDataGridColumn Property="Phone" Title="Phone" />
+        <RadzenDataGridColumn Property="Gender" Title="Gender" />
+        <RadzenDataGridColumn Property="BranchName" Title="Branch Name" />
+        <RadzenDataGridColumn Width="6rem"
+                              Filterable="false"
+                              Title="Action" Sortable="false">
+            <Template>
+                <RadzenButton Size="ButtonSize.ExtraSmall"
+                              Click="@(()=>AddCreditAgent(context!.EmployeeId))"
+                              Variant="Variant.Text"
+                              Text="Make C.O"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Icon="person_add" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+<RadzenStack Orientation="Orientation.Horizontal"
+             AlignItems="AlignItems.Center"
+             class="rz-my-2"
+             JustifyContent="JustifyContent.End">
+    <RadzenButton Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Danger"
+                  Click="@CloseTab" Text="Close" />
+</RadzenStack>
+@code {
+    [Parameter] public EventCallback<int> Closed { get; set; } = default!;
+    [Parameter] public int BranchId { get; set; } = 0;
+    LoanCreditAgentDtoCreate model = new();
+
+    List<VEmployeeCreditAgent> empCreditAgents = [];
+
+    protected string? _filter = "";
+    private string _filterColumn = "";
+    private string _sortField = nameof(VEmployeeCreditAgent.AltName);
+    private bool _isIncludeInActive = false;
+    private bool _sortDescending = false;
+    private int _skip = 0;
+    private int _pageSize = 15;
+    private int _counts = 0;
+    private readonly ICreditAgentServiceImpl _creditAgentService;
+
+    public AddCreditAgentTab(ICreditAgentServiceImpl creditAgentService)
+    {
+        _creditAgentService = creditAgentService;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await LoadPageList(BranchId, null);
+
+        await base.OnInitializedAsync();
+    }
+
+    async Task SearchCreditAgent(string filter)
+    {
+        _filter = filter;
+
+        await LoadPageList(BranchId, null);
+    }
+
+    async Task LoadPageList(int? branchId, string? filter = null)
+    {
+
+        var param = new QueryParam(_skip, _pageSize, _sortField, _isIncludeInActive, _sortDescending, _filter, _filterColumn);
+
+        var rsp = await _creditAgentService.GetEmployeeCreditAgents(branchId, null, param);
+
+        empCreditAgents = rsp.Items;
+
+        _counts = rsp.Count;
+
+    }
+
+    async Task PageSizeChanged(int page)
+    {
+        _pageSize = page;
+
+        _skip = 0;
+
+        await LoadPageList(BranchId, _filter);
+    }
+
+
+    async Task LoanCreditData(LoadDataArgs args)
+    {
+        _skip = args.Skip ?? 0;
+
+        _pageSize = args.Top ?? 15;
+
+        (_sortField, _sortDescending) = args.PageInfo();
+
+        var firstFilter = args.Filters?.FirstOrDefault();
+
+        if (firstFilter is not null)
+        {
+            _filterColumn = firstFilter.Property;
+
+            _filter = firstFilter.FilterValue?.ToString() ?? string.Empty;
+        }
+        else
+        {
+            _filter = null;
+
+            _filter = string.Empty;
+        }
+
+        await LoadPageList(BranchId, _filter);
+
+    }
+
+
+    private async Task AddCreditAgent(string? id)
+    {
+
+        bool? confirm = await DialogService.Confirm($"do you want make Employee #{id} as C.O?",
+                                "Confirm",
+                                 new ConfirmOptions
+                                 {
+                                     OkButtonText = "Ok",
+                                     CancelButtonText = "Cancel"
+                                 });
+        if (confirm == false) return;
+
+        var response = await _creditAgentService.AddCreditAgent(id, model);
+
+        if (response!.IsSuccess)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, response.Data);
+
+            await CloseTab();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+        }
+    }
+
+
+    async Task CloseTab()
+    {
+        await Closed.InvokeAsync(1);
+    }
+
+}

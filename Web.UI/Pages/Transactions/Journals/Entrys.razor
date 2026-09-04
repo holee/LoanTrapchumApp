@@ -1,0 +1,192 @@
+﻿@*   <div class="je-card je-grid-card">
+            <table class="je-table">
+                <thead>
+                   <tr>
+                        <th class="je-col-ctl"></th>
+                        <th class="je-col-num">#</th>
+                        <th class="je-col-account">ACCOUNT</th>
+                        <th class="je-col-debit">DEBITS</th>
+                        <th class="je-col-credit">CREDITS</th>
+                        <th class="je-col-desc">DESCRIPTION</th>
+                        <th class="je-col-name">NAME</th>
+                        <th class="je-col-action"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = 1; i <= VisibleRowCount; i++)
+                    {
+                        var jl = JournalLines.ElementAtOrDefault(i - 1);
+
+                        if (jl is not null)
+                        {
+                            <tr class="je-grid-row">
+                                <td class="je-col-ctl">
+                                    @if (jl == JournalLines.Last())
+                                    {
+                                        <RadzenButton Icon="add_circle"
+                                                      ButtonStyle="ButtonStyle.Success"
+                                                      Variant="Variant.Text"
+                                                      class="je-plus-btn"
+                                                      Click="@AddLine"
+                                                      tabindex="-1"
+                                                      title="Add line" />
+                                    }
+                                    else
+                                    {
+                                        <RadzenIcon Icon="drag_indicator" class="je-grip-icon" />
+                                    }
+                                </td>
+                                <td class="je-col-num" style="text-align:center;">@jl.LineSeq</td>
+                                <td class="je-col-account">
+                                    <RadzenDropDownDataGrid @bind-Value="jl.LedgerRefId"
+                                                            Style="width:100%;"
+                                                            Density="Density.Compact"
+                                                            Data="@Ledgers"
+                                                            AllowFiltering="true"
+                                                            PageSize="10"
+                                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                            Placeholder="Select account"
+                                                            ValueProperty="@nameof(VLedger.LedgerId)"
+                                                            TextProperty="@nameof(VLedger.LedgerName)"
+                                                            SelectedItemChanged="@((arg) => OnAccountSelected(arg, jl))"
+                                                            Name="@($"Account_{jl.LineSeq}")"
+                                                            class="je-grid-input">
+                                        <Template Context="c">
+                                            <div class="je-dropdown-item">
+                                                <span>@((c as VLedger)?.LedgerName)</span>
+                                                <small>@((c as VLedger)?.LedgerTypeCode)</small>
+                                            </div>
+                                        </Template>
+                                        <ValueTemplate Context="c">
+                                            <span>@((c as VLedger)?.LedgerName)</span>
+                                        </ValueTemplate>
+                                    </RadzenDropDownDataGrid>
+                                    <ValidationMessage For="@(() => jl.LedgerRefId)" />
+                                </td>
+                                <td class="je-col-debit">
+                                    <RadzenNumeric @bind-Value="jl.Debit"
+                                                   TextAlign="TextAlign.Right"
+                                                   class="je-grid-input je-num-input"
+                                                   ShowUpDown="false"
+                                                   Format="N2"
+                                                   Disabled="@(jl.IsCredit || jl.LedgerRefId is null or 0)"
+                                                   Change="@((decimal? _) => OnAmountChanged(jl))" />
+                                </td>
+                                <td class="je-col-credit">
+                                    <RadzenNumeric @bind-Value="jl.Credit"
+                                                   TextAlign="TextAlign.Right"
+                                                   class="je-grid-input je-num-input"
+                                                   ShowUpDown="false"
+                                                   Format="N2"
+                                                   Disabled="@(jl.IsDebit || jl.LedgerRefId is null or 0)"
+                                                   Change="@((decimal? _) => OnAmountChanged(jl))" />
+                                </td>
+                                <td class="je-col-desc">
+                                    <RadzenTextBox @bind-Value="jl.JournalLineDesc"
+                                                   Disabled="@(jl.LedgerRefId is null or 0)"
+                                                   Placeholder="Description"
+                                                   class="je-grid-input" />
+                                </td>
+                                <td class="je-col-name">
+                                    <RadzenDropDownDataGrid @bind-Value="jl.EntityNameRefId"
+                                                            Density="Density.Compact"
+                                                            Data="@NameLists"
+                                                            TextProperty="@nameof(VOtherNames.AltName)"
+                                                            ValueProperty="@nameof(VOtherNames.Id)"
+                                                            Placeholder="Enter text"
+                                                            AllowFilteringByAllStringColumns="true"
+                                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                            SelectedItemChanged="@((arg) => OnNameSelected(arg, jl))"
+                                                            Name="@($"Name_{jl.LineSeq}")"
+                                                            PageSize="10"
+                                                            class="je-grid-input"
+                                                            Disabled="@(jl.LedgerRefId is null or 0)">
+                                        <Columns>
+                                            <RadzenDropDownDataGridColumn Property="@nameof(VOtherNames.AltName)" Title="Name" Width="100px" />
+                                            <RadzenDropDownDataGridColumn Property="@nameof(VOtherNames.EntType)" Title="Type" Width="80px" />
+                                        </Columns>
+                                        <Template Context="n">
+                                            <div class="je-dropdown-item">
+                                                <span>@((n as VOtherNames)?.AltName)</span>
+                                                <small>@((n as VOtherNames)?.EntType)</small>
+                                            </div>
+                                        </Template>
+                                        <ValueTemplate Context="n">
+                                            <span>@((n as VOtherNames)?.AltName)</span>
+                                        </ValueTemplate>
+                                    </RadzenDropDownDataGrid>
+                                </td>
+                                <td class="je-col-action">
+                                    @if (JournalLines.Count > 1)
+                                    {
+                                        <RadzenButton Icon="delete"
+                                                      Size="ButtonSize.ExtraSmall"
+                                                      ButtonStyle="ButtonStyle.Danger"
+                                                      Variant="Variant.Text"
+                                                      class="je-delete-btn"
+                                                      Click="@(() => DeleteLine(jl))"
+                                                      title="Delete line"
+                                                      tabindex="-1" />
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr class="je-grid-row je-grid-empty-row">
+                                <td class="je-col-ctl"><RadzenIcon Icon="drag_indicator" class="je-grip-icon" /></td>
+                                <td class="je-col-num">@i</td>
+                                <td class="je-col-account"><div class="je-empty-cell"></div></td>
+                                <td class="je-col-debit"><div class="je-empty-cell"></div></td>
+                                <td class="je-col-credit"><div class="je-empty-cell"></div></td>
+                                <td class="je-col-desc"><div class="je-empty-cell"></div></td>
+                                <td class="je-col-name"><div class="je-empty-cell"></div></td>
+                                <td class="je-col-action"><RadzenIcon Icon="delete" class="je-empty-delete" /></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="je-total-label-cell">Total</td>
+                        <td class="je-total-value">@TotalDebit.Format(JLe.CurrencyRefId)</td>
+                        <td class="je-total-value">@TotalCredit.Format(JLe.CurrencyRefId)</td>
+                        <td colspan="3"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+ *@
+@* <div class="je-action-bar">
+            <div class="je-action-left">
+                <RadzenButton Text="Cancel"
+                              ButtonStyle="ButtonStyle.Danger"
+                              class="je-bar-btn je-bar-btn-outline"
+                              Size="ButtonSize.ExtraSmall"
+                              Click="CloseSelectedTab" />
+                <RadzenButton Text="Clear"
+                              ButtonStyle="ButtonStyle.Secondary"
+                              class="je-bar-btn je-bar-btn-outline"
+                              Size="ButtonSize.ExtraSmall"
+                              Click="@ClearForm" />
+            </div>
+            <div class="je-action-right">
+                <RadzenButton Text="Save"
+                              ButtonStyle="ButtonStyle.Primary"
+                              ButtonType="ButtonType.Submit"
+                              IsBusy="@_visibled"
+                              class="je-bar-btn je-bar-btn-outline"
+                              Size="ButtonSize.ExtraSmall"
+                              Disabled="@(!IsBalanced)" />
+                <div class="je-split-btn">
+                    <RadzenButton Text="Save and close"
+                                  ButtonStyle="ButtonStyle.Success"
+                                  ButtonType="ButtonType.Submit"
+                                  IsBusy="@_visibled"
+                                  BusyText="Saving…"
+                                  class="je-bar-btn je-bar-btn-green je-split-main"
+                                  Size="ButtonSize.ExtraSmall"
+                                  Disabled="@(!IsBalanced)" />
+                </div>
+            </div>
+        </div> *@

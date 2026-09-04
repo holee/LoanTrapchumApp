@@ -1,0 +1,83 @@
+﻿@using Applications.Features.Customers.Dto
+
+<RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-2">
+    <HeaderTemplate>
+        <RadzenIcon Icon="family_restroom" /><strong>ព័ត៌មានប្តី/ប្រពន្ធ</strong>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenRow AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="ឈ្មោះប្តី/ប្រពន្ធ" class="rz-w-100">
+                    <RadzenTextBox @bind-Value="model.SpouseName"
+                                   class="rz-w-100"
+                                   Placeholder="បញ្ចូលឈ្មោះ..." />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="ភេទ" class="rz-w-100">
+                    <BlaSalutation @bind-Value="model.SpouseGender" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="សញ្ជាតិ" class="rz-w-100">
+                    <BlaNationality @bind-Value="model.SpouseNationality" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="ថ្ងៃខែឆ្នាំកំណើត" class="rz-w-100">
+                    <RadzenDatePicker TValue="DateTime?"
+                                      class="rz-w-100"
+                                      Placeholder="dd/MM/yyyy"
+                                      DateFormat="dd/MM/yyyy"
+                                      @bind-Value:format="yyyy-MMM-dd"
+                                      @bind-Value="model.SpouseDateOfBirth" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="មុខរបរ" class="rz-w-100">
+                    <BlaOccupation @bind-Value="model.SpouseOccupation" TypeOf="TypeOfEnum.Job" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="អត្តសញ្ញាណប័ណ្ណប្តី/ប្រពន្ធ" class="rz-w-100">
+                    <RadzenTextBox @bind-Value="model.SpouseIdCard"
+                                   class="rz-w-100"
+                                   Placeholder="លេខអត្តសញ្ញាណប័ណ្ណប្តី/ប្រពន្ធ..." />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="លេខទូរស័ព្ទ" class="rz-w-100">
+                    <RadzenTextBox @bind-Value="model.SpousePhoneNo"
+                                   class="rz-w-100"
+                                   Placeholder="លេខទូរស័ព្ទ..." />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="អ្នកនៅអាស្រ័យ" class="rz-w-100">
+                    <RadzenNumeric TValue="int?"
+                                   class="rz-w-100"
+                                   Min="0"
+                                   Max="12"
+                                   ShowUpDown="false"
+                                   Placeholder="0"
+                                   @bind-Value="model.Dependents" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="ចំនួនកូន" class="rz-w-100">
+                    <RadzenNumeric TValue="int?"
+                                   class="rz-w-100"
+                                   Min="0"
+                                   Max="12"
+                                   ShowUpDown="false"
+                                   Placeholder="0"
+                                   @bind-Value="model.NoOfChildren" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+    </ChildContent>
+</RadzenFieldset>
+
+@code {
+    [Parameter] public EntityCustomerCreate model { get; set; } = new();
+}

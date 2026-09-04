@@ -1,0 +1,72 @@
+@typeparam TValue
+@typeparam TItem
+<RadzenDropDown
+    @bind-Value="Value"
+    Data="@Data"
+    TextProperty="@_textProperty"
+    ValueProperty="@_valueProperty"
+    Change="OnChange"
+    Style="@Style"
+    AllowClear="@AllowClear"
+    Placeholder="@Placeholder"
+    Name="@Name"/>
+
+@code {
+    [Parameter] public IEnumerable<TItem> Data { get; set; } = [];
+    [Parameter] public TValue? Value { get; set; }
+    [Parameter] public EventCallback<TValue> ValueChanged { get; set; }
+    // Strongly typed selectors
+    [Parameter] public Func<TItem, TValue>? ValueSelector { get; set; }
+    [Parameter] public Func<TItem, string>? TextSelector { get; set; }
+    // Selected text
+    [Parameter] public string Text { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> TextChanged { get; set; }
+    [Parameter] public string Style { get; set; } = string.Empty;
+    [Parameter] public bool AllowClear { get; set; } = false;
+    [Parameter] public string Placeholder { get; set; } = string.Empty;
+    [Parameter] public string Name { get; set; } = string.Empty;
+    string? _textProperty;
+    string? _valueProperty;
+    protected override void OnInitialized()
+    {
+        // If selectors are not provided, fall back to primitive binding
+        if (typeof(TItem).IsPrimitive || typeof(TItem) == typeof(string))
+        {
+            _textProperty = null; // Radzen will just ToString() the item 
+            _valueProperty = null;
+        }
+        else
+        {
+            // Radzen still needs property names
+            _textProperty = null; 
+            _valueProperty = null;
+        }
+    }
+
+    private async Task OnChange(object? value)
+    {
+        if (value is TValue typedValue)
+        {
+            Value = typedValue;
+            await ValueChanged.InvokeAsync(typedValue);
+        }
+
+        string? text = null;
+
+        if (typeof(TItem).IsPrimitive || typeof(TItem) == typeof(string))
+        {
+            // for primitive lists (like List<string>)
+            text = Value?.ToString();
+        }
+        else if (ValueSelector != null && TextSelector != null)
+        {
+            var item = Data.FirstOrDefault(x => EqualityComparer<TValue>.Default.Equals(ValueSelector(x), Value));
+            text = item != null ? TextSelector(item) : null;
+        }
+
+        Text = text ?? string.Empty;
+        
+        await TextChanged.InvokeAsync(Text);
+    }
+
+}

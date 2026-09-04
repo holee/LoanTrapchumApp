@@ -1,0 +1,41 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.JSInterop
+@using Web.UI
+@using Web.UI.Components
+@using Web.UI.Helpers.Constants
+@using Web.UI.Layout
+@using Web.UI.Services
+@using Radzen
+@using Radzen.Blazor
+@using Applications.Commons
+@using Applications.Constants
+@using Applications.Features.Currencies
+@using Applications.Features.Currencies.Dto
+@using Applications.Features.Currencies.Responses
+@using Applications.Responses.Paginations
+@using Applications.Utils
+@using Applications.Services.Identity
+@using Applications.Features.Addresses.Interfaces
+@using Web.UI.Components.Toasts
+@using Web.UI.Components.Messageboxes
+@using Web.UI.Components.Modals.SweetAlerts
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject ContextMenuService ContextMenuService
+@inject TooltipService TooltipService
+@inject IMediator mediator
+@inject IAddressServiceImpl _addressService
+@inject IUserServiceImpl _userService
+@inject ToastService _toastService
+@inject MessageBoxService MsgBox
+@inject SwalService Swal
+@inject BranchService branchService
+@inject UserServices userServices
+@inject CurrencyServices currencyServices

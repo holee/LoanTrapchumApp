@@ -1,0 +1,15 @@
+﻿table th {
+    background-color: #F1F1F4;
+}
+
+::deep .my-popup {
+    display: none;
+    position: absolute;
+    overflow: hidden;
+    height: 360px;
+    width: 600px;
+    border: var(--rz-panel-border);
+    background-color: var(--rz-panel-background-color);
+    box-shadow: var(--rz-panel-shadow);
+    border-radius: var(--rz-border-radius)
+}

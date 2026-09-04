@@ -1,0 +1,46 @@
+@page "/App/Branches/Edit/{BranchId}"
+@using Applications.Features.Branches.Dtos
+
+<RadzenCard class="branch-page-wrapper">
+    <BranchUpdateModal Id="@BranchIdParam"
+                       @ref="updateModalRef"
+                       OnClose="@Close"
+                       PageType="PageType.Tab" />
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public string? BranchId { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    [Parameter]
+    public EventCallback<VBranch> OnUpdated { get; set; }
+
+    private BranchUpdateModal? updateModalRef;
+
+    private int BranchIdParam = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (int.TryParse(BranchId, out var id))
+        {
+            BranchIdParam = id;
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+}
+
+<style>
+    .branch-page-wrapper {
+        padding: 0;
+        overflow: auto;
+    }
+</style>

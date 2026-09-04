@@ -1,0 +1,136 @@
+@using Applications.Features.Collaterals.Dtos
+
+<style>
+    .rz-grid-table td .rz-cell-data {
+        line-height: 1.5rem;
+        font-size: 0.8rem;
+    }
+</style>
+
+<RadzenDataGrid TItem="CollateralSubTypeDto"
+                @ref="@refGrid"
+                Data="@_collateralSubTypes"
+                Count="@_counts"
+                LoadData="@LoadData"
+                IsLoading="@_isLoading"
+                PageSize="@pageSize"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PagerPosition="PagerPosition.Bottom"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                ShowPagingSummary="true"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true"
+                Sort="@Reset"
+                Page="@Reset"
+                Filter="@Reset"
+                EditMode="DataGridEditMode.Single"
+                RowUpdate="@OnUpdateRow"
+                RowCreate="@OnCreateRow"
+                Density="Density.Compact"
+                GridLines="DataGridGridLines.Both">
+    <HeaderTemplate>
+        <RadzenButton Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Icon="@IconNames.Add"
+                      Text="Add New Collateral"
+                      Click="@ClickAdd" />
+    </HeaderTemplate>
+    <LoadingTemplate>
+        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Danger"
+                                   Value="100"
+                                   ShowValue="false"
+                                   Mode="ProgressBarMode.Indeterminate" />
+    </LoadingTemplate>
+    <Columns>
+        <RadzenDataGridColumn TItem="CollateralSubTypeDto" Title="#" Width="4rem" Sortable="false" Filterable="false">
+            <Template Context="c">
+                @(_collateralSubTypes.IndexOf(c) + 1)
+            </Template>
+            <EditTemplate Context="c">
+                <input type="hidden" @bind="c.Id" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="CollateralSubTypeDto" Property="@nameof(CollateralSubTypeDto.CollateralTypeRefId)" Title="Category" Width="12rem">
+            <Template Context="c">
+                @(_colleralTypes.FirstOrDefault(t => t.CollateralTypeId == c.CollateralTypeRefId)?.CollateralTypeCode)
+            </Template>
+            <EditTemplate Context="c">
+                <RadzenDropDown @bind-Value="@c.CollateralTypeRefId"
+                                Data="@_colleralTypes"
+                                TextProperty="@nameof(CollateralTypeDto.CollateralTypeCode)"
+                                ValueProperty="@nameof(CollateralTypeDto.CollateralTypeId)"
+                                TValue="int?"
+                                AllowClear="true"
+                                class="rz-w-100" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="CollateralSubTypeDto" Property="@nameof(CollateralSubTypeDto.CollateralSubTypeName)" Title="Type Name">
+            <EditTemplate Context="c">
+                <RadzenTextBox @bind-Value="@c.CollateralSubTypeName" class="rz-w-100" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="CollateralSubTypeDto" Property="@nameof(CollateralSubTypeDto.CollateralSubTypeNameInKhmer)" Title="Khmer Name">
+            <EditTemplate Context="c">
+                <RadzenTextBox @bind-Value="@c.CollateralSubTypeNameInKhmer" class="rz-w-100" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="CollateralSubTypeDto" Property="@nameof(CollateralSubTypeDto.ValueRate)" Title="Value Rate" Width="8rem" TextAlign="TextAlign.End">
+            <EditTemplate Context="c">
+                <RadzenNumeric @bind-Value="@c.ValueRate" ShowUpDown="false" TValue="decimal?" class="rz-w-100" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="CollateralSubTypeDto" Property="@nameof(CollateralSubTypeDto.LoanSizeAmuntMin)" Title="Min" Width="9rem" TextAlign="TextAlign.End">
+            <EditTemplate Context="c">
+                <RadzenNumeric @bind-Value="@c.LoanSizeAmuntMin" ShowUpDown="false" TValue="decimal?" class="rz-w-100" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="CollateralSubTypeDto" Property="@nameof(CollateralSubTypeDto.LoanSizeAmuntMax)" Title="Max" Width="9rem" TextAlign="TextAlign.End">
+            <EditTemplate Context="c">
+                <RadzenNumeric @bind-Value="@c.LoanSizeAmuntMax" ShowUpDown="false" TValue="decimal?" class="rz-w-100" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="CollateralSubTypeDto" Title="Status" Width="6rem" TextAlign="TextAlign.Center" Sortable="false" Filterable="false">
+            <Template Context="c">
+                <RadzenBadge BadgeStyle="@(c.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
+                             Text="@(c.IsActive == true ? "Active" : "Inactive")"
+                             IsPill="true" />
+            </Template>
+            <EditTemplate Context="c">
+                <RadzenCheckBox @bind-Value="@c.IsActive" TValue="bool?" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="CollateralSubTypeDto" Title="Action" Width="6rem" TextAlign="TextAlign.Center" Sortable="false" Filterable="false">
+            <Template Context="c">
+                <RadzenButton Icon="@IconNames.Edit"
+                              Variant="Variant.Text"
+                              Size="ButtonSize.ExtraSmall"
+                              Click="@(() => EditRow(c))"
+                              @onclick:stopPropagation="true" />
+            </Template>
+            <EditTemplate Context="c">
+                <RadzenButton Icon="@IconNames.Save"
+                              Variant="Variant.Text"
+                              Size="ButtonSize.ExtraSmall"
+                              ButtonStyle="ButtonStyle.Success"
+                              Click="@(() => SaveRow(c))"
+                              @onclick:stopPropagation="true" />
+
+                <RadzenButton Icon="@IconNames.Undo"
+                              Variant="Variant.Text"
+                              Size="ButtonSize.ExtraSmall"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Click="@(() => CancelEdit(c))"
+                              @onclick:stopPropagation="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>

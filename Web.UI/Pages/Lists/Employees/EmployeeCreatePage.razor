@@ -1,0 +1,27 @@
+﻿@page "/App/Employees/CreateNewUser"
+<PageTitle>New Employee</PageTitle>
+<EditForm Model="@model" OnValidSubmit="@FormValidSubmit">
+    <Blazilla.FluentValidator />
+    <EmployeeComp model="model" />
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 class="rz-mt-2"
+                 Gap="1rem">
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      ButtonStyle="ButtonStyle.Success"
+                      Size="ButtonSize.Small"
+                      Icon="save"
+                      Text="Save" />
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      Variant="Variant.Flat"
+                      Size="ButtonSize.Small"
+                      Icon="cancel"
+                      Text="Cancel"
+                      Click="CloseTab" />
+    </RadzenStack>
+</EditForm>
+@code {
+
+
+}

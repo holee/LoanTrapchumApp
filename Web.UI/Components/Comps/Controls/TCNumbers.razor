@@ -1,0 +1,117 @@
+﻿@using System.Linq.Expressions
+@if (string.IsNullOrEmpty(Label) && (IsFloatLabel == false || IsFloatLabel))
+{
+    <RadzenNumeric TValue="decimal?"
+                   Value="@Value"
+                   Name="@Name"
+                   id="@Id"
+                   ValueExpression="@ValueExpression"
+                   Change="@OnChanged"
+                   @oninput="@OnTextChanged"
+                   @onfocusout="OnMouseOut"
+                   onclick="this.querySelector('.rz-numeric-input').select()"
+                   ShowUpDown="false"
+                   TextAlign="TextAlign"
+                   class="rz-w-100"
+                   Disabled="@Disabled"
+                   Min="@Min"
+                   ValueChanged="@ValueChanged"
+                   Placeholder="@Placeholder"
+                   Format="@Format" />
+}
+@if (!string.IsNullOrEmpty(Label) && !IsFloatLabel)
+{
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="2" SizeMD="2" SizeSM="12">
+            @Label
+        </RadzenColumn>
+        <RadzenColumn Size="10" SizeMD="10" SizeSM="12">
+            <RadzenNumeric TValue="decimal?"
+                           Value="@Value"
+                           Name="@Name"
+                           id="@Id"
+                           ValueExpression="@ValueExpression"
+                           Change="@OnChanged"
+                           @oninput="@OnTextChanged"
+                           onclick="this.querySelector('.rz-numeric-input').select()"
+                           ShowUpDown="false"
+                           TextAlign="TextAlign"
+                           class="rz-w-100"
+                           Disabled="@Disabled"
+                           Min="@Min"
+                           ValueChanged="@ValueChanged"
+                           Placeholder="@Placeholder"
+                           Format="Format" />
+            <ValidationMessage For="@ValueExpression" />
+        </RadzenColumn>
+    </RadzenRow>
+}
+@if (!string.IsNullOrEmpty(Label) && IsFloatLabel)
+{
+    <RadzenFormField AllowFloatingLabel="true" class="rz-w-100" Text="@Label">
+        <ChildContent>
+            <RadzenNumeric TValue="decimal?"
+                           id="@Id"
+                           Name="@Name"
+                           Value="@Value"
+                           ValueExpression="@ValueExpression"
+                           Change="@OnChanged"
+                           @oninput="@OnTextChanged"
+                           onclick="this.querySelector('.rz-numeric-input').select()"
+                           ShowUpDown="false"
+                           TextAlign="TextAlign"
+                           Disabled="@Disabled"
+                           Min="@Min"
+                           class="rz-w-100"
+                           ValueChanged="ValueChanged"
+                           Format="@Format" />
+        </ChildContent>
+        <Helper>
+            <ValidationMessage For="@ValueExpression" />
+        </Helper>
+    </RadzenFormField>
+}
+@code {
+    [Parameter] public string? Label { get; set; } = string.Empty;
+    [Parameter] public string? Name { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string? Format { get; set; } = Defaults.DefaultCurrencyFormat;
+    [Parameter] public string? Placeholder { get; set; } = "";
+    [Parameter] public decimal? Value { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool IsFloatLabel { get; set; } = false;
+    [Parameter] public TextAlign TextAlign { get; set; } = TextAlign.End;
+    [Parameter] public Orientation Orientation { get; set; } = Orientation.Horizontal;
+    [Parameter] public EventCallback<decimal?> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<decimal?>> ValueExpression { get; set; } = default!;
+    [Parameter] public EventCallback<decimal?> OnChanged { get; set; }
+    [Parameter] public decimal? Min { get; set; } = 0;
+    [Parameter] public EventCallback<decimal?> OnValueChanged { get; set; }
+    [Parameter] public EventCallback<FocusEventArgs> MouseLeave { get; set; }
+
+    async Task OnTextChanged(ChangeEventArgs e)
+    {
+        if (string.IsNullOrEmpty(e.Value!.ToString()))
+        {
+            await OnValueChanged.InvokeAsync(0);
+        }
+        else
+        {
+            if (decimal.TryParse(e.Value.ToString(), out var test))
+            {
+                await OnValueChanged.InvokeAsync(test);
+            }
+            else
+            {
+                await OnValueChanged.InvokeAsync(0);
+            }
+        }
+
+
+    }
+
+    async Task OnMouseOut(FocusEventArgs e)
+    {
+        await MouseLeave.InvokeAsync(e);
+    }
+}

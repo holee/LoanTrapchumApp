@@ -1,0 +1,187 @@
+@page "/App/Notes/CurrencyCounter"
+@using Applications.Features.Currencies.Dto
+@using Applications.Features.Currencies.Responses
+<PageTitle>Currency Notes</PageTitle>
+
+@* ── Page Header ── *@
+<div class="nl-page-header rz-mb-4">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.75rem">
+        <div class="nl-header-icon">
+            <RadzenIcon Icon="payments" />
+        </div>
+        <div>
+            <h4 class="nl-page-title rz-mb-0">Currency Notes</h4>
+            <span class="nl-page-subtitle">Manage physical currency denominations and note counts.</span>
+        </div>
+    </RadzenStack>
+</div>
+
+<RadzenCard class="rz-background-color-base-200" Variant="Variant.Outlined">
+
+    <GridToolbar>
+        <LeftChildren>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenButton Click="DisplayCurrencyDialogue"
+                              Icon="@IconNames.Add"
+                              Text="New Note"
+                              Size="ButtonSize.ExtraSmall"
+                              ButtonStyle="ButtonStyle.Primary" />
+                <RadzenDropDown @bind-Value="@_currencyId"
+                                ValueProperty="@nameof(CurrencyDto.CurrencyId)"
+                                TextProperty="@nameof(CurrencyDto.CurrencyCode)"
+                                Data="@Currencies"
+                                SelectedItemChanged="SelectedItemChanged"
+                                Placeholder="Filter by currency..."
+                                Style="min-width:9rem; font-size:0.8rem;"
+                                Name="DropDownBindValue" />
+            </RadzenStack>
+        </LeftChildren>
+        <RightChildren>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+                <RadzenCheckBox TValue="bool"
+                                @bind-Value="includeInactive"
+                                Name="chkInactive" />
+                <RadzenLabel Text="Include Inactive" Component="chkInactive"
+                             Style="font-size:0.8rem; vertical-align:middle;" />
+            </RadzenStack>
+        </RightChildren>
+    </GridToolbar>
+
+    <RadzenDataGrid AllowPaging="true"
+                    PageSize="@pageSize"
+                    IsLoading="@isLoading"
+                    Density="Density.Compact"
+                    AllowAlternatingRows="true"
+                    AllowSorting="true"
+                    AllowFiltering="false"
+                    TItem="VCurrencyCounter"
+                    ShowPagingSummary="true"
+                    AllowColumnPicking="true"
+                    GridLines="DataGridGridLines.Both"
+                    PagerPosition="PagerPosition.Bottom"
+                    PagerHorizontalAlign="HorizontalAlign.Right"
+                    PageSizeOptions="@StorageConstant.PageSizeOptions"
+                    PageSizeChanged="SelectPageSizeChanged"
+                    Data="@CurrencyCounters">
+        <Columns>
+            <RadzenDataGridColumn Width="3.5rem"
+                                  Title="#"
+                                  TextAlign="TextAlign.Center"
+                                  Filterable="false"
+                                  Sortable="false"
+                                  Context="item">
+                <Template>
+                    @(CurrencyCounters.IndexOf(item) + 1)
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Title="Currency Name"
+                                  Property="@nameof(VCurrencyCounter.CurrencyName)"
+                                  Context="item">
+                <Template>
+                    <input @bind="item.Id" type="hidden" />
+                    @item.CurrencyName
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Width="7rem"
+                                  Title="Code"
+                                  Sortable="false"
+                                  Property="@nameof(VCurrencyCounter.CurrencyCode)"
+                                  Context="item">
+                <Template>
+                    <span class="nl-code-badge">@item.CurrencyCode</span>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Width="8rem"
+                                  Title="Value"
+                                  TextAlign="TextAlign.Right"
+                                  Property="@nameof(VCurrencyCounter.CurrencyValue)"
+                                  Context="item">
+                <Template>
+                    @item.CurrencyValue?.ToString("N2")
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Width="7rem"
+                                  Title="Quantity"
+                                  TextAlign="TextAlign.Right"
+                                  Property="@nameof(VCurrencyCounter.Quantity)"
+                                  Context="item">
+                <Template>
+                    @item.Quantity?.ToString("N0")
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Title="Description"
+                                  Property="@nameof(VCurrencyCounter.Description)"
+                                  Context="item">
+                <Template>
+                    @item.Description
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Width="6rem"
+                                  Title="Status"
+                                  TextAlign="TextAlign.Center"
+                                  Filterable="false"
+                                  Sortable="false"
+                                  Property="@nameof(VCurrencyCounter.IsActive)"
+                                  Context="item">
+                <Template>
+                    <RadzenBadge Text="@(item.IsActive ? "Active" : "Inactive")"
+                                 BadgeStyle="@(item.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                 Shade="Shade.Light"
+                                 IsPill="true" />
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Width="4rem"
+                                  Title="Actions"
+                                  TextAlign="TextAlign.Center"
+                                  Filterable="false"
+                                  Sortable="false"
+                                  Pickable="false"
+                                  Context="item">
+                <Template>
+                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                  Icon="more_vert"
+                                  Variant="Variant.Text"
+                                  Click="@((args) => ShowContextMenu(args, item))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+        <LoadingTemplate>
+            <RadzenProgressBarCircular ShowValue="false"
+                                       ProgressBarStyle="ProgressBarStyle.Primary"
+                                       Value="100"
+                                       Mode="ProgressBarMode.Indeterminate" />
+        </LoadingTemplate>
+    </RadzenDataGrid>
+
+</RadzenCard>
+
+@code {
+    private int? _currencyId = 0;
+
+    public IEnumerable<CurrencyDto>? Currencies { get; set; }
+
+    void ShowContextMenu(MouseEventArgs args, VCurrencyCounter item)
+    {
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem
+            {
+                Text = item.IsActive ? "Deactivate" : "Activate",
+                Icon = item.IsActive ? "toggle_off" : "toggle_on",
+                Value = "1"
+            },
+        }, async e =>
+        {
+            ContextMenuService.Close();
+            if (e.Value?.ToString() == "1")
+                await makeInactiveOrActive(!item.IsActive, item.Id);
+        });
+    }
+}

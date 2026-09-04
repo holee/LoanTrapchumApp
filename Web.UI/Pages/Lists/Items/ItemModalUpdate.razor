@@ -1,0 +1,55 @@
+@using Applications.Features.Items.Dto
+
+<PageTitle>Update Item</PageTitle>
+<RadzenStack Gap="1rem" Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
+    <RadzenTemplateForm TItem="ItemDtoUpdate" Data="@model" Submit="@Update">
+        <RadzenStack>
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="10">
+                    <RadzenFormField Text="Item Name*" Variant="Variant.Outlined" Style="width:100%">
+                        <RadzenTextBox Name="ItemName" @bind-Value="model.ItemName" Style="width:100%" />
+                        <RadzenRequiredValidator Component="ItemName" Text="Item name is required" Style="position: absolute" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="2">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenSwitch @bind-Value="model.IsActive" />
+                        <RadzenBadge BadgeStyle="@(model.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                     Shade="Shade.Light"
+                                     Text="@(model.IsActive ? "Active" : "Inactive")" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow>
+                <RadzenColumn Size="12" SizeMD="12">
+                    <RadzenFormField Text="Ledger" Variant="Variant.Outlined" Style="width:100%">
+                        <RadzenDropDown Name="LedgerRefId"
+                                        @bind-Value="model.LedgerRefId"
+                                        Data="@Ledgers"
+                                        TextProperty="LedgerName"
+                                        ValueProperty="LedgerId"
+                                        TValue="int?"
+                                        AllowFiltering="true"
+                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        AllowClear="true"
+                                        Placeholder="Select ledger..."
+                                        Style="width:100%" />
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenFormField Text="Description*" Variant="Variant.Outlined" Style="width:100%">
+                        <RadzenTextArea Name="Description" @bind-Value="model.Description" Style="width:100%;resize:none;" Rows="4" />
+                        <RadzenRequiredValidator Component="Description" Text="Description is required" />
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenStack>
+
+        <RadzenStack Orientation="Orientation.Horizontal" class="rz-mt-2" JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Save" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary" Icon="save" />
+            <RadzenButton Click="Close" Variant="Variant.Flat" Size="ButtonSize.Small" Text="Close" Icon="cancel" ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenStack>

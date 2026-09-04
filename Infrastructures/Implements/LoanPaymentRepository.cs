@@ -28,39 +28,44 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
             return Error.Conflict("409", "The official receipt number is already in use.");
         }
 
-        using var tranx = await db.Database.BeginTransactionAsync(cancellation);
+        var strategy = db.Database.CreateExecutionStrategy();
 
-        try
+        return await strategy.ExecuteAsync(async () =>
         {
-            req.LoanPayment?.OfficialReceiptNo = $"{DateTime.Now.Year}-{req.LoanPayment.OfficialReceiptNo}";
+            using var tranx = await db.Database.BeginTransactionAsync(cancellation);
 
-            var payment = db.LoanTransaction.Add(req).Entity;
-
-            await db.SaveChangesAsync(cancellation);
-
-            var schedules = payment.LoanPayment?.LoanRepaymentLines ?? [];
-
-            if (schedules is not null && schedules.Any())
+            try
             {
+                req.LoanPayment?.OfficialReceiptNo = $"{DateTime.Now.Year}-{req.LoanPayment.OfficialReceiptNo}";
 
-                var paidSchedules = schedules.FirstOrDefault();
+                var payment = db.LoanTransaction.Add(req).Entity;
 
-                await SetLoanScheduleComplete(db, paidSchedules?.BranchRefId, paidSchedules?.LoanRefId, paidSchedules?.LoanScheduleRefId, paidSchedules?.InstallmentNo);
+                await db.SaveChangesAsync(cancellation);
+
+                var schedules = payment.LoanPayment?.LoanRepaymentLines ?? [];
+
+                if (schedules is not null && schedules.Any())
+                {
+
+                    var paidSchedules = schedules.FirstOrDefault();
+
+                    await SetLoanScheduleComplete(db, paidSchedules?.BranchRefId, paidSchedules?.LoanRefId, paidSchedules?.LoanScheduleRefId, paidSchedules?.InstallmentNo);
+                }
+
+
+                await CloseLoanSchedule(db, req.LoanPayment?.BranchRefId, req.LoanPayment?.LoanRefId);
+
+                await tranx.CommitAsync(cancellation);
+
+                return LoanPaymentMessage.LOAN_PAYMENT_RECEIVED;
             }
+            catch (Exception ex)
+            {
+                await tranx.RollbackAsync(cancellation);
 
-
-            await CloseLoanSchedule(db, req.LoanPayment?.BranchRefId, req.LoanPayment?.LoanRefId);
-
-            await tranx.CommitAsync(cancellation);
-
-            return LoanPaymentMessage.LOAN_PAYMENT_RECEIVED;
-        }
-        catch (Exception ex)
-        {
-            await tranx.RollbackAsync(cancellation);
-
-            return Error.Unexpected($"{ex.Message}");
-        }
+                return (ErrorOr<string>)Error.Unexpected($"{ex.Message}");
+            }
+        });
     }
 
     public async Task<ErrorOr<PayOffResult>> PayOff(LoanTransaction trx, CancellationToken cancellation = default)
@@ -85,34 +90,39 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
             .OrderBy(x => x.InstallmentNo)
             .FirstOrDefaultAsync(cancellation);
 
-        await using var tranx = await context.Database.BeginTransactionAsync(cancellation);
+        var strategy = context.Database.CreateExecutionStrategy();
 
-        try
+        return await strategy.ExecuteAsync(async () =>
         {
-            context.LoanTransaction.Add(trx);
+            await using var tranx = await context.Database.BeginTransactionAsync(cancellation);
 
-            await CloseLoan(context, trx.LoanPayment.BranchRefId, trx.LoanPayment.LoanRefId);
-
-            await context.SaveChangesAsync(cancellation);
-
-            await tranx.CommitAsync(cancellation);
-
-            return new PayOffResult
+            try
             {
-                BranchId = trx.LoanPayment.BranchRefId,
-                LoanId = trx.LoanPayment.LoanRefId,
-                Principle = lastSchedule?.LeftPrinciple,
-                Interest = lastSchedule?.LeftInterestAmount,
-                CollectionFee = lastSchedule?.LeftCollectionFeeAmount,
-                Total = lastSchedule?.LeftAmount
-            };
-        }
-        catch (Exception ex)
-        {
-            await tranx.RollbackAsync(cancellation);
+                context.LoanTransaction.Add(trx);
 
-            return Error.Unexpected(description: ex.Message);
-        }
+                await CloseLoan(context, trx.LoanPayment.BranchRefId, trx.LoanPayment.LoanRefId);
+
+                await context.SaveChangesAsync(cancellation);
+
+                await tranx.CommitAsync(cancellation);
+
+                return new PayOffResult
+                {
+                    BranchId = trx.LoanPayment.BranchRefId,
+                    LoanId = trx.LoanPayment.LoanRefId,
+                    Principle = lastSchedule?.LeftPrinciple,
+                    Interest = lastSchedule?.LeftInterestAmount,
+                    CollectionFee = lastSchedule?.LeftCollectionFeeAmount,
+                    Total = lastSchedule?.LeftAmount
+                };
+            }
+            catch (Exception ex)
+            {
+                await tranx.RollbackAsync(cancellation);
+
+                return (ErrorOr<PayOffResult>)Error.Unexpected(description: ex.Message);
+            }
+        });
     }
 
     public async Task<ErrorOr<IEnumerable<PaymentLineDetailsDto>>> GetPaymentLinesAsync(int? branchId, string? loanId, int? installmentNo)

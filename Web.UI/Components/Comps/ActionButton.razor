@@ -1,0 +1,15 @@
+﻿<RadzenButton Variant="Variant.Text"
+              Size="ButtonSize.ExtraSmall"
+              Click="@Click"
+              Icon="@IconNames.MoreVert" />
+@code {
+    [Parameter] public EventCallback<MouseEventArgs> ButtonClick { get; set; }
+
+    private async Task Click(MouseEventArgs args)
+    {
+        if (ButtonClick.HasDelegate)
+        {
+            await ButtonClick.InvokeAsync(args);
+        }
+    }
+}

@@ -1,0 +1,4 @@
+namespace Application.Constants.Authorizations
+{
+    
+}

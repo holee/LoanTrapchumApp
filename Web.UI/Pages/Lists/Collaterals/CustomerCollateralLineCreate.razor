@@ -1,0 +1,333 @@
+@using Applications.Features.Collaterals.Dtos
+@using Applications.Features.Documents.Dto
+@using System.Text.Json
+@using Web.UI.Components.Buttons
+<EditForm Model="@model" OnValidSubmit="@HandleFormSubmit" FormName="CustomerCollateralLineCreate">
+    <Blazilla.FluentValidator />
+    <RadzenFieldset Text="Customer Info">
+        <RadzenRow class="rz-mb-1" Gap="0.7rem">
+            <RadzenColumn Size="3" SizeSM="12" SizeMD="3">
+                <RadzenFormField Text="Customer" class="@Defaults.W100">
+                    <RadzenTextBox class="@Defaults.W100" Disabled
+                                   @bind-Value="@baseModel.CustomerName" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="3" SizeSM="12" SizeMD="3">
+                <RadzenFormField Text="Register Date" class="@Defaults.W100">
+                    <RadzenDatePicker class="@Defaults.W100"
+                                      DateFormat="dd/MM/yyyy"
+                                      @bind-Value:format="yyyy/MM/dd"
+                                      @bind-Value="@baseModel.RegisterDate" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="3" SizeSM="12" SizeMD="3">
+                <RadzenFormField Text="Remark" class="@Defaults.W100">
+                    <RadzenTextBox class="@Defaults.W100"
+                                   @bind-Value="@baseModel.Remark" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="3" SizeSM="12" SizeMD="3">
+                <RadzenFormField Text="Document Keeping" class="@Defaults.W100">
+                    <RadzenTextBox class="@Defaults.W100"
+                                   @bind-Value="@baseModel.DocumentKeeping" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenFieldset>
+    <RadzenFieldset Text="Collateral Info">
+        <RadzenRow class="rz-mb-1">
+            <RadzenColumn Size="6">
+                <RadzenCard Variant="Variant.Outlined">
+                    <RadzenUpload @ref="radzenUpload"
+                                  ChooseText="Select PDF file to upload"
+                                  Auto="true"
+                                  Accept=".pdf"
+                                  Url="Upload/File"
+                                  Style="width: 100%"
+                                  Complete="@UploadComplete"
+                                  Progress="@UploadProgress"
+                                  Change="@OnFileChanged"
+                                  Error="@OnError"
+                                  InputAttributes="@(new Dictionary<string, object> { { "aria-label", "select file" } })" />
+                    <RadzenProgressBar Value="@progress"
+                                       class="rz-mt-2"
+                                       Style="height:0.7rem;"
+                                       Visible="@showProgress" />
+                </RadzenCard>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenCard Variant="Variant.Outlined" class="rz-mt-2">
+                    <RadzenStack AlignItems="AlignItems.Center"
+                                 JustifyContent="JustifyContent.SpaceBetween"
+                                 Orientation="Orientation.Horizontal">
+                        @if (!string.IsNullOrWhiteSpace(model?.FileUrl))
+                        {
+                            <NavLink href="@model.FileUrl" target="_blank" class="rz-mt-1">
+                                preview file
+                            </NavLink>
+                            <RadzenButton Variant="Variant.Text"
+                                          class="rz-ml-3"
+                                          Click="@DeleteFile"
+                                          Icon="@IconNames.Delete" Size="ButtonSize.ExtraSmall" />
+                        }
+                        else
+                        {
+                            <RadzenLabel Text="No file uploaded yet." />
+                        }
+                        @if (showComplete)
+                        {
+                            <div class="upload-indicator upload-complete">
+                                <RadzenIcon Icon="check_circle" Style="color:green;vertical-align:middle;" />
+                                <span style="color:green;">Upload complete</span>
+                            </div>
+                        }
+
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-1">
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Type" class="@Defaults.W100">
+                    <RadzenDropDown TValue="int?"
+                                    class="@Defaults.W100"
+                                    Data="@collateralTypes"
+                                    TextProperty="@nameof(CollateralTypeDto.CollateralTypeCode)"
+                                    ValueProperty="@nameof(CollateralTypeDto.CollateralTypeId)"
+                                    SelectedItemChanged="@GetCollateralSubTypes"
+                                    @bind-Value="@model!.CategoryRefId" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Collateral" class="@Defaults.W100">
+                    <RadzenDropDown TValue="int?"
+                                    class="@Defaults.W100"
+                                    Data="@allSubTypes"
+                                    TextProperty="@nameof(CollateralSubTypeDto.CollateralSubTypeName)"
+                                    ValueProperty="@nameof(CollateralSubTypeDto.Id)"
+                                    SelectedItemChanged="@OnSelectedItemChanged"
+                                    @bind-Value="@model.SubCategoryRefId" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-1">
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Owner Name" class="@Defaults.W100">
+                    <RadzenTextBox class="@Defaults.W100"
+                                   @bind-Value="@model.OwnerName" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="CollateralNo" class="@Defaults.W100">
+                    <RadzenTextBox class="@Defaults.W100"
+                                   @bind-Value="@model.CollateralNo" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-1">
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Location" class="@Defaults.W100">
+                    <BlaLocations @bind-Value="@model.Location" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Size" class="@Defaults.W100">
+                    <RadzenTextBox class="@Defaults.W100"
+                                   @bind-Value="@model.Size" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-1">
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Quantity" class="@Defaults.W100">
+                    <RadzenNumeric ShowUpDown="false"
+                                   Min="0"
+                                   ReadOnly
+                                   Placeholder="Quantity"
+                                   class="@Defaults.W100"
+                                   TextAlign="TextAlign.End"
+                                   @bind-Value="@model!.Quantity" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Market Price" class="@Defaults.W100">
+                    <TCNumbers Placeholder="Market Price"
+                               OnValueChanged="@((arg) => OnMarketPriceChanged(arg, model!))"
+                               @bind-Value="@model!.MarketPrice" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-1">
+            <RadzenColumn Size="6">
+                <TCNumbers Label="Hot Price" IsFloatLabel="true"
+                           Placeholder="Hot Price"
+                           @bind-Value="@model!.HotPrice"
+                           TextAlign="TextAlign.End" />
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <TCNumbers Label="Pawn Price" IsFloatLabel="true"
+                           Placeholder="Pawn Price"
+                           @bind-Value="@model!.PawnPrice"
+                           TextAlign="TextAlign.End" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn Size="12">
+                <RadzenFormField Text="Description" class="@Defaults.W100">
+                    <RadzenTextArea class="@Defaults.W100"
+                                    Rows="3"
+                                    Style="resize:none;"
+                                    @bind-Value="@model!.Description" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenFieldset>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                 class="@Defaults.Mt2"
+                 JustifyContent="JustifyContent.End">
+        <SaveButton ButtonType="ButtonType.Submit"
+                    Title="Save"
+                    IsBusy="@isSaving"
+                    BusyText="Saving..." />
+        <CancelButton ButtonType="ButtonType.Button"
+                      Text="Cancel"
+                      Disabled="@isSaving"
+                      OnClick="OnCloseTab" />
+    </RadzenStack>
+</EditForm>
+@code {
+
+    int progress;
+    bool showProgress;
+    bool showComplete;
+    bool isUploading;
+    string completionMessage = string.Empty;
+    bool cancelUpload = false;
+
+    void UploadComplete(UploadCompleteEventArgs args)
+    {
+        isUploading = false;
+        showProgress = false;
+        showComplete = true;
+
+        if (string.IsNullOrEmpty(args.RawResponse))
+        {
+            completionMessage = "Upload failed: empty response.";
+            model.FileUrl = string.Empty;
+            return;
+        }
+
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+        var fileModel = JsonSerializer.Deserialize<DocumentDto>(args.RawResponse!, options);
+
+        if (fileModel is not null)
+        {
+            completionMessage = "Upload complete!";
+
+            model.FileUrl = fileModel.FileUrl;
+
+            _toastService.ShowSuccess("", "File uploaded successfully.");
+        }
+        else
+        {
+            completionMessage = "Upload failed: unable to parse response.";
+
+            model.FileUrl = string.Empty;
+        }
+    }
+
+    void UploadProgress(UploadProgressArgs args)
+    {
+        isUploading = args.Progress < 100;
+        showProgress = true;
+        showComplete = false;
+        progress = args.Progress;
+
+        if (args.Progress == 100)
+        {
+            showProgress = false;
+        }
+    }
+
+    void OnError(UploadErrorEventArgs args)
+    {
+        isUploading = false;
+
+        showProgress = false;
+
+        showComplete = true;
+
+        _toastService.ShowError("", $"{args.Message}");
+
+        model.FileUrl = string.Empty;
+    }
+
+    void OnCancel()
+    {
+        cancelUpload = true;
+        isUploading = false;
+    }
+
+    void OnFileChanged(UploadChangeEventArgs args)
+    {
+        if (args.Files is null)
+        {
+            Console.WriteLine("No files selected.");
+            isUploading = false;
+            showComplete = false;
+            showProgress = false;
+            return;
+        }
+
+        var file = args.Files.FirstOrDefault();
+
+        if (file is null)
+        {
+            Console.WriteLine("No file found in the selection.");
+            isUploading = false;
+            showComplete = false;
+            showProgress = false;
+            return;
+        }
+
+        if (file.Size > maxFileSize)
+        {
+            Console.WriteLine("File size exceeds the maximum limit of {0} bytes.", maxFileSize);
+            isUploading = false;
+            showComplete = false;
+            showProgress = false;
+            return;
+        }
+
+        isUploading = true;
+        progress = 0;
+        showProgress = true;
+        showComplete = false;
+        completionMessage = string.Empty;
+        model.FileUrl = string.Empty;
+
+        Console.WriteLine("File changed: {0} files selected", args.Files.Count());
+    }
+
+    void DeleteFile()
+    {
+        model.FileUrl = string.Empty;
+        showComplete = false;
+        _toastService.ShowSuccess("", "File reference removed.");
+    }
+}
+
+<style>
+    .upload-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 4px 0;
+        justify-content: center;
+    }
+
+    .upload-complete {
+        color: green;
+    }
+</style>

@@ -1,0 +1,242 @@
+﻿@using Applications.Features.Collaterals.Dtos
+@using Applications.Features.Guarantor.Dtos
+@using Radzen.Blazor.Rendering
+@using Web.UI.Components.Buttons
+
+<style>
+    .collateral-popup {
+        display: none;
+        position: absolute;
+        overflow: hidden;
+        height: 340px;
+        width: 60%;
+        border: var(--rz-panel-border);
+        background-color: var(--rz-panel-background-color);
+        box-shadow: var(--rz-panel-shadow);
+        border-radius: var(--rz-border-radius);
+        z-index: 1000;
+    }
+
+    .collateral-search-grid .rz-column-title,
+    .collateral-search-grid .rz-sortable-column .rz-column-title,
+    .collateral-search-grid .kh-header {
+        font-family: kh_siemreap, "Khmer OS Siemreap", sans-serif;
+    }
+
+    .collateral-search-grid .kh-header {
+        font-size: 0.85rem;
+    }
+</style>
+
+<RadzenStack Orientation="Orientation.Horizontal"
+             AlignItems="AlignItems.Center" Gap="4px"
+             class="rz-my-1">
+    <RadzenTextBox @ref="@_collateralSearchText"
+                   @oninput="@OnCollateralSearchText"
+                   @onkeydown="@OnKeyDown"
+                   @onclick="@OpenPopup"
+                   Style="width:30rem;"
+                   Placeholder="Search Collateral...." />
+</RadzenStack>
+<Popup @ref="@_collateralPopup"
+       id="collateralPopup"
+       autoFocusFirstElement="false"
+       class="collateral-popup">
+    <RadzenStack Style="height:100%;width:100%;" Gap="0">
+        <RadzenDataGrid @ref="@_gridCollaterals"
+                        id="_gridCollaterals"
+                        TItem="VCollateralLines"
+                        Data="@_collateralLines"
+                        Density="Density.Compact"
+                        AllowAlternatingRows="true"
+                        RowSelect="@OnRowCollateralSelect"
+                        GridLines="DataGridGridLines.Both"
+                        Responsive="true"
+                        AllowPaging="true"
+                        @bind-Value="@_selectedCollateralLines"
+                        AllowRowSelectOnRowClick="@allowRowSelectOnRowClick"
+                        SelectionMode="DataGridSelectionMode.Multiple"
+                        ShowPagingSummary="true"
+                        RowRender="@OnRowRender"
+                        class="collateral-search-grid"
+                        Style="height:290px;width:100%;border-radius:0.5rem;overflow:hidden;">
+            <EmptyTemplate>
+                <RadzenStack AlignItems="AlignItems.Center" class="rz-p-4" Gap="4px">
+                    <RadzenIcon Icon="search_off" Style="font-size:2rem;color:var(--rz-text-disabled-color);" />
+                    <RadzenText TextStyle="TextStyle.Caption" style="color:var(--rz-text-disabled-color);">
+                        No collaterals found. Try a different search term.
+                    </RadzenText>
+                </RadzenStack>
+            </EmptyTemplate>
+            <Columns>
+                <RadzenDataGridColumn Width="4rem"
+                                      TextAlign="TextAlign.Center"
+                                      Property="@nameof(VCollateralLines.Id)" Title="ល.រ">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="@IconNames.Numbers" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ល.រ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template>
+                        <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@context.RowIndex.ToString()" Style="font-size:0.7rem;padding:0.1rem 0.4rem;" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="ជ្រើស" Width="3rem" Sortable="false"
+                                      TextAlign="TextAlign.Center"
+                                      Property="@nameof(VCollateralLines.Id)"
+                                      Context="g">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.2rem">
+                            <RadzenCheckBox TabIndex="-1"
+                                            TriState="false"
+                                            TValue="bool"
+                                            InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select many items" } })"
+                                            Change="CheckedChanged"
+                                            Value="@SelectedMultiple" />
+                            <span class="kh-header">ជ្រើស</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template>
+                        <RadzenCheckBox InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select item" } })"
+                                        TriState="false"
+                                        Disabled="!SelectedMultiple"
+                                        Value="@(_selectedCollateralLines.Any() && _selectedCollateralLines.Contains(g))"
+                                        Change="@(args => ToggleRowSelection(g))"
+                                        TValue="bool" />
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Property="@nameof(VCollateralLines.SubTypeName)" Title="ប្រភេទ្រព្យបញ្ចាំ">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="category" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ប្រភេទ្រព្យបញ្ចាំ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Width="8rem" Property="@nameof(VCollateralLines.OwnerName)" Title="ម្ចាស់ទ្រព្យ">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="person" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ម្ចាស់ទ្រព្យ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Width="10rem" Property="@nameof(VCollateralLines.TypeName)" Title="ប្រភេទ">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="label" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">ប្រភេទ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Context="g"
+                                      TextAlign="TextAlign.Right"
+                                      Width="8rem"
+                                      Property="@nameof(VCollateralLines.MarketPrice)" Title="តំលៃទីផ្សារ">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="trending_up" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">តំលៃទីផ្សារ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template>
+                        @g.MarketPrice
+                    </Template>
+                    <FooterTemplate>
+                        @_collateralLines.Sum(x => x.MarketPrice)
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VCollateralLines.HotPrice)"
+                                      Context="g"
+                                      TextAlign="TextAlign.Right"
+                                      Width="8rem"
+                                      Title="តំលៃលក់បន្ទាន់">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="local_fire_department" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">តំលៃលក់បន្ទាន់</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template>
+                        @g.HotPrice
+                    </Template>
+                    <FooterTemplate>
+                        @_collateralLines.Sum(x => x.HotPrice)
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VCollateralLines.PawnPrice)"
+                                      Context="g"
+                                      Width="8rem"
+                                      TextAlign="TextAlign.Right"
+                                      Title="តំលៃបញ្ចាំ">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.25rem">
+                            <RadzenIcon Icon="handshake" Style="font-size:0.85rem;color:var(--rz-primary);" />
+                            <span class="kh-header">តំលៃបញ្ចាំ</span>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Template>
+                        @g.PawnPrice
+                    </Template>
+                    <FooterTemplate>
+                        @_collateralLines.Sum(x => x.PawnPrice)
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Property="@nameof(VCollateralLines.Id)" Title="សកម្មភាព" Width="4rem"
+                                      TextAlign="TextAlign.Center" Sortable="false" Context="g">
+                    <HeaderTemplate>
+                        <span class="kh-header">សកម្មភាព</span>
+                    </HeaderTemplate>
+                    <Template>
+                        <RadzenButton Icon="@IconNames.Add"
+                                      ButtonStyle="ButtonStyle.Success"
+                                      Size="ButtonSize.ExtraSmall"
+                                      Variant="Variant.Outlined"
+                                      Click="@(() => GetSelectedCollater(g))" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+            <FooterTemplate>
+                <RadzenStack Orientation="Orientation.Horizontal"
+                             AlignItems="AlignItems.Center"
+                             JustifyContent="JustifyContent.End"
+                             class="rz-px-2 rz-py-1">
+                    <RadzenText TextStyle="TextStyle.Caption">
+                        @(_selectedCollateralLines.Count) selected
+                    </RadzenText>
+                </RadzenStack>
+            </FooterTemplate>
+        </RadzenDataGrid>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     Gap="0.5rem"
+                     class="rz-mt-2 rz-mr-2"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton Icon="done_all"
+                          Text="Accept Selected"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Size="ButtonSize.ExtraSmall"
+                          Disabled="@(!_selectedCollateralLines.Any())"
+                          Click="@(() => GetSelectedGuarantors(_selectedCollateralLines))" />
+            <CancelButton OnClick="@ClosePopup" />
+        </RadzenStack>
+    </RadzenStack>
+</Popup>
+
+@code {
+    bool SelectedMultiple = false;
+
+    private void OnRowRender(RowRenderEventArgs<VCollateralLines> args)
+    {
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
+    }
+
+    private async Task ClosePopup()
+    {
+        await _collateralPopup.CloseAsync();
+    }
+}

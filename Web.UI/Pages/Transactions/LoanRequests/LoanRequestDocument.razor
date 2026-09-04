@@ -1,0 +1,160 @@
+﻿@using Applications.Responses.ViewModels.Loans.Requests
+
+<div class="doc-card">
+    <div class="doc-card-header">
+        <span class="header-title">
+            <RadzenIcon Icon="attachment" Style="font-size:1.2rem;" />
+            Documents
+            @if (Documents?.Any() == true)
+            {
+                <span class="badge-count">@Documents.Count</span>
+            }
+        </span>
+        @if (ShowUpload && ShowCommand)
+        {
+            <RadzenButton Text="Upload"
+                          Icon="upload"
+                          Click="@ClickUpload"
+                          Size="ButtonSize.Small"
+                          ButtonType="ButtonType.Button"
+                          Variant="Variant.Outlined"
+                          Style="color:#fff;border-color:rgba(255,255,255,.55);font-weight:500;" />
+        }
+    </div>
+
+    <div class="doc-card-body">
+        <RadzenDataGrid Data="Documents"
+                        GridLines="DataGridGridLines.Horizontal"
+                        TItem="VLoanRequestsDocuments"
+                        Density="Density.Compact"
+                        @ref="@gridDocuments"
+                        PagerHorizontalAlign="HorizontalAlign.Right"
+                        EmptyText="No documents uploaded yet."
+                        Style="min-height:14rem;height:14rem;max-height:14rem;border-radius:8px;overflow:hidden;">
+            <Columns>
+                <RadzenDataGridColumn Context="g"
+                                      Property="@(nameof(VLoanRequestsDocuments.Id))"
+                                      Width="3rem"
+                                      Title="#"
+                                      Sortable="false"
+                                      TextAlign="TextAlign.Center">
+                    <HeaderTemplate>
+                        <span style="color:var(--rz-text-tertiary-color);font-size:.75rem;">#</span>
+                    </HeaderTemplate>
+                    <Template>
+                        <input type="hidden" @bind="g.Id" />
+                        <span style="color:var(--rz-text-tertiary-color);font-size:.8rem;">@(Documents.IndexOf(g) + 1)</span>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Context="g"
+                                      Width="16rem"
+                                      Title="ចំណងជើងឯកសារ"
+                                      Property="@(nameof(VLoanRequestsDocuments.OriginalName))"
+                                      Sortable="false">
+                    <HeaderTemplate>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">ចំណងជើងឯកសារ</span>
+                    </HeaderTemplate>
+                    <Template>
+                        <div class="doc-name-cell">
+                            <div class="doc-file-icon">
+                                <RadzenIcon Icon="insert_drive_file" Style="font-size:.9rem;" />
+                            </div>
+                            <span style="font-weight:500;font-size:.83rem;">@g.OriginalName</span>
+                        </div>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Width="22rem"
+                                      Property="@(nameof(VLoanRequestsDocuments.NewFileName))"
+                                      Title="តំណរភ្ជាប់"
+                                      Context="d"
+                                      Sortable="false">
+                    <HeaderTemplate>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">តំណរភ្ជាប់</span>
+                    </HeaderTemplate>
+                    <Template>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.2rem">
+                            <RadzenIcon Icon="open_in_new" Style="font-size:.82rem;color:var(--rz-primary);" />
+                            <RadzenLink Target="_blank" Path="@d.FileUrl" Style="font-size:.82rem;">@d.NewFileName</RadzenLink>
+                        </RadzenStack>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Context="g"
+                                      Title="ទំហំ"
+                                      TextAlign="TextAlign.Center"
+                                      Width="7rem"
+                                      Property="@(nameof(VLoanRequestsDocuments.FileSize))"
+                                      Sortable="false">
+                    <HeaderTemplate>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">ទំហំ</span>
+                    </HeaderTemplate>
+                    <Template>
+                        <span class="doc-size-badge">
+                            @(g.FileSize.HasValue ? $"{g.FileSize.Value / 1024.0:F1} KB" : "—")
+                        </span>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn Context="g"
+                                      Title="ផ្សេងៗ"
+                                      Property="@(nameof(VLoanRequestsDocuments.Description))"
+                                      Sortable="false">
+                    <HeaderTemplate>
+                        <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">ផ្សេងៗ</span>
+                    </HeaderTemplate>
+                    <Template>
+                        <span style="font-size:.82rem;color:var(--rz-text-secondary-color);">@g.Description</span>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                @if (ShowDelete)
+                {
+                    <RadzenDataGridColumn Context="g"
+                                          TextAlign="TextAlign.Center"
+                                          Width="4.5rem"
+                                          Title="Action"
+                                          Sortable="false">
+                        <HeaderTemplate>
+                            <span style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Action</span>
+                        </HeaderTemplate>
+                        <Template>
+                            <RadzenButton Icon="delete_outline"
+                                          ButtonStyle="ButtonStyle.Danger"
+                                          Shade="Shade.Lighter"
+                                          Click="@(()=>DeleteDocument(g))"
+                                          Size="ButtonSize.ExtraSmall"
+                                          Variant="Variant.Outlined"
+                                          Style="border-radius:6px;" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                }
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+</div>
+
+@code {
+
+    [Parameter, EditorRequired] public List<VLoanRequestsDocuments> Documents { get; set; } = [];
+    [Parameter] public bool ShowUpload { get; set; } = true;
+    [Parameter] public bool ShowCommand { get; set; } = true;
+    [Parameter] public EventCallback<VLoanRequestsDocuments> RemoveDocument { get; set; }
+    [Parameter] public EventCallback UploadDocument { get; set; }
+    [Parameter] public bool ShowDelete { get; set; } = false;
+    RadzenDataGrid<VLoanRequestsDocuments> gridDocuments = default!;
+    public async void ReloadDocument()
+    {
+        await gridDocuments.Reload();
+    }
+    async Task DeleteDocument(VLoanRequestsDocuments e)
+    {
+        await RemoveDocument.InvokeAsync(e);
+    }
+    async Task ClickUpload()
+    {
+        await UploadDocument.InvokeAsync();
+    }
+
+}

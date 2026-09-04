@@ -1,0 +1,112 @@
+﻿@page "/App/Branches/{BranchId:int}/CashVault"
+@using Applications.Features.CashManagements.Responses
+<PageTitle>Cash Vault</PageTitle>
+
+<RadzenCard Style="width:100%;">
+
+    @* Page Header *@
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.75rem" class="rz-mb-4">
+        <RadzenIcon Icon="account_balance_wallet" Style="font-size:1.6rem; color:var(--rz-primary);" />
+        <RadzenStack Gap="0">
+            <RadzenText TextStyle="TextStyle.H6" class="rz-m-0" style="font-weight:700; line-height:1.2;">Cash Vault</RadzenText>
+            <RadzenText TextStyle="TextStyle.Caption" class="rz-m-0" style="color:var(--rz-text-tertiary-color);">
+                Cash balance in vault on hand
+            </RadzenText>
+        </RadzenStack>
+    </RadzenStack>
+
+    @* Section Header *@
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-mb-3">
+        <RadzenIcon Icon="savings" Style="color:var(--rz-primary); font-size:1.1rem;" />
+        <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-m-0"
+                    style="font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:var(--rz-text-tertiary-color);">
+            Vault Summary
+        </RadzenText>
+    </RadzenStack>
+
+    @* Data Grid *@
+    <RadzenDataGrid TItem="VCashVaults"
+                    Responsive="true"
+                    Density="Density.Compact"
+                    GridLines="DataGridGridLines.Both"
+                    AllowAlternatingRows
+                    Data="vCashVaults"
+                    class="rz-mb-4">
+        <Columns>
+            <RadzenDataGridColumn Title="Currency"
+                                  Property="@nameof(VCashVaults.CurrencyCode)"
+                                  Width="7rem"
+                                  Context="c">
+                <Template>@c.CurrencyCode</Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Title="Start Cash"
+                                  Property="@nameof(VCashVaults.StartCash)"
+                                  TextAlign="TextAlign.Right"
+                                  Context="c">
+                <Template>@c.StartCash.Format(c.CurrencyRefId)</Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Title="Vault In"
+                                  Property="@nameof(VCashVaults.VaultIn)"
+                                  TextAlign="TextAlign.Right"
+                                  Context="c">
+                <Template>
+                    <RadzenText style="color:var(--rz-success);" class="rz-m-0">
+                        @c.VaultIn.Format(c.CurrencyRefId)
+                    </RadzenText>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Title="Vault Out"
+                                  Property="@nameof(VCashVaults.VaultOut)"
+                                  TextAlign="TextAlign.Right"
+                                  Context="c">
+                <Template>
+                    <RadzenText style="color:var(--rz-danger);" class="rz-m-0">
+                        @c.VaultOut.Format(c.CurrencyRefId)
+                    </RadzenText>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Title="Vault Balance"
+                                  Property="@nameof(VCashVaults.VaultBalance)"
+                                  TextAlign="TextAlign.Right"
+                                  Context="c">
+                <Template>
+                    <strong>@c.VaultBalance.Format(c.CurrencyRefId)</strong>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Title="User Balance"
+                                  Property="@nameof(VCashVaults.UserBalance)"
+                                  TextAlign="TextAlign.Right"
+                                  Context="c">
+                <Template>@c.UserBalance.Format(c.CurrencyRefId)</Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+
+    @* Actions *@
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.End"
+                 Gap="0.75rem"
+                 style="border-top:1px solid var(--rz-border-disabled-color); padding-top:1rem;">
+        @if (bState.VaultOut)
+        {
+            <RadzenButton Icon="move_to_inbox"
+                          Click="@OnCashVaultOut"
+                          Size="ButtonSize.Small"
+                          Variant="Variant.Filled"
+                          Text="Vault Out"
+                          ButtonStyle="ButtonStyle.Success" />
+        }
+        @if (bState.VaultIn)
+        {
+            <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                          Disabled="IsDisabled"
+                          Size="ButtonSize.Small"
+                          Variant="Variant.Filled"
+                          Icon="output"
+                          Text="Vault In"
+                          Click="@OnCashVaultIn" />
+        }
+    </RadzenStack>
+
+</RadzenCard>

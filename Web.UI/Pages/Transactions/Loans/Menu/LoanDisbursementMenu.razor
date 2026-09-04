@@ -1,0 +1,72 @@
+﻿@using Applications.Features.Loans.Dtos.Responses
+
+@if (Data is not null)
+{
+    <RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Icon="money"
+                        Click="@(()=>GetPaymentSchedules(Data))"
+                        Text="Recieve Payment"></RadzenMenuItem>
+        <RadzenMenuItem Icon="paid"
+                        Click="@(()=>CustomerPayOff(Data))"
+                        Text="PayOff"></RadzenMenuItem>
+        <RadzenMenuItem Icon="change_circle"
+                        Click="@(()=>ChangeCreditAgent(Data))"
+                        Text="Change Credit Agent"></RadzenMenuItem>
+        <RadzenMenuItem Icon="info"
+                        Click="@(()=>GetLoanDetails(Data))"
+                        Text="Loan Details"></RadzenMenuItem>
+        <RadzenMenuItem Icon="file_download"
+                        Click="@(()=>DownLoadScheduleAsExcel(Data.LoanId,Data.BranchId))"
+                        Text="Export Loan to Excel" />
+        <RadzenMenuItem Icon="picture_as_pdf"
+                        Click="@(()=>DownLoadScheduleAsPdf(Data.LoanId,Data.BranchId))"
+                        Text="Export Loan to Pdf" />
+    </RadzenMenu>
+}
+@code {
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [CascadingParameter] CascadingAppState bState { get; set; } = default!;
+    [Parameter] public VLoanDisbursments? Data { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationState;
+
+        if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
+        {
+            await bState.GetAuthenticatedUser(authState.User);
+        }
+        if (Data is not null)
+        {
+
+        }
+        await base.OnInitializedAsync();
+    }
+
+
+
+    void GetPaymentSchedules(VLoanDisbursments p)
+    {
+        // Implementation here
+    }
+    void CustomerPayOff(VLoanDisbursments p)
+    {
+        // Implementation here
+    }
+    void ChangeCreditAgent(VLoanDisbursments p)
+    {
+        // Implementation here
+    }
+    void GetLoanDetails(VLoanDisbursments p)
+    {
+        // Implementation here
+    }
+    void DownLoadScheduleAsExcel(string? loanId, int? branchId)
+    {
+        // Implementation here
+    }
+    void DownLoadScheduleAsPdf(string? loanId, int? branchId)
+    {
+        // Implementation here
+    }
+}

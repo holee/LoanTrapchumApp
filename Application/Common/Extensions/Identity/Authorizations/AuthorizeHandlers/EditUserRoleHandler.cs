@@ -1,0 +1,41 @@
+using System.Security.Claims;
+using Application.Extensions.Identity.Authorizations.AuthorizeRequirements;
+using Application.Extensions.Identity.Enumerations;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Filters;
+
+namespace Application.Extensions.Identity.Authorizations.AuthorizeHandlers
+{
+    public class EditUserRoleHandler : AuthorizationHandler<ManageUserRequirement>
+    {
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, ManageUserRequirement requirement)
+        {
+            var authContextFilter = context.Resource as AuthorizationFilterContext;
+
+            if (authContextFilter is null)
+            {
+                return Task.CompletedTask;
+            }
+
+            var loginUserId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var editUserId = authContextFilter.RouteData.Values["id"]?.ToString();
+
+            if (loginUserId is null)
+            {
+                return Task.CompletedTask;
+            }
+
+            if (loginUserId != editUserId &&
+                (context.User.IsInRole(AppRole.SeniorAccount.ToString()) ||
+                 context.User.IsInRole(AppRole.Admin.ToString())) &&
+                context.User.HasClaim(c => c.Value == "1"))
+            {
+                context.Succeed(requirement);
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+}
+

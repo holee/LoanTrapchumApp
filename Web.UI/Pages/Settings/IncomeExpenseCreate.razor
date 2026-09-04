@@ -1,0 +1,46 @@
+@page "/App/Settings/Income-Expense/Create"
+
+<PageTitle>Create Income / Expense</PageTitle>
+
+<RadzenTemplateForm TItem="CreateIncomeExpenseDto" Data="@_model" Submit="@OnSubmit">
+    <input type="hidden" @bind="@_model.Id" />
+
+    <RadzenFormField Text="Description" AllowFloatingLabel="true" class="rz-w-100">
+        <ChildContent>
+            <RadzenTextBox @bind-Value="_model.Description" Name="Description" class="rz-w-100" />
+        </ChildContent>
+        <Helper>
+            <RadzenRequiredValidator Component="Description" Text="@IncomeExpenseMessages.Required" Popup="false" />
+        </Helper>
+    </RadzenFormField>
+
+    <RadzenFormField Text="Types" AllowFloatingLabel="true" class="@Styles.W100">
+        <ChildContent>
+            <RadzenDropDown @bind-Value="_model.Types"
+                            Data="@_types"
+                            Name="Types"
+                            TValue="string"
+                            Style="width:100%" />
+        </ChildContent>
+        <Helper>
+            <RadzenRequiredValidator Component="Types" Text="@IncomeExpenseMessages.Types" Popup="false" />
+        </Helper>
+    </RadzenFormField>
+
+    <RadzenStack AlignItems="AlignItems.Center"
+                 Gap="1rem"
+                 class="@Styles.Mt2"
+                 Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Icon="@IconNames.Save"
+                      Text="Save"
+                      Size="@Styles.DefaultSize"
+                      ButtonStyle="ButtonStyle.Success"
+                      ButtonType="ButtonType.Submit" class="rz-me-2" />
+        <RadzenButton Icon="@IconNames.Close"
+                      Text="Cancel"
+                      Size="@Styles.DefaultSize"
+                      ButtonStyle="ButtonStyle.Danger"
+                      ButtonType="ButtonType.Button" Click="@OnCancel" />
+    </RadzenStack>
+</RadzenTemplateForm>

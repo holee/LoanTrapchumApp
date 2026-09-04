@@ -1,0 +1,93 @@
+﻿@page "/App/Loans/{LoanId}/CreditAgents/{CreditAgentId}"
+<PageTitle>Change Credit Agent</PageTitle>
+
+<RadzenFieldset Text="Change Credit Agent">
+    <RadzenLink Path="@($"/Loan/CreditAgent/{BranchId}/Branches?CreditAgentId={CreditAgentId}")">Change Credit Agents</RadzenLink>
+    <RadzenRow>
+        <RadzenColumn Size="6">
+            <RadzenFieldset Text="Loan Information">
+                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                    <RadzenColumn Size="4">
+                        <input type="hidden" @bind-value="LoanId" />
+                        <RadzenLabel Text="Loan Account" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="8">
+                        <RadzenTextBox class="w-100" Disabled Value="@existingLoan.ContractNumber" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                    <RadzenColumn Size="4">
+                        <input type="hidden" @bind-value="CustomerId" />
+                        <RadzenLabel Text="Customer's Name" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="8">
+                        <RadzenTextBox class="w-100" Value="@existingLoan.AltName" Disabled />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                    <RadzenColumn Size="4">
+                        <RadzenLabel Text="OutStanding" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="8">
+                        <RadzenNumeric class="w-100"
+                                       Disabled
+                                       Value="@existingLoan.OutStanding" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                    <RadzenColumn Size="4">
+                        <input type="hidden" @bind-value="CurrencyId" />
+                        <RadzenLabel Text="Currency" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="8">
+                        <RadzenTextBox class="w-100"
+                                       Disabled
+                                       Value="@existingLoan.CurrencyName" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenFieldset>
+        </RadzenColumn>
+        <RadzenColumn Size="6">
+            <RadzenFieldset Text="Credit Agent">
+                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                    <RadzenColumn Size="4">
+                        <RadzenLabel Text="Current Credit Agent" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="8">
+                        <input type="hidden" @bind-value="CreditAgentId" />
+                        <RadzenTextBox class="w-100" Value="@existingLoan.AgentName" Disabled />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                    <RadzenColumn Size="4">
+                        <RadzenLabel Text="New Credit Agent" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="8">
+                        <RadzenDropDown TextProperty="@nameof(VCreditAgent.AltName)"
+                                        ValueProperty="@nameof(VCreditAgent.EmployeeRefId)"
+                                        @bind-Value="@newCreditAgentId"
+                                        AllowFiltering="true"
+                                        PageSize="10"
+                                        class="rz-w-100"
+                                        Data="@_creditAgents">
+                        </RadzenDropDown>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenFieldset>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 Gap="1rem"
+                 AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+        <RadzenButton Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Success"
+                      Click="ChangedCreditAgent"
+                      Icon="@IconNames.Save"
+                      Text="Save" />
+        <RadzenButton Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Click="Back"
+                      Icon="@IconNames.Cancel"
+                      Text="Cancel" />
+    </RadzenStack>
+</RadzenFieldset>

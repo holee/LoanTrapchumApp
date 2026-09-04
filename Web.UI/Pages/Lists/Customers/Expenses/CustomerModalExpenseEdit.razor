@@ -1,0 +1,94 @@
+﻿@using Applications.Features.Incomes.Dto
+@using Applications.Features.Incomes.Command.CreateIncomeExpenseSource
+@using Domains.Enumerations
+<EditForm Model="@model" OnValidSubmit="@HandleFormSubmit">
+    <Blazilla.FluentValidator/>
+    <RadzenRow>
+        <RadzenColumn Size="6">
+            <RadzenFormField class="rz-w-100 rz-mt-2" Text="Expense Title($)" AllowFloatingLabel="true">
+                <ChildContent>
+                    <RadzenAutoComplete Data="@_incomeExpenses"
+                                        TextProperty="@nameof(IncomeExpenseDto.Description)"
+                                        LoadData="@LoadData"
+                                        class="rz-w-100"
+                                        Placeholder="Type to search or add new…"
+                                        MinLength="0"
+                                        OpenOnFocus="true"
+                                        @bind-Value="model.ExpenseTitle" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="() => model.ExpenseTitle" />
+                </Helper>
+            </RadzenFormField>
+
+        </RadzenColumn>
+        <RadzenColumn Size="6">
+            <RadzenFormField class="rz-w-100 rz-mt-2" Text="Amount" AllowFloatingLabel="true">
+                <ChildContent>
+                    <TCNumbers @bind-Value="model.Amount" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="() => model.Amount" />
+                </Helper>
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenFormField class="rz-w-100 rz-mt-2" Text="Description" AllowFloatingLabel="true">
+        <ChildContent>
+            <RadzenTextArea @bind-Value="model.Description" class="rz-w-100" />
+        </ChildContent>
+    </RadzenFormField>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 class="rz-mt-2"
+                 Gap="1rem"
+                 AlignItems="AlignItems.Center">
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Success"
+                      ButtonType="ButtonType.Submit"
+                      Text="Save" Icon="@IconNames.Save" />
+
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Text="Close"
+                      Click="HandleClose"
+                      Icon="@IconNames.Close" />
+    </RadzenStack>
+</EditForm>
+
+
+@code {
+
+    private async Task AddIfNotExists(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
+        var exists = _incomeExpenses.Any(x => x.Description.Equals(text, StringComparison.OrdinalIgnoreCase));
+
+        if (!exists)
+        {
+            var command = new CreateIncomeExpenseCommand(new CreateIncomeExpenseDto
+            {
+                Description = text,
+                Types = nameof(IncomeExpenseTypes.Expense)
+            });
+
+            var result = await mediator.Send(command);
+
+            if (!result.IsError)
+            {
+                _incomeExpenses.Insert(0, new IncomeExpenseDto { Description = text });
+
+                _toastService.ShowSuccess("Expense", $"'{text}' added to expense titles.");
+
+                StateHasChanged();
+            }
+            else
+            {
+                _toastService.ShowError("Expense", result.FirstError.Description);
+            }
+        }
+    }
+}

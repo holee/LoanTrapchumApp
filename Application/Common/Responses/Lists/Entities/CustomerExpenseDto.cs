@@ -1,0 +1,11 @@
+namespace Application.Responses.Lists.Entities
+{
+    public class CustomerExpenseDto 
+    {
+        public long Id { get; set; }
+        public string? ExpenseTitle { get; set; }
+        public decimal? Amount { get; set; } 
+        public string? Description { get; set; }
+
+    }
+}

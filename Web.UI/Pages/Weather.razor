@@ -1,0 +1,70 @@
+﻿@page "/weather"
+@inject HttpClient Http
+
+<PageTitle>Weather Forecast</PageTitle>
+
+<RadzenStack Gap="1.5rem" class="w-100">
+    <div>
+        <RadzenText TextStyle="TextStyle.H4" class="mb-1">Weather Forecast</RadzenText>
+        <RadzenText TextStyle="TextStyle.Body2" class="text-muted">7-day weather forecast</RadzenText>
+    </div>
+
+    @if (forecasts == null)
+    {
+        <RadzenCard>
+            <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="1rem" Style="min-height: 200px;">
+                <RadzenIcon Icon="cloud_queue" style="font-size: 2rem;" />
+                <RadzenText TextStyle="TextStyle.Body2">Loading weather data...</RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+    }
+    else
+    {
+        <RadzenDataGrid AllowFiltering="true" AllowSorting="true" AllowPaging="true" PageSize="10"
+            Data="@forecasts" TItem="WeatherForecast" ColumnWidth="100%">
+            <Columns>
+                <RadzenDataGridColumn TItem="WeatherForecast" Property="Date" Title="Date" FormatString="{0:dd MMM yyyy}" />
+                <RadzenDataGridColumn TItem="WeatherForecast" Property="TemperatureC" Title="Temp. (°C)" Sortable="true" />
+                <RadzenDataGridColumn TItem="WeatherForecast" Property="TemperatureF" Title="Temp. (°F)" Sortable="true" />
+                <RadzenDataGridColumn TItem="WeatherForecast" Property="Summary" Title="Summary">
+                    <Template Context="data">
+                        <RadzenBadge BadgeStyle="GetBadgeStyle(data.Summary)">@data.Summary</RadzenBadge>
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    }
+</RadzenStack>
+
+@code {
+    private WeatherForecast[]? forecasts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+    }
+
+    private BadgeStyle GetBadgeStyle(string? summary)
+    {
+        return summary switch
+        {
+            "Sunny" => BadgeStyle.Success,
+            "Rainy" => BadgeStyle.Info,
+            "Cloudy" => BadgeStyle.Secondary,
+            "Snowy" => BadgeStyle.Light,
+            "Freezing" => BadgeStyle.Danger,
+            _ => BadgeStyle.Secondary
+        };
+    }
+
+    public class WeatherForecast
+    {
+        public DateOnly Date { get; set; }
+
+        public int TemperatureC { get; set; }
+
+        public string? Summary { get; set; }
+
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+}

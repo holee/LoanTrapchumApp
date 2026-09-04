@@ -1,0 +1,177 @@
+﻿@using Applications.Features.Currencies.Dto
+
+<style>
+    .lp-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--rz-text-secondary-color);
+    }
+    .status-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 2px 10px;
+        border-radius: 12px;
+    }
+    .status-active   { background-color: var(--rz-success-lighter); color: var(--rz-success-dark); }
+    .status-inactive { background-color: var(--rz-danger-lighter);  color: var(--rz-danger-dark);  }
+</style>
+
+<EditForm Model="model" OnValidSubmit="OnSaveNew">
+    <DataAnnotationsValidator />
+
+    @* ── Product Info ── *@
+    <RadzenFieldset AllowCollapse="false" class="rz-mb-3">
+        <HeaderTemplate>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+                <RadzenIcon Icon="inventory_2" Style="color:var(--rz-primary)" />
+                <b>Product Information</b>
+            </RadzenStack>
+        </HeaderTemplate>
+        <ChildContent>
+            @* Code + Name + Status *@
+            <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenLabel Text="Product Code *" class="lp-label" />
+                        <RadzenTextBox @bind-Value="model.LoanProductCode"
+                                       Placeholder="e.g. LP-001"
+                                       Style="width:100%" />
+                        <ValidationMessage For="@(() => model.LoanProductCode)" />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenLabel Text="Product Name *" class="lp-label" />
+                        <RadzenTextBox @bind-Value="model.LoanProductName"
+                                       Placeholder="Loan product name..."
+                                       Style="width:100%" />
+                        <ValidationMessage For="@(() => model.LoanProductName)" />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="2">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenLabel Text="Status" class="lp-label" />
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+                            <RadzenCheckBox @bind-Value="model.IsActive" TValue="bool?" Name="IsActive" />
+                            <span class="status-badge @(model.IsActive == true ? "status-active" : "status-inactive")">
+                                <RadzenIcon Icon="@(model.IsActive == true ? "check_circle" : "cancel")"
+                                            Style="font-size:0.72rem;vertical-align:middle" />
+                                @(model.IsActive == true ? "Active" : "Inactive")
+                            </span>
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Loan Size + Currency *@
+            <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenLabel Text="Loan Size" class="lp-label" />
+                        <RadzenTextBox @bind-Value="model.LoanSize"
+                                       Placeholder="e.g. 5000"
+                                       Style="width:100%" />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenLabel Text="Currency *" class="lp-label" />
+                        <RadzenDropDown @bind-Value="model.CurrencyRefId"
+                                        Data="@_currencies"
+                                        TValue="int?"
+                                        TextProperty="@nameof(CurrencyDto.CurrencyCode)"
+                                        ValueProperty="@nameof(CurrencyDto.CurrencyId)"
+                                        Placeholder="Select currency..."
+                                        AllowFiltering="true"
+                                        Style="width:100%" />
+                        <ValidationMessage For="@(() => model.CurrencyRefId)" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+        </ChildContent>
+    </RadzenFieldset>
+
+    @* ── Loan Terms ── *@
+    <RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-3">
+        <HeaderTemplate>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+                <RadzenIcon Icon="calculate" Style="color:var(--rz-info)" />
+                <b>Loan Terms</b>
+            </RadzenStack>
+        </HeaderTemplate>
+        <ChildContent>
+            @* Installments + Type *@
+            <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenLabel Text="Installments" class="lp-label" />
+                        <RadzenTextBox @bind-Value="model.Installments"
+                                       Placeholder="e.g. 12"
+                                       Style="width:100%" />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenLabel Text="Installment Type" class="lp-label" />
+                        <RadzenTextBox @bind-Value="model.InstallmentType"
+                                       Placeholder="e.g. Monthly"
+                                       Style="width:100%" />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenLabel Text="Interest Rate (%)" class="lp-label" />
+                        <RadzenTextBox @bind-Value="model.InterestRate"
+                                       Placeholder="e.g. 1.5"
+                                       Style="width:100%" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            @* Repayment + Origination + Arrear *@
+            <RadzenRow AlignItems="AlignItems.Start">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenLabel Text="Repayment Mode" class="lp-label" />
+                        <RadzenTextBox @bind-Value="model.RepaymentMode"
+                                       Placeholder="e.g. Equal Principal"
+                                       Style="width:100%" />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenLabel Text="Origination Fee" class="lp-label" />
+                        <RadzenTextBox @bind-Value="model.OriginationFees"
+                                       Placeholder="e.g. 1%"
+                                       Style="width:100%" />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenLabel Text="Arrear Rate" class="lp-label" />
+                        <RadzenTextBox @bind-Value="model.ArrearRate"
+                                       Placeholder="e.g. 2%"
+                                       Style="width:100%" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+        </ChildContent>
+    </RadzenFieldset>
+
+    @* ── Footer Actions ── *@
+    <RadzenStack Gap="0.5rem" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" AlignItems="AlignItems.Center">
+        <RadzenButton Click="@(() => DialogService!.Close(false))"
+                      Variant="Variant.Outlined"
+                      Text="Cancel"
+                      Icon="close"
+                      Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Secondary" />
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Save Product"
+                      Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Success"
+                      Icon="save" />
+    </RadzenStack>
+</EditForm>
+
+

@@ -1,0 +1,84 @@
+﻿@using Applications.Features.Customers.Response
+<Containers Fluid>
+    <table class="table-sm">
+        <tbody>
+            <tr>
+                <th class="rz-w-25">
+                    Customer Name
+                </th>
+                <td>
+                    @Customer?.AltName ( @Customer?.FullName )
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-w-25">
+                    Phone
+                </th>
+                <td>
+                    @Customer?.Phone
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-w-25">DateOfBirth</th>
+                <td>
+                    <span>
+                        @Customer?.DateOfBirth
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-w-25">
+                    Occupation
+                </th>
+                <td>
+                    <span>
+                        @Customer?.Occupation
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-w-25">ID Card</th>
+                <td>
+                    @Customer?.IdCard
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-w-25">
+                    Circle
+                </th>
+                <td>
+                    @Customer?.Circle
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-w-25">
+                    Salutation
+                </th>
+                <td>
+                    @Customer?.Salutation
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-w-25">
+                    Address
+                </th>
+                <td>
+                    @Customer?.ToString()
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-w-25">Income</th>
+                <td>@Customer?.CustomerIncomes?.Sum(x => x?.IncomeAmount)</td>
+            </tr>
+            <tr>
+                <th class="rz-w-25">Expend</th>
+                <td>
+                    @Customer?.CustomerExpenses?.Sum(x => x?.ExpendAmount)
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</Containers>
+@code {
+    [Parameter] public VCustomerDetails? Customer { get; set; }
+}

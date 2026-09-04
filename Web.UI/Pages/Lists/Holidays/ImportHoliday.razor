@@ -1,0 +1,40 @@
+﻿@* <h3>ImportHoliday</h3>
+@page "/Holidays/import"
+@* <Card>
+    <Table Responsive FixedHeader FixedHeaderTableHeight="300px" Padding="Padding.Is1">
+         <TableHeader>
+             <TableRow>
+                 <TableHeaderCell>#</TableHeaderCell>
+                 <TableHeaderCell>Date</TableHeaderCell>
+                 <TableHeaderCell>Descriptions</TableHeaderCell>
+                 <TableHeaderCell>action</TableHeaderCell>
+             </TableRow>
+         </TableHeader>
+         <TableBody>
+             @for (int x = 0; x < Model?.Count; x++)
+            {
+                var row = x;
+                var currentrow = x + 1;
+                <TableRow>
+                    <TableRowCell Style="width:50px;">@currentrow</TableRowCell>
+                        <TableRowCell>
+                            <LoreSoft.Blazor.Controls.DateTimePicker TValue="DateTime?"
+                                            Mode="LoreSoft.Blazor.Controls.DateTimePickerMode.Date"
+                                            DateFormat="dd/MMM/yyyy"
+                                            @bind-Value:format="yyyy/MMM/dd"
+                                            @bind-Value="Model[row].HolidayName" />
+
+                        </TableRowCell>
+                        <TableRowCell>
+                            <TextEdit Placeholder="Descriptions" @bind-Text="Model[row].Description" />
+                        </TableRowCell>
+                        <TableRowCell>
+                            <TButton Icon="BtnIconType.Delete"
+                                     Click="(()=>DeleteEvent(Model[row]))" />
+                        </TableRowCell>
+                    </TableRow>
+            }
+        </TableBody>
+    </Table>
+</Card>
+ *@

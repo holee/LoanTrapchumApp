@@ -1,0 +1,64 @@
+﻿@using System.Linq.Expressions
+@typeparam TValue
+<RadzenNumeric TValue="@TValue"
+               Value="@Value"
+               Name="@Name"
+               id="@Id"
+               ValueExpression="@ValueExpression"
+               Change="@Changed"
+               @oninput="OnTextChanged"
+               @onfocusout="OnMouseLeave"
+               onclick="this.querySelector('.rz-numeric-input').select()"
+               ShowUpDown="false"
+               TextAlign="TextAlign"
+               class="form-control"
+               Disabled="@Disabled"
+               Min="@Min"
+               ValueChanged="@ValueChanged"
+               Format="@Format" />
+
+@code {
+    [Parameter] public string? Name { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string Format { get; set; } = "#,##0.00";
+    [Parameter] public TValue? Value { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public TextAlign TextAlign { get; set; } = TextAlign.End;
+    [Parameter] public Orientation Orientation { get; set; } = Orientation.Horizontal;
+    [Parameter] public EventCallback<TValue> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<TValue>> ValueExpression { get; set; } = default!;
+    [Parameter] public EventCallback<TValue> Changed { get; set; }
+    [Parameter] public decimal Min { get; set; } = 0;
+    [Parameter] public EventCallback<TValue> OnValueChanged { get; set; }
+    [Parameter] public EventCallback<FocusEventArgs> MouseLeave { get; set; }
+    async Task OnTextChanged(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? string.Empty;
+        try
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                await OnValueChanged.InvokeAsync(default);
+            }
+            else
+            {
+                var newValue = (TValue?)Convert.ChangeType(value, typeof(TValue));
+                await OnValueChanged.InvokeAsync(newValue);
+            }
+        }
+        catch (Exception ex)
+        {
+            await OnValueChanged.InvokeAsync(default);
+            Console.WriteLine(ex.Message);
+
+        }
+    }
+
+    async Task OnMouseLeave(FocusEventArgs e)
+    {
+        await MouseLeave.InvokeAsync(e);
+    }
+
+
+
+}

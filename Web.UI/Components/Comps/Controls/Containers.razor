@@ -1,0 +1,17 @@
+﻿<div class="@CssClass" style="@Style">
+    @if (ChildContent is not null)
+    {
+        @ChildContent
+    }
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; } = null;
+    [Parameter]
+    public bool Fluid { get; set; } = false;
+    [Parameter]
+    public string CssClass { get; set; } = string.Empty;
+    [Parameter]
+    public string Style { get; set; } = string.Empty;
+}

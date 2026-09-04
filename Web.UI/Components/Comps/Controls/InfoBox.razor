@@ -1,0 +1,34 @@
+﻿<RadzenCard class="info-card" Style="@($"background: linear-gradient(135deg, {@GradientStart}, {@GradientEnd}); border-radius: 8px; padding: 16px; margin-bottom: 16px;")">
+    @if (ChildContent is not null)
+    {
+        @ChildContent
+    }
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    [Parameter]
+    public string Title { get; set; } = "Metric";
+
+    [Parameter]
+    public string Subtitle { get; set; } = "Last 30 Days";
+
+    [Parameter]
+    public int Count { get; set; } = 0;
+
+    [Parameter]
+    public double PercentageIncrease { get; set; } = 0.0;
+
+    [Parameter]
+    public string Icon { get; set; } = "info";
+
+    [Parameter]
+    public string GradientStart { get; set; } = "#4CAF50";
+
+    [Parameter]
+    public string GradientEnd { get; set; } = "#81C784";
+
+    [Parameter]
+    public EventCallback OnMoreInfoClick { get; set; }
+}

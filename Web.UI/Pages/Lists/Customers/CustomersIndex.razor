@@ -1,0 +1,404 @@
+@page "/App/Customers"
+@page "/App/Customers/{BranchId:int}/Branches"
+@using Applications.Features.Customers.Response
+@using Web.UI.Components.Buttons
+@using Web.UI.Helpers.Options
+@attribute [StreamRendering]
+<PageTitle>Customers</PageTitle>
+<RadzenCard class="rz-background-color-base-200" Variant="Variant.Outlined">
+    <RadzenTabs RenderMode="TabRenderMode.Client" SelectedIndex="@selectedIndex" SelectedIndexChanged="SelectedTabChanged">
+        <Tabs>
+            <RadzenTabsItem Text="Customer" Icon="group">
+                <GridToolbar SearchChanged="SearchCustomer"
+                             CommandText="Add Customer"
+                             @bind-Value="@filterText"
+                             ShowAddCommand="false"
+                             Placeholder="Search Customer....">
+                    <LeftChildren>
+                        <AddButton OnClick="@AddCustomerTab" Text="Add Customer" Icon="@IconNames.PersonAdd" />
+                    </LeftChildren>
+                    <RightChildren>
+                        <div class="text-start">
+                            <RadzenCheckBox TValue="bool" Value="@includeInactive" Change="@OnChanged" />
+                            <RadzenLabel Text="Include InActive" />
+                        </div>
+                    </RightChildren>
+                </GridToolbar>
+                <RadzenDataGrid Count="@counts"
+                                AllowColumnPicking="true"
+                                Responsive
+                                GridLines="DataGridGridLines.Both"
+                                Density="Density.Compact"
+                                AllowAlternatingRows="true"
+                                AllowRowSelectOnRowClick="true"
+                                AllowFiltering="true"
+                                AllowSorting="true"
+                                PageSize="@pageSize"
+                                PagerPosition="PagerPosition.Bottom"
+                                ShowPagingSummary="true"
+                                AllowPaging="true"
+                                PagerHorizontalAlign="HorizontalAlign.Right"
+                                LoadData="@LoadData"
+                                TItem="VCustomerList"
+                                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                                PageSizeChanged="PageSizeChanged"
+                                RowRender="OnRowRender"
+                                RowSelect="OnRowSelected"
+                                CellRender="@OnCellRender"
+                                RowDoubleClick="@OnRowDoubleClick"
+                                @ref="@_gridCustomer"
+                                CellContextMenu="@ShowContextMenu"
+                                Style="min-height: var(--min-height);height: var(--normal-height); max-height: var(--max-height);overflow: auto;"
+                                Data="@VCustomers">
+                    <HeaderTemplate>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                            <RadzenLabel id="DropDownEditLabel" Text="Filter" Component="DropDownEdit" />
+                            <RadzenDropDown @bind-Value="selectedValue"
+                                            Placeholder="Filter by"
+                                            TValue="int"
+                                            Data="@Filters.CustomerFilters"
+                                            TextProperty="@nameof(ListItem.Name)"
+                                            ValueProperty="@nameof(ListItem.Id)"
+                                            SelectedItemChanged="@SelectedItemChanged"
+                                            Name="DropDownEdit">
+                            </RadzenDropDown>
+                        </RadzenStack>
+                    </HeaderTemplate>
+                    <Columns>
+                        <RadzenDataGridColumn Title="#"
+                                              Width="4rem"
+                                              Context="c"
+                                              Property="@nameof(VCustomerList.CustomerId)"
+                                              TextAlign="TextAlign.Center"
+                                              Pickable="false"
+                                              Filterable="false"
+                                              Sortable="false">
+                            <Template>
+                                @c.RowIndex
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="@nameof(VCustomerList.AltName)"
+                                              Context="c"
+                                              Width="8rem"
+                                              Title="Name">
+                            <Template>
+                                <NavLink @onclick="@(() => OnRowDoubleClick(c))">
+                                    <KhmerName AltName="@c.AltName" />
+                                </NavLink>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="@nameof(VCustomerList.FullName)"
+                                              Context="c"
+                                              Width="8rem"
+                                              Visible="false"
+                                              Title="FullName">
+                            <Template>
+                                @c.FullName
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="@nameof(VCustomerList.Phone)"
+                                              Context="c"
+                                              Width="8rem"
+                                              Property="Phone"
+                                              Sortable="true">
+                            <Template>
+                                @c.Phone
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="Email"
+                                              Context="c"
+                                              Width="10rem"
+                                              Property="@nameof(VCustomerList.EmailAddress)"
+                                              Visible="false"
+                                              Sortable="false" />
+                        <RadzenDataGridColumn Context="c"
+                                              Sortable="false"
+                                              Filterable="false"
+                                              Title="Address">
+                            <Template>
+                                <AddressInfo ComInKhmer="@c.ComInKhmer"
+                                             ProInKhmer="@c.ProInKhmer"
+                                             DisInKhmer="@c.DisInKhmer"
+                                             VilInKhmer="@c.VilInKhmer" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="សាខា"
+                                              Context="c"
+                                              Width="8rem"
+                                              Property="@nameof(VCustomerList.BranchName)"
+                                              Sortable="true">
+                            <Template>
+                                @(c?.BranchName ?? "-")
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="មន្ត្រីឥណ្ឌទាន"
+                                              Context="c"
+                                              Width="8rem"
+                                              Property="@nameof(VCustomerList.CreatedByUserName)"
+                                              Sortable="true">
+                            <Template>
+                                @(c?.CreatedByUserName ?? "-")
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="c"
+                                              Width="8rem"
+                                              TextAlign="TextAlign.Center"
+                                              Sortable="false"
+                                              Filterable="false"
+                                              Property="@nameof(VCustomerList.IsLoanActive)"
+                                              Title="Loan Active">
+                            <Template>
+                                <RadzenBadge Text="@(c.IsLoanActive ? "Active" : "None")"
+                                             BadgeStyle="@(c.IsLoanActive ? BadgeStyle.Success : BadgeStyle.Light)"
+                                             Shade="Shade.Default"
+                                             IsPill="true" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="c"
+                                              Width="5rem"
+                                              TextAlign="TextAlign.Center"
+                                              Sortable="false"
+                                              Filterable="false"
+                                              Property="@nameof(VCustomerList.IsActive)"
+                                              Title="Is Active">
+                            <Template>
+                                <RadzenBadge Text="@(c.IsActive ? "Active" : "Inactive")"
+                                             BadgeStyle="@(c.IsActive ? BadgeStyle.Primary : BadgeStyle.Danger)"
+                                             Shade="Shade.Default"
+                                             IsPill="true" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="FirstName"
+                                              Context="c"
+                                              Width="10rem"
+                                              Property="@nameof(VCustomerList.FirstName)"
+                                              Visible="false"
+                                              Sortable="false" />
+                        <RadzenDataGridColumn Title="LastName"
+                                              Context="c"
+                                              Width="10rem"
+                                              Property="@nameof(VCustomerList.LastName)"
+                                              Visible="false"
+                                              Sortable="false" />
+                        <RadzenDataGridColumn Context="c"
+                                              Width="5rem"
+                                              Sortable="false"
+                                              CssClass="z"
+                                              TextAlign="TextAlign.Center"
+                                              Filterable="false"
+                                              Pickable="false"
+                                              Title="Actions">
+                            <Template>
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
+                                              Icon="@IconNames.MoreVert"
+                                              Variant="Variant.Text"
+                                              Click="@((args)=>ShowContextMenu(args,c))" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenTabsItem>
+            @foreach (var item in _tabs)
+            {
+                <RadzenTabsItem Icon="@item.Icon" Text="@item.Title" @key="@item.TabId">
+                    <Template>
+                        <ClosedTab Title="@item.Title"
+                                   TabId="@item.TabId"
+                                   Closed="(() => CloseTab(item.TabId))" />
+                    </Template>
+                    <ChildContent>
+                        @item.ChildContent
+                    </ChildContent>
+                </RadzenTabsItem>
+            }
+        </Tabs>
+    </RadzenTabs>
+</RadzenCard>
+
+@code {
+
+    void EditIndex(int selectedTabIndex)
+    {
+        // selectedIndex = selectedTabIndex;
+
+        // isEditTab = true;
+    }
+
+    async Task CreateCustomerQuick()
+    {
+
+        var options = new DialogOptions
+        {
+            Width = "45vw",
+            Draggable = true,
+            Resizable = false
+        };
+
+        await DialogService.OpenAsync<CustomerCreateQuickPage>("Quick Add", options: options);
+    }
+
+    private int selectedValue = 0;
+
+    private RadzenDataGrid<VCustomerList> _gridCustomer = default!;
+
+    void ShowContextMenu(MouseEventArgs args, VCustomerList c)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;" Click="OnMenuItemClick">
+        <RadzenMenuItem Icon="request_quote"
+                        Click="@(()=>AddLoanRequest(c.CustomerId))"
+                        Disabled="@(!BState.CanRequest || c.IsLoanActive)"
+                        Text="Request Loan"
+                        Value="@c.CustomerId"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(() => AddCollateral(c.CustomerId))" Icon="add" Text="Add Collateral" Value="@c.CustomerId" />
+        <RadzenMenuItem Click="@(() => AddInComeModal(c.CustomerId))" Icon="money" Text="Add Income" Value="@c.CustomerId" />
+        <RadzenMenuItem Click="@(() => AddExpenseModal(c.CustomerId))" Icon="paid" Text="Add Expense" Value="@c.CustomerId" />
+        <RadzenMenuItem Click="@(() => AddDetails(c.CustomerId))" Icon="info" Text="Customer Details" Value="@c.CustomerId" />
+        <RadzenMenuItem Visible="@BState.IsAdmin" Click="@(() => AddEdit(c.CustomerId))" Icon="edit" Text="Edit" Value="@c.CustomerId" />
+        <RadzenMenuItem Visible="@BState.IsAdmin" Click="@(() => AddDelete(c.CustomerId))" Icon="delete" Text="Delete" Value="@c.CustomerId" />
+    </RadzenMenu>
+    );
+    }
+
+    void ChangedCustomerStatus(bool args)
+    {
+
+    }
+
+
+    void OnMenuItemClick(MenuItemEventArgs args)
+    {
+        ContextMenuService.Close();
+    }
+
+
+    async Task PageSizeChanged(int page)
+    {
+        pageSize = page;
+
+        pageIndex = 0; // Reset to first page when page size changes
+
+        await FilterCustomers(selectedValue);
+    }
+
+    private void ShowContextMenu(DataGridCellMouseEventArgs<VCustomerList> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem
+            {
+                Text = "Request Loan",
+                Icon = "request_quote",
+                Value = "2",
+                Disabled = (!BState.CanRequest || args.Data.IsLoanActive)
+            },
+            new ContextMenuItem
+            {
+                Text = "Add Collateral",
+                Icon = "add",
+                Value = "1"
+            },
+            new ContextMenuItem
+            {
+                Text = "Add Income",
+                Icon = "money",
+                Value = "3"
+            },
+             new ContextMenuItem
+            {
+                Text = "Add Expense",
+                Icon = "paid",
+                Value = "4"
+            },
+            new ContextMenuItem
+            {
+                Text = "Edit Customer",
+                Icon = "edit",
+                Value = "6",
+                Disabled = !BState.IsAdmin
+            },
+            new ContextMenuItem
+            {
+                Text = "Delete Customer",
+                Icon = "delete",
+                Value = "7",
+                Disabled = !BState.IsAdmin
+            },
+            new ContextMenuItem
+            {
+                Text = "Customer Details",
+                Icon = "info",
+                Value = "5"
+            }
+        }, (e) =>
+        {
+            ContextMenuService.Close();
+            DoShowCustomerActions(e, args);
+        });
+
+        
+    }
+
+    private void DoShowCustomerActions(MenuItemEventArgs e, DataGridCellMouseEventArgs<VCustomerList> args)
+    {
+        if (args.Data is null) return;
+
+          
+        if (int.TryParse(e.Value?.ToString(), out int value))
+        {
+            if (value == 1)
+            {
+                _ = AddCollateral(args.Data!.CustomerId);
+
+                return;
+            }
+            if (value == 2)
+            {
+                _ = AddLoanRequest(args.Data!.CustomerId);
+
+                return;
+            }
+
+            if (value == 3)
+            {
+                _ = AddInComeModal(args.Data!.CustomerId);
+
+                return;
+            }
+
+            if (value == 4)
+            {
+                AddExpenseModal(args.Data!.CustomerId);
+
+                return;
+            }
+
+            if (value == 5)
+            {
+                Details(args.Data!.CustomerId);
+
+                StateHasChanged();
+
+                return;
+            }
+            if (value == 6)
+            {
+                _ = AddEdit(args.Data!.CustomerId);
+
+                StateHasChanged();
+
+                return;
+            }
+
+            if (value == 7)
+            {
+                AddDelete(args.Data!.CustomerId);
+
+                return;
+            }
+        }
+    }
+
+}

@@ -1,0 +1,193 @@
+@page "/App/Settings/Periods"
+
+<PageTitle>Periods</PageTitle>
+
+<GridToolbar SearchChanged="@TextChanged">
+    <LeftChildren>
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Icon="@IconNames.Add"
+                      Text="Add New"
+                      Click="@AddPeriod" />
+    </LeftChildren>
+</GridToolbar>
+
+<RadzenDataGrid TItem="PeriodDto"
+                @ref="@_gridRef"
+                Data="@_periods"
+                Count="@_counts"
+                LoadData="@LoadData"
+                IsLoading="@_isLoading"
+                PageSize="@_pageSize"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PageSizeChanged="@PageSizeChanged"
+                PagerPosition="PagerPosition.Bottom"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="false"
+                AllowAlternatingRows="true"
+                Density="Density.Compact"
+                GridLines="DataGridGridLines.Both"
+                Responsive="true">
+    <Columns>
+        <RadzenDataGridColumn TItem="PeriodDto" Title="#" Width="4rem" Sortable="false" Filterable="false">
+            <Template Context="c">
+                @(_periods.IndexOf(c) + 1)
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="PeriodDto" Property="@nameof(PeriodDto.Period)" Title="Period (Months)" />
+
+        <RadzenDataGridColumn TItem="PeriodDto" Title="Actions" Width="5rem" TextAlign="TextAlign.Center" Sortable="false" Filterable="false">
+            <Template Context="c">
+                <RadzenButton Icon="@IconNames.MoreVert"
+                              Variant="Variant.Text"
+                              Size="ButtonSize.ExtraSmall"
+                              Click="@((args) => ShowContextMenu(args, c))"
+                              @onclick:stopPropagation="true" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+
+    [Inject] private ISettingApi SettingApi { get; set; } = default!;
+
+    private List<PeriodDto> _periods = [];
+
+    private RadzenDataGrid<PeriodDto> _gridRef = default!;
+
+    private int _pageIndex = 0;
+
+    private int _pageSize = 15;
+
+    private int _counts = 0;
+
+    private string? _filter = string.Empty;
+
+    private string _sortField = nameof(PeriodDto.Id);
+
+    private bool _sortDescending = false;
+
+    private bool _isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetPeriods(_filter);
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task GetPeriods(string? filter)
+    {
+        _isLoading = true;
+
+        try
+        {
+            var pager = await SettingApi.GetPeriodsAsync(_pageIndex, _pageSize, _sortField, _sortDescending, filter);
+
+            _periods = pager.Items ?? [];
+
+            _counts = pager.Count;
+        }
+        catch (Exception ex)
+        {
+            _periods = [];
+
+            _counts = 0;
+
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadData(LoadDataArgs args)
+    {
+        _pageIndex = args.Skip ?? 0;
+
+        _pageSize = args.Top ?? _pageSize;
+
+        (_sortField, _sortDescending) = args.PageInfo(nameof(PeriodDto.Id));
+
+        await GetPeriods(_filter);
+    }
+
+    private async Task PageSizeChanged(int size)
+    {
+        _pageSize = size;
+
+        _pageIndex = 0;
+
+        await GetPeriods(_filter);
+    }
+
+    private async Task TextChanged(string? value)
+    {
+        _filter = value;
+
+        _pageIndex = 0;
+
+        await GetPeriods(_filter);
+    }
+
+    private async Task AddPeriod()
+    {
+        var result = await DialogService.OpenAsync<PeriodCreate>("Add Period",
+            options: new DialogOptions { AutoFocusFirstElement = false });
+
+        if (result is PeriodDto)
+        {
+            await GetPeriods(_filter);
+        }
+    }
+
+    private async Task EditPeriod(PeriodDto item)
+    {
+        var result = await DialogService.OpenAsync<PeriodEdit>("Edit Period",
+            new Dictionary<string, object?> { { nameof(PeriodEdit.Id), item.Id } },
+            new DialogOptions { AutoFocusFirstElement = false });
+
+        if (result is PeriodDto)
+        {
+            await GetPeriods(_filter);
+        }
+    }
+
+    private async Task DeletePeriod(PeriodDto item)
+    {
+        var confirmed = await DialogService.Confirm($"Delete period '{item.Period}'?", "Confirm Delete",
+            new ConfirmOptions { OkButtonText = "Delete", CancelButtonText = "Cancel" });
+
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        try
+        {
+            await SettingApi.DeletePeriodAsync(item.Id);
+
+            NotificationService.Notify(NotificationSeverity.Success, "Deleted", "Period was deleted.");
+
+            await GetPeriods(_filter);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+    }
+
+    private void ShowContextMenu(MouseEventArgs args, PeriodDto item)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu>
+        <RadzenMenuItem Text="Edit" Icon="@IconNames.Edit" Click="@(() => EditPeriod(item))" />
+        <RadzenMenuItem Text="Delete" Icon="@IconNames.Delete" Click="@(() => DeletePeriod(item))" />
+    </RadzenMenu>);
+    }
+}

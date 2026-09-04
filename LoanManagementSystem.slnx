@@ -1,8 +1,11 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="Application/Application.csproj" Id="da71f130-1b9a-471e-8989-35588d0f8c08" />
     <Project Path="Applications/Applications.csproj" />
     <Project Path="Domains/Domains.csproj" />
     <Project Path="Infrastructures/Infrastructures.csproj" />
     <Project Path="TrapchumApp/TrapchumApp.csproj" />
+    <Project Path="Web.Api/Web.Api.csproj" Id="ce65d825-2f02-47e4-900d-6f5876b7aa6b" />
+    <Project Path="Web.UI/Web.UI.csproj" />
   </Folder>
 </Solution>

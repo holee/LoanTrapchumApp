@@ -1,0 +1,74 @@
+﻿@using System.Collections
+@using System.Linq.Expressions
+@using Applications.Features.Addresses.Dto
+@using Applications.Features.Addresses.Queries.GetCommunes
+@using Applications.Features.Addresses.Queries.GetDistricts
+<RadzenDropDown AllowFiltering="false"
+                AllowClear="false"
+                Name="@Name"
+                Style="width: 100%;"
+                Data="@districts"
+                Disabled="@(!ProvinceId.HasValue)"
+                Value="@Value"
+                TValue="int?"
+                ValueChanged="@ValueChanged"
+                ValueExpression="@ValueExpression"
+                Change="@(args => OnDistrictChanged((int?)args))"
+                TextProperty="@nameof(DistrictDto.DisInKhmer)"
+                ValueProperty="@nameof(DistrictDto.DistrictId)"
+                FilterOperator="StringFilterOperator.Contains"
+                Placeholder="@(!ProvinceId.HasValue ? "Select province first..." : "Select your district...")">
+</RadzenDropDown>
+@code {
+
+    [Parameter] public int? ProvinceId { get; set; }
+    [Parameter] public int? Value { get; set; }
+    [Parameter] public EventCallback<int?> OnGetCommuneEvent { get; set; }
+    [Parameter] public EventCallback<int?> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<int?>>? ValueExpression { get; set; }
+    [Parameter] public string? Name { get; set; } = "DistrictRefId";
+    private IEnumerable<DistrictDto> districts = [];
+    private IEnumerable<CommuneDto> communelist = [];
+    private async Task OnDistrictChanged(int? districtId)
+    {
+        communelist = [];
+
+        if (districtId.HasValue)
+        {
+            await OnGetCommuneEvent.InvokeAsync(districtId);
+
+            Value = districtId;
+        }
+    }
+
+    private async Task GetCommunes(int? districtId)
+    {
+        var query = new GetCommunesQuery(districtId ?? 0, 0, new());
+
+        var rsp = await mediator.Send(query);
+
+        communelist = rsp.Items;
+    }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ProvinceId.HasValue && ProvinceId > 0)
+        {
+            await GetDistricts(ProvinceId);
+        }
+
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task GetDistricts(int? provinceId)
+    {
+        var query = new GetDistrictsQuery(provinceId ?? 0, 0, new());
+
+        var rsp = await mediator.Send(query);
+
+        districts = rsp.Items;
+    }
+
+
+}

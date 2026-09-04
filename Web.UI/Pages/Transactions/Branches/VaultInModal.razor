@@ -1,0 +1,589 @@
+﻿@using Applications.Features.Transactions.CashManagements
+<PageTitle>Cash Vault In</PageTitle>
+@inject ExcelImportService excel
+
+<style>
+    .vin-modal-header {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+        border-radius: 8px 8px 0 0;
+        padding: 18px 24px 14px;
+        margin-bottom: 0;
+    }
+
+    .vin-modal-header .modal-title-text {
+        color: #ecfdf5;
+        font-size: 1.05rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .vin-modal-header .modal-subtitle-text {
+        color: #a7f3d0;
+        font-size: 0.78rem;
+        margin-top: 2px;
+    }
+
+    .vin-summary-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 14px 20px;
+        margin-bottom: 14px;
+    }
+
+    .vin-summary-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 4px;
+    }
+
+    .vin-summary-value {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #064e3b;
+        letter-spacing: 0.01em;
+    }
+
+    .vin-summary-value.is-positive {
+        color: #059669;
+    }
+
+    .vin-currency-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #d1fae5;
+        border: 1px solid #a7f3d0;
+        border-radius: 20px;
+        padding: 3px 12px 3px 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #065f46;
+    }
+
+    .vin-section-body {
+        padding: 0 20px 16px;
+    }
+
+    .vin-grid-wrapper {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(6,78,59,0.06);
+    }
+
+    .vin-footer-actions {
+        padding: 14px 20px 16px;
+        border-top: 1px solid #e2e8f0;
+        background: #f8fafc;
+        border-radius: 0 0 8px 8px;
+        gap: 8px;
+    }
+
+    .vin-import-zone {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #f0fdf4;
+        border: 1.5px dashed #86efac;
+        border-radius: 8px;
+        padding: 10px 16px;
+        margin-bottom: 14px;
+        font-size: 0.82rem;
+        color: #065f46;
+    }
+
+    .vin-import-zone label {
+        font-weight: 600;
+        font-size: 0.75rem;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: #047857;
+        white-space: nowrap;
+    }
+
+    .table-cell-edited {
+        position: relative;
+    }
+
+    .table-cell-edited::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 0;
+        height: 0;
+        border-top: 10px solid #ef4444;
+        border-left: 10px solid transparent;
+    }
+
+    .vin-note-value {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 0.88rem;
+    }
+
+    .vin-note-desc {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-left: 4px;
+    }
+
+    .vin-qty-onhand {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        color: #047857;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .divider-section {
+        border: none;
+        border-top: 1px solid #e2e8f0;
+        margin: 0 20px 14px;
+    }
+</style>
+
+<RadzenCard class="rz-p-0 rz-m-0" style="border-radius:8px; overflow:hidden; box-shadow: 0 4px 20px rgba(6,78,59,0.12);">
+
+    @* ── Header ── *@
+    <div class="vin-modal-header">
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenStack Orientation="Orientation.Vertical" Gap="2px">
+                <span class="modal-title-text">
+                    <RadzenIcon Icon="move_to_inbox" style="font-size:1.1rem;vertical-align:middle;margin-right:6px;color:#6ee7b7;" />
+                    Cash Vault In
+                </span>
+                <span class="modal-subtitle-text">Verify denomination amounts and balance before processing the vault deposit.</span>
+            </RadzenStack>
+            <div class="vin-currency-pill">
+                <RadzenIcon Icon="currency_exchange" style="font-size:0.95rem;" />
+                @(_currency?.CurrencyCode ?? "—")
+            </div>
+        </RadzenStack>
+    </div>
+
+    @* ── Summary Strip ── *@
+    <div class="vin-section-body" style="padding-top:14px;">
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="12px" Wrap="FlexWrap.Wrap">
+
+            @* Currency selector *@
+            <div class="vin-summary-card" style="flex:1; min-width:160px;">
+                <div class="vin-summary-label">
+                    <RadzenIcon Icon="language" style="font-size:0.75rem;vertical-align:middle;margin-right:3px;" />
+                    Currency
+                </div>
+                <RadzenDropDown @bind-Value="@CurrencyId"
+                                ValueProperty="CurrencyId"
+                                TextProperty="CurrencyCode"
+                                Data="@_currencyList"
+                                SelectedItemChanged="SelectedItemChanged"
+                                Style="width:100%; height:38px;"
+                                Name="DropDownBindValue" />
+            </div>
+
+            @* User Balance *@
+            <div class="vin-summary-card" style="flex:1; min-width:160px;">
+                <div class="vin-summary-label">
+                    <RadzenIcon Icon="account_balance" style="font-size:0.75rem;vertical-align:middle;margin-right:3px;" />
+                    User Balance
+                </div>
+                <span class="vin-summary-value">
+                    @((userBalance ?? 0).ToString(sp))
+                </span>
+            </div>
+
+            @* Total Vault-In Amount *@
+            <div class="vin-summary-card" style="flex:2; min-width:200px;">
+                <div class="vin-summary-label">
+                    <RadzenIcon Icon="payments" style="font-size:0.75rem;vertical-align:middle;margin-right:3px;" />
+                    Total Vault-In Amount
+                </div>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <span class="vin-summary-value @(totalAmount > 0 ? "is-positive" : "")">
+                        @((totalAmount ?? 0).ToString(sp))
+                    </span>
+                    <RadzenBadge BadgeStyle="@(totalAmount > 0 ? BadgeStyle.Success : BadgeStyle.Light)"
+                                 Text="@(totalAmount > 0 ? "READY" : "PENDING")"
+                                 style="font-size:0.7rem;letter-spacing:0.06em;" />
+                </RadzenStack>
+            </div>
+
+        </RadzenStack>
+
+        @* ── Import Strip ── *@
+        <div class="vin-import-zone">
+            <RadzenIcon Icon="upload_file" style="font-size:1.2rem;color:#059669;" />
+            <label>Import from Excel</label>
+            <InputFile OnChange="@OnInputFileChange"
+                       accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                       style="font-size:0.82rem;" />
+        </div>
+    </div>
+
+    <hr class="divider-section" />
+
+    @* ── Denomination Grid ── *@
+    <div class="vin-section-body" style="padding-top:0;">
+        <div class="vin-grid-wrapper">
+            <RadzenDataGrid Responsive
+                                         GridLines="DataGridGridLines.Both"
+                                         Data="cashMDList"
+                                         TItem="CashManagementDetailDtoCreate"
+                                         @ref="@grid"
+                                         EditMode="DataGridEditMode.Multiple"
+                                         CellClick="@OnCellClick"
+                                         RowUpdate="@OnUpdateRow"
+                                         Density="Density.Compact"
+                                         Style="border:none;">
+                <Columns>
+
+                    <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                          Property="CurrencyNoteValue"
+                                          Width="160px">
+                        <HeaderTemplate>
+                            <RadzenIcon Icon="receipt_long" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
+                            Denomination
+                        </HeaderTemplate>
+                        <Template>
+                            <span class="vin-note-value">@context.CurrencyNoteValue</span>
+                            <span class="vin-note-desc">@context.CurrencyRefDesc</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                          Property="QOnHand"
+                                          Context="c"
+                                          TextAlign="TextAlign.Right"
+                                          Width="120px">
+                        <HeaderTemplate>
+                            <RadzenIcon Icon="inventory_2" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
+                            In Vault
+                        </HeaderTemplate>
+                        <Template>
+                            <span class="vin-qty-onhand">
+                                <RadzenIcon Icon="warehouse" style="font-size:0.75rem;color:#94a3b8;" />
+                                @c.QOnHand
+                            </span>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                                               Property="@nameof(CashManagementDetailDtoCreate.Quantity)"
+                                                               TextAlign="TextAlign.Right"
+                                                               Context="c"
+                                                               Width="130px">
+                        <HeaderTemplate>
+                            <RadzenIcon Icon="tag" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
+                            Quantity
+                        </HeaderTemplate>
+                        <Template>
+                            <RadzenBadge BadgeStyle="@(c.Quantity > 0 ? BadgeStyle.Success : BadgeStyle.Light)"
+                                         Text="@(c.Quantity?.ToString() ?? "0")"
+                                         style="font-size:0.8rem;min-width:40px;" />
+                        </Template>
+                        <EditTemplate Context="item">
+                            <RadzenNumeric TValue="int?"
+                                                                        ShowUpDown="false"
+                                                                        TextAlign="TextAlign.Right"
+                                                                        class="@Styles.W100"
+                                                                        onclick="this.querySelector('.rz-numeric-input').select()"
+                                                                        @bind-Value="item.Quantity"
+                                                                        Min="0"
+                                                                        @ref="editor"
+                                                                        @key="item.CurrencyNoteValue"
+                                                                        InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Quantity" }})"
+                                                                        Change="@(args => CalculateByQuantity(item, args))" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                                               Property="@nameof(CashManagementDetailDtoCreate.TotalValue)"
+                                                               Context="c"
+                                                               TextAlign="TextAlign.Right"
+                                                               Width="150px">
+                        <HeaderTemplate>
+                            <RadzenIcon Icon="calculate" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
+                            Sub Total
+                        </HeaderTemplate>
+                        <Template>
+                            <span style="font-weight:600; color:@(c.TotalValue > 0 ? "#059669" : "#94a3b8");">
+                                @c.TotalValue?.ToString(sp)
+                            </span>
+                        </Template>
+                        <EditTemplate Context="item">
+                            <RadzenNumeric TValue="decimal?"
+                                           ShowUpDown="false"
+                                           TextAlign="TextAlign.Right"
+                                           class="@Styles.W100"
+                                           onclick="this.querySelector('.rz-numeric-input').select()"
+                                           @bind-Value="item.TotalValue"
+                                           Min="0"
+                                           Format="@sp"
+                                           @key="item.CurrencyNoteValue"
+                                           @ref="editor"
+                                           InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Total Value" }})"
+                                           Change="@(args => CalculateByAmount(item, args))" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                          Property="@nameof(CashManagementDetailDtoCreate.TotalQuantity)"
+                                          Context="c"
+                                          TextAlign="TextAlign.Right"
+                                          Width="130px">
+                        <HeaderTemplate>
+                            <RadzenIcon Icon="numbers" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
+                            Total Qty
+                        </HeaderTemplate>
+                        <Template>
+                            @c.TotalQuantity
+                        </Template>
+                        <FooterTemplate>
+                            <strong>@cashMDList?.Sum(x => x.TotalQuantity)</strong>
+                        </FooterTemplate>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                          Property="@nameof(CashManagementDetailDtoCreate.TotalValue)"
+                                          Context="c"
+                                          TextAlign="TextAlign.Right">
+                        <HeaderTemplate>
+                            <RadzenIcon Icon="summarize" style="font-size:0.85rem;vertical-align:middle;margin-right:4px;" />
+                            Total Value
+                        </HeaderTemplate>
+                        <Template>
+                            <span style="font-weight:600;">@c.Value.Format(CurrencyId)</span>
+                        </Template>
+                        <FooterTemplate>
+                            <strong style="color:#064e3b;">@cashMDList?.Sum(x => x.Value).Format(CurrencyId)</strong>
+                        </FooterTemplate>
+                    </RadzenDataGridColumn>
+
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    </div>
+
+    @* ── Footer Actions ── *@
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 AlignItems="AlignItems.Center"
+                 class="vin-footer-actions">
+        <RadzenButton ButtonStyle="ButtonStyle.Light"
+                      Icon="close"
+                      Text="Cancel"
+                      Click="@(() => DialogService.Close(true))"
+                      Size="ButtonSize.Small"
+                      style="min-width:90px;" />
+        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                      Icon="save"
+                      Text="Save"
+                      Disabled="total==0"
+                      Click="@OnSaveChanges"
+                      Size="ButtonSize.Small"
+                      style="min-width:90px;" />
+        <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                      Text="Save &amp; Close"
+                      Icon="task_alt"
+                      Disabled="total==0"
+                      Size="ButtonSize.Small"
+                      Click="@OnSaveChangesClose"
+                      style="min-width:120px;" />
+    </RadzenStack>
+
+</RadzenCard>
+@code {
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs args)
+    {
+
+
+        var file = args.File;
+
+        if (file is null || file.Size == 0) return;
+
+        using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+
+        using var ms = new MemoryStream();
+
+        await stream.CopyToAsync(ms);
+
+        ms.Position = 0;
+
+        var rsp = await excel.GetCashValaultInFromExcel(ms);
+
+        cashMDList = rsp.ToList();
+
+        await grid.Reload();
+    }
+
+    RadzenDataGrid<CashManagementDetailDtoCreate> grid = default!;
+    IRadzenFormComponent editor = default!;
+    bool editorFocused = false;
+    string? columnEditing;
+    List<KeyValuePair<int?, string>> editedFields = new List<KeyValuePair<int?, string>>();
+    List<CashManagementDetailDtoCreate> ordersToUpdate = new List<CashManagementDetailDtoCreate>();
+
+    bool IsEditing(string columnName, CashManagementDetailDtoCreate order)
+    {
+        return columnEditing == columnName && ordersToUpdate.Contains(order);
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (!editorFocused && editor != null)
+        {
+            editorFocused = true;
+
+            try
+            {
+                await editor.FocusAsync();
+            }
+            catch
+            {
+                //
+            }
+        }
+    }
+    void CalculateByQuantity(CashManagementDetailDtoCreate item, int? qty)
+    {
+        qty ??= 0;
+
+        if (qty > 0)
+        {
+            item.TotalValue = item.CurrencyNoteValue * qty.Value;
+        }
+        else
+        {
+            item.TotalValue = 0;
+        }
+
+        _ = Update();
+
+        CalTotal1();
+
+       // grid?.Reload();
+    }
+
+    void CalculateByAmount(CashManagementDetailDtoCreate item, decimal? value)
+    {
+        value ??= 0;
+
+        var qty = Convert.ToInt32(value / item.CurrencyNoteValue);
+
+        if (qty > 0 && value > 0)
+        {
+            item.Quantity = qty;
+
+            item.TotalValue = value.Value;
+        }
+
+        _ = Update();
+
+        CalTotal1();
+
+        //grid?.Reload();
+    }
+
+    void CalTotal1()
+    {
+        total = cashMDList?.Sum(x => x.TotalValue) ?? 0;
+
+        totalAmount = cashMDList?.Sum(x => x.TotalValue) ?? 0;
+    }
+
+
+    async Task OnCellClick(DataGridCellMouseEventArgs<CashManagementDetailDtoCreate> args)
+    {
+        if (grid == null) return;
+        if (args.Data is null) return;
+        if (args.Column is null) return;
+
+        if (!grid.IsValid ||
+            (ordersToUpdate.Contains(args.Data) && columnEditing == args.Column.Property)) return;
+
+        // Record the previous edited field, if you're not using IRevertibleChangeTracking to track object changes
+        if (ordersToUpdate.Any())
+        {
+            editedFields.Add(new(ordersToUpdate.First().CurrencyNoteValue, columnEditing!));
+            await Update();
+        }
+
+        // This sets which column is currently being edited.
+        columnEditing = args.Column.Property;
+
+        // This sets the Item to be edited.
+        await EditRow(args.Data);
+    }
+
+
+    async Task Update()
+    {
+        editorFocused = false;
+
+        if (ordersToUpdate.Any())
+        {
+            await grid.UpdateRow(ordersToUpdate.First());
+        }
+    }
+
+
+    async Task EditRow(CashManagementDetailDtoCreate? order)
+    {
+        Reset();
+
+        if (order is not null)
+        {
+            ordersToUpdate.Add(order);
+
+            await grid.EditRow(order);
+        }
+    }
+
+    void Reset(CashManagementDetailDtoCreate? order = null)
+    {
+        editorFocused = false;
+
+        if (order != null)
+        {
+            ordersToUpdate.Remove(order);
+        }
+        else
+        {
+            ordersToUpdate.Clear();
+        }
+    }
+
+    void OnUpdateRow(CashManagementDetailDtoCreate order)
+    {
+        Reset(order);
+
+        // dbContext.Update(order);
+
+        // dbContext.SaveChanges();
+
+        // If you were doing row-level edits and handling RowDeselect, you could use the line below to
+        // clear edits for the current record.
+
+        //editedFields = editedFields.Where(c => c.Key != order.OrderID).ToList();
+    }
+
+    string IsEdited(RadzenDataGridColumn<CashManagementDetailDtoCreate> column, CashManagementDetailDtoCreate order)
+    {
+        // In a real scenario, you might use IRevertibleChangeTracking to check the current column
+        //  against a list of the object's edited fields.
+        return editedFields.Where(c => c.Key == order.CurrencyNoteValue && c.Value == column.Property).Any() ?
+            "table-cell-edited" : string.Empty;
+    }
+}
+

@@ -16,8 +16,9 @@ public interface IEmployeeService
     Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId, string? employeeId, QueryParam q, CancellationToken cancellation = default);
     Task<ErrorOr<VEmployeeList>> CreateAsync(EntityNames employee, CancellationToken cancellation = default);
     Task<ErrorOr<VEmployeeList>> UpdateAsync(EntityNames employee, CancellationToken cancellation = default);
-    Task<ErrorOr<VEmployeeList>> GetEmployeeDetailsByIdAsync(string? id, int? branchId, bool include);
+    Task<VEmployeeList> GetEmployeeDetailsByIdAsync(string? id, int? branchId, bool include);
     Task<ErrorOr<VEmployeeList>> UpdateEmployeeStateAsync(string? id, bool state, CancellationToken ct = default);
+    Task<VEmployeeList> CreateOrUpdateAsync(EntityNames employee, CancellationToken cancellation = default);
 }
 //Task<Result<string>> UpdateIsActiveAsync(string? id, bool state, CancellationToken cancellation = default);
 //Task<Result<VEmployeeList>> GetByIdAsync(string? employeeId, CancellationToken cancellation = default);

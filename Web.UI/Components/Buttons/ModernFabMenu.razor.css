@@ -1,0 +1,147 @@
+.modern-fab-menu {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modern-fab-menu.is-open {
+    z-index: 9999;
+}
+
+.fab-menu-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0; /* Behind main fab, but blocks rest of page */
+    background: transparent;
+    cursor: default;
+}
+
+.fab-menu-main {
+    position: relative;
+    z-index: 2;
+}
+
+.fab-menu-main .modern-fab .fab-icon {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modern-fab-menu.is-open .fab-menu-main .modern-fab .fab-icon {
+    transform: rotate(180deg);
+}
+
+.fab-menu-items {
+    position: absolute;
+    display: flex;
+    gap: 12px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Direction Up */
+.modern-fab-menu.direction-up {
+    flex-direction: column-reverse;
+}
+.modern-fab-menu.direction-up .fab-menu-items {
+    bottom: 100%;
+    flex-direction: column-reverse;
+    margin-bottom: 16px;
+}
+
+/* Direction Down */
+.modern-fab-menu.direction-down {
+    flex-direction: column;
+}
+.modern-fab-menu.direction-down .fab-menu-items {
+    top: 100%;
+    flex-direction: column;
+    margin-top: 16px;
+}
+
+/* Direction Left */
+.modern-fab-menu.direction-left {
+    flex-direction: row-reverse;
+}
+.modern-fab-menu.direction-left .fab-menu-items {
+    right: 100%;
+    flex-direction: row-reverse;
+    margin-right: 16px;
+}
+
+/* Direction Right */
+.modern-fab-menu.direction-right {
+    flex-direction: row;
+}
+.modern-fab-menu.direction-right .fab-menu-items {
+    left: 100%;
+    flex-direction: row;
+    margin-left: 16px;
+}
+
+/* Open State Animations */
+.modern-fab-menu.is-open .fab-menu-items {
+    pointer-events: auto;
+}
+
+::deep .fab-menu-item-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transform: scale(0.4) translateY(20px);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, visibility 0s 0.25s;
+}
+
+.modern-fab-menu.direction-down ::deep .fab-menu-item-wrapper {
+    transform: scale(0.4) translateY(-20px);
+}
+.modern-fab-menu.direction-left ::deep .fab-menu-item-wrapper {
+    transform: scale(0.4) translateX(20px);
+}
+.modern-fab-menu.direction-right ::deep .fab-menu-item-wrapper {
+    transform: scale(0.4) translateX(-20px);
+}
+
+.modern-fab-menu.is-open ::deep .fab-menu-item-wrapper {
+    transform: scale(1) translate(0);
+    opacity: 1;
+    visibility: visible;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+/* Staggered animation using nth-child */
+.modern-fab-menu.is-open ::deep .fab-menu-item-wrapper:nth-child(1) { transition-delay: 0.05s; }
+.modern-fab-menu.is-open ::deep .fab-menu-item-wrapper:nth-child(2) { transition-delay: 0.1s; }
+.modern-fab-menu.is-open ::deep .fab-menu-item-wrapper:nth-child(3) { transition-delay: 0.15s; }
+.modern-fab-menu.is-open ::deep .fab-menu-item-wrapper:nth-child(4) { transition-delay: 0.2s; }
+.modern-fab-menu.is-open ::deep .fab-menu-item-wrapper:nth-child(5) { transition-delay: 0.25s; }
+
+/* Labels */
+::deep .fab-menu-item-label {
+    position: absolute;
+    background: rgba(66, 66, 66, 0.95);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-family: inherit;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+    right: 100%;
+    margin-right: 16px;
+    transition: opacity 0.2s;
+}
+
+::deep .fab-menu-item-label.side-label {
+    right: auto;
+    top: 100%;
+    margin-top: 12px;
+    margin-right: 0;
+}

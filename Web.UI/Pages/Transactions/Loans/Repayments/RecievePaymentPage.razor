@@ -1,0 +1,376 @@
+﻿@page "/app/loans/{BranchId:int}/branches/{LoanId}/schedules"
+@using Applications.Features.LoanPayments.Requests
+@using Web.UI.Pages.Transactions.Loans.Disbursements
+@using Web.UI.Pages.Transactions.RecievePayements
+<PageTitle>Receive Payments</PageTitle>
+
+<RadzenStack Gap="0" class="rz-h-100">
+
+    <LoanInfos BranchId="@BranchId"
+               LoanId="@LoanId"
+               LoanSchedule="@LoanSchedule"
+               @key="@(Guid.NewGuid().ToString())">
+        <ChildContent>
+            <RadzenButton Text="Exchange"
+                          Visible="@_isPaymentTab"
+                          Size="ButtonSize.ExtraSmall"
+                          Icon="@IconNames.CurrencyExchange"
+                          Click="@ToggleExchangeChanged"
+                          ButtonStyle="ButtonStyle.Secondary" />
+        </ChildContent>
+    </LoanInfos>
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.Start"
+                 class="rz-px-3 rz-py-2 rz-border-bottom"
+                 Gap="0.5rem">
+        <RadzenCheckBox TValue="bool"
+                        Name="CheckBox1"
+                        Change="OnShowScheduleChanged"
+                        @bind-Value="@isAllowShowSchedule" />
+        <RadzenLabel Text="Due Schedules Only"
+                     Component="CheckBox1"
+                     class="rz-ms-1"
+                     style="font-size:0.85rem;cursor:pointer;" />
+        <RadzenCheckBox TValue="bool"
+                        Name="CheckBox2"
+                        Change="OnShowUnpaidOnlyChanged"
+                        @bind-Value="@isUnpaidOnly" />
+        <RadzenLabel Text="Unpaid Only"
+                     Component="CheckBox2"
+                     class="rz-ms-1"
+                     style="font-size:0.85rem;cursor:pointer;" />
+    </RadzenStack>
+
+    <RadzenTabs SelectedIndex="@selectedIndex" class="rz-flex-grow-1" style="min-height:0;">
+        <Tabs>
+            <RadzenTabsItem Text="Due Schedules" Icon="@IconNames.SendMoney">
+                <DueDateSchedulesPage BranchId="@BranchId"
+                                      LoanId="@LoanId"
+                                      CurrencyId="@CurrencyId"
+                                      @key="@Guid.NewGuid().ToString("N")"
+                                      ShowOnScheduleOnly="isAllowShowSchedule"
+                                      ShowUnpaidOnly="isUnpaidOnly"
+                                      CustomerName="@LoanSchedule?.AltName"
+                                      CreditAgentId="@CreditAgentId" />
+            </RadzenTabsItem>
+            @foreach (var item in _tabs)
+            {
+                <RadzenTabsItem @key="@item.Key" Icon="@item.Icon" Text="@item.Title">
+                    <Template>
+                        <ClosedTab TabId="@item.Key" Title="@item.Title" Closed="(() => CloseTab(item.Key))" />
+                    </Template>
+                    <ChildContent>
+                        @item.Content
+                    </ChildContent>
+                </RadzenTabsItem>
+            }
+        </Tabs>
+    </RadzenTabs>
+
+</RadzenStack>
+
+@code {
+    private List<CustomTab> _tabs = [];
+
+    private bool isAllowShowSchedule = true;
+
+    private bool isUnpaidOnly = true;
+
+    void OnShowScheduleChanged(bool args)
+    {
+        isAllowShowSchedule = args;
+    }
+
+    void OnShowUnpaidOnlyChanged(bool args)
+    {
+        isUnpaidOnly = args;
+    }
+
+    private void AddScheduleTab()
+    {
+        var newKey = $"{LoanId}_{BranchId}_schedule";
+
+        var existingIndex = _tabs.FindIndex(x => x.Key == newKey);
+
+        if (existingIndex != -1)
+        {
+            _tabs.RemoveAt(existingIndex);
+        }
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(SchedulesPage));
+            builder.AddAttribute(1, "BranchId", BranchId);
+            builder.AddAttribute(2, "LoanId", LoanId);
+            builder.AddAttribute(3, "CurrencyId", CurrencyId);
+            builder.AddAttribute(4, "CreditAgentId", CreditAgentId);
+            builder.AddAttribute(5, "OnClosed", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(newKey);
+
+            }));
+
+            builder.AddAttribute(6, "OnMultiplePayment", EventCallback.Factory.Create(this, () =>
+            {
+
+            }));
+
+            builder.SetKey(newKey);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(newKey, "Schedules", TabActions.List, content);
+
+        _tabs.Add(newTab);
+
+        selectedIndex = _tabs.Count;
+
+    }
+
+
+
+    private void AddMultiplePaymentTab(IEnumerable<VSchedule>? Schedules, LoanPaymentDtoCreate? LoanPayment)
+    {
+        var newKey = $"{LoanPayment?.LoanRefId}_details";
+
+        var existingIndex = _tabs.FindIndex(x => x.Key == newKey);
+
+        if (existingIndex != -1)
+        {
+            _tabs.RemoveAt(existingIndex);
+        }
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(PaymentMultiples));
+
+            builder.AddAttribute(1, "Schedules", Schedules);
+
+            builder.AddAttribute(2, "LoanPayment", LoanPayment);
+
+            builder.AddAttribute(3, "CurrencyId", CurrencyId);
+
+            builder.AddAttribute(4, "OnClose", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(newKey);
+            }));
+            builder.SetKey(newKey);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(newKey, "Multiple Payment", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        selectedIndex = _tabs.Count;
+
+    }
+
+
+    private void AddPaymentTab(string? loanId, long? scheduleId)
+    {
+        var newKey = $"{loanId}_{scheduleId}_details";
+
+        var existingIndex = _tabs.FindIndex(x => x.Key == newKey);
+
+        if (existingIndex != -1)
+        {
+            selectIndex = existingIndex + 1;
+            return;
+        }
+
+        RenderFragment content = builder =>
+        {
+
+
+        };
+
+        var newTab = new CustomTab(newKey, "Schedule Details", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        selectedIndex = _tabs.Count;
+
+    }
+
+
+    private void CloseTab(string? key)
+    {
+        var tab = _tabs.FirstOrDefault(t => t.Key == key);
+
+        if (tab != null)
+        {
+            var idx = _tabs.IndexOf(tab);
+
+            _tabs.Remove(tab);
+
+            selectedIndex = _tabs.Count; //Math.Max(0, idx);
+        }
+
+        isAllowShowSchedule = false;
+    }
+
+    private string _getPaymentSchedulesUrl = "";
+
+    void ShowContextMenu(MouseEventArgs args, VSchedule schedule)
+    {
+        ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
+            <AuthorizeView Policy="@Policies.RecievePayment">
+                <Authorized>
+                    <RadzenMenuItem Icon="schedule"
+                                    Disabled="@(SetDisabled(schedule))"
+                                    Click="@(()=>PayBySchedules(schedule))"
+                                    Text="Payment By Schedule"></RadzenMenuItem>
+
+                </Authorized>
+            </AuthorizeView>
+            <RadzenMenuItem Icon="paid"
+                            Visible="@(schedule.IsPaid)"
+                            Click="@(()=>ShowPaidSchedules(schedule))"
+                            Text="Payment History"></RadzenMenuItem>
+        </RadzenMenu>);
+
+        }
+
+    void ShowPaidSchedules(VSchedule? p)
+    {
+        ContextMenuService.Close();
+
+        //_selectedTabIndex = 1;
+    }
+
+    async Task ShowScheduleDetails(VSchedule? p)
+    {
+        //await popup.ToggleAsync(buttonItem.Element);
+        ContextMenuService.Close();
+        var param = new Dictionary<string, object?>
+            {
+                {"LoanId",p.LoanId },
+                {"CurrencyId",p.CurrencyId },
+                {"BranchId",p.BranchId },
+                {"ScheduleId",p.LoanScheduleId },
+            };
+        var options = new SideDialogOptions
+        {
+            Position = DialogPosition.Right,
+            ShowMask = true,
+            CloseDialogOnOverlayClick = true,
+            Width = "60vw"
+        };
+        await DialogService.OpenSideAsync<ScheduleDetailsPage>($"Schedule-{p.LoanScheduleId}", parameters: param!, options);
+
+
+    }
+
+
+    async Task PayBySchedules(VSchedule p)
+    {
+        ContextMenuService.Close();
+
+        var options = new SideDialogOptions
+        {
+            Position = DialogPosition.Right,
+            ShowMask = true,
+            CloseDialogOnOverlayClick = false,
+            Width = "35rem"
+        };
+
+        var param = new Dictionary<string, object?>
+            {
+                {"LoanId",p.LoanId },
+                {"CurrencyId",p.CurrencyId },
+                {"BranchId",p.BranchId },
+                {"LoanScheduleId",p.LoanScheduleId },
+            };
+
+        await DialogService.OpenSideAsync<RecievePaymentSidebar>($"Schedule-{p.LoanScheduleId}", parameters: param!, options);
+
+    }
+
+
+    private IList<VSchedule>? selectedSchedule = null;
+
+    void OnCellContextMenu(DataGridCellMouseEventArgs<VSchedule> args)
+    {
+
+        if (args == null || args.Data == null)
+            return;
+
+        selectedSchedule = new List<VSchedule>() { args.Data };
+
+        ContextMenuService.Open(args,
+            new List<ContextMenuItem> {
+                new ContextMenuItem()
+                    {
+                      Text = "Recieve Payment",
+                      Value = 1,
+                      Icon = "paid",
+                      Disabled=SetDisabled(args.Data)
+                    },
+                new ContextMenuItem(){
+                    Text = "Show Details",
+                    Value = 2,
+                    Icon = "details"
+                },
+            },
+            (e) =>
+            {
+                ContextMenuService.Close();
+
+                var selected = (int)e?.Value!;
+
+                if (selected == 1)
+                {
+                    _ = PayBySchedules(args.Data);
+                }
+                else if (selected == 2)
+                {
+                    _ = ShowScheduleDetails(args.Data);
+                }
+
+            }
+         );
+    }
+
+
+    private bool SetDisabled(VSchedule schedule)
+    {
+        return (IsAlreadyPaidSchedule(schedule) || !IsFirstScheduleSelected(schedule));
+    }
+
+    private bool IsAlreadyPaidSchedule(VSchedule p)
+    {
+        if (p.IsPaid)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "This schedule is already paid.");
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool IsFirstScheduleSelected(VSchedule p)
+    {
+        var schedulesList = schedules?.ToList();
+
+        var firstSchedule = schedulesList?.First(x => x.IsPaid == false);
+
+        if (p != firstSchedule)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Cannot add new schedule due to previouse schedule not complete paid yet.");
+
+            return false;
+        }
+
+        return true;
+    }
+
+
+}
+
+

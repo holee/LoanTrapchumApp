@@ -1,0 +1,149 @@
+@using Web.UI.Pages.Lists
+@using Web.UI.Pages.Transactions.Loans.Menu
+<PageTitle>Late Schedule</PageTitle>
+<GridToolbar SearchChanged="GetLoanDataFilter">
+    <RightChildren>
+        <RadzenDatePicker @bind-Value="paymentDate"
+                          @bind-Value:format="yyyy/MM/dd"
+                          @bind-Value:after="SelectedDateChanged"
+                          DateFormat="dd/MM/yyyy"
+                          ShowCalendarWeek="true" />
+    </RightChildren>
+</GridToolbar>
+<RadzenDataGrid AllowPaging="true"
+                Responsive="true"
+                TItem="VSchedule"
+                AllowAlternatingRows="true"
+                AllowRowSelectOnRowClick="true"
+                AllowSorting="false"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                Density="Density.Compact"
+                IsLoading="@isLoading"
+                GridLines="DataGridGridLines.Both"
+                PageSize="@pageSize"
+                ShowPagingSummary="true"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PageSizeChanged="ChangedPageSize"
+                Count="@counts"
+                CellRender="RowRenderChanged"
+                @bind-Value="SelectedPaymentSchedules"
+                Data="@LatePaymentSchedules">
+    <Columns>
+        <RadzenDataGridColumn Title="#"
+                              Width="2rem"
+                              Context="p">
+            <Template>
+                @(LatePaymentSchedules.IndexOf(p) + 1)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Payment Date"
+                              Width="7.5rem"
+                              Property="PaymentDate"
+                              Context="p">
+            <Template>
+                @p.PaymentDate.DayFirst()
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Day Arrea"
+                              Property="DayArrea"
+                              Width="6rem"
+                              Context="p">
+            <Template>
+                <span>@p.DayArrea <b>(ថ្ងៃ)</b></span>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Name"
+                              Property="AltName"
+                              Width="10rem"
+                              Context="p">
+            <Template>
+                <KhmerName AltName="@p.AltName" />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Principle"
+                              Width="8rem"
+                              Property="Principal"
+                              TextAlign="TextAlign.Right"
+                              Context="p">
+            <Template>
+                @p.Principle.FormatUp(2, p.CurrencyId!.Value)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Interest"
+                              Width="8rem"
+                              Property="Interest"
+                              TextAlign="TextAlign.Right"
+                              Context="p">
+            <Template>
+                @p.Interest.FormatUp(2, p.CurrencyId!.Value)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Collection Fee"
+                              Width="8rem"
+                              Property="CollectionFee"
+                              TextAlign="TextAlign.Right"
+                              Context="p">
+            <Template>
+                @p.CollectionFee.Format(p.CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Penalty"
+                              Width="8rem"
+                              Property="PenaltyAmount"
+                              TextAlign="TextAlign.Right"
+                              Context="p">
+            <Template>
+                @if (p.PenaltyAmount > 0)
+                {
+                    <strong class="text-danger">
+                        @p.PenaltyAmount.FormatUp(2, p.CurrencyId!.Value)
+                    </strong>
+                }
+                else
+                {
+                    @p.PenaltyAmount.FormatUp(2, p.CurrencyId!.Value)
+                }
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Total"
+                              Width="8rem"
+                              Property="TotalPay"
+                              TextAlign="TextAlign.Right"
+                              Context="p">
+            <Template>
+                @p.TotalPay.Format(p.CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Outstanding"
+                              Width="8rem"
+                              Property="LoanOutstanding"
+                              TextAlign="TextAlign.Right"
+                              Context="p">
+            <Template>
+                @(p.LoanOutstanding.Format(p.CurrencyId))
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Actions"
+                              Width="5rem"
+                              TextAlign="TextAlign.Center"
+                              Context="p">
+            <Template>
+                <RadzenButton Size="@Styles.DefaultSize"
+                              Icon="@IconNames.MoreVert"
+                              Variant="Variant.Text"
+                              Click="@((arg)=>ShowContextMenu(arg,p))" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    void ShowContextMenu(MouseEventArgs args, VSchedule p)
+    {
+        ContextMenuService.Close();
+        ContextMenuService.Open(args,
+                                ds =>@<LateScheduleMenu GetScheduleChanged="@ShowLateSchedules"
+                  Schedule="@p" />
+    );
+    }
+}

@@ -1,4 +1,5 @@
-﻿using Applications.Bases;
+﻿using ActualLab.Versioning;
+using Applications.Bases;
 using Applications.Commons.Messages.Employees;
 using Applications.Enumerations;
 using Applications.Exceptions;
@@ -7,11 +8,12 @@ using Applications.Features.Loans.Dtos.Responses;
 using Applications.Interfaces.Employees;
 using Applications.Responses;
 using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
-using Domains.Models.Lists;
 using Domains.Models;
+using Domains.Models.Lists;
 using ErrorOr;
 using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
@@ -20,7 +22,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Linq.Expressions;
-using Applications.Responses.ViewModels.Auths;
 
 namespace Infrastructures.Implements;
 
@@ -31,6 +32,56 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
     private readonly IDapperConnectionFactory _connectionFactory = connectionFactory;
     private readonly IDbContextFactory<DataContext> _dbContextFactory = dbContextFactory;
     private readonly ILogger<EmployeeRepository> _logger = logger;
+
+
+    public async Task<VEmployeeList> CreateOrUpdateAsync(EntityNames employee, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var _context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+            if (string.IsNullOrEmpty(employee.Id))
+            {
+                _context.EntityNames.Add(employee);
+            }
+            else
+            {
+                var contact = employee.Employee?.Contact;
+
+                if (employee.Employee is not null)
+
+                    employee.Employee.Contact = null;
+
+                _context.EntityNames.Update(employee);
+
+                if (contact is not null && !string.IsNullOrEmpty(contact.ContactId))
+                {
+                    var exists = await _context.Set<EmergencyContact>()
+                        .AsNoTracking()
+                        .AnyAsync(x => x.ContactId == contact.ContactId, cancellation);
+
+                    if (exists)
+                        _context.Set<EmergencyContact>().Update(contact);
+                    else
+                        _context.Set<EmergencyContact>().Add(contact);
+                }
+
+            }
+
+
+            await _context.SaveChangesAsync();
+
+            var emp = await GetEmployeeDetailsByIdAsync(employee.Id, null, true);
+
+            return emp;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message, ex);
+        }
+    }
+
+
 
     public async Task<ErrorOr<VEmployeeList>> CreateAsync(EntityNames employee, CancellationToken cancellation = default)
     {
@@ -80,7 +131,7 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
 
             await context.SaveChangesAsync(cancellation);
 
-            var emp = await GetEmployeeDetailsByIdAsync(employee.Id, null, false);
+            var emp = await GetEmployeeDetailsByIdAsync(employee.Id, null, true);
 
             return emp;
         }
@@ -208,7 +259,7 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
         }
     }
 
-    public async Task<ErrorOr<VEmployeeList>> GetEmployeeDetailsByIdAsync(string? id, int? branchId, bool include)
+    public async Task<VEmployeeList> GetEmployeeDetailsByIdAsync(string? id, int? branchId, bool include)
     {
         try
         {
@@ -229,7 +280,10 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
             {
                 var employee = await db.QueryFirstOrDefaultAsync<VEmployeeList>(sp, parameters, commandType: CommandType.StoredProcedure);
 
-                if (employee is null) return Error.NotFound(EmployeeMessage.NotFound);
+                if (employee is null)
+                {
+                    throw new NotFoundExceptions(EmployeeMessage.NotFound);
+                }
 
                 return employee;
             }
@@ -240,7 +294,7 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
 
             if (existingItem is null)
             {
-                return Error.NotFound(description: "No Employee Found.");
+                throw new NotFoundExceptions(EmployeeMessage.NotFound);
             }
 
             existingItem.LoanRequests = (await multiMap.ReadAsync<VLoanRequests>()).ToList();
@@ -252,7 +306,7 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
         }
         catch (Exception ex)
         {
-            return Error.Unexpected("Server.Error", ex.Message);
+            throw new Exception(ex.Message, ex);
         }
     }
 
@@ -274,7 +328,7 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
             return DeleteResult.InUse(EmployeeMessage.InUsed);
         }
 
-        if(await IsEmployeeAssignAsUser(id,context, cancellation))
+        if (await IsEmployeeAssignAsUser(id, context, cancellation))
         {
             return DeleteResult.InUse(EmployeeMessage.InUsed);
         }

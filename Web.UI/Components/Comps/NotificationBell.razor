@@ -1,0 +1,255 @@
+@using Applications.Features.Notifications.Dto
+@using Applications.Features.Notifications.Queries.GetNotification
+@using Applications.Features.Notifications.Queries.GetUnreadNotifications
+@using Applications.Utils
+@using Domains.Enumerations
+@using Humanizer
+@using Microsoft.JSInterop
+@using Radzen.Blazor
+@using Web.UI.Helpers.Extensions
+@using Web.UI.Services
+@using Web.UI.Shared
+@implements IAsyncDisposable
+@inject NotificationServices _notiService
+@inject IMediator mediator
+@inject NavigationManager NavigationManager
+@inject IJSRuntime js
+<div class="nb-wrap" @ref="@WrapperRef">
+
+    @* ── Bell trigger ── *@
+    <button class="nb-trigger" @onclick="Toggle" type="button" aria-label="Notifications">
+        <RadzenIcon Icon="notifications" Style="font-size:1.4rem;color:#fff;" />
+
+        @if (_notiService.UnReadCount > 0)
+        {
+            <span class="nb-badge">@(_notiService.UnReadCount > 99 ? "99+" : _notiService.UnReadCount.ToString())</span>
+        }
+    </button>
+
+    @* ── Dropdown panel ── *@
+    @if (IsOpen)
+    {
+        <div class="nb-panel">
+
+            @* header *@
+            <div class="nb-panel__head">
+                <span class="nb-panel__title">Notifications</span>
+                @if (_notiService.UnReadCount > 0)
+                {
+                    <span class="nb-panel__count">@_notiService.UnReadCount new</span>
+                }
+            </div>
+
+            @* list *@
+            @if (_notiService.Notifications.Count == 0)
+            {
+                <div class="nb-empty">
+                    <RadzenIcon Icon="notifications_off" Style="font-size:2rem;color:var(--rz-text-secondary-color);" />
+                    <span>No new notifications</span>
+                </div>
+            }
+            else
+            {
+                <div class="nb-list">
+                    @foreach (var msg in _notiService.Notifications)
+                    {
+                        <button class="nb-item @(msg.IsRead ? "" : "nb-item--unread")"
+                                type="button"
+                                @onclick="() => OpenMessage(msg)">
+                            <span class="nb-item__icon nb-item__icon--@GetIconColor(msg)">
+                                <RadzenIcon Icon="@GetNotificationIcon(msg)" />
+                            </span>
+                            <div class="nb-item__body">
+                                <span class="nb-item__type">@msg.Type</span>
+                                <span class="nb-item__title">@msg.Title</span>
+                                <span class="nb-item__time">@msg.CreatedAt.Humanize()</span>
+                            </div>
+                            @if (!msg.IsRead)
+                            {
+                                <span class="nb-item__dot"></span>
+                            }
+                        </button>
+                    }
+                </div>
+            }
+
+            @* footer *@
+            <button class="nb-footer" type="button" @onclick="ViewAll">
+                See all notifications
+            </button>
+
+        </div>
+    }
+
+</div>
+
+@code {
+    [CascadingParameter] CascadingAppState AppState { get; set; } = default!;
+    [CascadingParameter] public Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    private bool IsOpen;
+    private bool _isNavigating;
+
+    private ElementReference WrapperRef;
+
+    private DotNetObjectReference<NotificationBell>? _objRef;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _notiService.OnChange += OnNotificationChanged;
+
+        var auth = await AuthenticationState;
+
+        await AppState.GetAuthenticatedUser(auth.User);
+
+        await AppState.GetBranchIdByUser();
+
+        await LoadNotifications();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadNotifications()
+    {
+        var userId = AppState.UserId;
+
+        var branchId = AppState.BranchId;
+
+        var query = new GetUnreadNotificationsQuery(userId, branchId, new(0, 0));
+
+        var result = await mediator.Send(query);
+
+        _notiService.Notifications = result.Items;
+
+        _notiService.UnReadCount = result.Count;
+    }
+
+    private void OnNotificationChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    void Toggle() => IsOpen = !IsOpen;
+
+    async Task OpenMessage(NotificationDto arg)
+    {
+        if (_isNavigating) return;
+
+        _isNavigating = true;
+
+        IsOpen = false;
+
+        var targetUrl = GetNavigationUrl(arg);
+
+        if (string.IsNullOrEmpty(targetUrl))
+        {
+            _isNavigating = false;
+
+            return;
+        }
+
+        try
+        {
+            var result = await mediator.Send(new MarkUnreadNotificationCommand(arg.Id, arg.BranchId));
+
+            if (result.IsSuccess())
+            {
+                _notiService.MarkAsRead(arg);
+
+                await Task.Delay(50);
+
+                NavigationManager.NavigateTo(targetUrl, false);
+
+                StateHasChanged();
+            }
+        }
+        finally
+        {
+            _isNavigating = false;
+        }
+    }
+
+    private string? GetNavigationUrl(NotificationDto arg)
+    {
+        return (AppState.CanRequest, AppState.CanApproved, AppState.CanDisbursed, AppState.CanRecievePayment, arg.Type) switch
+        {
+            (true, _, _, _, var t) when t == NotificationType.New.ToString()
+                => $"/App/Loans/{arg.ReferenceId}/Requests/{arg.BranchId}/Branches/{arg.CustomerId}/Details",
+
+            (_, true, _, _, var t) when t == NotificationType.Request.ToString()
+                => $"/App/Loans/{arg.ReferenceId}/Requests/{arg.BranchId}/Branches/{arg.CustomerId}/Details",
+
+            (_, _, true, _, var t) when t == NotificationType.Disbursement.ToString()
+                => $"/App/Loans/{arg.ReferenceId}/Disbursements/{arg.BranchId}/Branches/CreateNew",
+
+            (_, _, _, true, var t) when t == NotificationType.Payment.ToString()
+                => $"/App/Loans/{arg.BranchId}/Branches/{arg.ReferenceId}/Schedules",
+
+            _ => null
+        };
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _objRef = DotNetObjectReference.Create(this);
+
+            await js.InvokeVoidAsync("dropdownOutsideClick.register", WrapperRef, _objRef);
+        }
+    }
+
+    [JSInvokable]
+    public void CloseDropdown()
+    {
+        if (IsOpen)
+        {
+            IsOpen = false;
+
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    void ViewAll()
+    {
+        IsOpen = false;
+
+        NavigationManager.NavigateTo("/App/Notifications");
+    }
+
+    string GetNotificationIcon(NotificationDto msg) => msg.Type switch
+    {
+        nameof(NotificationType.New)          => "description",
+        nameof(NotificationType.Request)      => "send",
+        nameof(NotificationType.Disbursement) => "payments",
+        nameof(NotificationType.Payment)      => "attach_money",
+        _                                     => "notifications"
+    };
+
+    string GetIconColor(NotificationDto msg) => msg.Type switch
+    {
+        nameof(NotificationType.New)          => "info",
+        nameof(NotificationType.Request)      => "primary",
+        nameof(NotificationType.Disbursement) => "success",
+        nameof(NotificationType.Payment)      => "warning",
+        _                                     => "secondary"
+    };
+
+    string GetStarClass(NotificationDto msg) => msg.IsRead ? "text-muted" : "text-warning";
+
+    public async ValueTask DisposeAsync()
+    {
+        _notiService.OnChange -= OnNotificationChanged;
+
+        try
+        {
+            await js.InvokeVoidAsync("dropdownOutsideClick.unregister", WrapperRef);
+        }
+        catch (JSDisconnectedException)
+        {
+            // Ignore if the circuit is already disconnected
+        }
+
+        _objRef?.Dispose();
+    }
+}

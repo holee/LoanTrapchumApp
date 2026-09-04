@@ -13,10 +13,19 @@ public sealed class CreateLoanRequestCommandHandler : IRequestHandler<CreateLoan
     }
     public async Task<ErrorOr<RequestResult>> Handle(CreateLoanRequestCommand request, CancellationToken cancellationToken)
     {
+        try
+        {
+            var req = request.MapToLoanCreateNew();
 
-        var req = request.MapToLoanCreateNew();
+            return await _requestService.CreateNewOrSaveLoanRequestAsync(req, cancellationToken);
+        }
+        catch (Exception ex)
+        {
 
-        return await _requestService.CreateNewOrSaveLoanRequestAsync(req, cancellationToken);
+            throw new Exception("An error occurred while creating the loan request.", ex);
+        }
+
+      
 
     }
 }

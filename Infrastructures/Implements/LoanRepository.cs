@@ -49,51 +49,56 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
 
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellation);
+        var strategy = context.Database.CreateExecutionStrategy();
 
-        try
+        return await strategy.ExecuteAsync(async () =>
         {
-            req.LoanAccountCode = await GetMaxLoanAccountCode(context);
+            await using var transaction = await context.Database.BeginTransactionAsync(cancellation);
 
-            req.CreatedBy = currentUser.UserId;
+            try
+            {
+                req.LoanAccountCode = await GetMaxLoanAccountCode(context);
 
-            var entry = context.LoanDisbursments.Add(req);
+                req.CreatedBy = currentUser.UserId;
 
-            await context.SaveChangesAsync(cancellation);
+                var entry = context.LoanDisbursments.Add(req);
 
-            var loanId = entry.Entity.LoanId;
+                await context.SaveChangesAsync(cancellation);
 
-            await context.Customers
-                         .Where(c => c.CustomerId == req.CustomerRefId)
-                         .ExecuteUpdateAsync(s => s.SetProperty(c => c.IsLoanActive, true), cancellation);
+                var loanId = entry.Entity.LoanId;
 
-            await context.LoanRequests
-                .Where(r => r.LoanRequestId == req.LoanRequestId
-                         && r.CustomerRefId == req.CustomerRefId
-                         && r.BranchRefId == req.BranchRefId)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(r => r.LoanRequestStatusRefId, (int)RequestStatus.Disbursed)
-                    .SetProperty(r => r.ModifiedDt, DateTimeOffset.UtcNow), cancellation);
+                await context.Customers
+                             .Where(c => c.CustomerId == req.CustomerRefId)
+                             .ExecuteUpdateAsync(s => s.SetProperty(c => c.IsLoanActive, true), cancellation);
 
-            await context.CollateralsLinks
-                .Where(cl => cl.LoanRequestRefId == req.LoanRequestId
-                          && cl.BranchId == req.BranchRefId)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(cl => cl.LoanRefId, loanId)
-                    .SetProperty(cl => cl.ModifiedDt, DateTimeOffset.UtcNow), cancellation);
+                await context.LoanRequests
+                    .Where(r => r.LoanRequestId == req.LoanRequestId
+                             && r.CustomerRefId == req.CustomerRefId
+                             && r.BranchRefId == req.BranchRefId)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(r => r.LoanRequestStatusRefId, (int)RequestStatus.Disbursed)
+                        .SetProperty(r => r.ModifiedDt, DateTimeOffset.UtcNow), cancellation);
 
-            await transaction.CommitAsync(cancellation);
+                await context.CollateralsLinks
+                    .Where(cl => cl.LoanRequestRefId == req.LoanRequestId
+                              && cl.BranchId == req.BranchRefId)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(cl => cl.LoanRefId, loanId)
+                        .SetProperty(cl => cl.ModifiedDt, DateTimeOffset.UtcNow), cancellation);
 
-            return new DisburseResult(true, loanId, req.BranchRefId, "Loan disbursed successfully.");
-        }
-        catch (DbUpdateException ex)
-        {
-            logger.LogError(ex, "Failed to disburse loan for customer {CustomerId}", req.CustomerRefId);
+                await transaction.CommitAsync(cancellation);
 
-            await transaction.RollbackAsync(CancellationToken.None);
+                return new DisburseResult(true, loanId, req.BranchRefId, "Loan disbursed successfully.");
+            }
+            catch (DbUpdateException ex)
+            {
+                logger.LogError(ex, "Failed to disburse loan for customer {CustomerId}", req.CustomerRefId);
 
-            return Error.Unexpected("CreateLoan.DbError", ex.InnerException?.Message ?? ex.Message);
-        }
+                await transaction.RollbackAsync(CancellationToken.None);
+
+                return (ErrorOr<DisburseResult>)Error.Unexpected("CreateLoan.DbError", ex.InnerException?.Message ?? ex.Message);
+            }
+        });
     }
 
     public async Task<LoanDtoCreate> GetLoanForEditAsync(string? loanId, int? branchId, CancellationToken cancellationToken = default)
@@ -626,28 +631,33 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
             return Error.NotFound("No Loan Data found");
         }
         // Start Transaction
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellation);
+        var strategy = context.Database.CreateExecutionStrategy();
 
-        try
+        return await strategy.ExecuteAsync(async () =>
         {
-            existingLoan.LoanStatusRefId = (int)LoanStatuses.Close;
+            await using var transaction = await context.Database.BeginTransactionAsync(cancellation);
+
+            try
+            {
+                existingLoan.LoanStatusRefId = (int)LoanStatuses.Close;
 
 
-            await context.Customers.Where(x => x.CustomerId == customerId)
-                             .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, false), cancellation);
+                await context.Customers.Where(x => x.CustomerId == customerId)
+                                 .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, false), cancellation);
 
-            await context.SaveChangesAsync(cancellation);
+                await context.SaveChangesAsync(cancellation);
 
-            await transaction.CommitAsync(cancellation);
+                await transaction.CommitAsync(cancellation);
 
-            return "Loan disbursement was closed successfully.";
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, ex.InnerException!.Message);
-            await transaction.RollbackAsync(cancellation);
-            return Error.Failure($"{ex.InnerException!.Message}");
-        }
+                return "Loan disbursement was closed successfully.";
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ex.InnerException!.Message);
+                await transaction.RollbackAsync(cancellation);
+                return (ErrorOr<string>)Error.Failure($"{ex.InnerException!.Message}");
+            }
+        });
     }
 
     public async Task<Pager<VLoanCollateral>> GetLoanCollaterals(string? loanId, int? branchId, CancellationToken cancellation = default)

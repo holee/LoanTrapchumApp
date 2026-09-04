@@ -1,0 +1,38 @@
+@using Web.UI.Components.Indicatros
+@page "/App/Employees/{EmployeeId}/Edit"
+<PageTitle>Edit Employee</PageTitle>
+
+@if (_isPageLoading)
+{
+    <Loading Text="កំពុងផ្ទុកបុគ្គលិក..." />
+}
+else
+{
+
+    <EditForm Model="@model" OnValidSubmit="@FormValidSubmit">
+        <ValidationSummary />
+        <Blazilla.FluentValidator />
+        <input type="hidden" @bind="model.Id" />
+        <EmployeeComp model="model" />
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.End"
+                     class="rz-mt-2"
+                     Gap="1rem">
+            <RadzenButton ButtonType="ButtonType.Submit"
+                          ButtonStyle="ButtonStyle.Success"
+                          Size="ButtonSize.Small"
+                          Icon="save"
+                          Text="Save" />
+            <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                          Variant="Variant.Flat"
+                          Size="ButtonSize.Small"
+                          Icon="cancel"
+                          Text="Cancel"
+                          Click="CloseTab" />
+        </RadzenStack>
+    </EditForm>
+}
+@code {
+
+
+}

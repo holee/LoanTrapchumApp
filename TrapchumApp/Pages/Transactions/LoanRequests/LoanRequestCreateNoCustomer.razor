@@ -6,6 +6,7 @@
 @using Applications.Features.LoanPayments.Requests
 @using Applications.Features.LoanPurposes
 @using Applications.Features.LoanPurposes.Queries.GetLoanPurposes
+@using Applications.Features.LoanRequests.Command.IsCustomerBusy
 @using Applications.Features.LoanRequests.Requests
 @using Applications.Features.Loans.Dtos.Requests
 @using Applications.Features.Periods.Dto
@@ -662,16 +663,31 @@
         await GetCustomers(args.Filter);
     }
 
-    private void OnSelectedItemChanged(object? arg)
+    private async Task OnSelectedItemChanged(object? arg)
     {
-        if (arg is not null)
+
+        if (arg is null) return;
+      
+        _customerId = ((VCustomerList)arg).CustomerId;
+
+        var query = new IsCustomerBusyQuery(_customerId);
+
+        var rsp = await mediator.Send(query);
+
+        if (rsp.IsError == false && rsp.Value)
         {
-            _customerId = ((VCustomerList)arg).CustomerId;
 
-            model.CustomerRefId = ((VCustomerList)arg).CustomerId;
+            await Swal.InfoAsync("Customer Busy", "This customer cannot request loan again.");
 
-            model.FullName = ((VCustomerList)arg)?.AltName ?? string.Empty;
+            model.CustomerRefId = null;
+
+            return;
         }
+
+        model.CustomerRefId = ((VCustomerList)arg).CustomerId;
+
+        model.FullName = ((VCustomerList)arg)?.AltName ?? string.Empty;
+
     }
 
     private void AddNewCustomer()

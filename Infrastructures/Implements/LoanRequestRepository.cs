@@ -1,3 +1,4 @@
+using Applications.Commons;
 using Applications.Commons.ExceptionHandlers;
 using Applications.Commons.Mappers;
 using Applications.Commons.Messages.Loanrequests;
@@ -27,6 +28,7 @@ using Infrastructures.Implements.Extensions;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Linq.Expressions;
 
@@ -38,7 +40,78 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         ICurrentUserService currentUserService) : ILoanRequestService
 {
 
+
+
+
     public async Task<ErrorOr<RequestResult>> CreateNewOrSaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
+
+        // Both pre-conditions resolve in a single round trip instead of two connections/queries.
+        var eligibility = await GetCustomerLoanEligibilityAsync(req.CustomerRefId, cancellationToken);
+
+        if (eligibility.HasPendingRequest)
+        {
+            return Error.Conflict(description: LoanRequestMessage.REQUEST_ALREADY_EXISTS);
+        }
+
+        if (eligibility.HasActiveLoan)
+        {
+            return Error.Conflict(description: LoanRequestMessage.CUSTOMER_HAS_ACTIVE_LOAN);
+        }
+
+        try
+        {
+            await using var cxt = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+            // LoanDocuments is intentionally not loaded: the merge below never touches it,
+            // so including it only widened the query for nothing.
+            var existingRequest = await cxt.LoanRequests
+                .Include(c => c.CollateralLinesLink)
+                    .ThenInclude(x => x.CollateralLine)
+                .Include(g => g.GuarantorsLink)
+                    .ThenInclude(x => x.Guarantor)
+                .Include(x => x.LoanDescriptions)
+                .Include(x => x.CoPawnRequests)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+                            x.CustomerRefId == req.CustomerRefId &&
+                            x.LoanRequestStatusRefId == (int)RequestStatus.New, cancellationToken);
+
+            if (existingRequest is null)
+            {
+                cxt.LoanRequests.Add(req);
+            }
+            else
+            {
+                MergeLoanRequestForCreateOrSave(cxt, existingRequest, req);
+            }
+
+            // A single SaveChangesAsync is already atomic and is retried by the configured
+            // SqlServer retrying execution strategy, so no explicit transaction is needed.
+            // An explicit transaction here would instead require wrapping the whole unit in
+            // CreateExecutionStrategy().ExecuteAsync, and a retry would then replay the
+            // mutation against an already-tracked graph.
+            await cxt.SaveChangesAsync(cancellationToken);
+
+            return new RequestResult(true,
+                existingRequest is null ? LoanRequestMessage.REQUEST_CREATED : LoanRequestMessage.REQUEST_UPDATED,
+                req.LoanRequestId);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
+
+            return Error.Unexpected(description: Messages.DataNotCreated);
+        }
+    }
+
+
+    public async Task<RequestResult> CreateOrSaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
 
@@ -52,12 +125,12 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
 
         if (hasExistingRequestTask.Result)
         {
-            return Error.Conflict("Loan Request already exists.");
+            throw new ConflictException("Loan Request already exists.");
         }
 
         if (hasActiveLoanTask.Result)
         {
-            return Error.Conflict("Customer has active loan.");
+            throw new ConflictException("Customer has active loan.");
         }
 
         var existingRequest = await cxt.LoanRequests
@@ -72,34 +145,42 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                         x.CustomerRefId == req.CustomerRefId &&
                         x.LoanRequestStatusRefId == (int)RequestStatus.New, cancellationToken);
 
-        await using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
+        var strategy = cxt.Database.CreateExecutionStrategy();
 
-        try
+        return await strategy.ExecuteAsync(async () =>
         {
-            if (existingRequest is null)
+            await using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
+
+            try
             {
-                cxt.LoanRequests.Add(req);
+                if (existingRequest is null)
+                {
+                    cxt.LoanRequests.Add(req);
+                }
+                else
+                {
+                    MergeLoanRequestForCreateOrSave(cxt, existingRequest, req);
+                }
+
+                await cxt.SaveChangesAsync(cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+
+                return new RequestResult(true, "New Loan Request was created.", req.LoanRequestId);
             }
-            else
+            catch (Exception ex)
             {
-                MergeLoanRequestForCreateOrSave(cxt, existingRequest, req);
+                logger.LogError(ex, "Failed to create loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
+
+                await transaction.RollbackAsync(cancellationToken);
+
+                throw;
             }
-
-            await cxt.SaveChangesAsync(cancellationToken);
-
-            await transaction.CommitAsync(cancellationToken);
-
-            return new RequestResult(true, "New Loan Request was created.");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to create loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
-
-            await transaction.RollbackAsync(cancellationToken);
-
-            return Error.Unexpected(ex.Message);
-        }
+        });
     }
+
+
+
     public async Task<ErrorOr<RequestResult>> EditLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
 
@@ -125,36 +206,40 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                             x.CustomerRefId == req.CustomerRefId &&
                             (x.LoanRequestStatusRefId == (int)RequestStatus.New ||
                             x.LoanRequestStatusRefId == (int)RequestStatus.Rechecked), cancellationToken);
-            using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
+            var strategy = cxt.Database.CreateExecutionStrategy();
 
-            try
+            return await strategy.ExecuteAsync(async () =>
             {
-                if (existingRequest is null)
+                using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
+
+                try
                 {
-                    return Error.Conflict("There is any requests yet.");
+                    if (existingRequest is null)
+                    {
+                        return Error.Conflict("There is any requests yet.");
+                    }
+
+                    cxt.Entry(existingRequest).CurrentValues.SetValues(req);
+
+                    if (req.LoanDescriptions.Any())
+                    {
+                        existingRequest.LoanDescriptions.AddRange(req.LoanDescriptions);
+                    }
+
+                    await cxt.SaveChangesAsync(cancellationToken);
+
+                    await transaction.CommitAsync(cancellationToken);
+
+                    return new RequestResult(true, "Loan Request was updated.");
                 }
-
-                cxt.Entry(existingRequest).CurrentValues.SetValues(req);
-
-                if (req.LoanDescriptions.Any())
+                catch (Exception ex)
                 {
-                    existingRequest.LoanDescriptions.AddRange(req.LoanDescriptions);
+                    await transaction.RollbackAsync(cancellationToken);
+                    return (ErrorOr<RequestResult>)Error.Unexpected(ex.Message);
                 }
-
-                await cxt.SaveChangesAsync(cancellationToken);
-
-                await transaction.CommitAsync(cancellationToken);
-
-                return new RequestResult(true, "Loan Request was updated.");
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync(cancellationToken);
-                return Error.Unexpected(ex.Message);
-            }
+            });
 
         }
-
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to create loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
@@ -186,37 +271,42 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
         }
 
-        using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
+        var strategy = cxt.Database.CreateExecutionStrategy();
 
-        try
+        return await strategy.ExecuteAsync(async () =>
         {
-            existingLoanRequest.LoanRequestStatusRefId = (int)RequestStatus.Approved;
+            using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
 
-            existingLoanRequest.ModifiedDt = DateTime.UtcNow;
+            try
+            {
+                existingLoanRequest.LoanRequestStatusRefId = (int)RequestStatus.Approved;
 
-            existingLoanRequest.AprovedDate = req.AprovedDate;
+                existingLoanRequest.ModifiedDt = DateTime.UtcNow;
 
-            existingLoanRequest.AprovedAmount = req.AprovedAmount;
+                existingLoanRequest.AprovedDate = req.AprovedDate;
 
-            existingLoanRequest.AdminFeeAmount = req.AdminFeeAmount;
+                existingLoanRequest.AprovedAmount = req.AprovedAmount;
 
-            existingLoanRequest.ApprovedBy = currentUserService.UserId;
+                existingLoanRequest.AdminFeeAmount = req.AdminFeeAmount;
 
-            await cxt.SaveChangesAsync(cancellationToken);
+                existingLoanRequest.ApprovedBy = currentUserService.UserId;
 
-            await transaction.CommitAsync(cancellationToken);
+                await cxt.SaveChangesAsync(cancellationToken);
 
-            return new RequestResult(true, "Loan Request was Aproved");
-        }
-        catch (Exception ex)
-        {
+                await transaction.CommitAsync(cancellationToken);
 
-            logger.LogError(ex, "Failed to approve loan request for LoanRequestId: {LoanRequestId}, BranchRefId: {BranchRefId}, CustomerRefId: {CustomerId}", req.LoanRequestId, req.BranchId, req.CustomerId);
+                return new RequestResult(true, "Loan Request was Aproved");
+            }
+            catch (Exception ex)
+            {
 
-            await transaction.RollbackAsync(cancellationToken);
+                logger.LogError(ex, "Failed to approve loan request for LoanRequestId: {LoanRequestId}, BranchRefId: {BranchRefId}, CustomerRefId: {CustomerId}", req.LoanRequestId, req.BranchId, req.CustomerId);
 
-            return Error.Unexpected($"{ex.Message}");
-        }
+                await transaction.RollbackAsync(cancellationToken);
+
+                return (ErrorOr<RequestResult>)Error.Unexpected($"{ex.Message}");
+            }
+        });
     }
     public async Task<ErrorOr<RequestResult>> SaveLoanRequestByManagerAsync(SaveLoanRequestDtoCreate req, CancellationToken cancellationToken = default)
     {
@@ -473,51 +563,61 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
         }
 
-        using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
+        var strategy = cxt.Database.CreateExecutionStrategy();
 
-        try
+        return await strategy.ExecuteAsync(async () =>
         {
+            using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
 
-            existingLoanRequest.LoanDescriptions.Add(new LoanDescriptions
+            try
             {
-                LoanRequestRefId = req.LoanRequestId,
-                Memo = req.Description,
-                UserRefId = currentUserService.UserId
-            });
 
-            existingLoanRequest.LoanRequestStatusRefId = (int)RequestStatus.Requested;
-            existingLoanRequest.IsSubmitted = true;
-            existingLoanRequest.ModifiedDt = DateTime.UtcNow;
-            await cxt.SaveChangesAsync(cancellationToken);
+                existingLoanRequest.LoanDescriptions.Add(new LoanDescriptions
+                {
+                    LoanRequestRefId = req.LoanRequestId,
+                    Memo = req.Description,
+                    UserRefId = currentUserService.UserId
+                });
 
-            await transaction.CommitAsync(cancellationToken);
+                existingLoanRequest.LoanRequestStatusRefId = (int)RequestStatus.Requested;
+                existingLoanRequest.IsSubmitted = true;
+                existingLoanRequest.ModifiedDt = DateTime.UtcNow;
+                await cxt.SaveChangesAsync(cancellationToken);
 
-            return new RequestResult(true, "Loan Request was send");
-        }
-        catch (Exception ex)
-        {
+                await transaction.CommitAsync(cancellationToken);
 
-            logger.LogError(ex, "Failed to approve loan request for LoanRequestId: {LoanRequestId}, BranchRefId: {BranchRefId}, CustomerRefId: {CustomerId}", req.LoanRequestId, req.BranchId, req.CustomerId);
+                return new RequestResult(true, "Loan Request was send");
+            }
+            catch (Exception ex)
+            {
 
-            await transaction.RollbackAsync(cancellationToken);
+                logger.LogError(ex, "Failed to approve loan request for LoanRequestId: {LoanRequestId}, BranchRefId: {BranchRefId}, CustomerRefId: {CustomerId}", req.LoanRequestId, req.BranchId, req.CustomerId);
 
-            return Error.Unexpected($"{ex.Message}");
-        }
+                await transaction.RollbackAsync(cancellationToken);
+
+                return (ErrorOr<RequestResult>)Error.Unexpected($"{ex.Message}");
+            }
+        });
     }
     public async Task<ErrorOr<bool>> IsCustomerBusy(string? customerId, CancellationToken cancellation = default)
     {
-        if (string.IsNullOrEmpty(customerId)) return false;
+        if (string.IsNullOrWhiteSpace(customerId)) return false;
+
+        // Unlike the create/save pre-checks, an open draft (StatusId 1 = New) also counts as busy here.
+        const string sql = @"
+            SELECT CAST(CASE WHEN EXISTS (SELECT 1 FROM VLoanRequests
+                                          WHERE CustomerId = @CustomerId AND StatusId IN (1, 2, 3, 6))
+                               OR EXISTS (SELECT 1 FROM VCustomerList
+                                          WHERE CustomerId = @CustomerId AND IsLoanActive = @IsLoanActive)
+                             THEN 1 ELSE 0 END AS BIT);";
+
+        var command = new CommandDefinition(sql,
+            new { CustomerId = customerId, IsLoanActive = true },
+            cancellationToken: cancellation);
 
         using var db = await dapperFactory.CreateConnectionAsync(cancellation);
-        var parameters = new DynamicParameters();
-        parameters.Add("@CustomerId", customerId);
-        parameters.Add("@IsLoanActive", true);
-        var sql = @"SELECT LoanRequestId,CustomerId FROM VLoanRequests WHERE CustomerId=@CustomerId AND StatusId IN (1,2,3,6)";
-        var sql1 = "SELECT CustomerId,IsLoanActive FROM VCustomerList WHERE CustomerId=@CustomerId AND IsLoanActive=@IsLoanActive";
-        var existingLoanRequest = await db.QueryAsync<VLoanRequests>(sql, parameters);
-        var customerInActiveLoan = await db.QueryAsync<Customer>(sql1, parameters);
-        return existingLoanRequest.Any() || customerInActiveLoan.Any();
 
+        return await db.ExecuteScalarAsync<bool>(command);
     }
 
     public async Task<ErrorOr<string>> AddLoanRequestCollateralAsync(LoanCollateralRequest req, CancellationToken cancellation = default)
@@ -1674,6 +1774,124 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
 
 
 
+    private const string _loanRequestPageColumns = """
+        LoanRequestId, BranchId, CurrencyId, CustomerId, BranchName, AltName, RequestDate,
+        StatusId, Status, CurrencyName, AprovedAmount, InterestRate, CollectionFeeRate,
+        AdminFeeRate, Summiter, AprovedBy, ModifiedDT
+        """;
+
+    // Only view-backed properties may reach ORDER BY; the resolved name is taken from this set, never from the caller.
+    private static readonly HashSet<string> _loanRequestSortableColumns = typeof(VLoanRequests)
+        .GetProperties()
+        .Where(p => !Attribute.IsDefined(p, typeof(NotMappedAttribute)))
+        .Select(p => p.Name)
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+    public async Task<PageMetaData<VLoanRequests>> GetLoanRequestAsync(string? userId, int? branchId,
+       RequestStatus requestStatus,
+       QueryParam param,
+       CancellationToken cancellationToken = default)
+    {
+        var conditions = new List<string>();
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("StatusId", (int)requestStatus);
+
+        if (branchId is > 0)
+        {
+            conditions.Add("BranchId = @BranchId");
+
+            parameters.Add("BranchId", branchId);
+        }
+
+        var filter = param.Filter?.Trim();
+
+        if (!string.IsNullOrWhiteSpace(filter))
+        {
+            conditions.Add("""
+                (COALESCE(BranchName, '') LIKE @Filter OR
+                 COALESCE(AltName, '') LIKE @Filter OR
+                 COALESCE(FullName, '') LIKE @Filter)
+                """);
+
+            parameters.Add("Filter", $"{filter}%");
+        }
+
+        if (!string.IsNullOrEmpty(userId))
+        {
+            parameters.Add("UserId", userId);
+
+            conditions.Add(requestStatus switch
+            {
+                RequestStatus.All
+                    => "(AprovedUserId = @UserId OR UserRequestId = @UserId)",
+                RequestStatus.New or RequestStatus.Rechecked or RequestStatus.Denied
+                    => $"""
+                       (StatusId IN ({(int)RequestStatus.New}, {(int)RequestStatus.Rechecked}, {(int)RequestStatus.Denied})
+                        AND UserRequestId = @UserId)
+                       """,
+                RequestStatus.Requested or RequestStatus.Checking
+                    => $"""
+                       (StatusId IN ({(int)RequestStatus.Requested}, {(int)RequestStatus.Checking})
+                        AND AprovedUserId = @UserId)
+                       """,
+                RequestStatus.Disbursed
+                    => $"""
+                       (StatusId = {(int)RequestStatus.Disbursed}
+                        AND (AprovedUserId = @UserId OR UserRequestId = @UserId))
+                       """,
+                _ => "StatusId = @StatusId"
+            });
+        }
+        else if (requestStatus != RequestStatus.All)
+        {
+            conditions.Add("StatusId = @StatusId");
+        }
+
+        var whereSql = conditions.Count > 0 ? "WHERE " + string.Join(" AND ", conditions) : string.Empty;
+
+        var direction = param.SortDescending ? "DESC" : "ASC";
+
+        var orderBy = _loanRequestSortableColumns.TryGetValue(param.FilterColumn ?? string.Empty, out var sortColumn)
+            ? $"{sortColumn} {direction}, ModifiedDT {direction}, StatusId {direction}, RequestDate {direction}"
+            : $"ModifiedDT {direction}, Status {direction}, RequestDate {direction}";
+
+        var fetchAll = param.Take <= 0;
+
+        parameters.Add("Offset", fetchAll || param.Page <= 1 ? 0 : (param.Page - 1) * param.Take);
+
+        parameters.Add("Take", fetchAll ? int.MaxValue : param.Take);
+
+        var sql = $"""
+            SELECT {_loanRequestPageColumns}
+            FROM VLoanRequests
+            {whereSql}
+            ORDER BY {orderBy}
+            OFFSET @Offset ROWS FETCH NEXT @Take ROWS ONLY;
+
+            SELECT COUNT(*)
+            FROM VLoanRequests
+            {whereSql};
+            """;
+
+        using var db = await dapperFactory.CreateConnectionAsync(cancellationToken);
+
+        using var multi = await db.QueryMultipleAsync(new CommandDefinition(sql, parameters, cancellationToken: cancellationToken));
+
+        var items = (await multi.ReadAsync<VLoanRequests>()).ToList();
+
+        var totalCount = await multi.ReadSingleAsync<int>();
+
+        return new PageMetaData<VLoanRequests>
+        {
+            Items = items,
+            Page = param.Page,
+            PageSize = fetchAll ? totalCount : param.Take,
+            TotalCount = totalCount
+        };
+    }
+
 
     public async Task<ErrorOr<string>> AddDescription(LoanDescriptions descriptions, CancellationToken cancellation = default)
     {
@@ -1744,6 +1962,35 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         return await context.Database
             .SqlQueryRaw<CoPawnCustomerDto>(sql, requestId!, branchId!)
             .ToListAsync(cancellation);
+    }
+
+    private sealed record CustomerLoanEligibility(bool HasPendingRequest, bool HasActiveLoan);
+
+    /// <summary>
+    /// Resolves both loan-request pre-conditions in a single round trip: whether the customer already has a
+    /// pending request (Requested/Checking/Rechecked) and whether the customer already has an active loan.
+    /// Status <see cref="RequestStatus.New"/> is deliberately excluded so an existing draft can still be re-saved.
+    /// </summary>
+    private async Task<CustomerLoanEligibility> GetCustomerLoanEligibilityAsync(string? customerId, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(customerId)) return new CustomerLoanEligibility(false, false);
+
+        // Bit 1 => pending request, bit 2 => active loan.
+        const string sql = @"
+            SELECT CASE WHEN EXISTS (SELECT 1 FROM VLoanRequests
+                                     WHERE CustomerId = @CustomerId AND StatusId IN (2, 3, 6)) THEN 1 ELSE 0 END
+                 + CASE WHEN EXISTS (SELECT 1 FROM VCustomerList
+                                     WHERE CustomerId = @CustomerId AND IsLoanActive = @IsLoanActive) THEN 2 ELSE 0 END;";
+
+        var command = new CommandDefinition(sql,
+            new { CustomerId = customerId, IsLoanActive = true },
+            cancellationToken: cancellationToken);
+
+        using var db = await dapperFactory.CreateConnectionAsync(cancellationToken);
+
+        var flags = await db.ExecuteScalarAsync<int>(command);
+
+        return new CustomerLoanEligibility((flags & 1) != 0, (flags & 2) != 0);
     }
 
     private async Task<bool> CheckExistingHasLoan(string? customerId)

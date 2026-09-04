@@ -1,0 +1,196 @@
+@page "/App/Employees"
+@using Applications.Features.Branches.Dtos
+@using Applications.Responses.ViewModels.Employees
+@using Web.UI.Components.Buttons
+@attribute [StreamRendering]
+<PageTitle>Employees</PageTitle>
+<RadzenTabs RenderMode="TabRenderMode.Client" Change="TabChanged" @bind-SelectedIndex="@selectedIndex">
+    <Tabs>
+        <RadzenTabsItem Text="Employees" Icon="group">
+            <GridToolbar SearchChanged="PerformSearch">
+                <LeftChildren>
+                    <AddButton OnClick="@CreateNewEmployeeTab" Text="Add Employee" />
+
+                    <div class="rz-p-1">
+                        <RadzenCheckBox @bind-Value="includeInActive"
+                                        @bind-Value:after="GetIncludeInactive"
+                                        Name="includeInActive" />
+                        <RadzenLabel Text="Include Inactive"
+                                     Component="includeInActive"
+                                     Style="margin-left: 3px; vertical-align: middle;" />
+                    </div>
+                </LeftChildren>
+                <RightChildren>
+                    <div class="rz-p-1">
+                        <RadzenDropDown Data="@Branches"
+                                        AllowClear="false"
+                                        TValue="int?"
+                                        @bind-Value="@branchId"
+                                        TextProperty="@nameof(VBranch.BranchName)"
+                                        ValueProperty="@nameof(VBranch.BranchId)"
+                                        class="w-100"
+                                        Name="Branch"
+                                        SelectedItemChanged="SelectedItemChanged"
+                                        Placeholder="Select branch">
+                        </RadzenDropDown>
+                    </div>
+                </RightChildren>
+            </GridToolbar>
+            <RadzenDataGrid Data="@Employees"
+                            GridLines="DataGridGridLines.Both"
+                            ColumnWidth="10rem"
+                            RowRender="@OnRowRender"
+                            CellRender="@OnCellRender"
+                            RowSelect="@OnRowSelected"
+                            LoadData="@LoadData"
+                            Responsive="true"
+                            Density="Density.Compact"
+                            Count="@counts"
+                            PagerPosition="PagerPosition.Bottom"
+                            PagerHorizontalAlign="HorizontalAlign.Right"
+                            PageSize="@pageSize"
+                            ShowPagingSummary="true"
+                            PageSizeOptions="@StorageConstant.PageSizeOptions"
+                            PageSizeChanged="PageSizeChanged"
+                            AllowPaging="true"
+                            AllowFiltering="true"
+                            AllowAlternatingRows="true"
+                            AllowRowSelectOnRowClick="true"
+                            AllowSorting="true"
+                            RowDoubleClick="@OnRowDoubleClick"
+                            @ref="@_gridEmployee"
+                            CellContextMenu="@ShowCellContextMenu"
+                            ShowHeader="true"
+                            AllowPickAllColumns="true"
+                            AllowColumnPicking="true"
+                            TItem="VEmployeeList">
+                <HeaderTemplate>
+
+                </HeaderTemplate>
+                <Columns>
+                    <RadzenDataGridColumn Context="c"
+                                          Width="5rem"
+                                          TextAlign="TextAlign.Center"
+                                          Title="#"
+                                          Sortable="false"
+                                          Filterable="false"
+                                          Property="@nameof(VEmployeeList.EmployeeId)">
+                        <Template>
+                            @c.RowIndex
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Name" Property="@nameof(VEmployeeList.AltName)" Context="e">
+                        <Template>
+                            <KhmerName AltName="@e.AltName" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="FirstName" Property="@nameof(VEmployeeList.FirstName)" Visible="false" />
+                    <RadzenDataGridColumn Title="LastName" Property="@nameof(VEmployeeList.LastName)" Visible="false" />
+                    <RadzenDataGridColumn Title="Phone" Property="@nameof(VEmployeeList.Phone)" />
+                    <RadzenDataGridColumn Title="Department"
+                                          Property="@nameof(VEmployeeList.DepartmentName)" />
+                    <RadzenDataGridColumn Title="Occupation"
+                                          Property="@nameof(VEmployeeList.Occupation)" />
+                    <RadzenDataGridColumn Title="Branch"
+                                          Property="@nameof(VEmployeeList.BranchName)" />
+                    <RadzenDataGridColumn Title="Email"
+                                          Sortable="false"
+                                          Property="@nameof(VEmployeeList.EmailAddress)" />
+                    <RadzenDataGridColumn Width="5rem"
+                                          Sortable="false"
+                                          TextAlign="TextAlign.Center"
+                                          Title="Status"
+                                          Property="@nameof(VEmployeeList.EmployeeId)"
+                                          Filterable="false"
+                                          Context="c">
+                        <Template>
+                            <RadzenBadge Text="@(c.IsActive ? "Active" : "Inactive")"
+                                         BadgeStyle="@(c.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                         Shade="Shade.Default" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Width="5rem"
+                                          Sortable="false"
+                                          Title="Action"
+                                          TextAlign="TextAlign.Center"
+                                          Filterable="false"
+                                          Property="@nameof(VEmployeeList.EmployeeId)"
+                                          Context="c">
+                        <Template>
+                            <RadzenButton Size="ButtonSize.ExtraSmall"
+                                          Icon="more_vert"
+                                          Variant="Variant.Text"
+                                          Click="@((args) => ShowContextMenuWithContent(args, c.EmployeeId))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+                <LoadingTemplate>
+                    <RadzenProgressBar Value="100"
+                                       ProgressBarStyle="ProgressBarStyle.Secondary"
+                                       Mode="ProgressBarMode.Indeterminate"
+                                       Visible="@isLoading"
+                                       ShowValue="false">
+                    </RadzenProgressBar>
+                </LoadingTemplate>
+            </RadzenDataGrid>
+        </RadzenTabsItem>
+
+        @foreach (var item in _tabs)
+        {
+            <RadzenTabsItem Text="@item.Title" Icon="@item.Icon" @key="item.Key">
+                <Template>
+                    <ClosedTab TabId="@item.Key" Title="@item.Title" Closed="@(() => CloseTab(item.Key))" />
+                </Template>
+                <ChildContent>
+                    @item.Content
+                </ChildContent>
+            </RadzenTabsItem>
+        }
+
+    </Tabs>
+</RadzenTabs>
+@code {
+
+    int tabCount = 0;
+
+    void ShowContextMenuWithContent(MouseEventArgs args, string? id)
+    {
+        ContextMenuService.Open(args, BuildEmployeeMenuItems(), me =>
+        {
+            ContextMenuService.Close();
+
+            HandleEmployeeAction(me.Value?.ToString(), id);
+
+        });
+    }
+
+    void ShowCellContextMenu(DataGridCellMouseEventArgs<VEmployeeList> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, BuildEmployeeMenuItems(), me =>
+        {
+            ContextMenuService.Close();
+            HandleEmployeeAction(me.Value?.ToString(), args.Data.EmployeeId);
+        });
+    }
+
+    List<ContextMenuItem> BuildEmployeeMenuItems() =>
+    [
+        new ContextMenuItem { Text = "Details", Icon = "info",   Value = "1" },
+        new ContextMenuItem { Text = "Edit",    Icon = "edit",   Value = "2" },
+        new ContextMenuItem { Text = "Delete",  Icon = "delete", Value = "3" },
+    ];
+
+    void HandleEmployeeAction(string? value, string? id)
+    {
+        switch (value)
+        {
+            case "1": AddDetailsTab(id); break;
+            case "2": AddEditTab(id); break;
+            case "3": _ = DeleteEmployee(id); break;
+        }
+    }
+
+}
+

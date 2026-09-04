@@ -1,0 +1,196 @@
+﻿<div class="container-fluid rz-background-color-base-100">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-px-1 rz-py-2 rz-m-0">
+            <RadzenColumn Size="5">
+                <RadzenBadge BadgeStyle="BadgeStyle.Light" Shade="Shade.Dark">
+                    <RadzenStack Orientation="Orientation.Horizontal"
+                                 AlignItems="AlignItems.Center"
+                                 Gap="0.25rem"
+                                 Style="padding: 0.4rem 0.25rem 0.4rem 0; text-transform: none;">
+                        Paid Amount
+                        <strong style="font-size:1rem;color:black;">
+                            @(originalPaidAmount.Format(CurrencyId))
+                        </strong>
+                    </RadzenStack>
+                </RadzenBadge>
+            </RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenBadge BadgeStyle="BadgeStyle.Light" Shade="Shade.Dark">
+                    <RadzenStack Orientation="Orientation.Horizontal"
+                                 AlignItems="AlignItems.Center"
+                                 Gap="0.25rem"
+                                 Style="padding: 0.4rem 0.25rem 0.4rem 0; text-transform: none;">
+                        Penalty Amount
+                        <strong style="font-size:1rem;color:black;">
+                            @(originalPenaltyAmount.Format(CurrencyId))
+                        </strong>
+                    </RadzenStack>
+                </RadzenBadge>
+            </RadzenColumn>
+            <RadzenColumn Size="3">
+                <RadzenStack Orientation="Orientation.Horizontal"
+                             JustifyContent="JustifyContent.End"
+                             AlignItems="AlignItems.Center">
+                    <RadzenButton Click="RestoreDefault"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Text="Set Default"
+                                  Size="ButtonSize.Small">
+                    </RadzenButton>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="4"></RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Dark" class="w-100">
+                    <RadzenStack Orientation="Orientation.Horizontal"
+                                 AlignItems="AlignItems.Center"
+                                 JustifyContent="JustifyContent.Center"
+                                 Gap="0.25rem"
+                                 Style="padding: 0.2rem 0.25rem 0.2rem 0; text-transform:uppercase;">
+                        <strong>USD</strong>
+                    </RadzenStack>
+                </RadzenBadge>
+            </RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Dark" class="w-100">
+                    <RadzenStack Orientation="Orientation.Horizontal"
+                                 AlignItems="AlignItems.Center"
+                                 JustifyContent="JustifyContent.Center"
+                                 Gap="0.25rem"
+                                 Style="padding: 0.2rem 0.25rem 0.2rem 0; text-transform: uppercase;">
+                        <strong>KHR</strong>
+                    </RadzenStack>
+                </RadzenBadge>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="4">
+                <RadzenLabel>Penalty Amount</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="8">
+                <RadzenNumeric TValue="decimal?"
+                               @bind-Value="penaltyAmount"
+                               onclick="this.querySelector('.rz-numeric-input').select()"
+                               TextAlign="TextAlign.End"
+                               class="w-100"
+                               Format="#,##0.00"
+                               Style="height:var(--input-text-sm)"
+                               Min="0"
+                               @oninput="CalculatePenaltyAmount"
+                               Disabled="@(penaltyAmount<=0)"
+                               ShowUpDown="false" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="4">
+                <RadzenLabel>Total Amount</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="8">
+                <RadzenNumeric TValue="decimal?"
+                               @bind-Value="TotalPaidAmount"
+                               onclick="this.querySelector('.rz-numeric-input').select()"
+                               ShowUpDown="false"
+                               TextAlign="TextAlign.End"
+                               class="w-100"
+                               Disabled
+                               Min="0"
+                               Style="height:var(--input-text-sm)"
+                               Format="#,##0.00" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="4">
+                <RadzenLabel>
+                    Recieve Amount
+                </RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="8">
+                <RadzenNumeric TValue="decimal?"
+                               ShowUpDown="false"
+                               class="w-100"
+                               onclick="this.querySelector('.rz-numeric-input').select()"
+                               @bind-Value="receiveAmountUsd"
+                               Format="#,##0.00"
+                               Style="height:var(--input-text-sm)"
+                               Min="0"
+                               @oninput="ReceivePaymentUSDChanged"
+                               TextAlign="TextAlign.End" />
+            </RadzenColumn>
+           @*  <RadzenColumn Size="4">
+                <RadzenNumeric TValue="decimal?"
+                               ShowUpDown="false"
+                               Format="#,##0.00"
+                               @bind-Value="receiveAmountKhr"
+                               @oninput="ReceivePaymentKHRChanged"
+                               Disabled="@(CurrencyId==2)"
+                               Min="0"
+                               Style="height:var(--input-text-sm)"
+                               onclick="this.querySelector('.rz-numeric-input').select()"
+                               class="w-100"
+                               TextAlign="TextAlign.End" />
+            </RadzenColumn> *@
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="4">
+                <RadzenLabel>Change</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="8">
+                <RadzenNumeric TValue="decimal?"
+                               @bind-Value="changedAmountUSD"
+                               TextAlign="TextAlign.End"
+                               class="w-100"
+                               Format="#,##0.00"
+                               onclick="this.querySelector('.rz-numeric-input').select()"
+                               Min="0"
+                               Disabled="@(receiveAmountKhr > 0 && receiveAmountUsd > 0)"
+                               Style="cursor:not-allowed;height:var(--input-text-sm)"
+                               @oninput="TextUsdAmountChanged"
+                               ShowUpDown="false">
+                </RadzenNumeric>
+            </RadzenColumn>
+           @*  <RadzenColumn Size="4">
+                <RadzenNumeric TValue="decimal?"
+                               @bind-Value="changedAmountKHR"
+                               TextAlign="TextAlign.End"
+                               Disabled
+                               Style="cursor:not-allowed;height:var(--input-text-sm)"
+                               class="w-100"
+                               Min="0"
+                               Format="#,##0.00"
+                               ShowUpDown="false">
+                </RadzenNumeric>
+            </RadzenColumn> *@
+        </RadzenRow>
+        <input type="hidden" @bind="originalExchangeAmountUSD" />
+        <input type="hidden" @bind="originalExchangeAmountKHR" />
+        <input type="hidden" @bind="buyingRate" />
+        <input type="hidden" @bind="sellingRate" />
+        <input type="hidden" @bind="spotRate" />
+        <input type="hidden" @bind="buyAmount" />
+        <input type="hidden" @bind="sellAmount" />
+        <input type="hidden" @bind="spotRateAmount" />
+        <input type="hidden" @bind="gainOrLostAmount" />
+</div>
+<RadzenStack Orientation="Orientation.Horizontal"
+             AlignItems="AlignItems.Center"
+             class="mt-3"
+             JustifyContent="JustifyContent.End"
+             Gap="1rem">
+    <RadzenButton ButtonStyle="ButtonStyle.Success"
+                  Size="ButtonSize.Small"
+                  Icon="save"
+                  Text="Recieve Payment"
+                  IsBusy="isBusy"
+                  Click="OnSaveChanges">
+    </RadzenButton>
+    <RadzenButton Size="ButtonSize.Small"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Icon="cancel"
+                  Text="Close"
+                  Click="@CloseModal">
+    </RadzenButton>
+</RadzenStack>
+
+
+
+

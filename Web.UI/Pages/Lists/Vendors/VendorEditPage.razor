@@ -1,0 +1,27 @@
+@page "/App/Vendors/{Id}/Edit"
+@using Web.UI.Components.Buttons
+@using Web.UI.Components.Indicatros
+<PageTitle>Edit Vendor</PageTitle>
+@attribute [StreamRendering]
+@if (_isLoading)
+{
+    <Loading Text="កំពុងផ្ទុកទិន្នន័យ..." />
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="HandleFormSubmit">
+        <Blazilla.FluentValidator />
+        <input type="hidden" @bind="model.Id" />
+        <CreateComp model="model" @key="@(Guid.NewGuid().ToString("N"))" />
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     Gap="1rem"
+                     class="rz-mt-2"
+                     JustifyContent="JustifyContent.End">
+            <SaveButton />
+            <CancelButton OnClick="@Close" />
+        </RadzenStack>
+    </EditForm>
+}
+
+

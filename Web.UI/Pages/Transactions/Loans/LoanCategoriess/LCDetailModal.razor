@@ -1,0 +1,60 @@
+﻿<div class="rz-shadow-3" style="border-radius:8px;overflow:hidden;">
+    <div class="rz-background-color-primary-dark rz-color-white px-4 py-3 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <RadzenIcon Icon="info" Style="font-size:1.2rem;" />
+            <span class="fw-semibold" style="font-size:1rem;">Category Details</span>
+            <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@category?.LoanCategoryCode" Style="font-size:0.8rem;" />
+        </div>
+        <RadzenBadge BadgeStyle="@(category?.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
+                     Text="@(category?.IsActive == true ? "Active" : "Inactive")"
+                     Style="font-size:0.75rem;" />
+    </div>
+
+    <div class="p-4" style="background:#fff;">
+        <RadzenRow Gap="0.75rem">
+            <RadzenColumn Size="12" SizeMD="6">
+                <div class="rz-background-color-base-100 p-3" style="border-radius:6px;">
+                    <div class="text-muted mb-1" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.05em;">Category Name</div>
+                    <div class="fw-semibold" style="font-size:0.9rem;">@(category?.LoanCategoryCode ?? "—")</div>
+                </div>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <div class="rz-background-color-base-100 p-3" style="border-radius:6px;">
+                    <div class="text-muted mb-1" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.05em;">Code</div>
+                    <div class="fw-semibold" style="font-size:0.9rem;">@(category?.Code ?? "—")</div>
+                </div>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <div class="rz-background-color-base-100 p-3" style="border-radius:6px;">
+                    <div class="text-muted mb-1" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.05em;">Description</div>
+                    <div style="font-size:0.88rem;">@(category?.Description ?? "—")</div>
+                </div>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <div class="rz-background-color-base-100 p-3" style="border-radius:6px;">
+                    <div class="text-muted mb-1" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.05em;">Description (Khmer)</div>
+                    <div style="font-size:0.88rem;">@(category?.DesInKhmer ?? "—")</div>
+                </div>
+            </RadzenColumn>
+        </RadzenRow>
+    </div>
+
+    <div class="px-4 py-2 d-flex align-items-center justify-content-between"
+         style="background:#f8f9fa;border-top:1px solid #dee2e6;">
+        <RadzenButton ButtonStyle="ButtonStyle.Light"
+                      Icon="close"
+                      Text="Close"
+                      Click="@ClosedTab"
+                      Size="ButtonSize.Small" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback<int> CloseTab { get; set; }
+    async void ClosedTab()
+    {
+        await CloseTab.InvokeAsync(0);
+        DialogService.Close();
+        StateHasChanged();
+    }
+}

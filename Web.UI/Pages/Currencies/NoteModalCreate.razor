@@ -1,0 +1,89 @@
+@using Applications.Features.Currencies.Dto
+<div class="note-modal-shell @Styles.W100">
+    <EditForm Model="model" OnValidSubmit="@FormSubmit">
+        <DataAnnotationsValidator />
+        <div class="note-section-card">
+            <div class="note-section-header">
+                <div class="note-header-left">
+                    <div class="note-section-icon">
+                        <RadzenIcon Icon="payments" Style="font-size:1rem;" />
+                    </div>
+                    <div>
+                        <div class="note-section-title">Currency note</div>
+                        <div class="note-section-subtitle">Capture value details with a clean and consistent form.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="note-section-body">
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="12">
+                        <RadzenFormField AllowFloatingLabel="true" Text="Currency Code" class="@Styles.W100">
+                            <ChildContent>
+                                <RadzenDropDown Data="Currencies"
+                                                TValue="int?"
+                                                Disabled="@(Id != 0)"
+                                                class="@Styles.W100"
+                                                TextProperty="@nameof(CurrencyDto.Description)"
+                                                ValueProperty="@nameof(CurrencyDto.CurrencyId)"
+                                                Placeholder="Select currency"
+                                                @bind-Value="model.CurrencyRefId">
+                                </RadzenDropDown>
+                            </ChildContent>
+                            <Helper>
+                                <ValidationMessage For="@(() => model.CurrencyRefId)" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow AlignItems="AlignItems.Center" class="@Defaults.Mt2">
+                    <RadzenColumn Size="12">
+                        <RadzenFormField AllowFloatingLabel="true" Text="Currency Value" class="@Styles.W100">
+                            <ChildContent>
+                                <RadzenNumeric TValue="int?"
+                                               @bind-Value="model.CurrencyValue"
+                                               Placeholder="Currency Value"
+                                               class="@Styles.W100" />
+                            </ChildContent>
+                            <Helper>
+                                <ValidationMessage For="@(() => model.CurrencyValue)" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenRow AlignItems="AlignItems.Center" class="@Defaults.Mt2">
+                    <RadzenColumn Size="12">
+                        <RadzenFormField Text="Description" class="@Styles.W100">
+                            <ChildContent>
+                                <RadzenTextArea @bind-Value="model.Description"
+                                                Placeholder="Optional note about this value"
+                                                Rows="4"
+                                                class="@Styles.W100" />
+                            </ChildContent>
+                            <Helper>
+                                <ValidationMessage For="@(() => model.Description)" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+            </div>
+        </div>
+
+        <RadzenStack Orientation="Orientation.Horizontal" class="@($"note-footer {Defaults.Mt2}")"
+                     Gap="1rem"
+                     AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+            <RadzenButton Icon="save"
+                          Text="Save"
+                          ButtonType="ButtonType.Submit"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Success" />
+            <RadzenButton Icon="cancel"
+                          Click="Close"
+                          Text="Close"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Danger" />
+        </RadzenStack>
+    </EditForm>
+</div>

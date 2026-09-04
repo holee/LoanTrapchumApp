@@ -1,0 +1,247 @@
+﻿@using Applications.Calculations
+@using Applications.Features.LoanPayments.Requests
+
+<style>
+    .payment-lines-card {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    .payment-lines-header {
+        background: linear-gradient(135deg, var(--rz-primary) 0%, var(--rz-primary-dark, #1a6fb5) 100%);
+        padding: 0.75rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .payment-lines-header .rz-icon {
+            font-size: 1.2rem;
+            color: #fff;
+        }
+
+    .payment-lines-header-title {
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        letter-spacing: 0.03em;
+    }
+
+    .payment-lines-badge {
+        margin-left: auto;
+        background: rgba(255,255,255,0.2);
+        color: #fff;
+        border-radius: 20px;
+        padding: 2px 10px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .pl-row-index {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        background: var(--rz-primary-lighter, #e3f0fc);
+        color: var(--rz-primary);
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+
+    .pl-date-main {
+        font-weight: 600;
+        font-size: 0.82rem;
+        color: var(--rz-text-color);
+    }
+
+    .pl-date-sub {
+        font-size: 0.72rem;
+        color: var(--rz-text-secondary-color);
+    }
+
+    .pl-installment {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--rz-info-lighter, #e8f4fd);
+        color: var(--rz-info, #0ea5e9);
+        border-radius: 6px;
+        padding: 1px 8px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .pl-amount {
+        font-variant-numeric: tabular-nums;
+        font-size: 0.82rem;
+    }
+
+    .pl-amount-penalty {
+        color: var(--rz-danger, #ef4444);
+    }
+
+    .pl-amount-total {
+        font-weight: 700;
+        color: var(--rz-primary);
+    }
+
+    .pl-footer-amount {
+        font-weight: 700;
+        font-size: 0.82rem;
+        color: var(--rz-text-color);
+    }
+
+    .pl-footer-total {
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: var(--rz-primary);
+    }
+
+    .pl-delete-btn.rz-button {
+        border-radius: 8px !important;
+        transition: background 0.15s;
+    }
+</style>
+
+<div class="payment-lines-card">
+    <div class="payment-lines-header">
+        <RadzenIcon Icon="receipt_long" />
+        <span class="payment-lines-header-title">បង្ហាញតារាងបង់ប្រាក់</span>
+        <span class="payment-lines-badge">@LoanRepaymentLines.Count រង្វាស់</span>
+    </div>
+
+    <RadzenDataGrid @ref="gridLoanPaymentLines"
+                    Density="Density.Compact"
+                    GridLines="DataGridGridLines.Horizontal"
+                    AllowAlternatingRows="true"
+                    RowRender="@OnRowRender"
+                    Data="LoanRepaymentLines"
+                    Style="border-radius:0 0 12px 12px; border:none;">
+        <Columns>
+            <RadzenDataGridColumn Width="2.5rem"
+                                  Title="#"
+                                  TextAlign="TextAlign.Center"
+                                  Context="c">
+                <Template>
+                    <span class="pl-row-index">@(c.RowIndex)</span>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Width="6.5rem"
+                                  Title="ថ្ងៃបង់ប្រាក់"
+                                  Context="c">
+                <Template>
+                    <span class="pl-date-main">@c.PayDate.DayFirst()</span>
+                    <br />
+                    <span class="pl-date-sub">@c.PayDate.DayName()</span>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn Width="4.5rem"
+                                  Title="រយៈពេល"
+                                  TextAlign="TextAlign.Center"
+                                  Context="c">
+                <Template>
+                    <span class="pl-installment">@c.InstallmentNo</span>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="ប្រាក់ដើម"
+                                  Context="c">
+                <Template>
+                    <span class="pl-amount">@c.PaidPrinciple.ToFormattedNumber(2)</span>
+                </Template>
+                <FooterTemplate>
+                    <span class="pl-footer-amount">@LoanRepaymentLines.TotalPaidPrinciple().ToFormattedNumber(2)</span>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="ការប្រាក់"
+                                  Context="c">
+                <Template>
+                    <span class="pl-amount">@c.PaidInterest.ToFormattedNumber(2)</span>
+                </Template>
+                <FooterTemplate>
+                    <span class="pl-footer-amount">@LoanRepaymentLines.TotalPaidInterest()</span>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="ប្រាក់ប្រសិទ្ធិភាព"
+                                  Context="c">
+                <Template>
+                    <span class="pl-amount">@c.PaidCollectionFee.ToFormattedNumber(2)</span>
+                </Template>
+                <FooterTemplate>
+                    <span class="pl-footer-amount">@LoanRepaymentLines.TotalPaidCollectionFee().ToFormattedNumber(2)</span>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="ប្រាក់ពិន័យ"
+                                  Context="c">
+                <Template>
+                    <span class="pl-amount pl-amount-penalty">@c.PaidPenaltyAmount.ToFormattedNumber(2)</span>
+                </Template>
+                <FooterTemplate>
+                    <span class="pl-footer-amount pl-amount-penalty">@LoanRepaymentLines.TotalPaidPenalty().ToFormattedNumber(2)</span>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="សរុបប្រាក់"
+                                  Context="c">
+                <Template>
+                    <span class="pl-amount pl-amount-total">@c.TotalWithPenalty.ToFormattedNumber(2)</span>
+                </Template>
+                <FooterTemplate>
+                    <span class="pl-footer-total">@LoanRepaymentLines.Sum(x => x.TotalWithPenalty).ToFormattedNumber(2)</span>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TextAlign="TextAlign.Center"
+                                  Width="3.5rem"
+                                  Title=""
+                                  Context="c">
+                <Template>
+                    <RadzenButton Icon="delete_outline"
+                                  Size="ButtonSize.ExtraSmall"
+                                  ButtonStyle="ButtonStyle.Danger"
+                                  Variant="Variant.Text"
+                                  class="pl-delete-btn"
+                                  Click="(() => OnRemoveAdded(c))"
+                                  title="លុប">
+                    </RadzenButton>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</div>
+@code {
+    [Parameter] public List<LoanPaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
+    [Parameter] public EventCallback<LoanPaymentLineDtoCreate> Remove { get; set; }
+    RadzenDataGrid<LoanPaymentLineDtoCreate> gridLoanPaymentLines = default!;
+    async Task OnRemoveAdded(LoanPaymentLineDtoCreate c)
+    {
+        await Remove.InvokeAsync(c);
+        await gridLoanPaymentLines.Reload();
+    }
+    internal async Task ReLoad()
+    {
+        await gridLoanPaymentLines.Reload();
+    }
+
+    void OnRowRender(RowRenderEventArgs<LoanPaymentLineDtoCreate> args)
+    {
+        if (args.Data is not null)
+        {
+            args.Data.RowIndex = args.Index + 1;
+        }
+    }
+
+}

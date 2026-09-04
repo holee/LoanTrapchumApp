@@ -1,0 +1,53 @@
+/*::deep .modern-datagrid {
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+    border-radius: 0.75rem !important;
+    overflow: hidden !important;
+    background-color: #ffffff;
+}
+
+::deep .modern-datagrid .rz-grid-table thead th {
+    background-color: #f8fafc !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    padding: 0.75rem 1rem !important;
+}
+
+::deep .modern-datagrid .rz-grid-table tbody td {
+    padding: 0.75rem 1rem !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    border-left: none !important;
+    border-right: none !important;
+    color: #334155 !important;
+    font-size: 0.875rem !important;
+}
+
+::deep .modern-datagrid .rz-grid-table tbody tr {*/
+/*    transition: background-color 0.2s ease !important;*/
+/*}
+
+::deep .modern-datagrid .rz-grid-table tbody tr:hover td {*/
+/*    background-color: #f8fafc !important;*/
+/*}
+
+::deep .modern-datagrid .rz-grid-table tbody tr.rz-state-highlight td {*/
+/*    background-color: #e0f2fe !important;*/
+    /*color: #0369a1 !important;
+}
+
+::deep .modern-datagrid .rz-grid-table tfoot td {
+    background-color: #f8fafc !important;
+    border-top: 2px solid #e2e8f0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    padding: 0.75rem 1rem !important;
+}*/

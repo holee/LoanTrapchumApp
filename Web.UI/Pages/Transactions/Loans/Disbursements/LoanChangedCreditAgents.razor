@@ -1,0 +1,210 @@
+﻿@page "/App/Loans/Disbursments/Credit-Agent/{BranchId:int}/Branches"
+@using Applications.Features.Branches.Dtos
+@using Applications.Features.Loans.Dtos.Responses
+<PageTitle>Change Credit Agent</PageTitle>
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="@IconNames.SwitchAccount" /><b>Change Credit Agent</b>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenRow>
+            <RadzenColumn Size="4">
+                <RadzenFormField AllowFloatingLabel="true" Text="Branch" class="rz-w-100">
+                    <RadzenDropDown class="rz-w-100"
+                                    PageSize="10"
+                                    TextProperty="@nameof(VBranch.BranchName)"
+                                    ValueProperty="@nameof(VBranch.BranchId)"
+                                    SelectedItemChanged="@OnSelectedItemChanged"
+                                    @bind-Value="@BranchId"
+                                    Placeholder="Branch Name"
+                                    Style="font-size:0.8rem;"
+                                    Disabled="@(BranchId != 0)"
+                                    Data="@_newBranches">
+                    </RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenFormField Text="Old Credit Agent" class="rz-w-100" AllowFloatingLabel="true">
+                    <RadzenDropDown class="rz-w-100"
+                                    PageSize="10"
+                                    TextProperty="@nameof(VCreditAgent.AltName)"
+                                    ValueProperty="@nameof(VCreditAgent.EmployeeRefId)"
+                                    @bind-Value="@CreditAgentId"
+                                    SelectedItemChanged="@GetLoansByCreditAgents"
+                                    Style="font-size:0.8rem;"
+                                    Disabled="@disabledOldCreditAgent"
+                                    Placeholder="Old Credit Agent"
+                                    Count="@_counts"
+                                    Data="@_oldCreditAgents">
+                    </RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenFormField Text="New Credit Agent" class="rz-w-100" AllowFloatingLabel="true">
+                    <RadzenDropDown class="rz-w-100"
+                                    PageSize="10"
+                                    TextProperty="@nameof(VCreditAgent.AltName)"
+                                    ValueProperty="@nameof(VCreditAgent.EmployeeRefId)"
+                                    @bind-Value="@_newCreditAgentId"
+                                    Placeholder="New Credit Agent"
+                                    Style="font-size:0.8rem;"
+                                    Data="@_newCreditAgents">
+                    </RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow RowGap="0.5rem" class="rz-mt-2">
+            <RadzenDataGrid Density="Density.Compact"
+                            AllowAlternatingRows="true"
+                            GridLines="DataGridGridLines.Horizontal"
+                            IsLoading="@_isLoading"
+                            AllowPaging="true"
+                            PageSize="@_pageSize"
+                            Count="@_counts"
+                            SelectionMode="DataGridSelectionMode.Multiple"
+                            ShowPagingSummary="true"
+                            PagerPosition="PagerPosition.Bottom"
+                            PagerHorizontalAlign="HorizontalAlign.Right"
+                            @bind-Value="@_selectedSchedules"
+                            Data="@_items">
+                <Columns>
+                    <RadzenDataGridColumn Context="p"
+                                          Width="3rem"
+                                          Title="#"
+                                          Sortable="false">
+                        <HeaderTemplate>
+                            <RadzenCheckBox TValue="bool?" TabIndex="-1"
+                                            Value="@GetSelectAllCheckboxState"
+                                            Change="@(args => _selectedSchedules = args == true ? _items.ToList() : null)"
+                                            TriState="false" TValue="bool?"
+                                            InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select all items" } })" />
+                        </HeaderTemplate>
+                        <Template Context="data">
+                            <RadzenCheckBox TValue="bool" TabIndex="-1"
+                                            Value="@(_selectedSchedules != null && _selectedSchedules.Contains(data))"
+                                            TriState="false"
+                                            InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select an item" } })" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="p"
+                                          Width="3rem"
+                                          Title="#"
+                                          Sortable="false">
+                        <Template>
+                            @(_items.ToList().IndexOf(p) + 1)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="RegisterDate"
+                                          Context="p"
+                                          Title="Date"
+                                          Sortable="true">
+                        <Template>
+                            @p.RegisterDate!.Value.ToShortDateString()
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="p"
+                                          Property="AltName"
+                                          Title="Name"
+                                          Sortable="true">
+                        <Template>
+                            @p.AltName
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="p"
+                                          Title="Principle"
+                                          Property="Principle"
+                                          TextAlign="TextAlign.Right"
+                                          Sortable="true">
+                        <Template>
+                            @p.Amount.Format(p.CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="p"
+                                          Title="Interest"
+                                          Property="InterestRate"
+                                          TextAlign="TextAlign.Right"
+                                          Sortable="true">
+                        <Template>
+                            @p.InterestRate (%) / @p.PeriodName
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="p"
+                                          Title="Paid Principle"
+                                          Property="PaidPrinciple"
+                                          TextAlign="TextAlign.Right"
+                                          Sortable="true">
+                        <Template>
+                            @p.PaidPrinciple.Format(p.CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="p"
+                                          Title="OutStanding"
+                                          Property="OutStanding"
+                                          TextAlign="TextAlign.Right"
+                                          Sortable="true">
+                        <Template>
+                            @p.OutStanding.Format(p.CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="p"
+                                          Title="Status"
+                                          Property="LoanStatus"
+                                          Width="6rem"
+                                          TextAlign="TextAlign.Center"
+                                          Sortable="true">
+                        <Template>
+                            @p.LoanStatus
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+
+            </RadzenDataGrid>
+        </RadzenRow>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     class="rz-my-2"
+                     Gap="1rem"
+                     AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+            <RadzenButton Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Success"
+                          Click="ChangedCreditAgent"
+                          Icon="@IconNames.Save"
+                          Text="Save" />
+            <RadzenButton Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Click="Back"
+                          Icon="@IconNames.Cancel"
+                          Text="Cancel" />
+        </RadzenStack>
+    </ChildContent>
+</RadzenFieldset>
+@code {
+
+
+    VLoanDisbursments? vLoan;
+
+    private bool? GetSelectAllCheckboxState => _selectedSchedules == null || _selectedSchedules?.Any() != true ? false : !_items.All(i => _selectedSchedules.Contains(i)) ? null : _items.Any(i => _selectedSchedules.Contains(i));
+
+
+
+
+    // {
+    //     get
+    //     {
+    //         if (_selectedSchedules == null || !_selectedSchedules.Any())
+    //             return false;
+
+    //         if (!_items.All(i => _selectedSchedules.Contains(i)))
+    //             return null;
+
+    //         return _items.Any(i => _selectedSchedules.Contains(i));
+    //     }
+
+    // }
+
+
+    //(_selectedSchedules == null || _selectedSchedules?.Any() != true ? false : !_items.All(i => _selectedSchedules.Contains(i)) ? null : _items.Any(i => _selectedSchedules.Contains(i)))
+
+
+}
