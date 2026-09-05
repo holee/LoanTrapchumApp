@@ -1,12 +1,15 @@
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Radzen;
 using Refit;
 using Web.UI;
 using Web.UI.Services;
+using Web.UI.Services.Authentications;
 using Web.UI.Components.Messageboxes;
 using Web.UI.Components.Modals.SweetAlerts;
 using Web.UI.Components.Toasts;
+using Applications;
 using Applications.Utils;
 using Applications.Features.Addresses.Interfaces;
 using Applications.Services.Identity;
@@ -20,9 +23,26 @@ var apiBaseAddress = builder.Configuration["ApiBaseUrl"] is { Length: > 0 } conf
     ? configured
     : builder.HostEnvironment.BaseAddress;
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseAddress) });
+// Authentication: JWT bearer token kept in browser storage.
+builder.Services.AddScoped<TokenStore>();
+builder.Services.AddTransient<BearerTokenHandler>();
+builder.Services.AddScoped<JwtAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<JwtAuthenticationStateProvider>());
+builder.Services.AddScoped<AuthenticationClient>();
+builder.Services.AddCascadingAuthenticationState();
+
+builder.Services.AddScoped(sp =>
+{
+    var bearer = sp.GetRequiredService<BearerTokenHandler>();
+
+    bearer.InnerHandler = new HttpClientHandler();
+
+    return new HttpClient(bearer) { BaseAddress = new Uri(apiBaseAddress) };
+});
 builder.Services.AddRadzenComponents();
-builder.Services.AddAuthorizationCore();
+
+// Registers every named policy (AdminOnly, AccountOnly, CanExchanged, ReadLoan, ...) used by the layout menu.
+builder.Services.AddPoliciesServices();
 
 builder.Services.AddToastService();
 builder.Services.AddScoped<MessageBoxService>();
@@ -40,13 +60,18 @@ builder.Services.AddScoped<IMediator, ClientMediator>();
 builder.Services.AddScoped<IAddressServiceImpl, AddressServiceClient>();
 builder.Services.AddScoped<IUserServiceImpl, UserServiceClient>();
 builder.Services.AddScoped<Applications.Interfaces.Identity.IRoleService, RoleServiceClient>();
+builder.Services.AddScoped<IProfilePhotoService, ProfilePhotoService>();
+builder.Services.AddScoped<Applications.Interfaces.setting.IAppSettingService, AppSettingServiceClient>();
+builder.Services.AddScoped<Applications.Interfaces.Transactions.IForiegnCurrencyExchange, ForiegnCurrencyExchangeClient>();
 
 builder.Services
     .AddRefitClient<ICurrencyApi>()
-    .ConfigureHttpClient(client => client.BaseAddress = new Uri(apiBaseAddress));
+    .ConfigureHttpClient(client => client.BaseAddress = new Uri(apiBaseAddress))
+    .AddHttpMessageHandler<BearerTokenHandler>();
 
 builder.Services
     .AddRefitClient<ISettingApi>()
-    .ConfigureHttpClient(client => client.BaseAddress = new Uri(apiBaseAddress));
+    .ConfigureHttpClient(client => client.BaseAddress = new Uri(apiBaseAddress))
+    .AddHttpMessageHandler<BearerTokenHandler>();
 
 await builder.Build().RunAsync();

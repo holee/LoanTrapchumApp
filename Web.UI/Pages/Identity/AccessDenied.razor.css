@@ -1,0 +1,50 @@
+.denied-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: #f3f4f6;
+}
+
+.denied-card {
+  width: 100%;
+  max-width: 460px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+  padding: 2rem 1.75rem;
+  text-align: center;
+}
+
+.denied-card ::deep .rzi {
+  font-size: 2.5rem;
+  color: #b91c1c;
+}
+
+.denied-card__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.denied-card__sub {
+  margin: 0 0 0.75rem;
+  font-size: 0.88rem;
+  color: #6b7280;
+}
+
+.denied-card__url {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  word-break: break-all;
+  margin: 0 0 1rem;
+}
+
+.denied-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+}

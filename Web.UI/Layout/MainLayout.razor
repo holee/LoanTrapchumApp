@@ -1,7 +1,18 @@
-﻿@inherits LayoutComponentBase
-@implements IDisposable
+﻿@using Applications.Extensions.Identity.Policies
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Sections
+@using Microsoft.AspNetCore.Components.Web
+@using Radzen.Blazor
+@using Web.UI.Components.Comps
+@using Web.UI.Components.Toasts
+@using Web.UI.Helpers.Constants
+@using Web.UI.Services
+@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
+@inject LoadingTrackerService Tracker
 
+<Toastr />
 <RadzenComponents />
 
 <RadzenProgressBar Visible="@isLoading"
@@ -23,24 +34,21 @@
                          Gap="8px">
                 <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)"
                                      Style="color: white;" />
-                <span class="app-title">Loan Management System</span>
             </RadzenStack>
             <RadzenStack Orientation="Orientation.Horizontal"
                          AlignItems="AlignItems.Center"
                          Gap="12px">
-                <button type="button" class="hd-icon-btn" aria-label="Notifications">
-                    <span class="rzi hd-icon">notifications</span>
-                </button>
-                <div class="pm-trigger">
-                    <span class="pm-avatar">LM</span>
-                    <span class="pm-trigger__name">Guest</span>
-                </div>
+                <NotificationBell />
+                <TopMenus BranchId="@branchId" IsBranchOpen="true" />
+                <Profiles />
             </RadzenStack>
         </RadzenStack>
     </RadzenHeader>
 
+    <SectionOutlet SectionName="FabMenu"></SectionOutlet>
+
     <RadzenSidebar Responsive="false" Style="width: max-content;">
-        <NavMenu Expanded="sidebarExpanded" />
+        <NavMenu Expanded="@sidebarExpanded" BranchId="@branchId" />
     </RadzenSidebar>
 
     <RadzenBody>
@@ -61,7 +69,7 @@
 @code {
     private string? currentUrl;
     private bool isLoading;
-    private bool sidebarExpanded = true;
+    private Action<bool>? _loadingHandler;
     private ErrorBoundary _errorBoundary = default!;
 
     protected override void OnInitialized()
@@ -69,29 +77,26 @@
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
 
         NavigationManager.LocationChanged += OnLocationChanged;
+
+        _loadingHandler = state =>
+        {
+            isLoading = state;
+
+            InvokeAsync(StateHasChanged);
+        };
+
+        Tracker.OnLoadingChanged += _loadingHandler;
+
+        bState.OnChange += StateHasChanged;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
 
-        isLoading = true;
-
         _errorBoundary?.Recover();
 
         StateHasChanged();
     }
-
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (isLoading)
-        {
-            isLoading = false;
-
-            StateHasChanged();
-        }
-    }
-
-    public void Dispose() => NavigationManager.LocationChanged -= OnLocationChanged;
 }
 

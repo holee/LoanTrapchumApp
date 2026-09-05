@@ -1,0 +1,10 @@
+﻿<RadzenPanelMenuItem Text="Operated Person" Icon="@IconNames.PersonBook">
+    <RadzenPanelMenuItem Text="Customers" Icon="group" Path="@($"/App/Customers/{BranchId}/Branches")" />
+    <RadzenPanelMenuItem Text="Employees" Icon="person" Path="@($"/App/Employees")" />
+    <RadzenPanelMenuItem Text="Vendors" Icon="supervisor_account" Path="@($"/App/Vendors")" />
+    <RadzenPanelMenuItem Text="Guarantors" Icon="contact_page" Path="@($"/App/Customers/Guarantors")" />
+    <RadzenPanelMenuItem Text="Names" Icon="contacts" Path="@($"/App/Names")" />
+</RadzenPanelMenuItem>
+@code {
+    [Parameter] public int? BranchId { get; set; } = 0;
+}

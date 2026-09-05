@@ -1,5 +1,7 @@
 ﻿@using System.Net.Http
 @using System.Net.Http.Json
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
@@ -11,6 +13,7 @@
 @using Web.UI.Helpers.Constants
 @using Web.UI.Layout
 @using Web.UI.Services
+@using Web.UI.Shared
 @using Radzen
 @using Radzen.Blazor
 @using Applications.Commons
@@ -25,6 +28,7 @@
 @using Web.UI.Components.Toasts
 @using Web.UI.Components.Messageboxes
 @using Web.UI.Components.Modals.SweetAlerts
+@attribute [Authorize]
 @inject NavigationManager NavigationManager
 @inject NotificationService NotificationService
 @inject DialogService DialogService

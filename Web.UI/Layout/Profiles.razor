@@ -1,0 +1,216 @@
+﻿@using Applications.Services.Identity
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.JSInterop
+@using Radzen.Blazor
+@using Web.UI.Helpers.Extensions
+@using Web.UI.Services.Authentications
+@implements IDisposable
+@inject Web.UI.Services.IProfilePhotoService ProfilePhotoService
+@inject NavigationManager NavigationManager
+@inject IUserServiceImpl _userService
+@inject AuthenticationClient _authClient
+@inject IJSRuntime js
+
+<div class="pm-root" @onkeydown="OnKeyDown">
+    <button type="button"
+            class="pm-trigger @(_open ? "pm-trigger--active" : "")"
+            @ref="_triggerRef"
+            data-fb-trigger
+            aria-haspopup="menu"
+            aria-expanded="@(_open ? "true" : "false")"
+            @onclick="ToggleMenu"
+            @onclick:stopPropagation="true">
+        <span class="pm-avatar pm-avatar--sm">
+            @if (!string.IsNullOrWhiteSpace(_photoUrl))
+            {
+                <img src="@_photoUrl" alt="" class="pm-avatar__img" />
+            }
+            else
+            {
+                @_initials
+            }
+        </span>
+        <span class="pm-trigger__name">@_displayName</span>
+        <span class="pm-trigger__chevron @(_open ? "pm-trigger__chevron--up" : "")" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9l6 6 6-6" />
+            </svg>
+        </span>
+    </button>
+
+    @if (_open)
+    {
+        <div class="pm-backdrop" @onclick="CloseMenu"></div>
+        <div class="pm-panel" role="menu" style="@_dropdownStyle" @onclick:stopPropagation="true">
+            <AuthorizeView Context="u">
+                <Authorized>
+
+                    <a class="pm-identity" role="menuitem" href="@($"App/Account/Profile/{_userId}/User")">
+                        <span class="pm-avatar pm-avatar--lg">
+                            @if (!string.IsNullOrWhiteSpace(_photoUrl))
+                            {
+                                <img src="@_photoUrl" alt="" class="pm-avatar__img" />
+                            }
+                            else
+                            {
+                                @_initials
+                            }
+                        </span>
+                        <span class="pm-identity__text">
+                            <span class="pm-identity__name">@u.User.Identity!.Name</span>
+                            <span class="pm-identity__link">View profile</span>
+                        </span>
+                    </a>
+
+                    <div class="pm-group">
+                        <a class="pm-item" role="menuitem" href="@($"App/Account/Profile/{_userId}/User")">
+                            <span class="pm-item__icon pm-item__icon--accent">
+                                <RadzenIcon Icon="contact_page" />
+                            </span>
+                            <span class="pm-item__body">
+                                <span class="pm-item__title">My profile</span>
+                                <span class="pm-item__sub">Personal details and photo</span>
+                            </span>
+                            <span class="pm-item__arrow" aria-hidden="true">
+                                <RadzenIcon Icon="chevron_right" />
+                            </span>
+                        </a>
+
+                        <a class="pm-item" role="menuitem" href="/">
+                            <span class="pm-item__icon pm-item__icon--neutral">
+                                <RadzenIcon Icon="manage_accounts" />
+                            </span>
+                            <span class="pm-item__body">
+                                <span class="pm-item__title">Settings</span>
+                                <span class="pm-item__sub">Privacy, security &amp; preferences</span>
+                            </span>
+                            <span class="pm-item__arrow" aria-hidden="true">
+                                <RadzenIcon Icon="chevron_right" />
+                            </span>
+                        </a>
+                    </div>
+
+                    <div class="pm-separator"></div>
+
+                    <div class="pm-logout-form">
+                        <button type="button" class="pm-item pm-item--danger" role="menuitem" @onclick="LogoutAsync">
+                            <span class="pm-item__icon pm-item__icon--danger">
+                                <RadzenIcon Icon="logout" />
+                            </span>
+                            <span class="pm-item__body">
+                                <span class="pm-item__title">Log out</span>
+                                <span class="pm-item__sub">@u.User.Identity!.Name</span>
+                            </span>
+                        </button>
+                    </div>
+
+                    <div class="pm-footer">
+                        <span>&copy; @DateTime.Now.Year LoanMS</span>
+                        <span>Privacy · Terms</span>
+                    </div>
+
+                </Authorized>
+            </AuthorizeView>
+        </div>
+    }
+</div>
+
+@code {
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    private ElementReference _triggerRef;
+    private string? _userId = string.Empty;
+    private string _displayName = string.Empty;
+    private string _initials = "?";
+    private string? _photoUrl;
+    private string _currentUrl = string.Empty;
+    private bool _open = false;
+    private string _dropdownStyle = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationState;
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            _userId = authState.GetUserId();
+
+            _displayName = user.Identity.Name ?? string.Empty;
+
+            _initials = BuildInitials(_displayName);
+
+            var profile = await _userService.GetUserProfile(_userId);
+            if (!profile.IsError)
+                _photoUrl = profile.Value?.FileUrl;
+        }
+
+        _currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+
+        NavigationManager.LocationChanged += OnLocationChanged;
+
+        ProfilePhotoService.OnPhotoChanged += OnProfilePhotoChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        _currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        _open = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ToggleMenu()
+    {
+        _open = !_open;
+
+        if (_open)
+        {
+            var rect = await js.InvokeAsync<BoundingRect>("getElementRect", _triggerRef);
+            _dropdownStyle = $"top:{rect.Bottom:F1}px;right:{rect.Right:F1}px;";
+        }
+    }
+    private void CloseMenu() => _open = false;
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (_open && e.Key == "Escape")
+            CloseMenu();
+    }
+
+    private static string BuildInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length >= 2
+            ? $"{char.ToUpper(parts[0][0])}{char.ToUpper(parts[^1][0])}"
+            : char.ToUpper(parts[0][0]).ToString();
+    }
+
+    private void OnProfilePhotoChanged(string userId, string? newUrl)
+    {
+        if (userId != _userId) return;
+        _photoUrl = newUrl;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LogoutAsync()
+    {
+        CloseMenu();
+
+        await _authClient.LogoutAsync();
+
+        NavigationManager.NavigateTo("/App/Account/Login", forceLoad: false);
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+
+        ProfilePhotoService.OnPhotoChanged -= OnProfilePhotoChanged;
+    }
+
+    private sealed record BoundingRect(double Bottom, double Right);
+}

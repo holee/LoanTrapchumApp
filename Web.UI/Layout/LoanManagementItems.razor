@@ -1,0 +1,75 @@
+﻿@using Applications.Extensions.Identity.Authorizations.Extensions
+@using Applications.Extensions.Identity.Policies
+@using Microsoft.AspNetCore.Authorization
+@using Radzen.Blazor
+@using Web.UI.Helpers.Constants
+@using Web.UI.Helpers.Extensions
+@using Web.UI.Shared
+@inject IAuthorizationService _authorizeService
+<RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
+    <RadzenPanelMenuItem Text="Recieve Payments"
+                         Icon="schedule"
+                         Path="@($"/App/Loans/Schedules/{BranchId}/Branches")"
+                         Visible="@_canShowLoan" />
+    <RadzenPanelMenuItem Text="Loans Request" Icon="request_quote" Path="@($"/App/Loans/Requests/{BranchId}/Branches")"
+                         Visible="@BState.IsAccount" />
+    <RadzenPanelMenuItem Text="Loans Disbursement"
+                         Icon="lists"
+                         Path="@($"/App/Loans/Disbursements/{BranchId}/Branches")"
+                         Visible="@_canShowLoan" />
+    <RadzenPanelMenuItem Text="Loan Write Off"
+                         Icon="person_off" Path="@($"/App/Loans/Disbursements/{BranchId}/Write-Off")"
+                         Visible="@BState.IsAccount" />
+    <RadzenPanelMenuItem Text="Loan Pay Off"
+                         Icon="person_off" Path="@($"/App/Loans/Disbursements/{BranchId}/Pay-Off")"
+                         Visible="@BState.IsAccount" />
+    <RadzenPanelMenuItem Text="Notifications"
+                         Icon="notifications"
+                         Path="/App/Notifications" />
+    <RadzenPanelMenuItem Text="Active Customers" Icon="@IconNames.MoneyBag"
+                         Path="@($"/App/Customers/Loans/{BranchId}/Branches")" />
+</RadzenPanelMenuItem>
+
+@code {
+    [Parameter] public int BranchId { get; set; } = 0;
+    [Parameter] public bool BranchState { get; set; } = false;
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [CascadingParameter] private CascadingAppState BState { get; set; } = default!;
+    string _loanRequestUrl = "";
+    string _changeCreditUrl = "";
+    string _clientDuePayUrl = "";
+    string _customerUrl = "";
+    string _loanUrl = "";
+    private string? _userId = string.Empty;
+    bool _canShowLoan = false;
+    bool _canShowLoanRequest = false;
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationState;
+
+        var user = state.User;
+
+        await BState.GetAuthenticatedUser(user);
+
+
+        _userId = state.GetUserId();
+
+        _canShowLoan = await _authorizeService.MustHasPermissionAsync(user, Policies.ReadLoan);
+
+        _canShowLoanRequest = await _authorizeService.MustHasPermissionAsync(user, Policies.ReadLoanRequest);
+
+        _changeCreditUrl = $"/App/Loan/CreditAgent/{BranchId}/Branches";
+
+        _loanRequestUrl = $"/App/Request/{BranchId}/Branches";
+
+        _clientDuePayUrl = $"/App/Loan/{BranchId}/Branches/Schedules";
+
+        _customerUrl = $"/App/Customer/{BranchId}/Branches";
+
+        _loanUrl = $"/App/Loan/{BranchId}/Branches";
+
+        await base.OnInitializedAsync();
+    }
+
+}
+

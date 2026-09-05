@@ -1,0 +1,34 @@
+@page "/app/access-denied"
+@attribute [AllowAnonymous]
+@layout Web.UI.Layout.EmptyLayout
+@using Radzen.Blazor
+@inject NavigationManager NavigationManager
+
+<PageTitle>Access denied</PageTitle>
+
+<div class="denied-shell">
+    <div class="denied-card">
+        <RadzenIcon Icon="lock_person" />
+        <h1 class="denied-card__title">Access denied</h1>
+        <p class="denied-card__sub">
+            You are signed in, but your account does not have permission to open this page.
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(ReturnUrl))
+        {
+            <p class="denied-card__url">@ReturnUrl</p>
+        }
+
+        <div class="denied-card__actions">
+            <RadzenButton Text="Go to dashboard" Icon="home" ButtonStyle="ButtonStyle.Success"
+                          Click="@(() => NavigationManager.NavigateTo("/"))" />
+            <RadzenButton Text="Sign in as another user" Icon="login" ButtonStyle="ButtonStyle.Light"
+                          Click="@(() => NavigationManager.NavigateTo("/App/Account/Login"))" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    private string? ReturnUrl { get; set; }
+}

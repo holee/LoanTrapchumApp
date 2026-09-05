@@ -1,0 +1,48 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Routing
+@using Web.UI.Services.Authentications
+@implements IDisposable
+@inject NavigationManager NavigationManager
+@inject AuthenticationClient _authClient
+<AuthorizeView>
+    <Authorized>
+        <li class="rz-navigation-item">
+            <div class="rz-navigation-item-wrapper">
+                <button type="button" class="rz-navigation-item-link" style="background-color:transparent;border:none;"
+                        @onclick="LogoutAsync">
+                    <i class="notranslate rzi rz-navigation-item-icon">logout</i>
+                    <span class="rz-navigation-item-text">
+                        Logout
+                    </span>
+                </button>
+            </div>
+        </li>
+    </Authorized>
+</AuthorizeView>
+@code {
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    private async Task LogoutAsync()
+    {
+        await _authClient.LogoutAsync();
+
+        NavigationManager.NavigateTo("/App/Account/Login");
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
